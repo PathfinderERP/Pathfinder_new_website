@@ -1,0 +1,19 @@
+{
+  "full_name": "Rahul Sharma",
+  "student_class": "10",
+  "board": "CBSE",
+  "phone": "+91-9876543210",
+  "email": "rahul@example.com",
+  "area": "Andheri West",
+  "school_name": "Delhi Public School",
+  "course": {
+    "id": "foundation-10",
+    "name": "Foundation Class 10",
+    "goal": "Boards",
+    "mode": "Center",
+    "location": "Andheri",
+    "start": "Dec 15",
+    "price": "₹25k–₹45k",
+    "badge": "New batch"
+  }
+}

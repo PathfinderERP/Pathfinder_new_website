@@ -1,0 +1,51 @@
+[project]
+name = "contact-backend"
+version = "0.1.0"
+description = "Pathfinder Institute Backend"
+requires-python = ">=3.10"
+
+dependencies = [
+    "django==5.2.7",
+    "djangorestframework==3.16.1",
+    "django-cors-headers==4.9.0",
+    "mongoengine==0.29.1",
+    "pymongo==4.15.3",
+    "python-dotenv==1.2.1",
+    "gunicorn==23.0.0",
+    "whitenoise==6.11.0",
+    "pyjwt==2.8.0",
+    "certifi>=2025.10.5",
+    "bcrypt==5.0.0", # Added from requirements.txt
+    "dnspython==2.8.0", # Added from requirements.txt
+    "asgiref==3.10.0", # Added from requirements.txt
+    "sqlparse==0.5.3", # Added from requirements.txt
+    "django-rest-framework-mongoengine>=3.4.1",
+    "requests>=2.32.5",
+    "pillow>=12.0.0",
+    "boto3>=1.35.0",
+    "botocore>=1.35.0",
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "contact_backend*",
+    "contact_api*", 
+    "users*",
+    "courses*"
+]
+exclude = [
+    "*.tests*",
+    "tests*",
+    "*.migrations*",
+    "migrations*",
+    "venv*",
+    "__pycache__*",
+    "*.pyc",
+    "vscode*",
+    "staticfiles*"
+]

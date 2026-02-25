@@ -1,0 +1,26 @@
+# render.yaml (Optimized for UV)
+services:
+  - type: web
+    name: pathfinder-backend
+    env: python
+    plan: free
+    buildCommand: |
+      uv sync --frozen
+      uv run python manage.py collectstatic --noinput
+    startCommand: uv run gunicorn contact_backend.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: RENDER_EXTERNAL_HOSTNAME
+        fromService:
+          name: pathfinder-backend
+          type: web
+          property: hostname
+      - key: MONGO_URI
+        value: "mongodb+srv://PATH123:PATH%40123@cluster0.8vmgvwn.mongodb.net/test01?retryWrites=true&w=majority"
+      - key: MONGO_DB_NAME
+        value: "test01"
+      - key: JWT_SECRET_KEY
+        generateValue: true
