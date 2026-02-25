@@ -1,0 +1,25 @@
+# Root .gitignore for Pathfinder Project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files (Never commit these!)
+.env
+.env.*
+!.env.example
+
+# Build and IDE
+.vscode/
+.idea/
+node_modules/
+__pycache__/
+*.log
+
+# Project specific
+frontend/dist/
+frontend/build/
+backend/staticfiles/
+backend/media/
+backend/db.sqlite3
+backend/.venv/
