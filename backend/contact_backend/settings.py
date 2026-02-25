@@ -13,11 +13,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env_path = os.path.join(BASE_DIR, '.env')
 load_dotenv(env_path, override=True)
 
-print(f"📁 Loading .env from: {env_path}")
-print(f"🔍 Found .env: {os.path.exists(env_path)}")
+print(f"Loading .env from: {env_path}")
+print(f"Found .env: {os.path.exists(env_path)}")
 if os.path.exists(env_path):
     with open(env_path, 'r') as f:
-        print(f"📄 .env content preview: {f.readline().strip()}")
+        print(f"env content preview: {f.readline().strip()}")
 
 # SECRET_KEY with proper fallback for production
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-development-key-change-in-production-123456')
@@ -52,8 +52,8 @@ if DEBUG:
 # Remove duplicates
 ALLOWED_HOSTS = list(set(ALLOWED_HOSTS))
 
-print(f"🔧 DEBUG mode: {DEBUG}")
-print(f"🌐 Allowed Hosts: {ALLOWED_HOSTS}")
+print(f"DEBUG mode: {DEBUG}")
+print(f"Allowed Hosts: {ALLOWED_HOSTS}")
 
 # JWT Settings - IMPROVED
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', SECRET_KEY)  # Fallback to Django secret
@@ -70,7 +70,7 @@ mongo_uri = os.getenv("MONGO_URI")  # FIXED: Back to MONGO_URI
 mongo_connected = False
 
 if mongo_uri:
-    print("🔗 Using MONGO_URI from environment")
+    print("Using MONGO_URI from environment")
     try:
         disconnect(alias="default")
         connect(
@@ -80,16 +80,16 @@ if mongo_uri:
             tlsCAFile=certifi.where()
         )
         mongo_connected = True
-        print("✅ Successfully connected to MongoDB using MONGO_URI")
+        print("Successfully connected to MongoDB using MONGO_URI")
     except Exception as e:
-        print(f"❌ MongoDB connection failed: {e}")
+        print(f"MongoDB connection failed: {e}")
 
 elif all([username, password, cluster, db_name]):
     encoded_username = quote_plus(username)
     encoded_password = quote_plus(password)
     MONGO_URI = f"mongodb+srv://{encoded_username}:{encoded_password}@{cluster}.mongodb.net/{db_name}?retryWrites=true&w=majority"
     
-    print(f"🔗 Connecting to MongoDB Atlas: {db_name}")
+    print(f"Connecting to MongoDB Atlas: {db_name}")
     try:
         disconnect(alias="default")
         connect(
@@ -99,12 +99,12 @@ elif all([username, password, cluster, db_name]):
             tlsCAFile=certifi.where()
         )
         mongo_connected = True
-        print(f"✅ Successfully connected to MongoDB Atlas: {db_name}")
+        print(f"Successfully connected to MongoDB Atlas: {db_name}")
     except Exception as e:
-        print(f"❌ MongoDB connection failed: {e}")
+        print(f"MongoDB connection failed: {e}")
 
 else:
-    print("⚠️ MongoDB credentials missing - using SQLite only")
+    print("MongoDB credentials missing - using SQLite only")
 
 # Django SQLite database (for Django's built-in tables)
 DATABASES = {
@@ -201,7 +201,7 @@ TEMPLATES = [
     },
 ]
 
-# CORRECT WSGI APPLICATION - WITH DOT NOT COLON ✅
+# CORRECT WSGI APPLICATION - WITH DOT NOT COLON
 WSGI_APPLICATION = 'contact_backend.wsgi.application'
 
 # Password validation
@@ -290,7 +290,7 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-print(f"🌐 CORS Allowed Origins: {CORS_ALLOWED_ORIGINS}")  # Debug output
+print(f"CORS Allowed Origins: {CORS_ALLOWED_ORIGINS}")  # Debug output
 
 # Security settings for production
 if not DEBUG:
@@ -318,9 +318,9 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@pathfinder.com')
 OFFICIAL_EMAIL = os.getenv('OFFICIAL_EMAIL', 'hrpathfinder3@gmail.com')
 
 # Debugging the values read
-print(f"📧 EMAIL_BACKEND from env: {os.getenv('EMAIL_BACKEND')}")
-print(f"📧 EMAIL_HOST_USER from env: {os.getenv('EMAIL_HOST_USER')}")
-print(f"📧 Actual EMAIL_BACKEND being used: {EMAIL_BACKEND}")
+print(f"EMAIL_BACKEND from env: {os.getenv('EMAIL_BACKEND')}")
+print(f"EMAIL_HOST_USER from env: {os.getenv('EMAIL_HOST_USER')}")
+print(f"Actual EMAIL_BACKEND being used: {EMAIL_BACKEND}")
 
 # Frontend URLs
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
@@ -328,9 +328,9 @@ ADMIN_RESET_PASSWORD_URL = os.getenv('ADMIN_RESET_PASSWORD_URL', f'{FRONTEND_URL
 
 # Print email configuration for debugging
 if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
-    print("✅ SMTP Email is configured correctly")
+    print("SMTP Email is configured correctly")
 else:
-    print("⚠️ Console Email Backend is active - emails will NOT be sent to real inboxes")
+    print("Console Email Backend is active - emails will NOT be sent to real inboxes")
 
 # ==================== END EMAIL CONFIGURATION ====================
 
