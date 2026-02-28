@@ -110,7 +110,7 @@ export default function PathVerseOverview() {
       <Blog />
       <Community />
       <FAQ />
-      <FinalCTA />
+      {/* <FinalCTA /> */}
 
 
     </div>
@@ -3731,11 +3731,11 @@ function FAQ() {
         <div className="absolute bottom-[-10%] left-[-5%] w-80 h-80 rounded-full bg-orange-50 blur-3xl opacity-60"></div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 relative z-10">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 relative z-10">
         <div className="text-center mb-12 sm:mb-16">
-          <span className="inline-block py-1.5 px-4 rounded-full bg-red-100 text-red-700 text-xs sm:text-sm font-bold tracking-wider mb-4 uppercase shadow-sm">
+          {/* <span className="inline-block py-1.5 px-4 rounded-full bg-red-100 text-red-700 text-xs sm:text-sm font-bold tracking-wider mb-4 uppercase shadow-sm">
             Got Questions?
-          </span>
+          </span> */}
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
             Frequently Asked <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">Questions</span>
           </h2>
@@ -3780,11 +3780,11 @@ function FAQ() {
           })}
         </div>
 
-        <div className="mt-14 text-center">
+        {/* <div className="mt-14 text-center">
           <p className="text-slate-600 font-medium bg-white inline-block px-6 py-3 rounded-full shadow-sm border border-slate-100">
             Still have questions? <button onClick={() => document.getElementById('admissions')?.scrollIntoView({ behavior: 'smooth' })} className="text-orange-600 font-bold hover:text-orange-700 ml-1 transition-colors underline decoration-2 underline-offset-4 decoration-orange-200 hover:decoration-orange-600">Contact Support</button>
           </p>
-        </div>
+        </div> */}
       </div>
     </section>
   );
