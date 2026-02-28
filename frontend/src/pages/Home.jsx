@@ -3700,41 +3700,90 @@ function Community() {
 function FAQ() {
   const faqs = [
     {
-      q: "When do new batches start?",
-      a: "Multiple intakes; check the Courses section for exact dates.",
+      q: "How do I enroll in Pathfinder courses?",
+      a: "You can easily apply online through our Student Portal or visit any of our centers across the state. Our admission counselors will guide you through the process, evaluate your requirements, and help you select the ideal batch.",
     },
     {
-      q: "How do scholarships work?",
-      a: "Based on diagnostics and merit; see Admissions for current window.",
+      q: "What study materials are provided?",
+      a: "Pathfinder provides comprehensive, expertly curated study modules that cover theory, solved examples, daily practice problems (DPPs), and an extensive archive of previous years' questions for thorough preparation.",
     },
     {
-      q: "Online vs Center?",
-      a: "Choose based on proximity & learning style. Both follow the same rigor.",
+      q: "Are there dedicated doubt-clearing sessions?",
+      a: "Absolutely! We hold regular doubt-clearing sessions both online and offline. Students also get access to our 24x7 digital doubt forum where expert faculties resolve queries round the clock.",
+    },
+    {
+      q: "How are the Mock Tests structured?",
+      a: "Our mock tests meticulously replicate the latest examination patterns (NTA/Boards). Post-test, you receive in-depth performance analytics highlighting topic-wise strengths and areas needing improvement.",
+    },
+    {
+      q: "Can I switch between Online and Offline modes?",
+      a: "Yes, we offer flexible hybrid learning options. If you miss an offline lecture, you can always catch up via recorded sessions or attend our parallel live online classes.",
     },
   ];
+
   const [open, setOpen] = useState(0);
+
   return (
-    <section id="faq" className="py-12 bg-slate-50">
-      <div className="mx-auto max-w-7xl px-4">
-        <h2 className="text-2xl font-bold mb-3">Frequently asked questions</h2>
-        <div className="space-y-2">
-          {faqs.map((f, i) => (
-            <div
-              key={i}
-              className="border border-slate-200 rounded-2xl bg-white"
-            >
-              <button
-                onClick={() => setOpen(open === i ? null : i)}
-                className="w-full text-left px-4 py-3 font-medium flex items-center justify-between"
+    <section id="faq" className="py-16 sm:py-24 bg-gradient-to-br from-white to-slate-50 relative overflow-hidden">
+      {/* Decorative blobs */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-5%] w-96 h-96 rounded-full bg-red-50 blur-3xl opacity-60"></div>
+        <div className="absolute bottom-[-10%] left-[-5%] w-80 h-80 rounded-full bg-orange-50 blur-3xl opacity-60"></div>
+      </div>
+
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 relative z-10">
+        <div className="text-center mb-12 sm:mb-16">
+          <span className="inline-block py-1.5 px-4 rounded-full bg-red-100 text-red-700 text-xs sm:text-sm font-bold tracking-wider mb-4 uppercase shadow-sm">
+            Got Questions?
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            Frequently Asked <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">Questions</span>
+          </h2>
+          <p className="mt-4 text-slate-600 text-base sm:text-lg max-w-2xl mx-auto font-medium">
+            Everything you need to know about Pathfinder, our courses, and how we ensure your success.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((f, i) => {
+            const isOpen = open === i;
+            return (
+              <div
+                key={i}
+                className={`transition-all duration-300 border-2 rounded-[24px] bg-white overflow-hidden ${isOpen ? "border-orange-500 shadow-xl shadow-orange-100" : "border-slate-100 hover:border-orange-200 hover:shadow-lg hover:-translate-y-1"
+                  }`}
               >
-                <span>{f.q}</span>
-                <span>{open === i ? "−" : "+"}</span>
-              </button>
-              {open === i && (
-                <div className="px-4 pb-4 text-slate-600">{f.a}</div>
-              )}
-            </div>
-          ))}
+                <button
+                  onClick={() => setOpen(isOpen ? null : i)}
+                  className="w-full text-left px-6 py-5 sm:px-8 sm:py-6 flex items-center justify-between gap-4 focus:outline-none"
+                >
+                  <span className={`font-bold text-[16px] sm:text-lg transition-colors duration-300 pr-8 ${isOpen ? "text-[#66090D]" : "text-slate-800"}`}>
+                    {f.q}
+                  </span>
+                  <div className={`shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${isOpen ? "bg-gradient-to-br from-orange-500 to-red-600 text-white rotate-180 shadow-md" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>
+                    <svg className="w-5 h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </button>
+                <div
+                  className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? "max-h-[500px] opacity-100 pb-6 px-6 sm:px-8" : "max-h-0 opacity-0 px-6 sm:px-8"}`}
+                >
+                  <div className="pt-4 border-t border-slate-100">
+                    <p className="text-slate-600 leading-relaxed text-sm sm:text-base font-medium">
+                      {f.a}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-14 text-center">
+          <p className="text-slate-600 font-medium bg-white inline-block px-6 py-3 rounded-full shadow-sm border border-slate-100">
+            Still have questions? <button onClick={() => document.getElementById('admissions')?.scrollIntoView({ behavior: 'smooth' })} className="text-orange-600 font-bold hover:text-orange-700 ml-1 transition-colors underline decoration-2 underline-offset-4 decoration-orange-200 hover:decoration-orange-600">Contact Support</button>
+          </p>
         </div>
       </div>
     </section>
