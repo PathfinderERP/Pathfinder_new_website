@@ -677,7 +677,7 @@ const Footer = () => {
               >
                 2025 © All rights reserved by Pathfinder. Developed by{" "}
                 <a
-                  href="https://www.pixelsolutionz.com/"
+                  href=""
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#F8E4C2] font-semibold hover:text-orange-500 transition-colors duration-300"
