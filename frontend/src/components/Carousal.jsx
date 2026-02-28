@@ -8,47 +8,53 @@ export const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const descriptions = [
+    // 1
     {
-      name: "Himangshu Shekhar",
-      exam: "WBJEE 2022",
+      name: "Adrita Sarkar",
+      exam: " Madhyamik 2025",
       desc: "AIR Rank:",
       rank: "1",
-      img: "images/1-Himanshu-Shekhar-2.png",
+      img: "images/homepagecarousal_images/Adrita Sarkar.png",
     },
-    {
-      name: "Panchajanya Dey",
-      exam: "WBJEE 2021",
-      desc: "AIR Rank:",
-      rank: "1",
-      img: "images/Panchajanya_Dey_WBJEE__1_-removebg-preview.png",
-    },
+    // 2
     {
       name: "Devdutta Majhi",
-      exam: "JEE Main 2025",
+      exam: "JEE 2025",
       desc: "AIR Rank:",
       rank: "1",
-      img: "images/Devdutta_Majhi__1_-removebg-preview (1).png",
+      img: "images/homepagecarousal_images/devdutta majhi.png",
     },
+    // 3   rupayan pal all achivement .png cool
     {
-      name: "Zenia Bhattacharya",
-      exam: "NEET UG 2024",
+      name: "Rupayan Pal",
+      exam: "NEET 2025",
+      desc: "AIR Rank:",
+      rank: "20",
+      img: "images/homepagecarousal_images/rupayan pal.png",
+    },
+    // 4 Adrita Mahata
+    {
+      name: "Adrita Mahata",
+      exam: "ICSE 2025",
+      desc: "Score:99.8%",
+      rank: "AIR 2",
+      img: "images/homepagecarousal_images/Adrita Mahata.png",
+    },
+    // 5 Chandrachur Sen
+    {
+      name: "Chandrachur Sen",
+      exam: "Madhyamika 2024",
+      desc: "AIR Rank:",
+      rank: "1",
+      img: "images/homepagecarousal_images/Chandrachur Sen.png",
+    },
+    // 6 Pranami halder
+    {
+      name: "Pranami halder",
+      exam: "CBSE 2025",
       desc: "Score:",
-      rank: "715/720",
-      img: "images/Zenia-Bhattacharya_NEE-1-20 (1).png",
-    },
-    {
-      name: "Arka Das",
-      exam: "JEE Advanced 2023",
-      desc: "AIR Rank:",
-      rank: "24",
-      img: "images/AAYUSSH 2.0 (NEET).jpeg",
-    },
-    {
-      name: "Sayan Pradhan",
-      exam: "WBJEE 2023",
-      desc: "AIR Rank:",
-      rank: "15",
-      img: "images/SAYAN-PRADHAN testmonial.png",
+      rank: "99.2%",
+      img: "images/homepagecarousal_images/Pranami halder.png",
     },
   ];
 
