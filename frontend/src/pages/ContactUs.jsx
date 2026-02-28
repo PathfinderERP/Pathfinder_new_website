@@ -203,14 +203,14 @@ const ContactUs = () => {
                                 </p>
                                 <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
                                     <p className="mb-0">
-                                        You can call on Pathfinder's official Contact No. <span className="font-bold text-orange-600 text-xl tracking-tight">9147178888</span> (24x7).
+                                        You can call on Pathfinder's official Contact No. <span className="font-bold text-orange-600 text-xl tracking-tight"> 9147178886</span> (24x7).
                                     </p>
                                 </div>
                                 <p>
                                     If the phone is busy, we're resolving someone else's queries. We request you to contact us again after 15 minutes so that we can address your query or concern you may have regarding lecturers or course material. Your suggestions will help us improve and give all children a bright future.
                                 </p>
                                 <p>
-                                    In case of any grievance, don't hesitate to get in touch with us at <a href="mailto:info@pathfinder.edu.in" className="text-orange-600 hover:text-orange-700 font-bold underline decoration-2 underline-offset-4">info@pathfinder.edu.in</a>
+                                    In case of any grievance, don't hesitate to get in touch with us at <a href="mailto:support@pathfinder.edu.in" className="text-orange-600 hover:text-orange-700 font-bold underline decoration-2 underline-offset-4">support@pathfinder.edu.in</a>
                                 </p>
                             </div>
                         </div>
@@ -371,7 +371,7 @@ const ContactUs = () => {
                             {[
                                 {
                                     question: "How do I contact a Pathfinder counsellor?",
-                                    answer: "You can contact our counsellors by calling our 24x7 helpline at 9147178888 or by emailing us at info@pathfinder.edu.in. You can also visit any of our centres during working hours (Mon-Sat: 9:00 AM - 8:00 PM) for in-person counselling."
+                                    answer: "You can contact our counsellors by calling our 24x7 helpline at  9147178886 or by emailing us at support@pathfinder.edu.in. You can also visit any of our centres during working hours (Mon-Sat: 9:00 AM - 8:00 PM) for in-person counselling."
                                 },
                                 {
                                     question: "What is the official website of Pathfinder?",
@@ -379,7 +379,7 @@ const ContactUs = () => {
                                 },
                                 {
                                     question: "How can I contact the Pathfinder customer care?",
-                                    answer: "You can reach our customer care team through multiple channels: Call us at 9147178888 (24x7), email us at info@pathfinder.edu.in, or visit the nearest Pathfinder centre. Our team aims to resolve all queries within 7 days."
+                                    answer: "You can reach our customer care team through multiple channels: Call us at  9147178886 (24x7), email us at support@pathfinder.edu.in, or visit the nearest Pathfinder centre. Our team aims to resolve all queries within 7 days."
                                 },
                                 {
                                     question: "How will I get my doubts answered?",

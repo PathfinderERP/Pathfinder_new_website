@@ -521,7 +521,7 @@ const Contact = () => {
                               Email
                             </strong>
                             <motion.a
-                              href="mailto:info@pathfinder.edu.in"
+                              href="mailto:support@pathfinder.edu.in"
                               className="text-[#161616] hover:text-[#EE4600] transition-colors duration-300 group block"
                               initial={{ opacity: 0, y: 10 }}
                               whileInView={{ opacity: 1, y: 0 }}
@@ -672,25 +672,22 @@ const Contact = () => {
                                     id="fname"
                                     value={formData.first_name}
                                     onChange={handleChange}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm ${
-                                      errors.first_name
+                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm ${errors.first_name
                                         ? "border-red-500 ring-1 ring-red-500"
                                         : "border-gray-300"
-                                    }`}
+                                      }`}
                                     placeholder=" "
                                     required
                                   />
                                   <label
                                     htmlFor="fname"
-                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${
-                                      formData.first_name || errors.first_name
+                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${formData.first_name || errors.first_name
                                         ? "top-1 text-xs"
                                         : "top-3 text-gray-500"
-                                    } ${
-                                      errors.first_name
+                                      } ${errors.first_name
                                         ? "text-red-500"
                                         : "text-[#EE4600]"
-                                    }`}
+                                      }`}
                                   >
                                     First name
                                     <sup className="text-[#EE4600]">*</sup>
@@ -734,25 +731,22 @@ const Contact = () => {
                                     id="lname"
                                     value={formData.last_name}
                                     onChange={handleChange}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm ${
-                                      errors.last_name
+                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm ${errors.last_name
                                         ? "border-red-500 ring-1 ring-red-500"
                                         : "border-gray-300"
-                                    }`}
+                                      }`}
                                     placeholder=" "
                                     required
                                   />
                                   <label
                                     htmlFor="lname"
-                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${
-                                      formData.last_name || errors.last_name
+                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${formData.last_name || errors.last_name
                                         ? "top-1 text-xs"
                                         : "top-3 text-gray-500"
-                                    } ${
-                                      errors.last_name
+                                      } ${errors.last_name
                                         ? "text-red-500"
                                         : "text-[#EE4600]"
-                                    }`}
+                                      }`}
                                   >
                                     Last name
                                     <sup className="text-[#EE4600]">*</sup>
@@ -796,26 +790,23 @@ const Contact = () => {
                                     id="contactno"
                                     value={formData.contact_number}
                                     onChange={handleChange}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm ${
-                                      errors.contact_number
+                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm ${errors.contact_number
                                         ? "border-red-500 ring-1 ring-red-500"
                                         : "border-gray-300"
-                                    }`}
+                                      }`}
                                     placeholder=" "
                                     required
                                   />
                                   <label
                                     htmlFor="contactno"
-                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${
-                                      formData.contact_number ||
-                                      errors.contact_number
+                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${formData.contact_number ||
+                                        errors.contact_number
                                         ? "top-1 text-xs"
                                         : "top-3 text-gray-500"
-                                    } ${
-                                      errors.contact_number
+                                      } ${errors.contact_number
                                         ? "text-red-500"
                                         : "text-[#EE4600]"
-                                    }`}
+                                      }`}
                                   >
                                     Contact Number
                                     <sup className="text-[#EE4600]">*</sup>
@@ -859,25 +850,22 @@ const Contact = () => {
                                     id="emailid"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm ${
-                                      errors.email
+                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm ${errors.email
                                         ? "border-red-500 ring-1 ring-red-500"
                                         : "border-gray-300"
-                                    }`}
+                                      }`}
                                     placeholder=" "
                                     required
                                   />
                                   <label
                                     htmlFor="emailid"
-                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${
-                                      formData.email || errors.email
+                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${formData.email || errors.email
                                         ? "top-1 text-xs"
                                         : "top-3 text-gray-500"
-                                    } ${
-                                      errors.email
+                                      } ${errors.email
                                         ? "text-red-500"
                                         : "text-[#EE4600]"
-                                    }`}
+                                      }`}
                                   >
                                     Email<sup className="text-[#EE4600]">*</sup>
                                   </label>
@@ -919,11 +907,10 @@ const Contact = () => {
                                     id="course"
                                     value={formData.course}
                                     onChange={handleChange}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm appearance-none ${
-                                      errors.course
+                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm appearance-none ${errors.course
                                         ? "border-red-500 ring-1 ring-red-500"
                                         : "border-gray-300"
-                                    }`}
+                                      }`}
                                     required
                                   >
                                     <option value="">Select a course</option>
@@ -937,15 +924,13 @@ const Contact = () => {
                                     <option value="NCRP">NCRP</option>
                                   </select>
                                   <label
-                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${
-                                      formData.course || errors.course
+                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${formData.course || errors.course
                                         ? "top-1 text-xs"
                                         : "top-3 text-gray-500"
-                                    } ${
-                                      errors.course
+                                      } ${errors.course
                                         ? "text-red-500"
                                         : "text-[#EE4600]"
-                                    }`}
+                                      }`}
                                   >
                                     Select Course
                                     <sup className="text-[#EE4600]">*</sup>
@@ -1004,25 +989,22 @@ const Contact = () => {
                                     id="centername"
                                     value={formData.center_name}
                                     onChange={handleChange}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm ${
-                                      errors.center_name
+                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm ${errors.center_name
                                         ? "border-red-500 ring-1 ring-red-500"
                                         : "border-gray-300"
-                                    }`}
+                                      }`}
                                     placeholder=" "
                                     required
                                   />
                                   <label
                                     htmlFor="centername"
-                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${
-                                      formData.center_name || errors.center_name
+                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${formData.center_name || errors.center_name
                                         ? "top-1 text-xs"
                                         : "top-3 text-gray-500"
-                                    } ${
-                                      errors.center_name
+                                      } ${errors.center_name
                                         ? "text-red-500"
                                         : "text-[#EE4600]"
-                                    }`}
+                                      }`}
                                   >
                                     Centre Name
                                     <sup className="text-[#EE4600]">*</sup>
@@ -1066,24 +1048,21 @@ const Contact = () => {
                                     rows="4"
                                     value={formData.message}
                                     onChange={handleChange}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm resize-none ${
-                                      errors.message
+                                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EE4600] focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm resize-none ${errors.message
                                         ? "border-red-500 ring-1 ring-red-500"
                                         : "border-gray-300"
-                                    }`}
+                                      }`}
                                     placeholder=" "
                                   ></textarea>
                                   <label
                                     htmlFor="floatingTextarea2"
-                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${
-                                      formData.message || errors.message
+                                    className={`absolute left-4 transition-all duration-300 pointer-events-none bg-white px-2 ${formData.message || errors.message
                                         ? "top-1 text-xs"
                                         : "top-3 text-gray-500"
-                                    } ${
-                                      errors.message
+                                      } ${errors.message
                                         ? "text-red-500"
                                         : "text-[#EE4600]"
-                                    }`}
+                                      }`}
                                   >
                                     Message
                                   </label>
@@ -1127,10 +1106,10 @@ const Contact = () => {
                                 whileHover={
                                   !isSubmitting
                                     ? {
-                                        scale: 1.02,
-                                        boxShadow:
-                                          "0 10px 25px -5px rgba(238, 70, 0, 0.4)",
-                                      }
+                                      scale: 1.02,
+                                      boxShadow:
+                                        "0 10px 25px -5px rgba(238, 70, 0, 0.4)",
+                                    }
                                     : {}
                                 }
                                 whileTap={!isSubmitting ? { scale: 0.98 } : {}}
@@ -1187,22 +1166,20 @@ const Contact = () => {
                                   scale: 0.95,
                                   transition: { duration: 0.2 },
                                 }}
-                                className={`fixed top-25 left-1/2 -translate-x-1/2 z-[1000] w-[90%] sm:w-auto p-6 rounded-2xl shadow-2xl border-l-4 backdrop-blur-sm ${
-                                  submitMessage.includes("Thank you") ||
-                                  submitMessage.includes("success")
+                                className={`fixed top-25 left-1/2 -translate-x-1/2 z-[1000] w-[90%] sm:w-auto p-6 rounded-2xl shadow-2xl border-l-4 backdrop-blur-sm ${submitMessage.includes("Thank you") ||
+                                    submitMessage.includes("success")
                                     ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-900 border-l-green-500 shadow-green-100/50"
                                     : "bg-gradient-to-r from-red-50 to-rose-50 text-red-900 border-l-red-500 shadow-red-100/50"
-                                }`}
+                                  }`}
                               >
                                 {/* Close Button */}
                                 <button
                                   onClick={handleCloseMessage}
-                                  className={`absolute top-3 right-3 p-1 rounded-full transition-all duration-200 hover:scale-110 ${
-                                    submitMessage.includes("Thank you") ||
-                                    submitMessage.includes("success")
+                                  className={`absolute top-3 right-3 p-1 rounded-full transition-all duration-200 hover:scale-110 ${submitMessage.includes("Thank you") ||
+                                      submitMessage.includes("success")
                                       ? "hover:bg-green-200/50 text-green-600"
                                       : "hover:bg-red-200/50 text-red-600"
-                                  }`}
+                                    }`}
                                 >
                                   <svg
                                     className="w-5 h-5"
@@ -1234,15 +1211,14 @@ const Contact = () => {
                                         delay: 0.1,
                                       },
                                     }}
-                                    className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
-                                      submitMessage.includes("Thank you") ||
-                                      submitMessage.includes("success")
+                                    className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${submitMessage.includes("Thank you") ||
+                                        submitMessage.includes("success")
                                         ? "bg-green-100 text-green-600"
                                         : "bg-red-100 text-red-600"
-                                    }`}
+                                      }`}
                                   >
                                     {submitMessage.includes("Thank you") ||
-                                    submitMessage.includes("success") ? (
+                                      submitMessage.includes("success") ? (
                                       <motion.svg
                                         initial={{ pathLength: 0, scale: 0 }}
                                         animate={{
@@ -1310,7 +1286,7 @@ const Contact = () => {
                                       className="font-semibold text-lg mb-1"
                                     >
                                       {submitMessage.includes("Thank you") ||
-                                      submitMessage.includes("success")
+                                        submitMessage.includes("success")
                                         ? "Success!"
                                         : "Oops!"}
                                     </motion.h3>
@@ -1338,12 +1314,11 @@ const Contact = () => {
                                       ease: "linear",
                                     },
                                   }}
-                                  className={`absolute bottom-0 left-0 h-1 rounded-full origin-left ${
-                                    submitMessage.includes("Thank you") ||
-                                    submitMessage.includes("success")
+                                  className={`absolute bottom-0 left-0 h-1 rounded-full origin-left ${submitMessage.includes("Thank you") ||
+                                      submitMessage.includes("success")
                                       ? "bg-green-500"
                                       : "bg-red-500"
-                                  }`}
+                                    }`}
                                   style={{ width: "100%" }}
                                 />
                               </motion.div>

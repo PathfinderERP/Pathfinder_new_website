@@ -331,7 +331,7 @@ const Footer = () => {
                             <div className="text-base text-gray-400 flex flex-wrap items-center gap-2">
                                 <a href="tel:+919147178886" className="hover:text-[#EE4600] transition-colors">+91 9147178886</a>
                                 <span className="text-gray-600 hidden sm:inline">|</span>
-                                <a href="mailto:info@pathfinder.edu.in" className="hover:text-[#EE4600] transition-colors">info@pathfinder.edu.in</a>
+                                <a href="mailto:support@pathfinder.edu.in" className="hover:text-[#EE4600] transition-colors">support@pathfinder.edu.in</a>
                             </div>
                         </div>
 

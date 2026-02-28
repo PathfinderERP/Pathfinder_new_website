@@ -526,11 +526,11 @@ const Footer = () => {
                         +91 9147178886
                       </motion.a>
                       <motion.a
-                        href="mailto:info@pathfinder.edu.in"
+                        href="mailto:support@pathfinder.edu.in"
                         className="block text-gray-400 hover:text-orange-500 transition-colors duration-300"
                         whileHover={{ x: 5 }}
                       >
-                        info@pathfinder.edu.in
+                        support@pathfinder.edu.in
                       </motion.a>
                     </div>
                   </div>
