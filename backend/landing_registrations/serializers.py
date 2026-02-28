@@ -1,8 +1,8 @@
 from rest_framework import serializers
+from rest_framework_mongoengine import serializers as mongo_serializers
 from .models import LandingPageRegistration
 
-
-class LandingPageRegistrationSerializer(serializers.ModelSerializer):
+class LandingPageRegistrationSerializer(mongo_serializers.DocumentSerializer):
     class Meta:
         model = LandingPageRegistration
         fields = [
