@@ -301,7 +301,7 @@ const Header = () => {
     <>
       <motion.header className="w-full fixed top-0 z-[1000]" initial={{ y: -100 }} animate={{ y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
         <motion.div
-          className={`relative bg-gradient-to-br from-white/80 to-white/60 backdrop-blur-2xl border-b transition-all duration-500 mx-auto 2xl:max-w-7xl 2xl:rounded-b-2xl shadow-sm ${isScrolled ? "border-orange-200/30 shadow-2xl shadow-orange-500/5 py-2" : "border-orange-100/20 py-2"}`}
+          className={`relative bg-gradient-to-br from-white/80 to-white/60 backdrop-blur-2xl border-b transition-all duration-500 w-full shadow-sm ${isScrolled ? "border-orange-200/30 shadow-2xl shadow-orange-500/5 py-2" : "border-orange-100/20 py-2"}`}
           style={{ zIndex: 999 }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">

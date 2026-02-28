@@ -316,7 +316,7 @@ const Footer = () => {
   return (
     <>
       <footer
-        className="relative bg-[#161616] text-[#F8E4C2] overflow-hidden z-10 w-full 2xl:mx-auto 2xl:max-w-7xl 2xl:mb-8 shadow-2xl"
+        className="relative bg-[#161616] text-[#F8E4C2] overflow-hidden z-10 w-full shadow-2xl"
         ref={footerRef}
       >
         {/* Animated Background Elements */}
