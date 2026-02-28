@@ -22,7 +22,7 @@ class FeesStructureSerializer(mongo_serializers.EmbeddedDocumentSerializer):
 
 class TopperSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumentSerializer):
     year = serializers.IntegerField(required=False)
-    image_file = serializers.CharField(required=False, write_only=True)
+    image_file = serializers.CharField(required=False, write_only=True, allow_null=True, allow_blank=True)
     image_url = serializers.SerializerMethodField()
     percentages = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     total_marks = serializers.CharField(required=False, allow_null=True, allow_blank=True)
@@ -50,11 +50,18 @@ class TopperSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumentSeri
         return super().to_internal_value(data)
     
     def validate(self, attrs):
-        if 'image_file' in attrs and attrs['image_file']:
+        if 'image_file' in attrs:
             data_uri = attrs.pop('image_file')
-            processed = self.process_base64_file(data_uri)
-            if processed:
-                attrs.update(processed)
+            if data_uri:
+                processed = self.process_base64_file(data_uri)
+                if processed:
+                    attrs.update(processed)
+            else:
+                # Explicitly empty it out
+                attrs['image_data'] = None
+                attrs['image_content_type'] = None
+                attrs['image_filename'] = None
+                attrs['image'] = None
         return attrs
 
 
@@ -105,7 +112,7 @@ class TeacherInfoSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumen
     experience = serializers.IntegerField(required=False)
     rating = serializers.DecimalField(max_digits=3, decimal_places=2, required=False)
     is_active = serializers.BooleanField(required=False)
-    profile_image_file = serializers.CharField(required=False, write_only=True)
+    profile_image_file = serializers.CharField(required=False, write_only=True, allow_null=True, allow_blank=True)
     profile_image_url = serializers.SerializerMethodField()
     
     # Mixin config
@@ -137,17 +144,23 @@ class TeacherInfoSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumen
         return data
     
     def validate(self, attrs):
-        if 'profile_image_file' in attrs and attrs['profile_image_file']:
+        if 'profile_image_file' in attrs:
             data_uri = attrs.pop('profile_image_file')
-            processed = self.process_base64_file(data_uri)
-            if processed:
-                attrs.update(processed)
+            if data_uri:
+                processed = self.process_base64_file(data_uri)
+                if processed:
+                    attrs.update(processed)
+            else:
+                attrs['profile_image_data'] = None
+                attrs['profile_image_content_type'] = None
+                attrs['profile_image_filename'] = None
+                attrs['profile_image'] = None
         return attrs
 
 
 class SubjectScheduleSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumentSerializer):
     order = serializers.IntegerField(required=False)
-    schedule_pdf_file = serializers.CharField(write_only=True, required=False)
+    schedule_pdf_file = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     
     # Mixin configuration
     file_input_fields = ['schedule_pdf_file']
@@ -207,7 +220,7 @@ class StudyMaterialSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocum
     is_free = serializers.BooleanField(required=False)
     uploaded_at = serializers.DateTimeField(required=False)
     downloads = serializers.IntegerField(required=False)
-    material_file = serializers.CharField(write_only=True, required=False)
+    material_file = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     
     # Mixin configuration
     file_input_fields = ['material_file']
@@ -262,7 +275,7 @@ class CourseSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
     discounted_price = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     slug = serializers.CharField(read_only=True)
     code = serializers.CharField(read_only=True)
-    thumbnail_image_file = serializers.CharField(required=False, write_only=True)
+    thumbnail_image_file = serializers.CharField(required=False, write_only=True, allow_null=True, allow_blank=True)
     thumbnail_url = serializers.URLField(required=False, allow_null=True)
     thumbnail_display_url = serializers.SerializerMethodField()
     course_title = serializers.CharField(required=False, allow_null=True, allow_blank=True)
@@ -302,11 +315,17 @@ class CourseSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
         return super().to_internal_value(data)
     
     def validate(self, attrs):
-        if 'thumbnail_image_file' in attrs and attrs['thumbnail_image_file']:
-            data_uri = attrs.pop('thumbnail_image_file')
-            processed = self.process_base64_file(data_uri)
-            if processed:
-                attrs.update(processed)
+        if 'thumbnail_image_file' in attrs:
+            data_uri = attrs.pop('thumbnail_image_file', None)
+            if data_uri:
+                processed = self.process_base64_file(data_uri)
+                if processed:
+                    attrs.update(processed)
+            else:
+                attrs['thumbnail_image_data'] = None
+                attrs['thumbnail_content_type'] = None
+                attrs['thumbnail_filename'] = None
+                attrs['thumbnail_url'] = None
         return attrs
     
     # ==================== HELPER METHODS ====================
@@ -379,6 +398,12 @@ class CourseSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
         # Handle online course defaults
         validated_data = self._handle_online_course(validated_data)
         
+        # Remove empty thumbnail files
+        if 'thumbnail_image_file' in validated_data and not validated_data['thumbnail_image_file']:
+            validated_data.pop('thumbnail_image_file', None)
+            
+        validated_data.pop('thumbnail_image_file', None)
+        
         # Create embedded documents
         embedded_docs = self._create_embedded_documents(embedded_data)
         
@@ -391,9 +416,21 @@ class CourseSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
         # Pop embedded data (use None as default to detect "not provided")
         embedded_data = self._pop_embedded_data(validated_data, default=None)
         
+        # Clear thumbnail binary data if explicitly removed
+        if 'thumbnail_image_file' in validated_data and not validated_data['thumbnail_image_file']:
+            validated_data.pop('thumbnail_image_file', None)
+            setattr(instance, 'thumbnail_image_data', None)
+            setattr(instance, 'thumbnail_content_type', None)
+            setattr(instance, 'thumbnail_filename', None)
+            
+        # Optional: remove write-only files that shouldn't be set as attributes directy
+        for file_field in ['thumbnail_image_file']:
+            validated_data.pop(file_field, None)
+            
         # Update basic fields
         for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+            if hasattr(instance, attr):
+                setattr(instance, attr, value)
         
         # Update embedded documents only if provided (not None)
         if embedded_data.get('fees_structures') is not None:

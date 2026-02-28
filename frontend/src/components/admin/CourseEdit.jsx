@@ -478,8 +478,9 @@ const CourseEdit = () => {
                         <span className="text-gray-400 text-sm">No image</span>
                       )}
                     </div>
-                    <div>
+                    <div className="flex flex-col items-start justify-center">
                       <input
+                        id="thumbnail_input"
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
@@ -501,6 +502,23 @@ const CourseEdit = () => {
                       <p className="text-xs text-gray-500 mt-1">
                         Recommended size: 800x600px. Max 5MB.
                       </p>
+                      {courseData.thumbnail_url && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCourseData(prev => ({
+                              ...prev,
+                              thumbnail_image_file: null,
+                              thumbnail_url: null
+                            }));
+                            const fileInput = document.getElementById('thumbnail_input');
+                            if (fileInput) fileInput.value = '';
+                          }}
+                          className="mt-2 px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors"
+                        >
+                          Remove Image
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

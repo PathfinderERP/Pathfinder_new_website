@@ -15,6 +15,7 @@ export const HeroCarousel = () => {
       desc: "AIR Rank:",
       rank: "1",
       img: "images/homepagecarousal_images/Adrita Sarkar.png",
+      scaleClass: "scale-[1.25]",
     },
     // 2
     {
@@ -23,6 +24,7 @@ export const HeroCarousel = () => {
       desc: "AIR Rank:",
       rank: "1",
       img: "images/homepagecarousal_images/devdutta majhi.png",
+      scaleClass: "scale-100",
     },
     // 3   rupayan pal all achivement .png cool
     {
@@ -31,6 +33,7 @@ export const HeroCarousel = () => {
       desc: "AIR Rank:",
       rank: "20",
       img: "images/homepagecarousal_images/rupayan pal.png",
+      scaleClass: "scale-100",
     },
     // 4 Adrita Mahata
     {
@@ -39,6 +42,7 @@ export const HeroCarousel = () => {
       desc: "Score:99.8%",
       rank: "AIR 2",
       img: "images/homepagecarousal_images/Adrita Mahata.png",
+      scaleClass: "scale-125",
     },
     // 5 Chandrachur Sen
     {
@@ -47,6 +51,7 @@ export const HeroCarousel = () => {
       desc: "AIR Rank:",
       rank: "1",
       img: "images/homepagecarousal_images/Chandrachur Sen.png",
+      scaleClass: "scale-[1.05]",
     },
     // 6 Pranami halder
     {
@@ -55,6 +60,7 @@ export const HeroCarousel = () => {
       desc: "Score:",
       rank: "99.2%",
       img: "images/homepagecarousal_images/Pranami halder.png",
+      scaleClass: "scale-[1.15]",
     },
   ];
 
@@ -162,7 +168,7 @@ export const HeroCarousel = () => {
                       <FadeInImage
                         src={item.img}
                         alt={item.name}
-                        className="w-full h-full object-contain scale-90"
+                        className={`w-full h-full object-contain ${item.scaleClass || 'scale-110'}`}
                       />
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-full border-2 border-white flex items-center justify-center shadow-sm">

@@ -2515,7 +2515,7 @@ function ResultsSection({ selectedCentre }) {
         {loading && cards.length === 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-12">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-[2rem] overflow-hidden shadow-lg h-[450px]">
+              <div key={i} className="bg-white rounded-[5px] overflow-hidden shadow-lg h-[450px]">
                 <Skeleton className="h-52 w-full rounded-none mb-4" />
                 <div className="p-6 space-y-4">
                   <Skeleton className="h-8 w-3/4" />
@@ -2578,7 +2578,7 @@ function ResultsSection({ selectedCentre }) {
                         key={`${student.name}-${index}`}
                         className="w-full flex-shrink-0 px-2"
                       >
-                        <div className="bg-white rounded-[2rem] border border-orange-100 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 mx-auto max-w-sm flex flex-col h-full group/mobile">
+                        <div className="bg-white rounded-[5px] border border-orange-100 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 mx-auto max-w-sm flex flex-col h-full group/mobile">
                           {/* Student Photo with Rank Badge */}
                           <div className="relative w-full h-52 overflow-hidden bg-gradient-to-br from-orange-50 to-red-50">
                             <FadeInImage
@@ -2680,7 +2680,7 @@ function ResultsSection({ selectedCentre }) {
               {cards.map((student, index) => (
                 <div
                   key={`${student.name}-${index}`}
-                  className="group bg-white rounded-[2rem] border border-orange-100 overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 relative flex flex-col h-full"
+                  className="group bg-white rounded-[15px] border border-orange-100 overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 relative flex flex-col h-full"
                 >
                   {/* Student Photo with Rank Badge */}
                   <div className="relative w-full h-60 overflow-hidden bg-gradient-to-br from-orange-50/50 to-red-50/50 group-hover:bg-white transition-colors duration-500">
