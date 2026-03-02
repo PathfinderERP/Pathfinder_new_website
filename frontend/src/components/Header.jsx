@@ -19,6 +19,7 @@ import {
   PhoneIcon,
   IdentificationIcon,
   RectangleGroupIcon,
+  HomeIcon,
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -245,6 +246,7 @@ const Header = () => {
   };
 
   const menuItems = {
+    Home: { icon: HomeIcon, href: "/" },
     "About Us": {
       icon: UserGroupIcon,
       items: [

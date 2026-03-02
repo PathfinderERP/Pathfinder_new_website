@@ -58,7 +58,7 @@ export default function PathVerseOverview() {
 
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 scroll-smooth lg:mt-20">
+    <div className="min-h-screen bg-slate-50 text-slate-900 scroll-smooth lg:mt-20 overflow-x-hidden">
       {/* MAIN CONTENT */}
       <Hero />
       <KPIRibbon />
@@ -2603,29 +2603,7 @@ function ResultsSection({ selectedCentre }) {
                 onTouchEnd={onTouchEndHandler}
               >
 
-                {/* Manual Navigation Arrows */}
-                {cards.length > 1 && (
-                  <>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); prevSlide(); }}
-                      className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-orange-200 text-orange-600 hover:bg-orange-50 transition-all active:scale-95"
-                      aria-label="Previous slide"
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); nextSlide(); }}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-orange-200 text-orange-600 hover:bg-orange-50 transition-all active:scale-95"
-                      aria-label="Next slide"
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </>
-                )}
+                {/* Swipe gestures enabled for mobile navigation */}
 
                 {/* Carousel Container */}
                 <div className="overflow-hidden rounded-2xl touch-pan-y">
@@ -3153,9 +3131,9 @@ function Reels() {
   return (
     <section
       ref={sectionRef}
-      className="py-10 sm:py-12 lg:py-16 bg-gradient-to-b from-white via-orange-50/30 to-white px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="py-10 sm:py-12 lg:py-16 bg-gradient-to-b from-white via-orange-50/30 to-white overflow-hidden"
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* HEADER - RESPONSIVE */}
         <div className="flex flex-col gap-4 sm:gap-6 mb-6 sm:mb-8">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center sm:text-left">
@@ -3180,13 +3158,17 @@ function Reels() {
         </div>
 
         {/* REELS CONTAINER - RESPONSIVE */}
-        <div className="relative">
+        <div className="relative -mx-4 sm:mx-0 overflow-hidden">
           <div
             ref={scrollContainerRef}
-            className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4"
-            style={{ scrollbarWidth: "none", cursor: "grab" }}
+            className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-6 px-4 sm:px-0"
+            style={{
+              scrollbarWidth: "none",
+              cursor: "grab",
+              WebkitOverflowScrolling: "touch"
+            }}
           >
-            <div className="flex gap-0 sm:gap-4 lg:gap-6 px-0 sm:px-4 lg:px-6 py-2 sm:py-4">
+            <div className="flex gap-4 sm:gap-4 lg:gap-6 py-2 sm:py-4">
               {currentReels.map((reel, index) => {
                 const isDriveVideo = getVideoType(reel.video) === "embed";
 
