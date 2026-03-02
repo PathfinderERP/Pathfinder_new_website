@@ -14,7 +14,7 @@ class BlogPost(Document):
     read_time = fields.StringField(max_length=50, default='5 min read')
     
     # Image storage: Using URL (Cloudflare R2 Link)
-    image_url = fields.URLField()
+    image_url = fields.StringField(required=False, null=True)
     
     # Status and Metadata
     is_featured = fields.BooleanField(default=False)

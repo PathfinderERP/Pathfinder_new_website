@@ -10,6 +10,7 @@ class StudentCornerItemSerializer(mongoserializers.DocumentSerializer):
     custom_board = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     custom_class_level = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     custom_course_type = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    image_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     
     class Meta:
         model = StudentCornerItem

@@ -31,7 +31,7 @@ class Topper(EmbeddedDocument):
     image_filename = fields.StringField(max_length=255)
     
     # OLD: Keep for backward compatibility with existing data
-    image = fields.URLField(null=True, blank=True)
+    image = fields.StringField(null=True, blank=True)
     
     # Add timestamps for topper
     created_at = fields.DateTimeField(default=datetime.now)
@@ -97,7 +97,7 @@ class Centre(Document):
     logo_filename = fields.StringField(max_length=255)
     
     # OLD: Keep for backward compatibility with existing data
-    logo = fields.URLField(null=True, blank=True)
+    logo = fields.StringField(null=True, blank=True)
     
     # Map URL for location detection
     map_url = fields.StringField(null=True, blank=True)

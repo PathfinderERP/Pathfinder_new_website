@@ -22,7 +22,7 @@ class TopperSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumentSeri
             'image_file', 'image', 'image_url'
         ]
         extra_kwargs = {
-            'image': {'required': False, 'allow_null': True}
+            'image': {'required': False, 'allow_null': True, 'allow_blank': True}
         }
     
     def to_representation(self, instance):
@@ -76,7 +76,7 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
         fields = ['id', 'state', 'district', 'centre', 'centre_type', 'location', 'address', 'map_url',
                  'toppers', 'logo_file', 'logo', 'logo_url', 'created_by', 'created_at', 'updated_at']
         extra_kwargs = {
-            'logo': {'required': False, 'allow_null': True}
+            'logo': {'required': False, 'allow_null': True, 'allow_blank': True}
         }
     
     def to_representation(self, instance):
@@ -155,11 +155,18 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
     def update(self, instance, validated_data):
         toppers_data = validated_data.pop('toppers', None)
         
+        # Handle explicitly clearing logo
+        if 'logo' in validated_data and (validated_data['logo'] is None or validated_data['logo'] == ""):
+            instance.logo = None
+            instance.logo_data = None
+            instance.logo_content_type = None
+            instance.logo_filename = None
+        
         # Update basic fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         
-        # ✅ FIXED: Update toppers while preserving existing image data
+        # ✅ FIXED: Update toppers while preserving existing image data unless explicitly cleared
         if toppers_data is not None:
             updated_toppers = []
             for index, topper_data in enumerate(toppers_data):
@@ -167,15 +174,24 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
                 if index < len(instance.toppers):
                     existing_topper = instance.toppers[index]
                     
-                    # ✅ PRESERVE existing image data if not provided in update
-                    if 'image_data' not in topper_data and existing_topper.image_data:
-                        topper_data['image_data'] = existing_topper.image_data
-                    if 'image_content_type' not in topper_data and existing_topper.image_content_type:
-                        topper_data['image_content_type'] = existing_topper.image_content_type
-                    if 'image_filename' not in topper_data and existing_topper.image_filename:
-                        topper_data['image_filename'] = existing_topper.image_filename
-                    if 'image' not in topper_data and existing_topper.image:
-                        topper_data['image'] = existing_topper.image
+                    # Check if image is explicitly being cleared
+                    is_image_cleared = 'image' in topper_data and (topper_data['image'] is None or topper_data['image'] == "")
+                    
+                    if is_image_cleared:
+                        topper_data['image'] = None
+                        topper_data['image_data'] = None
+                        topper_data['image_content_type'] = None
+                        topper_data['image_filename'] = None
+                    else:
+                        # ✅ PRESERVE existing image data if not provided in update and not cleared
+                        if 'image_data' not in topper_data and existing_topper.image_data:
+                            topper_data['image_data'] = existing_topper.image_data
+                        if 'image_content_type' not in topper_data and existing_topper.image_content_type:
+                            topper_data['image_content_type'] = existing_topper.image_content_type
+                        if 'image_filename' not in topper_data and existing_topper.image_filename:
+                            topper_data['image_filename'] = existing_topper.image_filename
+                        if 'image' not in topper_data and existing_topper.image:
+                            topper_data['image'] = existing_topper.image
                     
                     # ✅ Also preserve timestamps
                     if 'created_at' not in topper_data and existing_topper.created_at:

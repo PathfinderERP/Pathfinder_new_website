@@ -117,17 +117,36 @@ const BlogManagement = () => {
         }
     };
 
+    const handleRemoveImage = () => {
+        setFormData(prev => ({
+            ...prev,
+            image_file: null,
+            image_url: ""
+        }));
+        console.log("🗑️ Blog image cleared from local state");
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setFormLoading(true);
         try {
             const submissionData = { ...formData };
-            // Don't send null image_file as it might clear existing image on some backends
+
+            // Remove metadata and read-only fields
+            delete submissionData.id;
+            delete submissionData._id;
+            delete submissionData.slug;
+            delete submissionData.created_at;
+            delete submissionData.updated_at;
+            delete submissionData.published_date;
+
+            // Handle image logic
             if (!submissionData.image_file) {
                 delete submissionData.image_file;
             }
 
             if (currentPost) {
+                console.log("📤 Updating blog post with payload:", submissionData);
                 await blogAPI.update(currentPost.id, submissionData);
             } else {
                 await blogAPI.create(submissionData);
@@ -352,14 +371,34 @@ const BlogManagement = () => {
                                             <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
                                         </label>
                                         {formData.image_file ? (
-                                            <div className="relative">
-                                                <img src={formData.image_file} className="w-10 h-10 rounded border object-cover" />
-                                                <span className="absolute -top-1 -right-1 bg-green-500 w-3 h-3 rounded-full border border-white"></span>
+                                            <div className="flex flex-col gap-2">
+                                                <div className="relative group w-max">
+                                                    <img src={formData.image_file} className="w-16 h-16 rounded-xl border-2 border-orange-200 object-cover shadow-sm" />
+                                                    <span className="absolute -top-2 -right-2 bg-green-500 w-4 h-4 rounded-full border-2 border-white shadow-sm"></span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRemoveImage}
+                                                    className="text-red-600 hover:text-red-700 text-xs font-bold flex items-center gap-1 hover:underline"
+                                                >
+                                                    <XMarkIcon className="w-4 h-4" />
+                                                    Remove Image
+                                                </button>
                                             </div>
                                         ) : formData.image_url ? (
-                                            <div className="relative">
-                                                <img src={formData.image_url} className="w-10 h-10 rounded border object-cover" />
-                                                <span className="absolute -top-1 -right-1 bg-blue-500 w-3 h-3 rounded-full border border-white"></span>
+                                            <div className="flex flex-col gap-2">
+                                                <div className="relative group w-max">
+                                                    <img src={formData.image_url} className="w-16 h-16 rounded-xl border-2 border-blue-200 object-cover shadow-sm" />
+                                                    <span className="absolute -top-2 -right-2 bg-blue-500 w-4 h-4 rounded-full border-2 border-white shadow-sm"></span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRemoveImage}
+                                                    className="text-red-600 hover:text-red-700 text-xs font-bold flex items-center gap-1 hover:underline"
+                                                >
+                                                    <XMarkIcon className="w-4 h-4" />
+                                                    Remove Image
+                                                </button>
                                             </div>
                                         ) : null}
                                     </div>

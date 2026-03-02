@@ -727,8 +727,12 @@ const AlumniManagement = () => {
                                                         />
                                                         <button
                                                             type="button"
-                                                            onClick={() => removeImage(idx)}
-                                                            className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                removeImage(idx);
+                                                            }}
+                                                            className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full transition-all shadow-lg z-10 scale-90 hover:scale-100"
+                                                            title="Remove Image"
                                                         >
                                                             <X className="w-4 h-4" />
                                                         </button>

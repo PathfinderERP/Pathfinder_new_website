@@ -115,6 +115,7 @@ const CentreEdit = () => {
         centre_type: centre.centre_type || "",
         location: centre.location || "",
         address: centre.address || "",
+        logo_url: centre.logo_url || "", // Track logo URL in centreData
         toppers: (centre.toppers || []).map(topper => ({
           ...topper,
           name: topper.name || "",
@@ -126,7 +127,8 @@ const CentreEdit = () => {
           year: topper.year || new Date().getFullYear(),
           marks_obtained: topper.marks_obtained || "",
           total_marks: topper.total_marks || "",
-          badge: topper.badge || ""
+          badge: topper.badge || "",
+          image_url: topper.image_url || "" // Track image URL in topper object
         })),
       });
 
@@ -182,6 +184,33 @@ const CentreEdit = () => {
     }));
   };
 
+  const handleRemoveLogo = () => {
+    setLogoFile(null);
+    setCurrentLogoUrl("");
+    setCentreData(prev => ({ ...prev, logo_url: "" }));
+    console.log("🗑️ Centre logo cleared from local state");
+  };
+
+  const handleRemoveTopperImage = (index) => {
+    // Remove if there was a newly selected file
+    setTopperFiles((prev) => {
+      const newFiles = { ...prev };
+      delete newFiles[index];
+      return newFiles;
+    });
+
+    // Clear the existing URL in state
+    setCentreData((prev) => {
+      const updatedToppers = [...prev.toppers];
+      updatedToppers[index] = {
+        ...updatedToppers[index],
+        image_url: ""
+      };
+      return { ...prev, toppers: updatedToppers };
+    });
+    console.log(`🗑️ Topper image at index ${index} cleared from local state`);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -207,7 +236,8 @@ const CentreEdit = () => {
 
       console.log("✅ Google Maps URL is valid:", centreData.location);
 
-      // ✅ FIXED: Update centre data WITHOUT image fields to prevent data loss
+      // ✅ FIXED: Update centre data WITHOUT image fields to prevent data loss 
+      // UNLESS they are explicitly cleared
       const dataToSend = {
         state: centreData.state,
         district: centreData.district,
@@ -215,7 +245,9 @@ const CentreEdit = () => {
         centre_type: centreData.centre_type,
         location: centreData.location,
         address: centreData.address,
-        // ✅ Send topper text data only - NO image fields
+        // Send clear signal for logo if removed
+        logo: currentLogoUrl === "" ? "" : undefined,
+        // ✅ Send topper text data
         toppers: centreData.toppers.map((topper) => ({
           name: topper.name,
           exam: topper.exam || "",
@@ -227,7 +259,8 @@ const CentreEdit = () => {
           marks_obtained: topper.marks_obtained ? parseFloat(topper.marks_obtained) : null,
           total_marks: topper.total_marks ? parseFloat(topper.total_marks) : null,
           badge: topper.badge || "",
-          // ❌ DO NOT include image fields here - they will be preserved on the backend
+          // Send clear signal for topper image if removed
+          image: topper.image_url === "" ? "" : undefined,
         })),
       };
 
@@ -596,19 +629,48 @@ const CentreEdit = () => {
                   {currentLogoUrl ? (
                     <div className="flex flex-col space-y-2">
                       <div
-                        className="cursor-pointer transform hover:scale-105 transition duration-200 inline-block"
-                        onClick={() =>
-                          handleLogoClick(currentLogoUrl, centreData.centre)
-                        }
+                        className="relative group cursor-pointer transform hover:scale-105 transition duration-200 inline-block"
                       >
                         <img
                           src={currentLogoUrl}
                           alt="Current centre logo"
                           className="h-20 w-20 rounded-lg object-cover border border-gray-300"
+                          onClick={() =>
+                            handleLogoClick(currentLogoUrl, centreData.centre)
+                          }
                         />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveLogo();
+                          }}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Remove Logo"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
                       </div>
-                      <div className="text-xs text-blue-600 text-center">
-                        Click to view full size
+                      <div className="text-xs text-blue-600 text-center flex flex-col space-y-2 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => handleLogoClick(currentLogoUrl, centreData.centre)}
+                          className="hover:underline"
+                        >
+                          Click to view full size
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRemoveLogo}
+                          className="text-red-600 hover:text-red-700 font-medium hover:underline flex items-center justify-center gap-1"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Remove Logo
+                        </button>
                       </div>
                       <span className="text-sm text-green-600">
                         Logo is stored in database
@@ -1029,15 +1091,15 @@ const CentreEdit = () => {
                           {imageUrl ? (
                             <div className="flex flex-col space-y-2">
                               <div
-                                className="cursor-pointer transform hover:scale-110 transition duration-200 inline-block"
-                                onClick={() =>
-                                  handleTopperImageClick(imageUrl, topper.name)
-                                }
+                                className="relative group cursor-pointer transform hover:scale-110 transition duration-200 inline-block"
                               >
                                 <img
                                   src={imageUrl}
                                   alt={topper.name}
                                   className="h-16 w-16 rounded-full object-cover border border-gray-300"
+                                  onClick={() =>
+                                    handleTopperImageClick(imageUrl, topper.name)
+                                  }
                                   onError={(e) => {
                                     console.error(
                                       `Failed to load image for topper ${topper.name}:`,
@@ -1046,9 +1108,38 @@ const CentreEdit = () => {
                                     e.target.style.display = "none";
                                   }}
                                 />
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveTopperImage(index);
+                                  }}
+                                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="Remove Photo"
+                                >
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
                               </div>
-                              <div className="text-xs text-blue-600 text-center">
-                                Click to view full size
+                              <div className="text-xs text-blue-600 text-center flex flex-col space-y-2 mt-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTopperImageClick(imageUrl, topper.name)}
+                                  className="hover:underline"
+                                >
+                                  Click to view full size
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveTopperImage(index)}
+                                  className="text-red-600 hover:text-red-700 font-medium hover:underline flex items-center justify-center gap-1"
+                                >
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                  Remove Photo
+                                </button>
                               </div>
                               <span className="text-sm text-green-600">
                                 Photo stored in database

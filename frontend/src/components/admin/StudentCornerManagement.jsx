@@ -127,6 +127,16 @@ const StudentCornerManagement = () => {
         }
     };
 
+    const handleRemoveImage = () => {
+        setImageFile(null);
+        setImagePreview(null); // Explicitly nullify preview for logic detection
+        setFormData(prev => ({
+            ...prev,
+            image_url: ""
+        }));
+        console.log("🗑️ Image state cleared for removal");
+    };
+
     const resetForm = () => {
         setFormData(initialFormState);
         setImageFile(null);
@@ -179,6 +189,16 @@ const StudentCornerManagement = () => {
             delete dataToSubmit.custom_class_level;
             delete dataToSubmit.custom_course_type;
 
+            // Remove metadata and read-only fields that shouldn't be in the payload body
+            delete dataToSubmit.id;
+            delete dataToSubmit._id;
+            delete dataToSubmit.unique_id;
+            delete dataToSubmit.created_at;
+            delete dataToSubmit.updated_at;
+            delete dataToSubmit.created_by;
+            delete dataToSubmit.updated_by;
+            delete dataToSubmit.discounted_price;
+
             // Handle tags: convert comma-separated string to array
             if (typeof dataToSubmit.tags === 'string' && dataToSubmit.tags.trim() !== "") {
                 dataToSubmit.tags = dataToSubmit.tags.split(',')
@@ -197,6 +217,10 @@ const StudentCornerManagement = () => {
             if (imageFile) {
                 const uploadRes = await studentCornerAPI.uploadImage(imageFile);
                 dataToSubmit.image_url = uploadRes.data.url;
+            } else if (imagePreview === null || formData.image_url === "") {
+                // If either is true, the user has explicitly removed the image
+                dataToSubmit.image_url = "";
+                console.log("📤 Update Request: Clearing image_url in database");
             }
 
             if (editingItem) {
@@ -430,9 +454,9 @@ const StudentCornerManagement = () => {
                                             <>
                                                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                                                 {!isViewOnly && (
-                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                        <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">
-                                                            Replace Image
+                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                                        <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-colors w-32 text-center">
+                                                            Replace
                                                             <input type="file" onChange={handleImageChange} className="hidden" accept="image/*" />
                                                         </label>
                                                     </div>
@@ -446,6 +470,18 @@ const StudentCornerManagement = () => {
                                             </label>
                                         )}
                                     </div>
+                                    {imagePreview && !isViewOnly && (
+                                        <div className="flex justify-center">
+                                            <button
+                                                type="button"
+                                                onClick={handleRemoveImage}
+                                                className="text-red-500 hover:text-red-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 py-1 px-3 bg-red-500/10 rounded-lg border border-red-500/20 transition-all"
+                                            >
+                                                <XMarkIcon className="w-3 h-3" />
+                                                Remove Image
+                                            </button>
+                                        </div>
+                                    )}
                                     <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter italic text-center">Standard resolution: 1:1 Aspect Ratio (Square)</p>
                                 </div>
 

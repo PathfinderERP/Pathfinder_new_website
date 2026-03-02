@@ -58,7 +58,6 @@ class StudentCornerItemViewSet(ModelViewSet):
         if max_price:
             try:
                 queryset = queryset.filter(discounted_price__lte=float(max_price))
-                queryset = queryset.filter(discounted_price__lte=float(max_price))
             except ValueError:
                 pass
 

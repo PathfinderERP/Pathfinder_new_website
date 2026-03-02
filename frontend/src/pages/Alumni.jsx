@@ -14,6 +14,7 @@ import AlumniCoursesSection from "../components/Alumni/AlumniCoursesSection";
 
 import { Skeleton, FadeInImage } from "../components/common/OptimizedImage";
 import { getImageUrl } from "../utils/imageUtils";
+import { alumniAPI } from "../services/api";
 
 
 const AlumniPage = () => {
