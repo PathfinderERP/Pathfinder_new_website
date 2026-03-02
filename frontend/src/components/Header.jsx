@@ -21,7 +21,7 @@ import {
   RectangleGroupIcon,
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import LoginModal from "../components/LoginModal";
 import ApplyNowForm from "../pages/Student/Applynow";
 import { centresAPI } from "../services/api";
@@ -308,12 +308,12 @@ const Header = () => {
             <div className="flex justify-between items-center">
               {/* Logo */}
               <motion.div className="flex items-center space-x-2 xs:space-x-3" variants={itemVariants} initial="hidden" animate="visible">
-                <a href="/" title="Pathfinder" className="flex items-center space-x-2 xs:space-x-3">
+                <Link to="/" title="Pathfinder" className="flex items-center space-x-2 xs:space-x-3">
                   <div className="relative">
                     <img src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/03/logo-1.svg" alt="Pathfinder Logo" className="h-8 xs:h-10 sm:h-10 md:h-12 transition-all duration-300 filter drop-shadow-lg" />
                   </div>
                   <img src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/03/excellence.svg" alt="Excellence" className="h-10 hidden sm:block" />
-                </a>
+                </Link>
               </motion.div>
 
               {/* Right Side */}

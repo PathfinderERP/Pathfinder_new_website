@@ -60,16 +60,19 @@ const ChairmanMessage = () => {
     return (
         <div className="min-h-screen ">
             {/* Hero Section with CEO Image - Full Width */}
-            <div className="w-full lg:mt-32">
+            <div className="w-full mt-16 lg:mt-32">
                 <div className="max-w-[1400px] mx-auto">
-                    <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden">
+
+                    <div className="relative w-full h-[220px] sm:h-[450px] md:h-[600px] lg:h-[750px] overflow-hidden">
                         {/* Background Image */}
                         <div className="absolute inset-0">
                             <img
-                                src="/images/about/chairman sir.png"
+                                src="images/about/chairman sir.png"
                                 alt="Chairman Debdutta Sreemany"
-                                className="w-full h-full object-cover object-center"
+                                className="w-full h-full object-contain object-top"
                             />
+                            {/* Dark Gradient Overlay */}
+                            {/* <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-900"></div> */}
                         </div>
 
                     </div>
@@ -77,7 +80,7 @@ const ChairmanMessage = () => {
             </div>
 
             {/* Message Content Section */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 md:py-16 py-8">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}

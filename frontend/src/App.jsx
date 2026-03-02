@@ -4,6 +4,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { FilterProvider } from "./contexts/FilterContext";
 import AppRoutes from "./routes/AppRoutes";
 import { CartProvider } from "./contexts/CartContext";
+import ScrollToTop from "./components/ScrollToTop";
 
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -14,6 +15,7 @@ const App = () => {
         <FilterProvider>
           <ThemeProvider>
             <Router>
+              <ScrollToTop />
               <div className="App">
                 {/* Debug info in development */}
                 {/* {import.meta.env.VITE_DEBUG === "true" && (

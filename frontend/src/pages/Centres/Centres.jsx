@@ -5,32 +5,6 @@ import Slider from "react-slick";
 import { ChevronUp } from "lucide-react";
 
 const CentresPage = () => {
-    const [showScrollTop, setShowScrollTop] = useState(false);
-    const [scrollProgress, setScrollProgress] = useState(0);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const progress = (window.scrollY / totalHeight) * 100;
-            setScrollProgress(progress);
-
-            if (window.scrollY > 400) {
-                setShowScrollTop(true);
-            } else {
-                setShowScrollTop(false);
-            }
-        };
-
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
-
-    const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
-    };
 
     return (
         <div className="pt-[70px] lg:pt-[120px]">
@@ -149,72 +123,7 @@ const CentresPage = () => {
             {/* Free Content Section */}
             <FreeContentSection />
 
-            {/* Unique Scroll to Top with Progress Ring */}
-            <div
-                className={`fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50 transition-all duration-500 transform ${showScrollTop ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
-                    }`}
-            >
-                <button
-                    onClick={scrollToTop}
-                    className="relative flex items-center justify-center group focus:outline-none"
-                    aria-label="Scroll to top"
-                >
-                    {/* Circular Progress Ring */}
-                    <svg
-                        className="w-12 h-12 sm:w-16 sm:h-16 transform -rotate-90"
-                        viewBox="0 0 64 64"
-                    >
-                        <circle
-                            cx="32"
-                            cy="32"
-                            r="28"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            fill="transparent"
-                            className="text-slate-200/50"
-                        />
-                        <circle
-                            cx="32"
-                            cy="32"
-                            r="28"
-                            stroke="url(#scrollGradientCentres)"
-                            strokeWidth="4"
-                            fill="transparent"
-                            strokeDasharray="175.9"
-                            style={{
-                                strokeDashoffset: 175.9 - (175.9 * scrollProgress) / 100,
-                            }}
-                            strokeLinecap="round"
-                            className="transition-all duration-200 ease-out"
-                        />
-                        <defs>
-                            <linearGradient id="scrollGradientCentres" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#f97316" />
-                                <stop offset="100%" stopColor="#66090D" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
-
-                    {/* Glassmorphic Center Button */}
-                    <div className="absolute inset-[4px] sm:inset-[6px] bg-white/95 backdrop-blur-md rounded-full shadow-lg border border-white/50 flex items-center justify-center group-hover:bg-[#66090D] group-hover:border-[#66090D] transition-all duration-300">
-                        <motion.div
-                            animate={{
-                                y: [0, -3, 0],
-                            }}
-                            transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                            }}
-                        >
-                            <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6 text-[#66090D] group-hover:text-white transition-all duration-300" />
-                        </motion.div>
-                    </div>
-
-                    {/* Magnetic Outer Glow Effect */}
-                    <div className="absolute inset-0 rounded-full bg-orange-500/0 group-hover:bg-orange-500/10 blur-xl transition-all duration-500 -z-10 scale-150"></div>
-                </button>
-            </div>
+            {/* Unique Scroll to Top logic removed as it's now handled by Footer */}
         </div>
     );
 };

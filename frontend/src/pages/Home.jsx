@@ -2376,6 +2376,34 @@ function ResultsSection({ selectedCentre }) {
   const [activeTab, setActiveTab] = useState("All");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStartHandler = (e) => {
+    setIsPaused(true);
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMoveHandler = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEndHandler = () => {
+    setIsPaused(false);
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      nextSlide();
+    } else if (isRightSwipe) {
+      prevSlide();
+    }
+  };
+
   const { data: allToppers, loading, error, refetch } = useCachedData(
     "toppers",
     () => centresAPI.getAll(),
@@ -2563,9 +2591,34 @@ function ResultsSection({ selectedCentre }) {
                 className="relative"
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
-                onTouchStart={handleMouseEnter}
-                onTouchEnd={handleMouseLeave}
+                onTouchStart={onTouchStartHandler}
+                onTouchMove={onTouchMoveHandler}
+                onTouchEnd={onTouchEndHandler}
               >
+
+                {/* Manual Navigation Arrows */}
+                {cards.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-orange-200 text-orange-600 hover:bg-orange-50 transition-all active:scale-95"
+                      aria-label="Previous slide"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-orange-200 text-orange-600 hover:bg-orange-50 transition-all active:scale-95"
+                      aria-label="Next slide"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
 
                 {/* Carousel Container */}
                 <div className="overflow-hidden rounded-2xl">

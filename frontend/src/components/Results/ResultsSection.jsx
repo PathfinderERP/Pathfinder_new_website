@@ -333,7 +333,7 @@ export default function ResultsSection({ selectedCentre, fixedCategory, title, s
                                                 settings: {
                                                     slidesToShow: 1,
                                                     centerPadding: "40px",
-                                                    arrows: false
+                                                    arrows: true
                                                 }
                                             }
                                         ]

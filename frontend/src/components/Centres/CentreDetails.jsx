@@ -25,7 +25,7 @@ const CentreDetails = ({ centre }) => {
                     <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-amber-400 rounded-full blur-[150px] -ml-[10%]" />
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 relative z-20 mb-8 mt-8 md:mt-0">
+                <div className="max-w-7xl mx-auto px-4 relative z-20 mb-8 mt-8 md:mt-4">
                     <Link
                         to="/centres"
                         className="inline-flex items-center gap-2 px-6 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-white font-bold text-sm hover:bg-white/20 transition-all group"
