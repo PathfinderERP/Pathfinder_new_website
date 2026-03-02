@@ -1,3 +1,4 @@
+import { getImageUrl } from "../../utils/imageUtils";
 import React, { useState, useEffect } from 'react';
 import ResultsSection from '../../components/Results/ResultsSection';
 import { centresAPI } from '../../services/api';
@@ -83,7 +84,7 @@ export default function BoardsResultPage() {
             <div className="w-full bg-white overflow-hidden">
                 <div className="w-full relative overflow-hidden aspect-[21/9] sm:aspect-[21/7] lg:aspect-[21/6]">
                     <img
-                        src="/images/result/result_hero_section.png"
+                        src={getImageUrl("/images/result/result_hero_section.webp")}
                         alt="Board Exam Results"
                         className="w-full h-full object-cover object-center lg:object-[center_top]"
                         onError={(e) => {
@@ -143,7 +144,7 @@ export default function BoardsResultPage() {
             <div className="w-full bg-white">
                 <div className="w-full">
                     <img
-                        src="/images/result/dev x rup.png"
+                        src={getImageUrl("/images/result/dev x rup.webp")}
                         alt="Toppers Showcase - Board Exam Toppers"
                         className="w-full h-auto object-contain"
                         onError={(e) => {
@@ -158,7 +159,7 @@ export default function BoardsResultPage() {
                 {/* Building Silhouette Background - Enlarged and Shifted significantly up */}
                 <div className="absolute inset-x-0 -top-40 h-full opacity-60 select-none pointer-events-none z-0">
                     <img
-                        src="/images/result/building.png"
+                        src={getImageUrl("/images/result/building.webp")}
                         alt="Background Building"
                         className="w-full h-[550px] object-cover object-bottom scale-110"
                     />
@@ -217,7 +218,7 @@ export default function BoardsResultPage() {
                 {/* Result Footer Image */}
                 <div className="w-full bg-white">
                     <img
-                        src="/images/result/footer image.png"
+                        src={getImageUrl("/images/result/footer image.webp")}
                         alt="Pathfinder Success"
                         className="w-full h-auto object-contain"
                         onError={(e) => {

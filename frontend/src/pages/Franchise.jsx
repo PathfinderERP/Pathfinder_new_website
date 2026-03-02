@@ -1,3 +1,4 @@
+import { getImageUrl } from "../utils/imageUtils";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -12,6 +13,7 @@ import {
     BuildingOfficeIcon,
     BanknotesIcon
 } from '@heroicons/react/24/outline';
+import { FadeInImage } from "../components/common/OptimizedImage";
 
 const Franchise = () => {
     const [formData, setFormData] = useState({
@@ -40,8 +42,8 @@ const Franchise = () => {
                     transition={{ duration: 1.2 }}
                     className="w-full"
                 >
-                    <img
-                        src="/images/franchise/hero%20franchise.png"
+                    <FadeInImage
+                        src={getImageUrl("/images/franchise/hero%20franchise.webp")}
                         alt="Franchise Hero Banner"
                         className="w-full h-auto block"
                     />
@@ -145,8 +147,8 @@ const Franchise = () => {
                     <div className="relative md:absolute md:top-8 left-0 w-full z-10 text-center pointer-events-none px-4 pt-8 md:pt-0">
                         <h2 className="text-3xl md:text-4xl font-black text-slate-900">Investor Contacts</h2>
                     </div>
-                    <img
-                        src="/images/franchise/footer.png"
+                    <FadeInImage
+                        src={getImageUrl("/images/franchise/footer.webp")}
                         alt="Investor Contacts Banner"
                         className="w-full h-auto block"
                     />

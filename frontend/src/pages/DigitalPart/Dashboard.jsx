@@ -16,13 +16,13 @@ import {
 import StudentSidebar from "../../components/DigitalPart/StudentSidebar";
 
 // Assets from public folder
-const CHARACTER_IMG = "/images/dashboard/character.png";
+const CHARACTER_IMG = "/images/dashboard/character.webp";
 const PERFORMANCE_ICONS = {
-  bars: "/images/dashboard/performance.png",
-  pie: "/images/dashboard/performance.png",
-  notebook: "/images/dashboard/performance.png"
+  bars: "/images/dashboard/performance.webp",
+  pie: "/images/dashboard/performance.webp",
+  notebook: "/images/dashboard/performance.webp"
 };
-const BOOKS_IMG = "/images/dashboard/books.png";
+const BOOKS_IMG = "/images/dashboard/books.webp";
 
 import { coursesAPI, studentCornerAPI } from "../../services/api";
 

@@ -18,7 +18,7 @@ export const blogPosts = [
         author: "Dr. S. Mukherjee",
         date: "Dec 15, 2025",
         readTime: "8 min read",
-        image: "/images/blog/jee_strategy.png",
+        image: "/images/blog/jee_strategy.webp",
         featured: true
     },
     {
@@ -30,7 +30,7 @@ export const blogPosts = [
         author: "Prof. A. Ray",
         date: "Dec 20, 2025",
         readTime: "6 min read",
-        image: "/images/blog/neet_success.png",
+        image: "/images/blog/neet_success.webp",
         featured: false
     },
     {

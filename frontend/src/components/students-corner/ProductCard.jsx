@@ -1,3 +1,4 @@
+import { getImageUrl } from "../../utils/imageUtils";
 import React from 'react';
 import { motion } from 'framer-motion';
 import { StarIcon } from '@heroicons/react/24/outline';
@@ -19,7 +20,7 @@ const ProductCard = ({ item }) => {
                 {/* 1. Popular/Trending Badge if no specific tag overrides it, or as first badge */}
                 {item.is_popular && (!item.tags || item.tags.length === 0) && (
                     <div className="relative flex items-center justify-center filter drop-shadow-md z-20">
-                        <img src="/images/student corner/BADGE BG IMAGE.png" alt="" className="h-[35px] w-auto object-contain object-left" />
+                        <img src={getImageUrl("/images/student corner/BADGE BG IMAGE.webp")} alt="" className="h-[35px] w-auto object-contain object-left" />
                         <span className="absolute inset-0 flex items-center justify-center text-white text-[10px] font-bold pb-1 pr-5 uppercase tracking-wider pl-2">
                             TRENDING
                         </span>
@@ -30,7 +31,7 @@ const ProductCard = ({ item }) => {
                 {item.tags && Array.isArray(item.tags) && item.tags.map((tag, i) => (
                     <div key={i} className={`relative flex items-center justify-center filter drop-shadow-md ${i > 0 || (item.is_popular && (!item.tags || item.tags.length === 0)) ? '-mt-2' : ''} z-${10 - i}`}>
                         <img
-                            src="/images/student corner/BADGE BG IMAGE.png"
+                            src={getImageUrl("/images/student corner/BADGE BG IMAGE.webp")}
                             alt="badge bg"
                             className="h-[35px] w-auto object-contain"
                         />

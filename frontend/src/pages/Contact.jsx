@@ -1,3 +1,4 @@
+import { getImageUrl } from "../utils/imageUtils";
 // Contact.jsx
 import React, { useState, useEffect } from "react";
 import Slider from "react-slick";
@@ -247,7 +248,7 @@ const Contact = () => {
                   className="overflow-hidden mt-0 mb-0 lg:ml-4"
                 >
                   <motion.img
-                    src="/images/img_rectangle_4.png"
+                    src={getImageUrl("/images/img_rectangle_4.webp")}
                     alt="Divider"
                     className="
             w-[180px] sm:w-[240px] md:w-[320px] lg:w-[6px]
@@ -551,7 +552,7 @@ const Contact = () => {
                         transition={{ duration: 0.8, ease: "easeOut" }}
                       >
                         <img
-                          src="https://pathfinder.edu.in/wp-content/themes/pathfinder/images/contactdemo.png"
+                          src="https://pathfinder.edu.in/wp-content/themes/pathfinder/images/contactdemo.webp"
                           alt="Contact us"
                           className="w-full h-auto rounded-2xl"
                         />
@@ -1339,7 +1340,7 @@ const Contact = () => {
                         transition={{ duration: 0.8, ease: "easeOut" }}
                       >
                         <img
-                          src="https://pathfinder.edu.in/wp-content/themes/pathfinder/images/contactdemo.png"
+                          src="https://pathfinder.edu.in/wp-content/themes/pathfinder/images/contactdemo.webp"
                           alt="Contact us"
                           className="w-full h-auto rounded-2xl "
                         />

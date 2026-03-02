@@ -157,11 +157,11 @@ export const AllIndiaLandingPage = () => {
 
     const banners = [
         {
-            src: "/Header Banner.png",
+            src: "/Header Banner.webp",
             alt: "JEE WBJEE Header Banner"
         },
         // {
-        //     src: "/WHY PATH IMAGES/NEET BANNER.png",
+        //     src: "/WHY PATH IMAGES/NEET BANNER.webp",
         //     alt: "NEET 2025 Banner"
         // }
     ];
@@ -416,7 +416,7 @@ export const AllIndiaLandingPage = () => {
                     {/* Right Side: Boy Image - Absolute Extreme Down */}
                     <div className="hidden md:block absolute right-0 bottom-0 z-0 pointer-events-none">
                         <img
-                            src="/Form Boy.png"
+                            src="/Form Boy.webp"
                             alt="Pathfinder Student"
                             className="w-56 lg:w-[280px] h-auto object-contain block"
                         />
@@ -441,12 +441,12 @@ export const AllIndiaLandingPage = () => {
 
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 lg:gap-10">
                             {[
-                                { image: "/WHY PATH IMAGES/Top faculty.png", label: "Top Faculty" },
-                                { image: "/WHY PATH IMAGES/pathtex app.png", label: "Pathtex App" },
-                                { image: "/WHY PATH IMAGES/Soft skills.png", label: "Soft Skills" },
-                                { image: "/WHY PATH IMAGES/mental-health.png", label: "Mental Health" },
-                                { image: "/WHY PATH IMAGES/AI.png", label: "AI Learning" },
-                                { image: "/WHY PATH IMAGES/Robotics.png", label: "Robotics" }
+                                { image: "/WHY PATH IMAGES/Top faculty.webp", label: "Top Faculty" },
+                                { image: "/WHY PATH IMAGES/pathtex app.webp", label: "Pathtex App" },
+                                { image: "/WHY PATH IMAGES/Soft skills.webp", label: "Soft Skills" },
+                                { image: "/WHY PATH IMAGES/mental-health.webp", label: "Mental Health" },
+                                { image: "/WHY PATH IMAGES/AI.webp", label: "AI Learning" },
+                                { image: "/WHY PATH IMAGES/Robotics.webp", label: "Robotics" }
                             ].map((feature, idx) => (
                                 <div
                                     key={idx}
@@ -497,7 +497,7 @@ export const AllIndiaLandingPage = () => {
                         <div className="flex flex-col md:flex-row items-center md:items-stretch justify-center gap-6 md:gap-0 mb-12 pt-8">
                             {/* Frequency */}
                             <div className="flex-1 flex items-center justify-center md:justify-end gap-4 md:pr-8">
-                                <img src="/WHY PATH IMAGES/rotateing cube.png" alt="Frequency" className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0" />
+                                <img src="/WHY PATH IMAGES/rotateing cube.webp" alt="Frequency" className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0" />
                                 <div className="text-left">
                                     <h4 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Frequency</h4>
                                     <p className="text-gray-700 text-sm md:text-base whitespace-nowrap"><span className="font-semibold">Instation:</span> 2 Days a Week</p>
@@ -510,7 +510,7 @@ export const AllIndiaLandingPage = () => {
 
                             {/* Timings */}
                             <div className="flex-1 flex items-center justify-center md:justify-start gap-4 md:pl-8">
-                                <img src="/WHY PATH IMAGES/clock.png" alt="Timings" className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0" />
+                                <img src="/WHY PATH IMAGES/clock.webp" alt="Timings" className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0" />
                                 <div className="text-left">
                                     <h4 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Timings</h4>
                                     <p className="text-gray-700 text-sm md:text-base whitespace-nowrap"><span className="font-semibold">Instation:</span> 12hrs / Subject / Month</p>
@@ -616,15 +616,15 @@ export const AllIndiaLandingPage = () => {
                             </h3>
                             <div className="flex flex-wrap justify-center items-center gap-6 md:gap-12">
                                 <div className="flex items-center gap-3">
-                                    <img src="/WHY PATH IMAGES/Tick mark.png" alt="Check" className="w-8 h-8" />
+                                    <img src="/WHY PATH IMAGES/Tick mark.webp" alt="Check" className="w-8 h-8" />
                                     <span className="text-lg md:text-xl font-semibold text-gray-800">Online Class Support</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <img src="/WHY PATH IMAGES/Tick mark.png" alt="Check" className="w-8 h-8" />
+                                    <img src="/WHY PATH IMAGES/Tick mark.webp" alt="Check" className="w-8 h-8" />
                                     <span className="text-lg md:text-xl font-semibold text-gray-800">Free Doubt Clearing Calender</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <img src="/WHY PATH IMAGES/Tick mark.png" alt="Check" className="w-8 h-8" />
+                                    <img src="/WHY PATH IMAGES/Tick mark.webp" alt="Check" className="w-8 h-8" />
                                     <span className="text-lg md:text-xl font-semibold text-gray-800">Individual Mentorship</span>
                                 </div>
                             </div>
@@ -637,7 +637,7 @@ export const AllIndiaLandingPage = () => {
                     <div className="max-w-7xl mx-auto">
                         <div className="h-[100px] md:h-[290px] flex items-start justify-center">
                             <img
-                                src="/Toppers.png"
+                                src="/Toppers.webp"
                                 alt="Pathfinder Toppers"
                                 className="w-full h-auto object-contain -mt-[160px] md:-mt-[504px] scale-[1.4] translate-x-[6%] md:scale-[1.1] md:translate-x-0 pointer-events-none"
                             />

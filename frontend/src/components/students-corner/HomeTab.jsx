@@ -1,3 +1,4 @@
+import { getImageUrl } from "../../utils/imageUtils";
 import React from 'react';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import ProductCard from './ProductCard';
@@ -78,7 +79,7 @@ const HomeTab = ({
             <div className="mb-14 ">
                 <div className="">
                     <img
-                        src="/images/student corner/student corner home page  2nd banner.png"
+                        src={getImageUrl("/images/student corner/student corner home page  2nd banner.webp")}
                         alt="Pathfinder Promotion"
                         className="w-full h-auto block"
                     />

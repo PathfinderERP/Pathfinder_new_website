@@ -1,3 +1,4 @@
+import { getImageUrl } from "../utils/imageUtils";
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -278,7 +279,7 @@ const StudentsCorner = () => {
                             {/* Persistent Hero Banner */}
                             <div className="mb-8 overflow-hidden aspect-[21/9] lg:aspect-auto">
                                 <img
-                                    src="/images/student corner/student coner hero image.png"
+                                    src={getImageUrl("/images/student corner/student coner hero image.webp")}
                                     alt="Pathfinder Topper"
                                     className="w-full h-full object-cover"
                                 />

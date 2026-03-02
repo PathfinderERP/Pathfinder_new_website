@@ -1,3 +1,4 @@
+﻿import { getImageUrl } from "../../utils/imageUtils";
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
@@ -52,10 +53,10 @@ export default function FoundationPage() {
 
                 // 3. Identify images to preload
                 const staticImages = [
-                    "https://pub-d6735230562849b0b1ddf75b7d89148a.r2.dev/black%20%20paper%20high%20res.png",
-                    "https://pub-d6735230562849b0b1ddf75b7d89148a.r2.dev/orange%20paper.png",
-                    "/images/course_images/hero_leftside banner.png",
-                    "/images/course_images/hero_rightside banner.png"
+                    "/images/result/black  paper high res.webp",
+                    "/images/result/orange paper.webp",
+                    "/images/course_images/hero_leftside banner.webp",
+                    "/images/course_images/hero_rightside banner.webp"
                 ];
 
                 const courseThumbnails = relevantCourses
@@ -131,7 +132,7 @@ function FoundationHero() {
             {/* Left Banner Image */}
             <div className="absolute left-0 top-[31%] -translate-y-1/2 hidden lg:block z-0">
                 <img
-                    src="/images/course_images/hero_leftside banner.png"
+                    src={getImageUrl("/images/course_images/hero_leftside banner.webp")}
                     alt="Left Banner"
                     className="h-[350px] xl:h-[400px] w-auto object-contain opacity-90"
                 />
@@ -140,7 +141,7 @@ function FoundationHero() {
             {/* Right Banner Image */}
             <div className="absolute right-0 top-[30%] -translate-y-1/2 hidden lg:block z-10">
                 <img
-                    src="/images/course_images/hero_rightside banner.png"
+                    src={getImageUrl("/images/course_images/hero_rightside banner.webp")}
                     alt="Right Banner"
                     className="h-[360px] xl:h-[400px] w-auto object-contain opacity-90"
                 />
@@ -1099,7 +1100,7 @@ function FeaturesAndStoriesSection() {
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
                 <img
-                    src="https://pub-d6735230562849b0b1ddf75b7d89148a.r2.dev/black%20%20paper%20high%20res.png"
+                    src="/images/result/black  paper high res.webp"
                     alt="Background"
                     className="w-full h-full object-cover"
                 />
@@ -1109,7 +1110,7 @@ function FeaturesAndStoriesSection() {
             <div className="relative z-10 w-full mb-0">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="https://pub-d6735230562849b0b1ddf75b7d89148a.r2.dev/orange%20paper.png"
+                        src="/images/result/orange paper.webp"
                         alt="Background"
                         className="w-full h-full object-cover"
                     />
@@ -1165,7 +1166,7 @@ function FeaturesAndStoriesSection() {
                     {/* Left Image */}
                     <div className="hidden lg:block w-1/4 max-w-[350px] relative z-20">
                         <img
-                            src="/images/course_images/course_footer_left_img.png"
+                            src={getImageUrl("/images/course_images/course_footer_left_img.webp")}
                             alt="Student"
                             className="w-full h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                         />
@@ -1269,7 +1270,7 @@ function FeaturesAndStoriesSection() {
                     {/* Right Image */}
                     <div className="hidden lg:block w-1/4 max-w-[350px] relative z-20 translate-y-12">
                         <img
-                            src="/images/course_images/course_footer_right_img.png"
+                            src={getImageUrl("/images/course_images/course_footer_right_img.webp")}
                             alt="Student"
                             className="w-full h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                         />

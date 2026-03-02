@@ -7,6 +7,7 @@ import { centresAPI } from "../../services/api";
 import CourseDetailModal from "../CourseDetailModal";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { getImageUrl } from "../../utils/imageUtils";
 
 export default function OtherCoursesResultSection({ category }) {
     const [courses, setCourses] = useState([]);
@@ -185,7 +186,7 @@ export default function OtherCoursesResultSection({ category }) {
             {/* Smooth Transition/Jagged Edge Divider - Overlaying the bottom of orange section */}
             <div className="hidden md:block absolute top-0 left-0 w-full h-24 lg:h-32 -translate-y-[90%] z-20 pointer-events-none">
                 <img
-                    src="https://pub-d6735230562849b0b1ddf75b7d89148a.r2.dev/black%20%20paper%20high%20res.png"
+                    src={getImageUrl("/images/result/black  paper high res.webp")}
                     alt="Divider"
                     className="w-full h-full object-cover object-top"
                 />

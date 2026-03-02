@@ -49,7 +49,7 @@ const BlogPostDetail = () => {
             {/* Header / Hero */}
             <section className="relative h-[40vh] md:h-[60vh] min-h-[400px] overflow-hidden">
                 <img
-                    src={post.image_url || "/images/blog/placeholder.png"}
+                    src={post.image_url || "/images/blog/placeholder.webp"}
                     alt={post.title}
                     className="absolute inset-0 w-full h-full object-cover"
                 />

@@ -1,3 +1,4 @@
+import { getImageUrl } from "../utils/imageUtils";
 // Career.jsx
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -275,7 +276,7 @@ const Career = () => {
                         <div key={idx} className="px-2 md:px-10">
                           <div className="aspect-square max-w-[240px] mx-auto bg-slate-900 rounded-full overflow-hidden border-[10px] border-white/20 shadow-2xl transition-all duration-500 hover:scale-105 group">
                             <img
-                              src="/images/carrer/employee1.png"
+                              src={getImageUrl("/images/carrer/employee1.webp")}
                               alt="Team Member"
                               className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
                             />

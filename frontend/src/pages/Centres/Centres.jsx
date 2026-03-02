@@ -1,3 +1,4 @@
+﻿import { getImageUrl } from "../../utils/imageUtils";
 import React, { useState, useEffect } from "react";
 import CentreShowcase from "../../components/Centres/CentreShowcase";
 import { motion } from "framer-motion";
@@ -17,7 +18,7 @@ const CentresPage = () => {
                     className="relative rounded-[32px] md:rounded-[48px] overflow-hidden shadow-2xl shadow-slate-200/50 border border-slate-100 group"
                 >
                     <img
-                        src="/images/centre/centre hero imge.png"
+                        src={getImageUrl("/images/centre/centre hero imge.webp")}
                         alt="Centres Hero"
                         className="w-full h-auto block"
                     />
@@ -162,7 +163,7 @@ function FeaturesAndStoriesSection() {
             <div className="relative w-full">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="https://pub-d6735230562849b0b1ddf75b7d89148a.r2.dev/orange%20paper.png"
+                        src="/images/result/orange paper.webp"
                         alt="Background"
                         className="w-full h-full object-cover"
                     />
@@ -228,25 +229,25 @@ function FreeContentSection() {
         {
             title: "Basic Chemistry 01: How to complete syllabus in 3 hours...",
             description: "Learn the secrets of mastering chemistry fundamentals quickly with our expert faculty.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-11-10"
         },
         {
             title: "Hybridization: For students targeting JEE & NEET 2026....",
             description: "Deep dive into chemical bonding and molecular geometry for competitive exams.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-10-10"
         },
         {
             title: "Newton's Laws of Motion: Concept Clarity & problem solving",
             description: "Master the foundation of mechanics with this comprehensive guide to NLM.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-11-10"
         },
         {
             title: "Math Shortcut Tricks for JEE Main 2026",
             description: "Save time and improve accuracy with these elite mathematical shortcuts.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-12-05"
         }
     ];

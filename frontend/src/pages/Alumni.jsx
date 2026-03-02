@@ -12,7 +12,8 @@ import {
 } from "@heroicons/react/24/outline";
 import AlumniCoursesSection from "../components/Alumni/AlumniCoursesSection";
 
-import { alumniAPI } from "../services/api";
+import { Skeleton, FadeInImage } from "../components/common/OptimizedImage";
+import { getImageUrl } from "../utils/imageUtils";
 
 
 const AlumniPage = () => {
@@ -142,8 +143,8 @@ const AlumniPage = () => {
                     transition={{ duration: 0.8 }}
                     className="flex flex-col "
                 >
-                    <img
-                        src="/images/alumni/ALU.png"
+                    <FadeInImage
+                        src={getImageUrl("/images/alumni/ALU.webp")}
                         alt="Our Alumni"
                         className="w-full h-auto block m-0 p-0 align-bottom"
                     />
@@ -275,7 +276,7 @@ const AlumniPage = () => {
                                     <div key={index} className="flex flex-col items-center">
                                         <div className="relative w-full aspect-[3/4] md:aspect-auto overflow-hidden rounded-xl bg-white shadow-sm">
                                             <img
-                                                src={imgUrl}
+                                                src={getImageUrl(imgUrl)}
                                                 alt={`Alumni ${index + 1}`}
                                                 className="w-full h-full object-contain md:max-w-[180px]"
                                             />
@@ -305,8 +306,8 @@ const AlumniPage = () => {
                     transition={{ duration: 0.8 }}
                     className="w-full relative"
                 >
-                    <img
-                        src="/images/alumni/dev x rup in alumni.jpeg"
+                    <FadeInImage
+                        src={getImageUrl("/images/alumni/dev x rup in alumni.webp")}
                         alt="Once a Student, Now a Legend"
                         className="w-full h-auto block"
                     />
@@ -330,8 +331,8 @@ const AlumniPage = () => {
                     transition={{ duration: 1 }}
                     className="w-full overflow-hidden"
                 >
-                    <img
-                        src="/images/alumni/know your alumni.png"
+                    <FadeInImage
+                        src={getImageUrl("/images/alumni/know your alumni.webp")}
                         alt="Know Your Alumni"
                         className="w-full h-auto block"
                     />
@@ -345,8 +346,8 @@ const AlumniPage = () => {
                 }}
             >
                 <div className="w-full md:w-[120%] relative md:-left-[10%]">
-                    <img
-                        src="/images/alumni/papper.png"
+                    <FadeInImage
+                        src={getImageUrl("/images/alumni/papper.webp")}
                         alt="Join our Alumni Group"
                         className="w-full h-[350px] md:h-[450px] object-cover md:object-fill rounded-none md:rounded-none shadow-none md:shadow-none"
                     />

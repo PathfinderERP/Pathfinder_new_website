@@ -4,6 +4,7 @@ import { XMarkIcon, PlayIcon } from '@heroicons/react/24/outline';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { getImageUrl } from '../../utils/imageUtils';
 
 const CEOMessage = () => {
     const [selectedVideo, setSelectedVideo] = useState(null);
@@ -39,19 +40,19 @@ const CEOMessage = () => {
     const videos = [
         {
             id: 1,
-            thumbnail: "/images/video-thumb-1.jpg",
+            thumbnail: getImageUrl("/images/video-thumb-1.webp"),
             title: "Success Story 1",
             embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
         },
         {
             id: 2,
-            thumbnail: "/images/video-thumb-2.jpg",
+            thumbnail: getImageUrl("/images/video-thumb-2.webp"),
             title: "Success Story 2",
             embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
         },
         {
             id: 3,
-            thumbnail: "/images/video-thumb-3.jpg",
+            thumbnail: getImageUrl("/images/video-thumb-3.webp"),
             title: "Success Story 3",
             embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
         }
@@ -66,7 +67,7 @@ const CEOMessage = () => {
                         {/* Background Image */}
                         <div className="absolute inset-0">
                             <img
-                                src="images/about/ceo image.png"
+                                src={getImageUrl("images/about/ceo image.webp")}
                                 alt="CEO Madhuparna Sreemany"
                                 className="w-full h-full object-cover object-top"
                             />
@@ -154,25 +155,25 @@ function FreeContentSection() {
         {
             title: "Empowering Minds: A Vision for Educational Excellence",
             description: "Ms. Madhuparna Sreemany discusses the future of competitive exam preparation and student empowerment.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-11-10"
         },
         {
             title: "Mental Well-being: The Key to Sustaining Peak Performance",
             description: "Our CEO shares essential strategies for students to manage stress and prioritize mental health.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-10-10"
         },
         {
             title: "The Pathfinder Difference: Innovative Learning for Tomorrow",
             description: "Discover how we are integrating technology and personalized mentorship to transform education.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-11-10"
         },
         {
             title: "Message to 2026 Batch: Turning Challenges into Opportunities",
             description: "An encouraging address from the CEO to the next generation of JEE and NEET aspirants.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-12-05"
         }
     ];

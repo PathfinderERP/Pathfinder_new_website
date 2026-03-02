@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
+import { getImageUrl } from "../utils/imageUtils";
 import { FadeInImage } from "./common/OptimizedImage";
 
 export const HeroCarousel = () => {
@@ -14,7 +15,7 @@ export const HeroCarousel = () => {
       exam: " Madhyamik 2025",
       desc: "AIR Rank:",
       rank: "1",
-      img: "images/homepagecarousal_images/Adrita Sarkar.png",
+      img: getImageUrl("images/homepagecarousal_images/Adrita Sarkar.webp"),
       scaleClass: "scale-[1.25]",
     },
     // 2
@@ -23,7 +24,7 @@ export const HeroCarousel = () => {
       exam: "JEE 2025",
       desc: "AIR Rank:",
       rank: "1",
-      img: "images/homepagecarousal_images/devdutta majhi.png",
+      img: getImageUrl("images/homepagecarousal_images/devdutta majhi.webp"),
       scaleClass: "scale-100",
     },
     // 3   rupayan pal all achivement .png cool
@@ -32,7 +33,7 @@ export const HeroCarousel = () => {
       exam: "NEET 2025",
       desc: "AIR Rank:",
       rank: "20",
-      img: "images/homepagecarousal_images/rupayan pal.png",
+      img: getImageUrl("images/homepagecarousal_images/rupayan pal.webp"),
       scaleClass: "scale-100",
     },
     // 4 Adrita Mahata
@@ -41,7 +42,7 @@ export const HeroCarousel = () => {
       exam: "ICSE 2025",
       desc: "Score:99.8%",
       rank: "AIR 2",
-      img: "images/homepagecarousal_images/Adrita Mahata.png",
+      img: getImageUrl("images/homepagecarousal_images/Adrita Mahata.webp"),
       scaleClass: "scale-125",
     },
     // 5 Chandrachur Sen
@@ -50,7 +51,7 @@ export const HeroCarousel = () => {
       exam: "Madhyamika 2024",
       desc: "AIR Rank:",
       rank: "1",
-      img: "images/homepagecarousal_images/Chandrachur Sen.png",
+      img: getImageUrl("images/homepagecarousal_images/Chandrachur Sen.webp"),
       scaleClass: "scale-[1.05]",
     },
     // 6 Pranami halder
@@ -59,7 +60,7 @@ export const HeroCarousel = () => {
       exam: "CBSE 2025",
       desc: "Score:",
       rank: "99.2%",
-      img: "images/homepagecarousal_images/Pranami halder.png",
+      img: getImageUrl("images/homepagecarousal_images/Pranami halder.webp"),
       scaleClass: "scale-[1.15]",
     },
   ];

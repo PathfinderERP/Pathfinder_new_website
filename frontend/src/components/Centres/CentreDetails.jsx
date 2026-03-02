@@ -11,6 +11,7 @@ import {
     ChevronLeftIcon
 } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
+import { getImageUrl } from "../../utils/imageUtils";
 
 const CentreDetails = ({ centre }) => {
     const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=400&auto=format&fit=crop";
@@ -39,7 +40,7 @@ const CentreDetails = ({ centre }) => {
                     <div className="flex flex-col md:flex-row items-center gap-8 mb-12">
                         <div className="w-24 h-24 md:w-32 md:h-32 rounded-[40px] bg-white p-4 shadow-2xl overflow-hidden">
                             <img
-                                src={centre.logo_url || FALLBACK_IMAGE}
+                                src={getImageUrl(centre.logo_url) || FALLBACK_IMAGE}
                                 alt={centre.centre}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
@@ -129,7 +130,7 @@ const CentreDetails = ({ centre }) => {
                                         <div key={idx} className="flex-shrink-0 w-48 text-center group">
                                             <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-slate-50 group-hover:border-orange-500 transition-all duration-300 mb-4 shadow-lg">
                                                 <img
-                                                    src={topper.image_url || "images/placeholder.png"}
+                                                    src={getImageUrl(topper.image_url) || getImageUrl("images/placeholder.webp")}
                                                     alt={topper.name}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                 />

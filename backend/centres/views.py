@@ -289,9 +289,11 @@ def save_image_locally(request, image_file):
 @permission_classes([IsAuthenticated])
 def upload_centre_logo(request, centre_id):
     """
-    Upload and store logo directly in Centre document with 12MB limit
+    Upload and store logo in Cloudflare R2
     """
     try:
+        from contact_backend.utils.r2_storage import upload_to_r2
+        
         if 'logo' not in request.FILES:
             return Response(
                 {'error': 'No logo file provided'}, 
@@ -309,35 +311,51 @@ def upload_centre_logo(request, centre_id):
         
         logo_file = request.FILES['logo']
         
-        # Process image with 12MB limit
+        # 1. Process/Compress image
         try:
             processed_logo = ImageProcessor.process_uploaded_image(
                 logo_file, 
-                max_size=(1200, 900),  # Larger dimensions for better quality
-                quality=85,
-                max_size_mb=12  # 12MB limit
+                max_size=(1200, 900),
+                quality=85
             )
         except ValueError as e:
-            return Response(
-                {'error': str(e)}, 
-                status=status.HTTP_400_BAD_REQUEST
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 2. Upload to Cloudflare R2
+        try:
+            public_url = upload_to_r2(
+                file_data=processed_logo['data'],
+                file_name=processed_logo['filename'],
+                content_type=processed_logo['content_type'],
+                folder='logos'
             )
-        
-        # Store in centre document
-        centre.logo_data = processed_logo['data']
-        centre.logo_content_type = processed_logo['content_type']
-        centre.logo_filename = processed_logo['filename']
-        centre.save()
-        
-        return Response({
-            'message': 'Logo uploaded successfully (12MB limit)',
-            'logo_url': centre.get_logo_url(),
-            'size_bytes': processed_logo['size'],
-            'size_mb': round(processed_logo['size'] / (1024 * 1024), 2),
-            'original_size_mb': round(processed_logo.get('original_size', 0) / (1024 * 1024), 2),
-            'dimensions': processed_logo['dimensions'],
-            'compression_ratio': f"{round((1 - processed_logo['size'] / max(processed_logo.get('original_size', 1), 1)) * 100, 1)}%"
-        }, status=status.HTTP_201_CREATED)
+            
+            if public_url:
+                # Store URL and clear old binary data
+                centre.logo = public_url
+                centre.logo_data = None 
+                centre.save()
+                
+                return Response({
+                    'message': 'Logo uploaded successfully to Cloudflare R2',
+                    'logo_url': public_url,
+                    'service': 'r2'
+                }, status=status.HTTP_201_CREATED)
+                
+        except Exception as r2_err:
+            logger.error(f"Cloudflare R2 upload failed: {r2_err}")
+            # Fallback to local MongoDB storage if R2 fails
+            centre.logo_data = processed_logo['data']
+            centre.logo_content_type = processed_logo['content_type']
+            centre.logo_filename = processed_logo['filename']
+            centre.logo = None
+            centre.save()
+            
+            return Response({
+                'message': 'Logo uploaded to MongoDB (R2 upload failed)',
+                'logo_url': centre.get_logo_url(),
+                'service': 'mongodb'
+            }, status=status.HTTP_201_CREATED)
         
     except Exception as e:
         logger.error(f"Logo upload error: {e}")
@@ -351,28 +369,12 @@ def upload_centre_logo(request, centre_id):
 @permission_classes([IsAuthenticated])
 def upload_topper_image(request, centre_id):
     """
-    Upload topper image for an existing topper in the centre
+    Upload topper image to Cloudflare R2
     """
     try:
-        print("🖼️ BACKEND: Topper Image Upload Started")
+        from contact_backend.utils.r2_storage import upload_to_r2
         
-        # ✅ DEBUG: Check request details (BEFORE accessing files)
-        print(f"🔍 DEBUG - Request method: {request.method}")
-        print(f"🔍 DEBUG - Request content type: {request.content_type}")
-        
-        # Check if we have any files at all (this is safe)
-        if not request.FILES:
-            print("❌ DEBUG - No files in request.FILES at all")
-            return Response(
-                {'error': 'No image file provided'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        print(f"✅ DEBUG - Found files: {list(request.FILES.keys())}")
-        
-        if 'image' not in request.FILES:
-            print("❌ DEBUG - No 'image' key in request.FILES")
-            print(f"🔍 DEBUG - Available FILES keys: {list(request.FILES.keys())}")
+        if not request.FILES or 'image' not in request.FILES:
             return Response(
                 {'error': 'No image file provided'}, 
                 status=status.HTTP_400_BAD_REQUEST
@@ -381,7 +383,6 @@ def upload_topper_image(request, centre_id):
         # Get centre
         try:
             centre = Centre.objects.get(id=centre_id)
-            print(f"✅ BACKEND: Found centre: {centre.centre}")
         except Centre.DoesNotExist:
             return Response(
                 {'error': 'Centre not found'}, 
@@ -391,52 +392,66 @@ def upload_topper_image(request, centre_id):
         image_file = request.FILES['image']
         topper_index = request.POST.get('topper_index')
         
-        print(f"🖼️ BACKEND: Processing image for topper index: {topper_index}")
-        print(f"🔍 DEBUG - Image file: {image_file.name}, size: {image_file.size}, type: {image_file.content_type}")
-        
-        # Process image
+        if not topper_index or not topper_index.isdigit():
+            return Response({'error': 'Invalid topper index'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        index = int(topper_index)
+        if index < 0 or index >= len(centre.toppers):
+            return Response({'error': 'Topper index out of range'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 1. Process image
         try:
             processed_image = ImageProcessor.process_uploaded_image(
                 image_file,
                 max_size=(1200, 900),
-                quality=85,
-                max_size_mb=12
+                quality=85
             )
-            print(f"✅ BACKEND: Image processed - {processed_image['size']} bytes")
         except ValueError as e:
-            return Response(
-                {'error': str(e)}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Update existing topper if index provided
-        if topper_index and topper_index.isdigit():
-            index = int(topper_index)
-            if 0 <= index < len(centre.toppers):
-                print(f"✅ BACKEND: Updating topper at index {index}: {centre.toppers[index].name}")
-                
-                # Update ONLY the image fields, preserve all other data
-                existing_topper = centre.toppers[index]
-                existing_topper.image_data = processed_image['data']
-                existing_topper.image_content_type = processed_image['content_type']
-                existing_topper.image_filename = processed_image['filename']
-                
-                print(f"🔍 DEBUG: Image data size: {len(processed_image['data'])} bytes")
-                
-                # Save the centre
+        # 2. Upload to Cloudflare R2
+        try:
+            public_url = upload_to_r2(
+                file_data=processed_image['data'],
+                file_name=processed_image['filename'],
+                content_type=processed_image['content_type'],
+                folder='toppers'
+            )
+            
+            if public_url:
+                # Update topper and save centre
+                topper = centre.toppers[index]
+                topper.image = public_url
+                topper.image_data = None # Clear old binary data
                 centre.save()
-                print("💾 BACKEND: Centre saved successfully")
                 
                 return Response({
-                    'message': 'Topper image updated successfully',
-                    'topper_name': centre.toppers[index].name,
-                    'image_url': centre.toppers[index].get_image_url(),
-                    'topper_index': index
+                    'message': 'Topper image uploaded successfully to Cloudflare R2',
+                    'image_url': public_url,
+                    'service': 'r2'
                 }, status=status.HTTP_200_OK)
-        
+                
+        except Exception as r2_err:
+            logger.error(f"Cloudflare R2 upload failed for topper: {r2_err}")
+            # Fallback to MongoDB
+            topper = centre.toppers[index]
+            topper.image_data = processed_image['data']
+            topper.image_content_type = processed_image['content_type']
+            topper.image_filename = processed_image['filename']
+            topper.image = None
+            centre.save()
+            
+            return Response({
+                'message': 'Topper image uploaded to MongoDB (R2 upload failed)',
+                'image_url': topper.get_image_url(),
+                'service': 'mongodb'
+            }, status=status.HTTP_200_OK)
+            
+    except Exception as e:
+        logger.error(f"Topper upload error: {e}")
         return Response(
-            {'error': 'Invalid topper index'}, 
-            status=status.HTTP_400_BAD_REQUEST
+            {'error': 'Internal server error'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
         
     except Exception as e:

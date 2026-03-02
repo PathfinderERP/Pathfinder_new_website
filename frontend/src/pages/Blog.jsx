@@ -178,7 +178,7 @@ const Blog = () => {
                                 >
                                     <Link to={`/blog/${post.slug || post.id}`} className="block h-full w-full bg-slate-200">
                                         <img
-                                            src={post.image_url || "/images/blog/placeholder.png"}
+                                            src={post.image_url || "/images/blog/placeholder.webp"}
                                             alt={post.title}
                                             className="w-full h-full object-cover transition-all duration-700"
                                         />
@@ -326,7 +326,7 @@ const Blog = () => {
                                     >
                                         <div className="w-24 h-24 rounded-[1.8rem] overflow-hidden flex-shrink-0 shadow-md shadow-slate-100 group-hover:shadow-orange-100 transition-all">
                                             <img
-                                                src={post.image_url || "/images/blog/placeholder.png"}
+                                                src={post.image_url || "/images/blog/placeholder.webp"}
                                                 alt={post.title}
                                                 className="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
                                             />
@@ -374,25 +374,25 @@ function FreeContentSection() {
         {
             title: "Basic Chemistry 01: How to complete syllabus in 3 hours...",
             description: "Learn the secrets of mastering chemistry fundamentals quickly with our expert faculty.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-11-10"
         },
         {
             title: "Hybridization: For students targeting JEE & NEET 2026....",
             description: "Deep dive into chemical bonding and molecular geometry for competitive exams.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-10-10"
         },
         {
             title: "Newton's Laws of Motion: Concept Clarity & problem solving",
             description: "Master the foundation of mechanics with this comprehensive guide to NLM.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-11-10"
         },
         {
             title: "Math Shortcut Tricks for JEE Main 2026",
             description: "Save time and improve accuracy with these elite mathematical shortcuts.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-12-05"
         }
     ];

@@ -4,6 +4,7 @@ import { XMarkIcon, PlayIcon } from '@heroicons/react/24/outline';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { getImageUrl } from '../../utils/imageUtils';
 
 const ChairmanMessage = () => {
     const [selectedVideo, setSelectedVideo] = useState(null);
@@ -39,19 +40,19 @@ const ChairmanMessage = () => {
     const videos = [
         {
             id: 1,
-            thumbnail: "/images/video-thumb-1.jpg",
+            thumbnail: getImageUrl("/images/video-thumb-1.webp"),
             title: "Success Story 1",
             embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
         },
         {
             id: 2,
-            thumbnail: "/images/video-thumb-2.jpg",
+            thumbnail: getImageUrl("/images/video-thumb-2.webp"),
             title: "Success Story 2",
             embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
         },
         {
             id: 3,
-            thumbnail: "/images/video-thumb-3.jpg",
+            thumbnail: getImageUrl("/images/video-thumb-3.webp"),
             title: "Success Story 3",
             embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
         }
@@ -67,7 +68,7 @@ const ChairmanMessage = () => {
                         {/* Background Image */}
                         <div className="absolute inset-0">
                             <img
-                                src="images/about/chairman sir.png"
+                                src={getImageUrl("images/about/chairman sir.webp")}
                                 alt="Chairman Debdutta Sreemany"
                                 className="w-full h-full object-contain object-top"
                             />
@@ -121,25 +122,25 @@ function FreeContentSection() {
         {
             title: "Pathfinder's 30-Year Legacy: A Message from the Chairman",
             description: "Mr. T.K. Banerjee shares the inspiring journey of Pathfinder and our commitment to excellence.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-11-10"
         },
         {
             title: "Navigating Success: Chairman's Guide for JEE/NEET Aspirants",
             description: "Essential advice for students on how to balance hard work with mental well-being.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-10-10"
         },
         {
             title: "The Future of Education: Our Vision for the Next Generation",
             description: "Hear about our innovative teaching methodologies and future-ready educational programs.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-11-10"
         },
         {
             title: "Celebrating Excellence: Chairman's Address to Toppers",
             description: "A heart-warming message to our achievers and a call to action for future leaders.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.jpg",
+            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-12-05"
         }
     ];

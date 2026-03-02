@@ -204,7 +204,7 @@ const BlogManagement = () => {
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-4">
                                         <img
-                                            src={post.image_url || "/images/placeholder.png"}
+                                            src={post.image_url || "/images/placeholder.webp"}
                                             alt={post.title}
                                             className="w-12 h-12 rounded-lg object-cover"
                                         />

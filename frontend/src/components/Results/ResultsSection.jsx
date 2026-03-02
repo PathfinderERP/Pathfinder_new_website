@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { centresAPI } from "../../services/api";
 import { useFilter } from "../../contexts/FilterContext";
 import Slider from "react-slick";
+import { getImageUrl } from "../../utils/imageUtils";
 
 export default function ResultsSection({ selectedCentre, fixedCategory, title, showTabs = true, activeExam, activeYear }) {
     const { globalSelectedCentre } = useFilter(); // Access global filter context
@@ -87,7 +88,7 @@ export default function ResultsSection({ selectedCentre, fixedCategory, title, s
                             exam: topper.exam || "N/A",
                             category: category,
                             rank: topper.rank ? `Rank ${topper.rank}` : "N/A",
-                            photo: getTopperImageUrl(topper) || "/images/placeholder.png", // Ensure absolute path for placeholder
+                            photo: getTopperImageUrl(topper) || getImageUrl("images/placeholder.webp"), // Ensure absolute path for placeholder
                             quote: topper.topper_msg || "No message available",
                             centre: centre.centre || "Unknown",
                             badge: topper.badge || "",
@@ -111,8 +112,8 @@ export default function ResultsSection({ selectedCentre, fixedCategory, title, s
 
     // Helper function to get topper image URL
     const getTopperImageUrl = (topper) => {
-        if (topper.image_url) return topper.image_url;
-        if (topper.image) return topper.image;
+        if (topper.image_url) return getImageUrl(topper.image_url);
+        if (topper.image) return getImageUrl(topper.image);
         if (topper.image_data && topper.image_content_type) {
             return `data:${topper.image_content_type};base64,${topper.image_data}`;
         }
@@ -291,7 +292,7 @@ export default function ResultsSection({ selectedCentre, fixedCategory, title, s
                         {/* FULL PAGE BACKGROUND */}
                         <div className="absolute inset-0 z-0 w-screen left-1/2 -ml-[50vw]">
                             <img
-                                src="https://pub-d6735230562849b0b1ddf75b7d89148a.r2.dev/orange%20paper.png"
+                                src={getImageUrl("/images/result/orange paper.webp")}
                                 alt="Background"
                                 className="w-full h-full object-cover"
                             />

@@ -1,3 +1,4 @@
+import { getImageUrl } from "../../utils/imageUtils";
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
@@ -113,7 +114,7 @@ const AboutUs = () => {
               <div
                 className="absolute top-0 right-0 md:right-[-13%] lg:right-[-13%] w-full md:w-[120%] lg:w-[130%] h-full z-0 pointer-events-none opacity-100"
                 style={{
-                  backgroundImage: "url('/images/about us page/herobg.png')",
+                  backgroundImage: `url("${getImageUrl("/images/about us page/herobg.webp")}")`,
                   backgroundPosition: 'top right',
                   backgroundRepeat: 'no-repeat',
                   backgroundSize: 'contain'
@@ -125,7 +126,7 @@ const AboutUs = () => {
                 initial={{ opacity: 0, scale: 0.9, y: 50 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-                src="/images/about us page/herofigure.png"
+                src={getImageUrl("/images/about us page/herofigure.webp")}
                 alt="Pathfinder Figure"
                 className="relative z-10 w-full h-full object-contain bottom-12 lg:bottom-0 translate-y-[-5%] lg:translate-y-[25%] pointer-events-none"
               />
@@ -220,7 +221,7 @@ const AboutUs = () => {
               className="w-full lg:w-1/2"
             >
               <img
-                src="/images/about us page/our vision.png"
+                src={getImageUrl("/images/about us page/our vision.webp")}
                 alt="Our Vision"
                 className="w-full h-[400px] lg:h-[800px] object-contain object-center drop-shadow-2xl"
               />
@@ -350,14 +351,14 @@ const AboutUs = () => {
         >
           <div className="flex items-end justify-center gap-0 flex-nowrap min-w-max lg:min-w-full mx-auto group/team">
             {[
-              { name: "Abhishek Sir", image: "Abhishek Sir.png", role: "Sr. Faculty", desc: "Expert in JEE Mathematics with 15+ years experience." },
-              { name: "Biswajit Sir", image: "Biswajit Sir.png", role: "Sr. Faculty", desc: "Physics specialist known for conceptual clarity." },
-              { name: "Chairman Sir", image: "Chairman Sir.png", role: "Founder & Chairman", desc: "The visionary behind Pathfinder's academic excellence." },
-              { name: "CEO Mam", image: "CEO mam.png", isCEO: true, role: "CEO", desc: "Leading the mission to empower students across India." },
-              { name: "Subhojit Sir", image: "subhojit Sir.png", role: "Sr. Faculty", desc: "Expert in Chemistry and competitive exam strategies." },
-              { name: "Dipanjan Sir", image: "Dipanjan Sir.png", role: "Sr. Faculty", desc: "Mathematics guru for NEET and Board preparations." },
-              { name: "Jitendra Sir", image: "Jitendra Sir.png", role: "Sr. Faculty", desc: "Dedicated mentor for Foundation and Olympiad students." },
-              { name: "Sourabh Sir", image: "Sourabh Sir.png", role: "Sr. Faculty", desc: "Proven track record in guiding toppers in competitive exams." },
+              { name: "Abhishek Sir", image: "Abhishek Sir.webp", role: "Sr. Faculty", desc: "Expert in JEE Mathematics with 15+ years experience." },
+              { name: "Biswajit Sir", image: "Biswajit Sir.webp", role: "Sr. Faculty", desc: "Physics specialist known for conceptual clarity." },
+              { name: "Chairman Sir", image: "Chairman Sir.webp", role: "Founder & Chairman", desc: "The visionary behind Pathfinder's academic excellence." },
+              { name: "CEO Mam", image: "CEO mam.webp", isCEO: true, role: "CEO", desc: "Leading the mission to empower students across India." },
+              { name: "Subhojit Sir", image: "subhojit Sir.webp", role: "Sr. Faculty", desc: "Expert in Chemistry and competitive exam strategies." },
+              { name: "Dipanjan Sir", image: "Dipanjan Sir.webp", role: "Sr. Faculty", desc: "Mathematics guru for NEET and Board preparations." },
+              { name: "Jitendra Sir", image: "Jitendra Sir.webp", role: "Sr. Faculty", desc: "Dedicated mentor for Foundation and Olympiad students." },
+              { name: "Sourabh Sir", image: "Sourabh Sir.webp", role: "Sr. Faculty", desc: "Proven track record in guiding toppers in competitive exams." },
             ].map((teacher, index) => (
               <motion.div
                 key={index}
@@ -370,7 +371,7 @@ const AboutUs = () => {
                 style={{ zIndex: teacher.isCEO ? 100 : index }}
               >
                 <img
-                  src={`/images/about us page/teachers_image/${teacher.image}`}
+                  src={getImageUrl(`images/about us page/teachers_image/${teacher.image}`)}
                   alt={teacher.name}
                   className={teacher.isCEO
                     ? "h-48 md:h-60 lg:h-[300px] w-auto object-contain"
@@ -472,7 +473,7 @@ const AboutUs = () => {
               <div className="absolute top-1/2 -translate-y-1/2 right-[-100px] md:right-[-250px] w-[300px] md:w-[600px] h-[80px] md:h-[120px] bg-gradient-to-r from-[#FFB380] to-[#FF5F00] z-0"></div>
 
               <img
-                src="/images/about us page/Books.png"
+                src={getImageUrl("/images/about us page/Books.webp")}
                 alt="Comprehensive Study Materials"
                 className="relative z-10 w-full max-w-[280px] md:max-w-[420px] object-contain drop-shadow-xl translate-x-0 md:translate-x-16"
               />
@@ -497,7 +498,7 @@ const AboutUs = () => {
               <div className="absolute top-1/2 -translate-y-1/2 left-[-100px] md:left-[-250px] w-[300px] md:w-[600px] h-[80px] md:h-[120px] bg-gradient-to-r from-[#FFB380] to-[#FF5F00] z-0"></div>
 
               <img
-                src="/images/about us page/Students.png"
+                src={getImageUrl("/images/about us page/Students.webp")}
                 alt="Student-Centric Environment"
                 className="relative z-10 w-full max-w-[280px] md:max-w-[420px] object-contain drop-shadow-xl translate-x-0 md:-translate-x-0"
               />
@@ -575,7 +576,7 @@ const AboutUs = () => {
               <div className="absolute top-1/2 -translate-y-1/2 right-[-100px] md:right-[-250px] w-[300px] md:w-[600px] h-[80px] md:h-[120px] bg-gradient-to-r from-[#FFB380] to-[#FF5F00] z-0"></div>
 
               <img
-                src="/images/about us page/CEO.png"
+                src={getImageUrl("/images/about us page/CEO.webp")}
                 alt="Holistic Development"
                 className="relative z-10 w-full max-w-[280px] md:max-w-[420px] object-contain drop-shadow-xl translate-x-0 md:translate-x-0  md:mt-0"
               />
@@ -603,7 +604,7 @@ const AboutUs = () => {
               <div className="absolute top-1/2 -translate-y-1/2 left-[-100px] md:left-[-250px] w-[300px] md:w-[600px] h-[80px] md:h-[120px] bg-gradient-to-r from-[#FFB380] to-[#FF5F00] z-0"></div>
 
               <img
-                src="/images/about us page/Woman.png"
+                src={getImageUrl("/images/about us page/Woman.webp")}
                 alt="Innovative Teaching Techniques"
                 className="relative z-10 w-full max-w-[320px] md:max-w-[550px] object-contain drop-shadow-xl translate-x-0 md:-translate-x-0 mt-[-80px] md:-mt-[100px]"
               />

@@ -1,3 +1,4 @@
+﻿import { getImageUrl } from "../utils/imageUtils";
 ﻿import React, { useState, useEffect, useRef } from "react";
 import Slider from "react-slick";
 import { useNavigate } from "react-router-dom";
@@ -165,14 +166,14 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                         <div
                             className="absolute inset-0 z-0 bg-cover bg-center"
                             style={{
-                                backgroundImage: `url('/images/course_images/explore_hero_bg.png')`,
+                                backgroundImage: `url(${getImageUrl("/images/course_images/explore_hero_bg.webp")})`,
                             }}
                         />
 
                         {/* Map Image - Right */}
                         <div className="absolute bottom-15 right-10 h-[85%] w-[30%] md:w-[25%] z-20 hidden md:flex justify-end items-center pointer-events-none">
                             <img
-                                src="/images/course_images/explore_top_india_map_right.png"
+                                src={getImageUrl("/images/course_images/explore_top_india_map_right.webp")}
                                 alt="Map"
                                 className="h-[70%] object-contain object-right opacity-90 mix-blend-multiply"
                             />
@@ -181,7 +182,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                         {/* Person/Banner Image - Left - OVERLAPPING BOTTOM */}
                         <div className="absolute top-15 left-0 h-[75%] md:h-[70%] z-30 hidden md:flex items-end pointer-events-none filter drop-shadow-2xl mb-8">
                             <img
-                                src="/images/course_images/explore_banner.png"
+                                src={getImageUrl("/images/course_images/explore_banner.webp")}
                                 alt="Course Banner"
                                 className="h-full object-contain object-bottom"
                             />
@@ -287,7 +288,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                                         {/* Right Image Overlay */}
                                         <div className="flex-shrink-0 relative overflow-hidden w-16 md:w-28 bg-black">
                                             <img
-                                                src="/images/course_images/STANDARD BATCH.png"
+                                                src={getImageUrl("/images/course_images/STANDARD BATCH.webp")}
                                                 alt="Standard Batch"
                                                 className="absolute top-0 left-0 h-[100.1%] w-auto max-w-none object-cover select-none overflow-hidden"
                                             />
@@ -461,7 +462,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                                     {/* FULL PAGE BACKGROUND */}
                                     <div className="absolute inset-x-0 top-0 z-0 h-full">
                                         <img
-                                            src="https://pub-d6735230562849b0b1ddf75b7d89148a.r2.dev/orange%20paper.png"
+                                            src="/images/result/orange paper.webp"
                                             alt="Background"
                                             className="w-full h-[400px] object-fit"
                                         />
@@ -615,7 +616,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                                     {/* Horizontal Background Line - Thinner */}
                                     <div className="absolute top-[55%] left-1/2 w-[200%] -translate-x-1/2 -translate-y-1/2 z-0 hidden sm:block">
                                         <img
-                                            src="/images/course_images/teachers horizontal bg line.png"
+                                            src={getImageUrl("/images/course_images/teachers horizontal bg line.webp")}
                                             alt=""
                                             className="w-full h-4 object-cover opacity-90"
                                         />
@@ -636,7 +637,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                                                                 {/* Teacher Photo */}
                                                                 <div className="relative z-20 w-full h-full flex items-end justify-center pb-1">
                                                                     <img
-                                                                        src={teacher.profile_image_url || teacher.profile_image || "/images/course_images/explore_teacher.png"}
+                                                                        src={teacher.profile_image_url || teacher.profile_image || "/images/course_images/explore_teacher.webp"}
                                                                         alt={teacher.name}
                                                                         className="h-full object-contain object-bottom drop-shadow-md"
                                                                     />
@@ -661,7 +662,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                                                                 <div className="absolute w-[170px] h-36 bottom-0 left-1/2 -translate-x-1/2 bg-gradient-to-b from-orange-400 to-orange-600 rounded-t-[5rem] z-10" />
                                                                 <div className="relative z-20 w-full h-full flex items-end justify-center pb-1">
                                                                     <img
-                                                                        src="/images/course_images/explore_teacher.png"
+                                                                        src={getImageUrl("/images/course_images/explore_teacher.webp")}
                                                                         alt="Start Faculty"
                                                                         className="h-full object-contain object-bottom"
                                                                     />

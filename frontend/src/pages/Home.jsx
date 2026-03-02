@@ -16,6 +16,7 @@ import { centresAPI, coursesAPI } from "../services/api";
 const normalizeStr = (str) => str ? str.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
 
 import { Skeleton, FadeInImage } from "../components/common/OptimizedImage";
+import { getImageUrl } from "../utils/imageUtils";
 
 // Path-Verse Overview — CLEAN SINGLE-FILE PREVIEW
 
@@ -2438,7 +2439,7 @@ function ResultsSection({ selectedCentre }) {
                 exam: topper.exam || "N/A",
                 category: category,
                 rank: topper.rank ? `Rank ${topper.rank}` : "N/A",
-                photo: getTopperImageUrl(topper) || "images/placeholder.png",
+                photo: getTopperImageUrl(topper) || getImageUrl("images/placeholder.webp"),
                 quote: topper.topper_msg || "No message available",
                 centre: centre.centre || "Unknown",
                 badge: topper.badge || "",
@@ -2455,8 +2456,8 @@ function ResultsSection({ selectedCentre }) {
 
   // Helper function to get topper image URL
   const getTopperImageUrl = (topper) => {
-    if (topper.image_url) return topper.image_url;
-    if (topper.image) return topper.image;
+    if (topper.image_url) return getImageUrl(topper.image_url);
+    if (topper.image) return getImageUrl(topper.image);
     if (topper.image_data && topper.image_content_type) {
       return `data:${topper.image_content_type};base64,${topper.image_data}`;
     }
