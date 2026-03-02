@@ -2376,31 +2376,38 @@ function ResultsSection({ selectedCentre }) {
   const [activeTab, setActiveTab] = useState("All");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
 
-  const minSwipeDistance = 50;
+  const minSwipeDistance = 40;
 
   const onTouchStartHandler = (e) => {
     setIsPaused(true);
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchStartY.current = e.targetTouches[0].clientY;
+    touchEndX.current = e.targetTouches[0].clientX;
+    touchEndY.current = e.targetTouches[0].clientY;
   };
 
   const onTouchMoveHandler = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    touchEndX.current = e.targetTouches[0].clientX;
+    touchEndY.current = e.targetTouches[0].clientY;
   };
 
   const onTouchEndHandler = () => {
     setIsPaused(false);
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) {
-      nextSlide();
-    } else if (isRightSwipe) {
-      prevSlide();
+    const xDistance = touchStartX.current - touchEndX.current;
+    const yDistance = touchStartY.current - touchEndY.current;
+
+    // Only trigger swipe if horizontal movement is significantly greater than vertical movement
+    if (Math.abs(xDistance) > Math.abs(yDistance) && Math.abs(xDistance) > minSwipeDistance) {
+      if (xDistance > 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
     }
   };
 
@@ -2621,7 +2628,7 @@ function ResultsSection({ selectedCentre }) {
                 )}
 
                 {/* Carousel Container */}
-                <div className="overflow-hidden rounded-2xl">
+                <div className="overflow-hidden rounded-2xl touch-pan-y">
                   <div
                     className="flex transition-transform duration-500 ease-in-out"
                     style={{ transform: `translateX(-${currentSlide * 100}%)` }}
