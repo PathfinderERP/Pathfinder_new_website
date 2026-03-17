@@ -341,10 +341,7 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
         onClose();
       } else {
         // For development without backend
-        console.log(
-          "Application Data (would be sent to API):",
-          applicationData
-        );
+        
         onSubmit(applicationData);
         setFormData({
           fullName: "",

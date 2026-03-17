@@ -55,7 +55,7 @@ const JobApplicationList = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("refresh") === "true") {
-      console.log("🔄 Forcing job applications refresh due to URL parameter");
+      
       clearAdminCache("admin_job_applications");
       fetchApplications();
     }

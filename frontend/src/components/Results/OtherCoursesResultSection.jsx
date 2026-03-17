@@ -162,7 +162,7 @@ export default function OtherCoursesResultSection({ category }) {
     };
 
     const handleApplyNowSubmit = (applicationData) => {
-        console.log("Application submitted from Results section:", applicationData);
+        
 
         // Match the Header's redirect logic
         const courseSlug = category.toLowerCase().replace(/\s+/g, '-');

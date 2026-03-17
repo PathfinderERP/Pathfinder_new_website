@@ -71,7 +71,7 @@ const Header = () => {
 
                 const centreNames = centresData.map(c => c.centre).filter(Boolean);
                 setDynamicCentres(centreNames);
-                console.log("📍 [HEADER] Fetched centres:", centreNames);
+                
             } catch (error) {
                 console.error("❌ [HEADER] Error fetching centres:", error);
                 setDynamicCentres(["Online", "Hazra", "Garia", "Salt Lake", "Howrah"]);
@@ -190,7 +190,7 @@ const Header = () => {
 
     // Handle form submission
     const handleApplyNowSubmit = (applicationData) => {
-        console.log("Application submitted:", { ...applicationData, course: selectedCourseData.name });
+        
 
         // Determine base path based on context type
         const basePath = contextType === "result" ? "/results" : "/courses";

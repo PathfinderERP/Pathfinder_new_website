@@ -1,4 +1,4 @@
-﻿import { getImageUrl } from "../../utils/imageUtils";
+import { getImageUrl } from "../../utils/imageUtils";
 import React, { useState, useEffect } from "react";
 import CentreShowcase from "../../components/Centres/CentreShowcase";
 import { motion } from "framer-motion";
@@ -230,6 +230,7 @@ function FreeContentSection() {
             title: "Basic Chemistry 01: How to complete syllabus in 3 hours...",
             description: "Learn the secrets of mastering chemistry fundamentals quickly with our expert faculty.",
             thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
+
             published_date: "2025-11-10"
         },
         {

@@ -27,9 +27,9 @@ import {
 const CourseList = () => {
   // --- Caching Hook Implementation ---
   const fetchCoursesData = useCallback(async () => {
-    console.log("Fetching courses...");
+    
     const response = await coursesAPI.getAll();
-    console.log("Raw API response:", response);
+    
 
     // Handle different response formats
     let coursesData = [];
@@ -106,11 +106,11 @@ const CourseList = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('refresh') === 'true') {
-      console.log("🔄 Forcing course list refresh due to URL parameter");
+      
       // Clear cache first to ensure fresh data
       const cacheKey = `admin_cache_admin_courses`;
       localStorage.removeItem(cacheKey);
-      console.log("🧹 Cache cleared, fetching fresh course data");
+      
       fetchCourses();
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
@@ -641,7 +641,7 @@ const CourseList = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
-                console.log("🔄 Manual refresh triggered");
+                
                 const cacheKey = `admin_cache_admin_courses`;
                 localStorage.removeItem(cacheKey);
                 fetchCourses();

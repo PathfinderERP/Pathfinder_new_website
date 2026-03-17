@@ -123,7 +123,7 @@ const BlogManagement = () => {
             image_file: null,
             image_url: ""
         }));
-        console.log("🗑️ Blog image cleared from local state");
+        
     };
 
     const handleSubmit = async (e) => {
@@ -146,7 +146,7 @@ const BlogManagement = () => {
             }
 
             if (currentPost) {
-                console.log("📤 Updating blog post with payload:", submissionData);
+                
                 await blogAPI.update(currentPost.id, submissionData);
             } else {
                 await blogAPI.create(submissionData);

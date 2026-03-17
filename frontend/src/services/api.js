@@ -79,49 +79,43 @@ api.interceptors.response.use(
 
     // Handle authentication errors
     if (error.response?.status === 401) {
-      console.log("🔐 401 Unauthorized - Clearing tokens");
+      
       const userType = localStorage.getItem("userType");
 
       if (userType === "admin") {
         localStorage.removeItem("admin_token");
         localStorage.removeItem("admin_user");
         localStorage.removeItem("userType");
-        console.log("🔄 Redirecting to admin login");
+        
         window.location.href = "/admin/login";
       } else {
         localStorage.removeItem("authToken");
         localStorage.removeItem("userData");
         localStorage.removeItem("userType");
-        console.log("🔄 Redirecting to student login");
+        
         window.location.href = "/login";
       }
     } else if (error.response?.status === 403) {
-      console.log("🚫 403 Forbidden - Authentication issue detected");
-      console.log("💡 Possible causes:", {
-        tokenPresent:
-          !!localStorage.getItem("admin_token") ||
-          !!localStorage.getItem("authToken"),
-        userType: localStorage.getItem("userType"),
-        endpoint: error.config?.url,
-      });
+      
+      
 
       // Handle 403 as token expiry/auth failure
       // If a token exists, it's likely expired or invalid
       if (localStorage.getItem("admin_token") || localStorage.getItem("authToken")) {
-        console.log("↪️ Treating 403 as auth failure explicitly -> Force Logout");
+        
         const userType = localStorage.getItem("userType");
 
         if (userType === "admin") {
           localStorage.removeItem("admin_token");
           localStorage.removeItem("admin_user");
           localStorage.removeItem("userType");
-          console.log("🔄 Redirecting to admin login");
+          
           window.location.href = "/admin/login";
         } else {
           localStorage.removeItem("authToken");
           localStorage.removeItem("userData");
           localStorage.removeItem("userType");
-          console.log("🔄 Redirecting to student login");
+          
           window.location.href = "/login";
         }
       }

@@ -69,10 +69,10 @@ const CourseCreate = () => {
   const fetchAllCentres = async () => {
     try {
       setFetchLoading((prev) => ({ ...prev, centres: true }));
-      console.log("🔄 Fetching all centres from API...");
+      
 
       const response = await centresAPI.getAll();
-      console.log("✅ Centres API response:", response.data);
+      
 
       // Add virtual "Online" centre
       const centresWithOnline = [
@@ -308,7 +308,7 @@ const CourseCreate = () => {
       }
     });
 
-    console.log(`📦 Creating course for centre: ${centreData.centre}`, dataToSend);
+    
     return await coursesAPI.create(dataToSend);
   };
 
@@ -423,7 +423,7 @@ const CourseCreate = () => {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        console.log("📊 CSV Parsed:", results.data);
+        
 
         // Validate CSV structure
         const requiredColumns = ['centre', 'name', 'class_level', 'course_price', 'duration', 'course_sessions', 'mode'];
@@ -598,7 +598,7 @@ const CourseCreate = () => {
             }
           });
 
-          console.log(`📦 Creating course from CSV row ${index + 1}: ${row.name}`);
+          
           await coursesAPI.create(dataToSend);
           successCount++;
         } catch (err) {

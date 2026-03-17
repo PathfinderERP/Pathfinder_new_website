@@ -39,13 +39,13 @@ export const clearAllAdminCache = () => {
             localStorage.removeItem(key);
         }
     });
-    console.log("🧹 Admin cache cleared");
+    
 };
 
 export const clearAdminCache = (key) => {
     const cacheKey = `${ADMIN_CACHE_PREFIX}${key}`;
     localStorage.removeItem(cacheKey);
-    console.log(`🧹 Admin cache cleared for: ${key}`);
+    
 };
 
 export const clearAdminCacheByPrefix = (prefix) => {
@@ -55,7 +55,7 @@ export const clearAdminCacheByPrefix = (prefix) => {
             localStorage.removeItem(key);
         }
     });
-    console.log(`🧹 Admin cache cleared for prefix: ${prefix}`);
+    
 };
 
 export const useAdminCache = (key, fetchFunction, options = {}) => {

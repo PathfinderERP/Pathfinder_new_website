@@ -220,7 +220,7 @@ const JobApplication = () => {
             .filter((skill) => skill)
         : [];
 
-      console.log("Skills array:", skillsArray);
+      
       skillsArray.forEach((skill, index) => {
         formDataToSend.append(`skills[${index}]`, skill);
       });
@@ -230,7 +230,7 @@ const JobApplication = () => {
         (exp) => exp.company.trim() && exp.position.trim()
       );
 
-      console.log("Work experience:", filteredWorkExperience);
+      
       filteredWorkExperience.forEach((exp, index) => {
         Object.keys(exp).forEach((field) => {
           let value = exp[field];
@@ -242,7 +242,7 @@ const JobApplication = () => {
           if (field.includes("date") && !value) {
             value = "";
           }
-          console.log(`Adding work_experience[${index}][${field}] =`, value);
+          
           formDataToSend.append(`work_experience[${index}][${field}]`, value);
         });
       });
@@ -252,7 +252,7 @@ const JobApplication = () => {
         (edu) => edu.institution.trim() && edu.degree.trim()
       );
 
-      console.log("Education details:", filteredEducation);
+      
       filteredEducation.forEach((edu, index) => {
         Object.keys(edu).forEach((field) => {
           let value = edu[field];
@@ -260,7 +260,7 @@ const JobApplication = () => {
           if (!value) {
             value = "";
           }
-          console.log(`Adding education_details[${index}][${field}] =`, value);
+          
           formDataToSend.append(`education_details[${index}][${field}]`, value);
         });
       });
@@ -269,21 +269,21 @@ const JobApplication = () => {
       formDataToSend.append("cv_file", cvFile);
 
       // Debug: Log the complete FormData contents
-      console.log("=== COMPLETE FORMDATA CONTENTS ===");
+      
       for (let pair of formDataToSend.entries()) {
-        console.log(pair[0] + ":", pair[1]);
+        
       }
-      console.log("=== END FORMDATA CONTENTS ===");
+      
 
       // Check if arrays are empty
       if (filteredWorkExperience.length === 0) {
-        console.log("No work experience to send");
+        
       }
       if (filteredEducation.length === 0) {
-        console.log("No education details to send");
+        
       }
       if (skillsArray.length === 0) {
-        console.log("No skills to send");
+        
       }
 
       await jobAPI.createApplication(formDataToSend);

@@ -134,7 +134,7 @@ const StudentCornerManagement = () => {
             ...prev,
             image_url: ""
         }));
-        console.log("🗑️ Image state cleared for removal");
+        
     };
 
     const resetForm = () => {
@@ -220,7 +220,7 @@ const StudentCornerManagement = () => {
             } else if (imagePreview === null || formData.image_url === "") {
                 // If either is true, the user has explicitly removed the image
                 dataToSubmit.image_url = "";
-                console.log("📤 Update Request: Clearing image_url in database");
+                
             }
 
             if (editingItem) {

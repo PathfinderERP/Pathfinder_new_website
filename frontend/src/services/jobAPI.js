@@ -4,7 +4,7 @@ import env from "../config/env";
 export const jobAPI = {
   // Job Posts
   getAllJobs: (params = {}) => {
-    console.log("💼 Fetching all jobs");
+    
     const queryParams = new URLSearchParams(params).toString();
     return api.get(
       `${env.endpoints.JOBS}${queryParams ? `?${queryParams}` : ""}`
@@ -12,38 +12,38 @@ export const jobAPI = {
   },
 
   getJobById: (id) => {
-    console.log("🔍 Fetching job by ID:", id);
+    
     return api.get(`${env.endpoints.JOBS}${id}/`);
   },
 
   createJob: (jobData) => {
-    console.log("➕ Creating new job:", jobData.title);
+    
     return api.post(env.endpoints.JOBS, jobData);
   },
 
   updateJob: (id, jobData) => {
-    console.log("✏️ Updating job:", id);
+    
     return api.put(`${env.endpoints.JOBS}${id}/`, jobData);
   },
 
   deleteJob: (id) => {
-    console.log("🗑️ Deleting job:", id);
+    
     return api.delete(`${env.endpoints.JOBS}${id}/`);
   },
 
   toggleJobActive: (id) => {
-    console.log("🔄 Toggling job active status:", id);
+    
     return api.post(`${env.endpoints.JOBS}${id}/toggle_active/`);
   },
 
   toggleJobFeatured: (id) => {
-    console.log("⭐ Toggling job featured status:", id);
+    
     return api.post(`${env.endpoints.JOBS}${id}/toggle_featured/`);
   },
 
   // For public career page - get only active jobs
   getActiveJobs: () => {
-    console.log("📋 Fetching active jobs for career page");
+    
     return api
       .get(env.endpoints.JOBS, {
         params: { is_active: true }, // Filter by active status
@@ -53,9 +53,7 @@ export const jobAPI = {
         const jobs = response.data.results || response.data;
         const activeJobs = jobs.filter((job) => job.is_active !== false);
 
-        console.log(
-          `📊 API returned ${jobs.length} jobs, ${activeJobs.length} are active`
-        );
+        
 
         // Log any inactive jobs that slipped through
         const inactiveJobs = jobs.filter((job) => job.is_active === false);
@@ -81,7 +79,7 @@ export const jobAPI = {
   },
 
   getFeaturedJobs: () => {
-    console.log("🌟 Fetching featured jobs");
+    
     return api
       .get(env.endpoints.JOBS, {
         params: { is_active: true, is_featured: true }, // Filter by active and featured
@@ -93,9 +91,7 @@ export const jobAPI = {
           (job) => job.is_active !== false && job.is_featured === true
         );
 
-        console.log(
-          `📊 API returned ${jobs.length} featured jobs, ${featuredActiveJobs.length} are active and featured`
-        );
+        
 
         return {
           ...response,
@@ -108,7 +104,7 @@ export const jobAPI = {
 
   // Job Applications
   getAllApplications: (params = {}) => {
-    console.log("📝 Fetching all applications");
+    
     const queryParams = new URLSearchParams(params).toString();
     return api.get(
       `${env.endpoints.JOB_APPLICATIONS}${queryParams ? `?${queryParams}` : ""}`
@@ -116,12 +112,12 @@ export const jobAPI = {
   },
 
   getApplicationById: (id) => {
-    console.log("🔍 Fetching application by ID:", id);
+    
     return api.get(`${env.endpoints.JOB_APPLICATIONS}${id}/`);
   },
 
   createApplication: (applicationData) => {
-    console.log("📄 Creating new application");
+    
     return api.post(env.endpoints.JOB_APPLICATIONS, applicationData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -130,21 +126,21 @@ export const jobAPI = {
   },
 
   updateApplicationStatus: (id, status) => {
-    console.log("🔄 Updating application status:", { id, status });
+    
     return api.post(`${env.endpoints.JOB_APPLICATIONS}${id}/update_status/`, {
       status: status,
     });
   },
 
   downloadCV: (id) => {
-    console.log("📥 Downloading CV for application:", id);
+    
     return api.get(`${env.endpoints.JOB_APPLICATIONS}${id}/download-cv/`, {
       responseType: "blob",
     });
   },
 
   downloadCoverLetter: (id) => {
-    console.log("📥 Downloading cover letter for application:", id);
+    
     return api.get(
       `${env.endpoints.JOB_APPLICATIONS}${id}/download-cover-letter/`,
       {
@@ -154,7 +150,7 @@ export const jobAPI = {
   },
 
   deleteApplication: (id) => {
-    console.log("🗑️ Deleting application:", id);
+    
     return api.delete(`${env.endpoints.JOB_APPLICATIONS}${id}/`);
   },
 };

@@ -311,7 +311,7 @@ function CoursesSection({ courseType = "foundation", preFetchedCourses, preFetch
         }
 
         if (centresFromNav.length > 0) {
-            console.log("📍 [FOUNDATION] Centres from Apply Now form:", centresFromNav);
+            
             setIsFromApplyNow(true);
             setAllowedCentres(centresFromNav);
 
@@ -333,7 +333,7 @@ function CoursesSection({ courseType = "foundation", preFetchedCourses, preFetch
                 // Determine effective course type from navigation state or prop
                 const stateFilter = location.state?.courseFilter;
                 const targetType = stateFilter ? stateFilter.toLowerCase() : courseType.toLowerCase();
-                console.log("🎯 [COURSES] Filtering for type:", targetType);
+                
 
                 // Extract centre names
                 const centreNames = centresData.map(c => c.centre).filter(Boolean);
@@ -370,12 +370,12 @@ function CoursesSection({ courseType = "foundation", preFetchedCourses, preFetch
                     }
 
                     if (isMatch) {
-                        console.log(`📚 [${targetType.toUpperCase()}] Matched course:`, course.name, "Centre:", course.centre);
+                        
                     }
                     return isMatch;
                 });
 
-                console.log(`📚 [${targetType.toUpperCase()}] Filtered courses:`, filteredCourses.length);
+                
                 setCourses(filteredCourses);
             } catch (err) {
                 console.error("❌ [COURSES] Error processing data:", err);
@@ -442,24 +442,24 @@ function CoursesSection({ courseType = "foundation", preFetchedCourses, preFetch
                 const courseCentre = course.centre?.toLowerCase().trim() || "";
                 return allowedCentres.some(ac => ac.toLowerCase().trim() === courseCentre);
             });
-            console.log("📍 [FOUNDATION] Courses in allowed centres:", coursesToFilter.length);
+            
         }
 
         // If "All" selected, return all (allowed) courses
         if (selectedCentre === "All") return coursesToFilter;
 
         // Filter by specific selected centre
-        console.log("📍 [FOUNDATION] Filtering courses by centre:", selectedCentre);
+        
         const filtered = coursesToFilter.filter((course) => {
             const courseCentre = course.centre?.toLowerCase().trim() || "";
             const filterCentre = selectedCentre.toLowerCase().trim();
             const matches = courseCentre === filterCentre;
             if (matches) {
-                console.log("✅ Course matches:", course.name, "Centre:", course.centre);
+                
             }
             return matches;
         });
-        console.log("📍 [FOUNDATION] Filtered courses count:", filtered.length);
+        
         return filtered;
     }, [courses, selectedCentre]);
 

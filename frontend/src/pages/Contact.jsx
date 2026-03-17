@@ -67,7 +67,7 @@ const Contact = () => {
     setShowMessage(false);
 
     try {
-      console.log("Submitting to:", `${API_BASE_URL}/api/contact/submit/`);
+      
 
       const response = await fetch(`${API_BASE_URL}/api/contact/submit/`, {
         method: "POST",

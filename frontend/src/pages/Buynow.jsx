@@ -143,9 +143,9 @@ const Buynow = () => {
       };
 
       // 3. Call API
-      console.log("Processing purchase:", payload);
+      
       const response = await coursesAPI.purchase(payload);
-      console.log("Purchase Success Response:", response.data);
+      
 
       // 4. Handle Success
       if (response.data.token && response.data.user) {

@@ -101,7 +101,7 @@ export default function ResultsSection({ selectedCentre, fixedCategory, title, s
             });
 
             setAllToppers(toppers);
-            console.log("🏆 Fetched toppers:", toppers);
+            
         } catch (err) {
             console.error("Error fetching toppers:", err);
             setError("Failed to load results. Please try again later.");
@@ -141,7 +141,7 @@ export default function ResultsSection({ selectedCentre, fixedCategory, title, s
 
     // Update filterCentre if selectedCentre prop changes OR global context changes
     useEffect(() => {
-        console.log("🔄 ResultsSection Sync - Prop:", selectedCentre, "Global:", globalSelectedCentre);
+        
 
         let targetCentre = "All";
 
@@ -156,7 +156,7 @@ export default function ResultsSection({ selectedCentre, fixedCategory, title, s
         if (targetCentre !== "All") {
             // Find canonical name from data (case-insensitive match)
             const match = uniqueCentres.find(c => (c || "").toLowerCase() === targetCentre.toLowerCase());
-            console.log("🔍 Match found for centre:", match, "Target:", targetCentre);
+            
 
             if (match) {
                 setFilterCentre(match);
@@ -201,7 +201,7 @@ export default function ResultsSection({ selectedCentre, fixedCategory, title, s
         return true;
     });
 
-    console.log(`📊 Filter Stats - Tab: ${activeTab}, Centre: ${filterCentre}, Exam: ${filterExam}, Year: ${filterYear}, Results: ${cards.length}`);
+    
 
     // Reset derived filters when base filters change? 
     // Example: If I select Centre A, and currently Exam X is selected but Centre A doesn't have Exam X, 

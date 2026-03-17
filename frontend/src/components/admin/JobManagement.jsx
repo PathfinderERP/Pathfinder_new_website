@@ -41,7 +41,7 @@ const JobManagement = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("refresh") === "true") {
-      console.log("🔄 Forcing job data refresh due to URL parameter");
+      
       clearAdminCache("admin_job_stats");
       clearAdminCache("admin_job_posts");
       clearAdminCache("admin_job_applications");

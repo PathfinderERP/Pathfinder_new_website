@@ -189,7 +189,7 @@ function AlumniApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCe
                 source: "alumni_page_legend_enroll"
             };
 
-            console.log("Submitting application:", applicationData);
+            
 
             // Send to backend API
             if (API_BASE_URL) {

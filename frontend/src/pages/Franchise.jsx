@@ -28,7 +28,7 @@ const Franchise = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Franchise Inquiry:', formData);
+        
         alert('Thank you for your interest! Our team will contact you shortly.');
     };
 

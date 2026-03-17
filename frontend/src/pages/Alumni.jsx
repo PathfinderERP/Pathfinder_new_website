@@ -207,7 +207,7 @@ const AlumniPage = () => {
                                     key={prof}
                                     onPointerDown={(e) => {
                                         // Prevents double-triggering with click but ensures fast response
-                                        console.log("Pointer down on profession:", prof);
+                                        
                                         setActiveProfession(prof);
                                     }}
                                     className={`flex-shrink-0 px-8 py-4 rounded-full text-xl font-bold transition-all duration-200 relative z-[60] cursor-pointer touch-manipulation ${activeProfession === prof

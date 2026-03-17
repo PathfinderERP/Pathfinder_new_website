@@ -92,7 +92,7 @@ const CentreCreate = () => {
     setError("");
 
     try {
-      console.log("🚀 STARTING CENTRE CREATION PROCESS");
+      
 
       // VALIDATE GOOGLE MAPS URL - ACCEPT ALL FORMATS
       const isValidGoogleMapsUrl =
@@ -109,7 +109,7 @@ const CentreCreate = () => {
         return;
       }
 
-      console.log("✅ Google Maps URL is valid:", centreData.location);
+      
 
       // OPTION 1: Create centre WITH toppers data first (RECOMMENDED)
       // This ensures all topper fields are saved properly
@@ -139,36 +139,36 @@ const CentreCreate = () => {
           .filter((topper) => topper.name && topper.exam && topper.rank), // Only include valid toppers
       };
 
-      console.log("📤 Creating centre WITH toppers data:", apiCentreData);
+      
 
       // Step 1: Create the centre first (WITH topper data)
-      console.log("📝 Step 1: Creating centre...");
+      
       const createResponse = await centresAPI.create(apiCentreData);
       const newCentre = createResponse.data;
       const centreId = newCentre.id;
 
-      console.log("✅ Centre created successfully");
-      console.log("🆕 Centre ID:", centreId);
-      console.log("📋 Centre response:", newCentre);
+      
+      
+      
 
       // Step 2: Upload logo if provided
       if (logoFile) {
         try {
-          console.log("🖼️ Step 2: Uploading centre logo...");
+          
           await centresAPI.uploadCentreLogo(centreId, logoFile);
-          console.log("✅ Centre logo uploaded successfully");
+          
         } catch (logoError) {
           console.error("❌ Logo upload failed:", logoError);
         }
       }
 
       // Step 3: Upload topper images for existing toppers
-      console.log("👤 Step 3: Uploading topper images...");
+      
 
       const topperUploadPromises = centreData.toppers.map(
         async (topper, index) => {
-          console.log(`\n--- Uploading Image for Topper ${index + 1} ---`);
-          console.log(`📝 Topper data:`, topper);
+          
+          
 
           // Validate topper has required data
           if (
@@ -179,9 +179,7 @@ const CentreCreate = () => {
             !topper.rank ||
             topper.rank.toString().trim() === ""
           ) {
-            console.log(
-              `⏭️ Skipping topper ${index + 1} - missing required fields`
-            );
+            
             return {
               success: false,
               skipped: true,
@@ -191,11 +189,11 @@ const CentreCreate = () => {
 
           const file = topperFiles[index];
           if (!file) {
-            console.log(`⏭️ Skipping topper ${index + 1} - no image file`);
+            
             return { success: true, skipped: true, reason: "No image file" };
           }
 
-          console.log(`📁 Uploading image for topper: "${topper.name}"`);
+          
 
           try {
             // Send minimal data for image upload - the topper already exists
@@ -213,7 +211,7 @@ const CentreCreate = () => {
               badge: topper.badge || "",
             };
 
-            console.log(`📤 Sending topper data for image upload:`, topperData);
+            
 
             // Create FormData for image upload
             const formData = new FormData();
@@ -223,9 +221,7 @@ const CentreCreate = () => {
             // This should update the existing topper with the image
             await centresAPI.uploadTopperImage(centreId, formData);
 
-            console.log(
-              `✅ Topper image uploaded successfully: ${topper.name}`
-            );
+            
             return { success: true, topperName: topper.name };
           } catch (topperError) {
             console.error(
@@ -243,7 +239,7 @@ const CentreCreate = () => {
 
       // Wait for all topper image uploads to complete
       if (topperUploadPromises.length > 0) {
-        console.log("⏳ Waiting for topper image uploads...");
+        
         const results = await Promise.allSettled(topperUploadPromises);
 
         // Count results
@@ -255,37 +251,31 @@ const CentreCreate = () => {
           if (result.status === "fulfilled") {
             const uploadResult = result.value;
             if (uploadResult.skipped) {
-              console.log(
-                `   ${index + 1}. ⏭️ SKIPPED: ${uploadResult.reason}`
-              );
+              
               skipCount++;
             } else if (uploadResult.success) {
-              console.log(
-                `   ${index + 1}. ✅ SUCCESS: ${uploadResult.topperName}`
-              );
+              
               successCount++;
             } else {
-              console.log(
-                `   ${index + 1}. ❌ FAILED: ${uploadResult.topperName}`
-              );
+              
               failCount++;
             }
           } else {
-            console.log(`   ${index + 1}. 💥 PROMISE REJECTED:`, result.reason);
+            
             failCount++;
           }
         });
 
-        console.log(`\n📈 TOPPER IMAGE UPLOAD SUMMARY:`);
-        console.log(`   ✅ Successful: ${successCount}`);
-        console.log(`   ⏭️ Skipped: ${skipCount}`);
-        console.log(`   ❌ Failed: ${failCount}`);
-        console.log(`   📊 Total Processed: ${results.length}`);
+        
+        
+        
+        
+        
       } else {
-        console.log("⏭️ No topper images to upload");
+        
       }
 
-      console.log("🎉 CENTRE CREATION PROCESS COMPLETED SUCCESSFULLY");
+      
       alert("Centre created successfully!");
       clearAdminCache("admin_centres");
       navigate("/admin/centres?refresh=true");

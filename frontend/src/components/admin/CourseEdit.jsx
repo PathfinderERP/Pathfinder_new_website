@@ -143,10 +143,10 @@ const CourseEdit = () => {
   const fetchAllCentres = async () => {
     try {
       setFetchLoading((prev) => ({ ...prev, centres: true }));
-      console.log("🔄 Fetching all centres from API...");
+      
 
       const response = await centresAPI.getAll();
-      console.log("✅ Centres API response:", response.data);
+      
 
       setCentres(response.data);
     } catch (err) {
@@ -159,7 +159,7 @@ const CourseEdit = () => {
 
   // Auto-fill ALL fields when centre is selected (like VLOOKUP)
   const handleCentreChange = (centreName) => {
-    console.log("🎯 Centre selected:", centreName);
+    
     setSelectedCentre(centreName);
 
     if (centreName) {
@@ -167,7 +167,7 @@ const CourseEdit = () => {
       const selectedCentreData = centres.find(
         (centre) => centre.centre === centreName
       );
-      console.log("🔍 Selected centre data:", selectedCentreData);
+      
 
       if (selectedCentreData) {
         // Auto-fill ALL related fields (like VLOOKUP)
@@ -181,7 +181,7 @@ const CourseEdit = () => {
           // If centre is "Online", set mode to online automatically
           mode: selectedCentreData.centre === "Online" ? "online" : prev.mode,
         }));
-        console.log("✅ All fields auto-filled from centre data");
+        
       } else {
         console.error("❌ Centre data not found for:", centreName);
         // Reset fields if centre not found
@@ -284,7 +284,7 @@ const CourseEdit = () => {
       delete dataToSend.slug;
       delete dataToSend.code;
 
-      console.log("📦 Updating course data:", dataToSend);
+      
 
       await coursesAPI.update(id, dataToSend);
       clearAdminCache("admin_courses");

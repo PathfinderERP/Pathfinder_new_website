@@ -104,8 +104,8 @@ const CentreEdit = () => {
       const response = await centresAPI.getById(id);
       const centre = response.data;
 
-      console.log("📋 FULL CENTRE DATA:", centre);
-      console.log("👤 TOPPERS DATA:", centre.toppers);
+      
+      
 
       // Format the centre data for the form
       setCentreData({
@@ -188,7 +188,7 @@ const CentreEdit = () => {
     setLogoFile(null);
     setCurrentLogoUrl("");
     setCentreData(prev => ({ ...prev, logo_url: "" }));
-    console.log("🗑️ Centre logo cleared from local state");
+    
   };
 
   const handleRemoveTopperImage = (index) => {
@@ -208,7 +208,7 @@ const CentreEdit = () => {
       };
       return { ...prev, toppers: updatedToppers };
     });
-    console.log(`🗑️ Topper image at index ${index} cleared from local state`);
+    
   };
 
   const handleSubmit = async (e) => {
@@ -217,7 +217,7 @@ const CentreEdit = () => {
     setError("");
 
     try {
-      console.log("🚀 STARTING CENTRE UPDATE PROCESS");
+      
 
       // VALIDATE GOOGLE MAPS URL - ACCEPT ALL FORMATS
       const isValidGoogleMapsUrl =
@@ -234,7 +234,7 @@ const CentreEdit = () => {
         return;
       }
 
-      console.log("✅ Google Maps URL is valid:", centreData.location);
+      
 
       // ✅ FIXED: Update centre data WITHOUT image fields to prevent data loss 
       // UNLESS they are explicitly cleared
@@ -264,17 +264,17 @@ const CentreEdit = () => {
         })),
       };
 
-      console.log("📤 Step 1: Updating centre data (text only)...");
-      console.log("📋 Topper data being sent:", dataToSend.toppers);
+      
+      
       await centresAPI.update(id, dataToSend);
-      console.log("✅ Centre data updated successfully");
+      
 
       // Step 2: Upload new logo if provided
       if (logoFile) {
         try {
-          console.log("🖼️ Step 2: Uploading centre logo...");
+          
           await centresAPI.uploadCentreLogo(id, logoFile);
-          console.log("✅ Centre logo uploaded successfully");
+          
         } catch (logoError) {
           console.error("❌ Logo upload failed:", logoError);
           // Don't stop the process for logo errors
@@ -283,7 +283,7 @@ const CentreEdit = () => {
 
       // Step 3: Handle topper image updates for EXISTING toppers
       // Step 3: Handle topper image updates for EXISTING toppers
-      console.log("👤 Step 3: Uploading topper images...");
+      
 
       const topperImageUploadPromises = Object.entries(topperFiles).map(
         async ([index, file]) => {
@@ -296,16 +296,9 @@ const CentreEdit = () => {
           }
 
           try {
-            console.log(
-              `📁 Uploading image for topper: "${topper.name}" at index ${topperIndex}`
-            );
-            console.log(`📄 File object:`, file);
-            console.log(`📄 File details:`, {
-              name: file.name,
-              type: file.type,
-              size: file.size,
-              lastModified: file.lastModified,
-            });
+            
+            
+            
 
             // ✅ Create FormData - SIMPLIFIED VERSION FOR TESTING
             const formData = new FormData();
@@ -315,40 +308,30 @@ const CentreEdit = () => {
             formData.append("topper_index", topperIndex.toString());
 
             // ✅ DEBUG: Check FormData contents
-            console.log("📤 FormData verification:");
-            console.log("   - Has 'image':", formData.has("image"));
-            console.log(
-              "   - Has 'topper_index':",
-              formData.has("topper_index")
-            );
+            
+            
+            
 
             // Try to log FormData entries (this might not work in all browsers)
             try {
               for (let [key, value] of formData.entries()) {
                 if (key === "image") {
-                  console.log(`   - ${key}:`, {
-                    name: value.name,
-                    type: value.type,
-                    size: value.size,
-                  });
+                  
                 } else {
-                  console.log(`   - ${key}:`, value);
+                  
                 }
               }
             } catch (e) {
-              console.log(
-                "   - Could not iterate FormData entries:",
-                e.message
-              );
+              
             }
 
             // ✅ Use the API call with better error handling
-            console.log(`🔄 Calling uploadTopperImage API for centre ${id}...`);
+            
 
             const response = await centresAPI.uploadTopperImage(id, formData);
 
-            console.log(`✅ Image uploaded successfully for: ${topper.name}`);
-            console.log("📋 Response:", response.data);
+            
+            
 
             return {
               success: true,
@@ -392,7 +375,7 @@ const CentreEdit = () => {
 
       // Wait for all topper image uploads to complete
       if (topperImageUploadPromises.length > 0) {
-        console.log("⏳ Waiting for topper image uploads...");
+        
         const results = await Promise.allSettled(topperImageUploadPromises);
 
         // Count and log results
@@ -403,32 +386,27 @@ const CentreEdit = () => {
           if (result.status === "fulfilled") {
             const uploadResult = result.value;
             if (uploadResult.success) {
-              console.log(
-                `   ${index + 1}. ✅ SUCCESS: ${uploadResult.topperName}`
-              );
+              
               successCount++;
             } else {
-              console.log(
-                `   ${index + 1}. ❌ FAILED: ${uploadResult.topperName} - ${uploadResult.error
-                }`
-              );
+              
               failCount++;
             }
           } else {
-            console.log(`   ${index + 1}. 💥 PROMISE REJECTED:`, result.reason);
+            
             failCount++;
           }
         });
 
-        console.log(`\n📈 TOPPER IMAGE UPLOAD SUMMARY:`);
-        console.log(`   ✅ Successful: ${successCount}`);
-        console.log(`   ❌ Failed: ${failCount}`);
-        console.log(`   📊 Total: ${results.length}`);
+        
+        
+        
+        
       } else {
-        console.log("⏭️ No topper images to upload");
+        
       }
 
-      console.log("🎉 CENTRE UPDATE PROCESS COMPLETED SUCCESSFULLY");
+      
       alert("Centre updated successfully!");
       clearAdminCache("admin_centres");
       navigate("/admin/centres?refresh=true");
