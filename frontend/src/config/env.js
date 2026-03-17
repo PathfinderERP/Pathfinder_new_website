@@ -40,7 +40,7 @@ const env = {
     USER_DELETE:
       import.meta.env.VITE_USER_DELETE_ENDPOINT || "/api/auth/users/",
     USER_CREATE:
-      import.meta.env.VITE_USER_CREATE_ENDPOINT || "/api/auth/admin/create/",
+      import.meta.env.VITE_USER_CREATE_ENDPOINT || "/api/business/admin/auth/create/",
 
     // Admin Auth
     ADMIN_LOGIN:

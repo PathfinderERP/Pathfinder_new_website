@@ -28,9 +28,9 @@ export const AuthProvider = ({ children }) => {
 
   // Admin endpoints - using environment variables
   const ADMIN_LOGIN_ENDPOINT =
-    import.meta.env.VITE_ADMIN_LOGIN_ENDPOINT || "/api/admin/auth/login/";
+    import.meta.env.VITE_ADMIN_LOGIN_ENDPOINT || "/api/business/admin/auth/login/";
   const ADMIN_REGISTER_ENDPOINT =
-    import.meta.env.VITE_ADMIN_REGISTER_ENDPOINT || "/api/admin/auth/register/";
+    import.meta.env.VITE_ADMIN_REGISTER_ENDPOINT || "/api/business/admin/auth/register/";
 
   // Check for existing token on app start
   useEffect(() => {
