@@ -104,12 +104,12 @@ export default function PathVerseOverview() {
         loadingCentres={loadingCentres}
       />
       <Students />
-      <Admissions />
-      <Events />
+      {/* <Admissions />
+      <Events /> */}
       <Lumos />
-      <PathTex />
+      {/* <PathTex />
       <Blog />
-      <Community />
+      <Community /> */}
       <FAQ />
       {/* <FinalCTA /> */}
 
