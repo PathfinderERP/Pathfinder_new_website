@@ -361,7 +361,7 @@ def admin_login(request):
     serializer = AdminLoginSerializer(data=request.data)
     if serializer.is_valid():
         email = serializer.validated_data['email'].lower().strip()
-        password = serializer.validated_data['password'].strip()
+        password = serializer.validated_data['password']
         
         try:
             admin = Admin.objects.get(email=email, is_active=True)

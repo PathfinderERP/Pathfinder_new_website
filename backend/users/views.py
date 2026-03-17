@@ -47,7 +47,7 @@ def register_user(request):
 def login_user(request):
     try:
         email = request.data.get('email', '').lower().strip()
-        password = request.data.get('password', '').strip()
+        password = request.data.get('password', '')
 
         if not email or not password:
             return Response(
@@ -423,7 +423,7 @@ def reset_password_admin(request, user_id):
     
     try:
         user = User.objects.get(id=user_id)
-        new_password = request.data.get('password', '').strip()
+        new_password = request.data.get('password', '')
         
         if not new_password or len(new_password) < 6:
             return Response({'error': 'Password must be at least 6 characters'}, status=status.HTTP_400_BAD_REQUEST)

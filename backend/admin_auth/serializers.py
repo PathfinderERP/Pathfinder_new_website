@@ -6,9 +6,10 @@ class AdminSerializer(serializers.Serializer):
     email = serializers.EmailField()
     full_name = serializers.CharField()
     phone = serializers.CharField(required=False, allow_blank=True)
-    is_active = serializers.BooleanField()
-    is_superuser = serializers.BooleanField()
+    is_active = serializers.BooleanField(default=True)
+    is_superuser = serializers.BooleanField(default=False)
     permissions = serializers.ListField(child=serializers.CharField())
+    password = serializers.CharField(write_only=True, required=False, min_length=6)
     created_at = serializers.DateTimeField(read_only=True)
     
     def update(self, instance, validated_data):
@@ -16,7 +17,13 @@ class AdminSerializer(serializers.Serializer):
         instance.full_name = validated_data.get('full_name', instance.full_name)
         instance.phone = validated_data.get('phone', instance.phone)
         instance.is_active = validated_data.get('is_active', instance.is_active)
+        instance.is_superuser = validated_data.get('is_superuser', instance.is_superuser)
         instance.permissions = validated_data.get('permissions', instance.permissions)
+        
+        password = validated_data.get('password')
+        if password:
+            instance.set_password(password)
+            
         instance.save()
         return instance
 

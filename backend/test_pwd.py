@@ -93,6 +93,7 @@ def test_admin_password_hash():
             is_superuser=True
         )
         admin.set_password(new_pwd)
+        admin.save() # ADDED SAVE
         admin_reloaded = Admin.objects.get(email=email)
         result = admin_reloaded.check_password(new_pwd)
         print(f"Checking new admin password: {result}")
