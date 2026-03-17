@@ -5,7 +5,7 @@ from . import views
 
 router = DefaultRouter()
 router.register(r'courses', views.CourseViewSet, basename='course')
-router.register(r'admin', views.AdminViewSet, basename='admin')
+router.register(r'business/admin', views.AdminViewSet, basename='admin')
 router.register(r'data', views.DataViewSet, basename='data')
 router.register(r'purchase', views.PurchaseViewSet, basename='purchase')
 

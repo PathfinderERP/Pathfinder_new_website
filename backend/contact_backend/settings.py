@@ -316,7 +316,7 @@ OFFICIAL_EMAIL = os.getenv('OFFICIAL_EMAIL', 'hrpathfinder3@gmail.com')
 
 # Frontend URLs
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-ADMIN_RESET_PASSWORD_URL = os.getenv('ADMIN_RESET_PASSWORD_URL', f'{FRONTEND_URL}/admin/reset-password')
+ADMIN_RESET_PASSWORD_URL = os.getenv('ADMIN_RESET_PASSWORD_URL', f'{FRONTEND_URL}/business/admin/reset-password')
 
 # Print email configuration for debugging
 if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':

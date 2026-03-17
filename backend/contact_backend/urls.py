@@ -11,12 +11,12 @@ def root(request):
             "list_contacts": "/api/contacts/",
             "user_register": "/api/auth/register/",
             "user_login": "/api/auth/login/",
-            "admin_register": "/api/admin/auth/register/",
-            "admin_login": "/api/admin/auth/login/",
-            "admin_forgot_password": "/api/admin/auth/forgot-password/",
-            "admin_dashboard": "/api/admin/auth/dashboard/",
+            "admin_register": "/api/business/admin/auth/register/",
+            "admin_login": "/api/business/admin/auth/login/",
+            "admin_forgot_password": "/api/business/admin/auth/forgot-password/",
+            "admin_dashboard": "/api/business/admin/auth/dashboard/",
             "courses_list": "/api/courses/courses/",
-            "admin_all_data": "/api/courses/admin/alldata/",
+            "admin_all_data": "/api/courses/business/admin/alldata/",
             "data_states": "/api/courses/data/states/",
             "alumni_list": "/api/alumni/",
             "alumni_by_profession": "/api/alumni/by_profession/",
@@ -30,10 +30,10 @@ def root(request):
 
 urlpatterns = [
     path('', root, name='root'),
-    path('admin/', admin.site.urls),
+    path('business/admin/', admin.site.urls),
     path('api/', include('contact_api.urls')),   # Your existing contact API
     path('api/auth/', include('users.urls')),    # Your existing auth
-    path('api/admin/auth/', include('admin_auth.urls')),  # ADD THIS LINE - Admin authentication
+    path('api/business/admin/auth/', include('admin_auth.urls')),  # ADD THIS LINE - Admin authentication
     path('api/courses/', include('courses.urls')),  # Courses URLs
     path('api/centres/', include('centres.urls')),
     path('api/jobs/', include('job_post.urls')),  

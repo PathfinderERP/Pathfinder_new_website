@@ -28,10 +28,10 @@ api.interceptors.request.use(
     // 3. Otherwise use whatever is available
     let tokenToUse = null;
 
-    const isAdminEndpoint = config.url.includes('/api/admin/') ||
+    const isAdminEndpoint = config.url.includes('/api/business/admin/') ||
       config.url.includes('/api/auth/users/') ||
-      config.url.includes('/api/auth/admin/') ||
-      config.url.includes('/api/courses/admin/');
+      config.url.includes('/api/auth/business/admin/') ||
+      config.url.includes('/api/courses/business/admin/');
 
     const isStudentEndpoint = config.url.includes('/my_courses/') ||
       config.url.includes('/api/auth/profile/') ||
@@ -87,7 +87,7 @@ api.interceptors.response.use(
         localStorage.removeItem("admin_user");
         localStorage.removeItem("userType");
         
-        window.location.href = "/admin/login";
+        window.location.href = "/business/admin/login";
       } else {
         localStorage.removeItem("authToken");
         localStorage.removeItem("userData");
@@ -110,7 +110,7 @@ api.interceptors.response.use(
           localStorage.removeItem("admin_user");
           localStorage.removeItem("userType");
           
-          window.location.href = "/admin/login";
+          window.location.href = "/business/admin/login";
         } else {
           localStorage.removeItem("authToken");
           localStorage.removeItem("userData");
@@ -128,7 +128,7 @@ api.interceptors.response.use(
 // Token verification utility
 export const verifyToken = async (token, userType = "admin") => {
   try {
-    const response = await api.post("/api/admin/auth/debug-token/", { token });
+    const response = await api.post("/api/business/admin/auth/debug-token/", { token });
     return response.data;
   } catch (error) {
     console.error("❌ Token verification failed:", error);
@@ -162,7 +162,7 @@ export const adminAuthAPI = {
   },
 
   updateProfile: (data) => {
-    return api.put("/api/admin/auth/update-profile/", data);
+    return api.put("/api/business/admin/auth/update-profile/", data);
   },
 
   getDashboard: () => {
@@ -178,12 +178,12 @@ export const adminAuthAPI = {
   },
 
   registerWithInvite: (adminData) => {
-    return api.post("/api/admin/auth/register-with-invite/", adminData);
+    return api.post("/api/business/admin/auth/register-with-invite/", adminData);
   },
 
   // Add debug endpoint
   debugToken: (token) => {
-    return api.post("/api/admin/auth/debug-token/", { token });
+    return api.post("/api/business/admin/auth/debug-token/", { token });
   },
 };
 
@@ -282,7 +282,7 @@ export const adminManagementAPI = {
   // Update admin details
   updateAdmin: (adminId, adminData) => {
     return api.put(
-      `/api/admin/auth/${adminId}/update/`,
+      `/api/business/admin/auth/${adminId}/update/`,
       adminData
     );
   },
@@ -378,7 +378,7 @@ export const userManagementAPI = {
 
   // Get user enrollments (admin)
   getUserEnrollments: (userId) => {
-    return api.get(`/api/courses/admin/user_enrollments/?user_id=${userId}`);
+    return api.get(`/api/courses/business/admin/user_enrollments/?user_id=${userId}`);
   },
 };
 

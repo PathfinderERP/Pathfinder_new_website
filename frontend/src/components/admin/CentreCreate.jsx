@@ -278,7 +278,7 @@ const CentreCreate = () => {
       
       alert("Centre created successfully!");
       clearAdminCache("admin_centres");
-      navigate("/admin/centres?refresh=true");
+      navigate("/business/admin/centres?refresh=true");
     } catch (err) {
       console.error("💥 CENTRE CREATION FAILED:", err);
       setError(
@@ -373,7 +373,7 @@ const CentreCreate = () => {
             </p>
           </div>
           <button
-            onClick={() => navigate("/admin/centres")}
+            onClick={() => navigate("/business/admin/centres")}
             className="bg-gray-500 hover:bg-gray-600 dark:bg-slate-700 dark:hover:bg-slate-600 text-white px-4 py-2 rounded-md transition duration-200"
           >
             Back to Centres
@@ -886,7 +886,7 @@ const CentreCreate = () => {
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/admin/centres")}
+                onClick={() => navigate("/business/admin/centres")}
                 className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition duration-200"
               >
                 Cancel

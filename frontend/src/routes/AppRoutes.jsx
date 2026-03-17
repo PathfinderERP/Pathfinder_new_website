@@ -325,17 +325,17 @@ const AppRoutes = () => {
       />
 
       {/* Admin Auth Routes (No Layout - they have their own styling) */}
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
-      <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+      <Route path="/business/admin/login" element={<AdminLogin />} />
+      <Route path="/business/admin/forgot-password" element={<AdminForgotPassword />} />
+      <Route path="/business/admin/reset-password" element={<AdminResetPassword />} />
       <Route
-        path="/admin/register/:token"
+        path="/business/admin/register/:token"
         element={<AdminRegisterWithInvite />}
       />
 
       {/* Protected Admin Routes with Admin Layout */}
       <Route
-        path="/admin/dashboard"
+        path="/business/admin/dashboard"
         element={
           <AdminProtectedRoute requiredPermission="view_dashboard">
             <AdminLayout>
@@ -347,7 +347,7 @@ const AppRoutes = () => {
 
       {/* Courses Routes */}
       <Route
-        path="/admin/courses"
+        path="/business/admin/courses"
         element={
           <AdminProtectedRoute requiredPermission="manage_courses">
             <AdminLayout>
@@ -357,7 +357,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/courses/create"
+        path="/business/admin/courses/create"
         element={
           <AdminProtectedRoute requiredPermission="manage_courses">
             <AdminLayout>
@@ -367,7 +367,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/courses/:id/edit"
+        path="/business/admin/courses/:id/edit"
         element={
           <AdminProtectedRoute requiredPermission="manage_courses">
             <AdminLayout>
@@ -379,7 +379,7 @@ const AppRoutes = () => {
 
       {/* Centres Routes */}
       <Route
-        path="/admin/centres"
+        path="/business/admin/centres"
         element={
           <AdminProtectedRoute requiredPermission="manage_courses">
             <AdminLayout>
@@ -389,7 +389,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/centres/create"
+        path="/business/admin/centres/create"
         element={
           <AdminProtectedRoute requiredPermission="manage_courses">
             <AdminLayout>
@@ -399,7 +399,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/centres/:id/edit"
+        path="/business/admin/centres/:id/edit"
         element={
           <AdminProtectedRoute requiredPermission="manage_courses">
             <AdminLayout>
@@ -411,7 +411,7 @@ const AppRoutes = () => {
 
       {/* Job Management Routes - ADD THESE */}
       <Route
-        path="/admin/jobs"
+        path="/business/admin/jobs"
         element={
           <AdminProtectedRoute requiredPermission="manage_applications">
             <AdminLayout>
@@ -421,7 +421,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/jobs/create"
+        path="/business/admin/jobs/create"
         element={
           <AdminProtectedRoute requiredPermission="manage_applications">
             <AdminLayout>
@@ -431,7 +431,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/jobs/edit/:id"
+        path="/business/admin/jobs/edit/:id"
         element={
           <AdminProtectedRoute requiredPermission="manage_applications">
             <AdminLayout>
@@ -441,7 +441,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/applications"
+        path="/business/admin/applications"
         element={
           <AdminProtectedRoute requiredPermission="manage_applications">
             <AdminLayout>
@@ -451,7 +451,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/course-applications"
+        path="/business/admin/course-applications"
         element={
           <AdminProtectedRoute requiredPermission="manage_applications">
             <AdminLayout>
@@ -461,7 +461,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/ads-leads"
+        path="/business/admin/ads-leads"
         element={
           <AdminProtectedRoute requiredPermission="manage_applications">
             <AdminLayout>
@@ -473,7 +473,7 @@ const AppRoutes = () => {
 
       {/* Alumni Management */}
       <Route
-        path="/admin/alumni"
+        path="/business/admin/alumni"
         element={
           <AdminProtectedRoute requiredPermission="manage_courses">
             <AdminLayout>
@@ -485,7 +485,7 @@ const AppRoutes = () => {
 
       {/* Student Corner Management */}
       <Route
-        path="/admin/student-corner"
+        path="/business/admin/student-corner"
         element={
           <AdminProtectedRoute requiredPermission="manage_courses">
             <AdminLayout>
@@ -496,7 +496,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/admin/blog"
+        path="/business/admin/blog"
         element={
           <AdminProtectedRoute requiredPermission="manage_blogs">
             <AdminLayout>
@@ -508,7 +508,7 @@ const AppRoutes = () => {
 
       {/* Users Management */}
       <Route
-        path="/admin/users"
+        path="/business/admin/users"
         element={
           <AdminProtectedRoute requiredPermission="manage_users">
             <AdminLayout>
@@ -520,7 +520,7 @@ const AppRoutes = () => {
 
       {/* Admin Management (Super Admin Only) */}
       <Route
-        path="/admin/management"
+        path="/business/admin/management"
         element={
           <SuperAdminProtectedRoute>
             <AdminLayout>
@@ -532,7 +532,7 @@ const AppRoutes = () => {
 
       {/* Settings */}
       <Route
-        path="/admin/settings"
+        path="/business/admin/settings"
         element={
           <AdminProtectedRoute requiredPermission="view_dashboard">
             <AdminLayout>
@@ -544,8 +544,8 @@ const AppRoutes = () => {
 
       {/* Redirect /admin to /admin/dashboard */}
       <Route
-        path="/admin"
-        element={<Navigate to="/admin/dashboard" replace />}
+        path="/business/admin"
+        element={<Navigate to="/business/admin/dashboard" replace />}
       />
 
       {/* Course Pages */}

@@ -277,7 +277,7 @@ const JobPostList = () => {
           </p>
           <div className="mt-6">
             <Link
-              to="/admin/jobs/create"
+              to="/business/admin/jobs/create"
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
             >
               Create Job Post

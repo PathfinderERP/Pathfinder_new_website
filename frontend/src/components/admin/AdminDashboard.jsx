@@ -235,7 +235,7 @@ const AdminDashboard = () => {
 
           {/* Quick Actions Panel */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <Link to="/admin/courses/create" className="group relative overflow-hidden bg-gradient-to-tr from-orange-400 to-orange-600 rounded-3xl p-8 shadow-xl shadow-orange-500/20 hover:shadow-orange-500/30 hover:-translate-y-1 transition-all duration-300">
+            <Link to="/business/admin/courses/create" className="group relative overflow-hidden bg-gradient-to-tr from-orange-400 to-orange-600 rounded-3xl p-8 shadow-xl shadow-orange-500/20 hover:shadow-orange-500/30 hover:-translate-y-1 transition-all duration-300">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -mr-16 -mt-16 blur-xl group-hover:scale-150 transition-transform duration-700"></div>
               <div className="relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center text-white mb-6">
@@ -247,7 +247,7 @@ const AdminDashboard = () => {
               <ChevronRightIcon className="absolute bottom-8 right-8 w-6 h-6 text-white/50 group-hover:translate-x-1 group-hover:text-white transition-all" />
             </Link>
 
-            <Link to="/admin/jobs/create" className="group relative overflow-hidden bg-gradient-to-tr from-slate-700 to-slate-900 rounded-3xl p-8 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            <Link to="/business/admin/jobs/create" className="group relative overflow-hidden bg-gradient-to-tr from-slate-700 to-slate-900 rounded-3xl p-8 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-xl group-hover:scale-150 transition-transform duration-700"></div>
               <div className="relative z-10">
                 <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center text-white mb-6">
@@ -267,7 +267,7 @@ const AdminDashboard = () => {
                 <h3 className="text-lg font-black text-gray-900 dark:text-white">Recent Applications</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Latest candidates applied for positions</p>
               </div>
-              <Link to="/admin/course-applications" className="text-xs font-bold text-orange-600 hover:text-orange-700 uppercase tracking-widest bg-orange-50 dark:bg-orange-900/10 px-4 py-2 rounded-xl transition-colors">
+              <Link to="/business/admin/course-applications" className="text-xs font-bold text-orange-600 hover:text-orange-700 uppercase tracking-widest bg-orange-50 dark:bg-orange-900/10 px-4 py-2 rounded-xl transition-colors">
                 View All
               </Link>
             </div>
@@ -316,7 +316,7 @@ const AdminDashboard = () => {
           <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-gray-100 dark:border-slate-800 p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-black text-gray-900 dark:text-white">New Courses</h3>
-              <Link to="/admin/courses" className="text-orange-500 hover:text-orange-600">
+              <Link to="/business/admin/courses" className="text-orange-500 hover:text-orange-600">
                 <ArrowTopRightOnSquareIcon className="w-5 h-5" />
               </Link>
             </div>
@@ -366,7 +366,7 @@ const AdminDashboard = () => {
               )}
             </div>
 
-            <Link to="/admin/jobs" className="mt-6 block w-full py-3 bg-orange-600 hover:bg-orange-700 text-center rounded-xl text-xs font-black uppercase tracking-widest transition-colors">
+            <Link to="/business/admin/jobs" className="mt-6 block w-full py-3 bg-orange-600 hover:bg-orange-700 text-center rounded-xl text-xs font-black uppercase tracking-widest transition-colors">
               Manage All Jobs
             </Link>
           </div>

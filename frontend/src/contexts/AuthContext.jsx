@@ -240,7 +240,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("admin_token");
     localStorage.removeItem("admin_user");
     localStorage.removeItem("userType");
-    window.location.href = "/admin/login";
+    window.location.href = "/business/admin/login";
   };
 
   const clearRedirect = () => {

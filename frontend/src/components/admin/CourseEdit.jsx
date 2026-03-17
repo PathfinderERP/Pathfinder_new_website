@@ -289,7 +289,7 @@ const CourseEdit = () => {
       await coursesAPI.update(id, dataToSend);
       clearAdminCache("admin_courses");
       alert("Course updated successfully!");
-      navigate("/admin/courses?refresh=true");
+      navigate("/business/admin/courses?refresh=true");
     } catch (err) {
       const errorMessage =
         err.response?.data?.error || "Failed to update course";
@@ -385,7 +385,7 @@ const CourseEdit = () => {
         await coursesAPI.delete(id);
         clearAdminCache("admin_courses");
         alert("Course deleted successfully!");
-        navigate("/admin/courses?refresh=true");
+        navigate("/business/admin/courses?refresh=true");
       } catch (err) {
         setError("Failed to delete course");
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -433,7 +433,7 @@ const CourseEdit = () => {
           </div>
           <div className="flex space-x-2">
             <button
-              onClick={() => navigate("/admin/courses")}
+              onClick={() => navigate("/business/admin/courses")}
               className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition duration-200"
             >
               Back to Courses
@@ -1462,7 +1462,7 @@ const CourseEdit = () => {
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/admin/courses")}
+                onClick={() => navigate("/business/admin/courses")}
                 className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition duration-200"
               >
                 Cancel

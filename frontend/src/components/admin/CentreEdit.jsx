@@ -409,7 +409,7 @@ const CentreEdit = () => {
       
       alert("Centre updated successfully!");
       clearAdminCache("admin_centres");
-      navigate("/admin/centres?refresh=true");
+      navigate("/business/admin/centres?refresh=true");
     } catch (err) {
       console.error("💥 CENTRE UPDATE FAILED:", err);
       setError(
@@ -501,7 +501,7 @@ const CentreEdit = () => {
         await centresAPI.delete(id);
         alert("Centre deleted successfully!");
         clearAdminCache("admin_centres");
-        navigate("/admin/centres?refresh=true");
+        navigate("/business/admin/centres?refresh=true");
       } catch (err) {
         setError("Failed to delete centre");
         console.error("Delete centre error:", err);
@@ -558,7 +558,7 @@ const CentreEdit = () => {
           </div>
           <div className="flex space-x-2">
             <button
-              onClick={() => navigate("/admin/centres")}
+              onClick={() => navigate("/business/admin/centres")}
               className="bg-gray-500 hover:bg-gray-600 dark:bg-slate-700 dark:hover:bg-slate-600 text-white px-4 py-2 rounded-md transition duration-200"
             >
               Back to Centres
@@ -1213,7 +1213,7 @@ const CentreEdit = () => {
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/admin/centres")}
+                onClick={() => navigate("/business/admin/centres")}
                 className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition duration-200"
               >
                 Cancel

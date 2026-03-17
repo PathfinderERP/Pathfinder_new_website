@@ -31,16 +31,16 @@ const AdminLogin = () => {
 
     if (result.success) {
       const admin = result.data.admin;
-      let targetRoute = "/admin/dashboard";
+      let targetRoute = "/business/admin/dashboard";
 
       // If not superuser, check if they have dashboard permission. 
       // If not, redirect to the first module they DO have permission for.
       if (!admin.is_superuser && (!admin.permissions || !admin.permissions.includes("view_dashboard"))) {
         const permissions = admin.permissions || [];
-        if (permissions.includes("manage_blogs")) targetRoute = "/admin/blog";
-        else if (permissions.includes("manage_courses")) targetRoute = "/admin/courses";
-        else if (permissions.includes("manage_applications")) targetRoute = "/admin/course-applications";
-        else if (permissions.includes("manage_users")) targetRoute = "/admin/users";
+        if (permissions.includes("manage_blogs")) targetRoute = "/business/admin/blog";
+        else if (permissions.includes("manage_courses")) targetRoute = "/business/admin/courses";
+        else if (permissions.includes("manage_applications")) targetRoute = "/business/admin/course-applications";
+        else if (permissions.includes("manage_users")) targetRoute = "/business/admin/users";
       }
 
       navigate(targetRoute);
@@ -125,7 +125,7 @@ const AdminLogin = () => {
             <div className="flex items-center justify-between">
               <div className="text-sm">
                 <Link
-                  to="/admin/forgot-password"
+                  to="/business/admin/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
                   Forgot your password?

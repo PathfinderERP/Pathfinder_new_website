@@ -56,7 +56,7 @@ const AdminRegister = () => {
 
       // Redirect to login after 2 seconds
       setTimeout(() => {
-        navigate("/admin/login");
+        navigate("/business/admin/login");
       }, 2000);
     } catch (error) {
       setError(
@@ -211,7 +211,7 @@ const AdminRegister = () => {
 
             <div className="text-center">
               <Link
-                to="/admin/login"
+                to="/business/admin/login"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Already have an account? Login here

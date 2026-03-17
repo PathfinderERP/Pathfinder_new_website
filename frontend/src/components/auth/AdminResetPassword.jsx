@@ -71,7 +71,7 @@ const AdminResetPassword = () => {
 
       setMessage(response.data.message || "Password reset successfully");
       setTimeout(() => {
-        navigate("/admin/login");
+        navigate("/business/admin/login");
       }, 3000);
     } catch (error) {
       setError(error.response?.data?.error || "Failed to reset password");
@@ -96,7 +96,7 @@ const AdminResetPassword = () => {
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
             <div className="text-red-600 text-lg mb-4">{error}</div>
             <button
-              onClick={() => navigate("/admin/forgot-password")}
+              onClick={() => navigate("/business/admin/forgot-password")}
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
               Request New Reset Link

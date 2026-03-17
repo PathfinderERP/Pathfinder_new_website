@@ -14,7 +14,7 @@ const SuperAdminProtectedRoute = ({ children }) => {
   }
 
   if (!admin) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/business/admin/login" replace />;
   }
 
   if (!admin.is_superuser) {

@@ -336,7 +336,7 @@ const CourseCreate = () => {
       setSuccess("Course created successfully!");
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setTimeout(() => {
-        navigate("/admin/courses?refresh=true");
+        navigate("/business/admin/courses?refresh=true");
       }, 2000);
     } catch (err) {
       const errorMessage = err.response?.data?.error || "Failed to create course";
@@ -393,7 +393,7 @@ const CourseCreate = () => {
         setSuccess(`✅ Successfully created course for ${successCount} centre(s)!`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(() => {
-          navigate("/admin/courses?refresh=true");
+          navigate("/business/admin/courses?refresh=true");
         }, 2000);
       } else {
         const errorMessages = errors.map(e => `${e.centre}: ${e.error}`).join('\n');
@@ -615,7 +615,7 @@ const CourseCreate = () => {
         setSuccess(`✅ Successfully created ${successCount} course(s) from CSV!`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(() => {
-          navigate("/admin/courses?refresh=true");
+          navigate("/business/admin/courses?refresh=true");
         }, 2000);
       } else {
         const errorMessages = errors.map(e => `Row ${e.row} (${e.centre}): ${e.error}`).join('\n');
@@ -702,7 +702,7 @@ const CourseCreate = () => {
             </p>
           </div>
           <button
-            onClick={() => navigate("/admin/courses")}
+            onClick={() => navigate("/business/admin/courses")}
             className="bg-gray-500 hover:bg-gray-600 dark:bg-slate-700 dark:hover:bg-slate-600 text-white px-4 py-2 rounded-md transition duration-200"
           >
             Back to Courses
@@ -1851,7 +1851,7 @@ const CourseCreate = () => {
 
                 <button
                   type="button"
-                  onClick={() => navigate("/admin/courses")}
+                  onClick={() => navigate("/business/admin/courses")}
                   className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition duration-200"
                 >
                   Cancel
@@ -2046,7 +2046,7 @@ const CourseCreate = () => {
 
                 <button
                   type="button"
-                  onClick={() => navigate("/admin/courses")}
+                  onClick={() => navigate("/business/admin/courses")}
                   className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md transition duration-200"
                 >
                   Cancel

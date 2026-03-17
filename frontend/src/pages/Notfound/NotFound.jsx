@@ -25,7 +25,7 @@ const NotFound = () => {
 
           {/* <div className="text-sm text-gray-500">
             <Link
-              to="/admin/login"
+              to="/business/admin/login"
               className="text-orange-600 hover:text-orange-700"
             >
               Admin Login

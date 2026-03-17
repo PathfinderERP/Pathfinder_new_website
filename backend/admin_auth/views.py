@@ -264,7 +264,7 @@ class AdminInviteView(mongo_generics.CreateAPIView):
         
         # Create invitation link
         frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
-        invitation_link = f"{frontend_url}/admin/register/{invitation_token}"
+        invitation_link = f"{frontend_url}/business/admin/register/{invitation_token}"
         
         # Send invitation email
         try:
@@ -395,7 +395,7 @@ def forgot_password(request):
             
             # Create reset link
             frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
-            reset_link = f"{frontend_url}/admin/reset-password?token={reset_token}"
+            reset_link = f"{frontend_url}/business/admin/reset-password?token={reset_token}"
             
             # Send email
             try:

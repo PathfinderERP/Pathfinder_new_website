@@ -344,7 +344,7 @@ const CentreList = () => {
             <RefreshCcw className="w-5 h-5" />
           </button>
           <Link
-            to="/admin/centres/create"
+            to="/business/admin/centres/create"
             className="flex items-center gap-2 px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20"
           >
             <PlusIcon className="w-5 h-5" />

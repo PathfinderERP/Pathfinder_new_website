@@ -23,16 +23,16 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
     };
 
     const navItems = [
-        { name: "Dashboard", path: "/admin/dashboard", icon: Squares2X2Icon, permission: "view_dashboard" },
-        { name: "Courses", path: "/admin/courses", icon: AcademicCapIcon, permission: "manage_courses" },
-        { name: "Applicants", path: "/admin/course-applications", icon: DocumentTextIcon, permission: "manage_applications" },
-        { name: "Ads Leads", path: "/admin/ads-leads", icon: UserGroupIcon, permission: "manage_applications" },
-        { name: "Centres", path: "/admin/centres", icon: BuildingOfficeIcon, permission: "manage_courses" },
-        { name: "Alumni", path: "/admin/alumni", icon: UserGroupIcon, permission: "manage_users" },
-        { name: "Users", path: "/admin/users", icon: UserIcon, permission: "manage_users" },
-        { name: "Student Corner", path: "/admin/student-corner", icon: BookOpenIcon, permission: "manage_courses" },
-        { name: "Blog", path: "/admin/blog", icon: NewspaperIcon, permission: "manage_blogs" },
-        { name: "Jobs", path: "/admin/jobs", icon: BriefcaseIcon, permission: "manage_applications" },
+        { name: "Dashboard", path: "/business/admin/dashboard", icon: Squares2X2Icon, permission: "view_dashboard" },
+        { name: "Courses", path: "/business/admin/courses", icon: AcademicCapIcon, permission: "manage_courses" },
+        { name: "Applicants", path: "/business/admin/course-applications", icon: DocumentTextIcon, permission: "manage_applications" },
+        { name: "Ads Leads", path: "/business/admin/ads-leads", icon: UserGroupIcon, permission: "manage_applications" },
+        { name: "Centres", path: "/business/admin/centres", icon: BuildingOfficeIcon, permission: "manage_courses" },
+        { name: "Alumni", path: "/business/admin/alumni", icon: UserGroupIcon, permission: "manage_users" },
+        { name: "Users", path: "/business/admin/users", icon: UserIcon, permission: "manage_users" },
+        { name: "Student Corner", path: "/business/admin/student-corner", icon: BookOpenIcon, permission: "manage_courses" },
+        { name: "Blog", path: "/business/admin/blog", icon: NewspaperIcon, permission: "manage_blogs" },
+        { name: "Jobs", path: "/business/admin/jobs", icon: BriefcaseIcon, permission: "manage_applications" },
     ];
 
     // Filter items based on permissions
@@ -45,11 +45,11 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
     });
 
     if (admin?.is_superuser) {
-        filteredNavItems.push({ name: "Admin Management", path: "/admin/management", icon: Cog6ToothIcon });
+        filteredNavItems.push({ name: "Admin Management", path: "/business/admin/management", icon: Cog6ToothIcon });
     }
 
     if (admin?.is_superuser || admin?.permissions?.includes("system_settings")) {
-        filteredNavItems.push({ name: "Settings", path: "/admin/settings", icon: Cog6ToothIcon });
+        filteredNavItems.push({ name: "Settings", path: "/business/admin/settings", icon: Cog6ToothIcon });
     }
 
     return (
@@ -60,7 +60,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
             <div className="flex flex-col h-full">
                 {/* Logo Section */}
                 <div className={`flex items-center h-16 px-4 border-b border-gray-200 dark:border-slate-800 ${isOpen ? "justify-between" : "justify-center"}`}>
-                    <Link to="/admin/dashboard" className={`flex items-center ${isOpen ? "space-x-2" : ""}`}>
+                    <Link to="/business/admin/dashboard" className={`flex items-center ${isOpen ? "space-x-2" : ""}`}>
                         <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
                             <span className="text-white font-bold text-xl">P</span>
                         </div>

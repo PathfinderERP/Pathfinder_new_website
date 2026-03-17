@@ -48,7 +48,7 @@ export const useAuth = () => {
     localStorage.removeItem("admin_user");
     setAdmin(null);
     setIsAuthenticated(false);
-    window.location.href = "/admin/login";
+    window.location.href = "/business/admin/login";
   }, []);
 
   const forgotPassword = useCallback(async (email) => {

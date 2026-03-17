@@ -9,22 +9,22 @@ const AdminProtectedRoute = ({ children, requiredPermission }) => {
 
   // Helper to find the first available route for this admin
   const getFirstAvailableRoute = (adminObj) => {
-    if (!adminObj) return "/admin/login";
-    if (adminObj.is_superuser) return "/admin/dashboard";
+    if (!adminObj) return "/business/admin/login";
+    if (adminObj.is_superuser) return "/business/admin/dashboard";
 
     const permissions = adminObj.permissions || [];
 
     // Mapping of permissions to routes in priority order
     const permissionRoutes = [
-      { perm: "view_dashboard", route: "/admin/dashboard" },
-      { perm: "manage_courses", route: "/admin/courses" },
-      { perm: "manage_blogs", route: "/admin/blog" },
-      { perm: "manage_applications", route: "/admin/course-applications" },
-      { perm: "manage_users", route: "/admin/users" },
+      { perm: "view_dashboard", route: "/business/admin/dashboard" },
+      { perm: "manage_courses", route: "/business/admin/courses" },
+      { perm: "manage_blogs", route: "/business/admin/blog" },
+      { perm: "manage_applications", route: "/business/admin/course-applications" },
+      { perm: "manage_users", route: "/business/admin/users" },
     ];
 
     const firstAvailable = permissionRoutes.find(pr => permissions.includes(pr.perm));
-    return firstAvailable ? firstAvailable.route : "/admin/login";
+    return firstAvailable ? firstAvailable.route : "/business/admin/login";
   };
 
   if (isLoading) {
@@ -39,7 +39,7 @@ const AdminProtectedRoute = ({ children, requiredPermission }) => {
   }
 
   if (!isAdminAuthenticated) {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+    return <Navigate to="/business/admin/login" state={{ from: location }} replace />;
   }
 
   // Permission check

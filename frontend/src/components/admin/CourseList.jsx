@@ -660,7 +660,7 @@ const CourseList = () => {
               Reset Filters
             </button>
             <Link
-              to="/admin/courses/create"
+              to="/business/admin/courses/create"
               className="inline-flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl transition-all shadow-md shadow-orange-500/20 gap-2"
             >
               <PlusIcon className="w-5 h-5" />
@@ -1250,7 +1250,7 @@ const CourseList = () => {
                     : "No course assets have been registered in the system yet."}
                 </p>
                 <Link
-                  to="/admin/courses/create"
+                  to="/business/admin/courses/create"
                   className="inline-flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-orange-500/20"
                 >
                   Create Your First Asset

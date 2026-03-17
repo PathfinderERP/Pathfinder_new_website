@@ -62,7 +62,7 @@ const AdminRegisterWithInvite = () => {
       );
 
       setTimeout(() => {
-        navigate("/admin/dashboard");
+        navigate("/business/admin/dashboard");
       }, 2000);
     } catch (error) {
       setError(
@@ -92,7 +92,7 @@ const AdminRegisterWithInvite = () => {
               Please contact system administrator for a valid invitation link.
             </p>
             <Link
-              to="/admin/login"
+              to="/business/admin/login"
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
               Go to Login
@@ -250,7 +250,7 @@ const AdminRegisterWithInvite = () => {
 
             <div className="text-center">
               <Link
-                to="/admin/login"
+                to="/business/admin/login"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Already have an account? Login here

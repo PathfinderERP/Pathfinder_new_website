@@ -44,39 +44,39 @@ const env = {
 
     // Admin Auth
     ADMIN_LOGIN:
-      import.meta.env.VITE_ADMIN_LOGIN_ENDPOINT || "/api/admin/auth/login/",
+      import.meta.env.VITE_ADMIN_LOGIN_ENDPOINT || "/api/business/admin/auth/login/",
     ADMIN_REGISTER:
       import.meta.env.VITE_ADMIN_REGISTER_ENDPOINT ||
-      "/api/admin/auth/register/",
+      "/api/business/admin/auth/register/",
     ADMIN_DASHBOARD:
       import.meta.env.VITE_ADMIN_DASHBOARD_ENDPOINT ||
-      "/api/admin/auth/dashboard/",
+      "/api/business/admin/auth/dashboard/",
     ADMIN_FORGOT_PASSWORD:
       import.meta.env.VITE_ADMIN_FORGOT_PASSWORD_ENDPOINT ||
-      "/api/admin/auth/forgot-password/",
+      "/api/business/admin/auth/forgot-password/",
     ADMIN_RESET_PASSWORD:
       import.meta.env.VITE_ADMIN_RESET_PASSWORD_ENDPOINT ||
-      "/api/admin/auth/reset-password/",
+      "/api/business/admin/auth/reset-password/",
     ADMIN_VERIFY_RESET_TOKEN:
       import.meta.env.VITE_ADMIN_VERIFY_RESET_TOKEN_ENDPOINT ||
-      "/api/admin/auth/verify-reset-token/",
+      "/api/business/admin/auth/verify-reset-token/",
     ADMIN_PROFILE:
-      import.meta.env.VITE_ADMIN_PROFILE_ENDPOINT || "/api/admin/auth/profile/",
+      import.meta.env.VITE_ADMIN_PROFILE_ENDPOINT || "/api/business/admin/auth/profile/",
     ADMIN_CHANGE_PASSWORD:
       import.meta.env.VITE_ADMIN_CHANGE_PASSWORD_ENDPOINT ||
-      "/api/admin/auth/change-password/",
+      "/api/business/admin/auth/change-password/",
 
     // Admin Management
     ADMIN_CREATE:
-      import.meta.env.VITE_ADMIN_CREATE_ENDPOINT || "/api/admin/auth/create/",
+      import.meta.env.VITE_ADMIN_CREATE_ENDPOINT || "/api/business/admin/auth/create/",
     ADMIN_LIST:
-      import.meta.env.VITE_ADMIN_LIST_ENDPOINT || "/api/admin/auth/list/",
+      import.meta.env.VITE_ADMIN_LIST_ENDPOINT || "/api/business/admin/auth/list/",
     ADMIN_PERMISSIONS:
-      import.meta.env.VITE_ADMIN_PERMISSIONS_ENDPOINT || "/api/admin/auth/",
+      import.meta.env.VITE_ADMIN_PERMISSIONS_ENDPOINT || "/api/business/admin/auth/",
     ADMIN_DELETE:
-      import.meta.env.VITE_ADMIN_DELETE_ENDPOINT || "/api/admin/auth/",
+      import.meta.env.VITE_ADMIN_DELETE_ENDPOINT || "/api/business/admin/auth/",
     ADMIN_INVITE:
-      import.meta.env.VITE_ADMIN_INVITE_ENDPOINT || "/api/admin/auth/invite/",
+      import.meta.env.VITE_ADMIN_INVITE_ENDPOINT || "/api/business/admin/auth/invite/",
 
     // Courses
     COURSES: import.meta.env.VITE_COURSES_ENDPOINT || "/api/courses/courses/",
@@ -91,7 +91,7 @@ const env = {
       "/api/courses/data/centres/",
     COURSES_ADMIN_ALLDATA:
       import.meta.env.VITE_COURSES_ADMIN_ALLDATA_ENDPOINT ||
-      "/api/courses/admin/alldata/",
+      "/api/courses/business/admin/alldata/",
     PURCHASE: import.meta.env.VITE_PURCHASE_ENDPOINT || "/api/courses/purchase/",
     MY_COURSES:
       import.meta.env.VITE_MY_COURSES_ENDPOINT || "/api/courses/courses/my_courses/",

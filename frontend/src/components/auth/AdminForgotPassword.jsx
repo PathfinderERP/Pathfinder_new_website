@@ -87,7 +87,7 @@ const AdminForgotPassword = () => {
 
             <div className="text-center">
               <Link
-                to="/admin/login"
+                to="/business/admin/login"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
                 Back to Login

@@ -101,7 +101,7 @@ def create_registration(request):
 
                 # 2. Prepare official notification
                 frontend_url = getattr(settings, 'FRONTEND_URL', 'https://pathfinder-landing-3.vercel.app')
-                admin_leads_url = f"{frontend_url}/admin/ads-leads"
+                admin_leads_url = f"{frontend_url}/business/admin/ads-leads"
                 backend_base_url = "https://three-pathfinder-new-backend-9.onrender.com"
                 backend_detail_url = f"{backend_base_url}/api/landing/registrations/{reg.id}/"
 
