@@ -27,7 +27,12 @@ jobs:
             free -h
             
             cd /home/ubuntu/Pathfinder_new_website
+            
+            # Stash any local server-side changes (e.g. settings.py) before pulling
+            git stash
             git pull origin main
+            # Restore locally modified production files (e.g. settings.py)
+            git stash pop || true
             
             # Backend
             cd backend
