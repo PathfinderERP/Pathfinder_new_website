@@ -34,4 +34,8 @@ jobs:
             npm install
             npm run build
             
+            # Copy built files to Nginx web root
+            sudo rm -rf /var/www/html/*
+            sudo cp -r dist/* /var/www/html/
+            
             sudo systemctl restart nginx
