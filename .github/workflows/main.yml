@@ -20,6 +20,12 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Check disk space and memory before doing anything
+            echo "=== DISK SPACE ==="
+            df -h
+            echo "=== MEMORY ==="
+            free -h
+            
             cd /home/ubuntu/Pathfinder_new_website
             git pull origin main
             
@@ -29,13 +35,24 @@ jobs:
             pip install -r requirements.txt
             sudo systemctl restart gunicorn
             
-            # Frontend
+            # Frontend - clean up old files first to free space
             cd ../frontend
-            npm install
+            rm -rf node_modules/.cache
+            npm ci --prefer-offline || npm install
+            
+            # Build with increased Node.js memory limit
+            export NODE_OPTIONS="--max-old-space-size=1024"
             npm run build
+            
+            echo "=== BUILD COMPLETE - DIST CONTENTS ==="
+            ls -la dist/
             
             # Copy built files to Nginx web root
             sudo rm -rf /var/www/html/*
             sudo cp -r dist/* /var/www/html/
             
+            echo "=== NGINX ROOT CONTENTS ==="
+            ls -la /var/www/html/
+            
             sudo systemctl restart nginx
+            echo "=== DEPLOYMENT DONE ==="
