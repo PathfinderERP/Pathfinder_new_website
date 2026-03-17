@@ -1,0 +1,7 @@
+🛠️ Starting Orphaned Reference Fix...
+📍 Fixing Centres (Checking 28 centres)
+✅ Cleared 0 orphaned references in Centres.
+💼 Fixing JobPosts (Checking 2 job posts)
+✅ Cleared 0 orphaned references in JobPosts.
+
+✨ Reference fix complete.

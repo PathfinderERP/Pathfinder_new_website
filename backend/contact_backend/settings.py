@@ -14,18 +14,16 @@ import dns.resolver  # Add this for DNS patch
 try:
     dns.resolver.get_default_resolver().nameservers = ['8.8.8.8', '8.8.4.4']
 except Exception as e:
-    print(f"DNS Patch warning: {e}")
+    pass
 
 # Load environment variables FIRST
 BASE_DIR = Path(__file__).resolve().parent.parent
 env_path = os.path.join(BASE_DIR, '.env')
 load_dotenv(env_path, override=True)
 
-print(f"Loading .env from: {env_path}")
-print(f"Found .env: {os.path.exists(env_path)}")
 if os.path.exists(env_path):
     with open(env_path, 'r') as f:
-        print(f"env content preview: {f.readline().strip()}")
+        pass
 
 # SECRET_KEY with proper fallback for production
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-development-key-change-in-production-123456')
@@ -60,9 +58,6 @@ if DEBUG:
 # Remove duplicates
 ALLOWED_HOSTS = list(set(ALLOWED_HOSTS))
 
-print(f"DEBUG mode: {DEBUG}")
-print(f"Allowed Hosts: {ALLOWED_HOSTS}")
-
 # JWT Settings - IMPROVED
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', SECRET_KEY)  # Fallback to Django secret
 JWT_ALGORITHM = 'HS256'
@@ -78,42 +73,38 @@ mongo_uri = os.getenv("MONGO_URI")  # FIXED: Back to MONGO_URI
 mongo_connected = False
 
 if mongo_uri:
-    print("Using MONGO_URI from environment")
     try:
         disconnect(alias="default")
         connect(
-            db=db_name, 
-            host=mongo_uri, 
+            db=db_name,
+            host=mongo_uri,
             alias="default",
             tlsCAFile=certifi.where()
         )
         mongo_connected = True
-        print("Successfully connected to MongoDB using MONGO_URI")
-    except Exception as e:
-        print(f"MongoDB connection failed: {e}")
+    except Exception:
+        pass
 
 elif all([username, password, cluster, db_name]):
     # Ensure they are strings for the type checker
     encoded_username = quote_plus(str(username))
     encoded_password = quote_plus(str(password))
     MONGO_URI = f"mongodb+srv://{encoded_username}:{encoded_password}@{cluster}.mongodb.net/{db_name}?retryWrites=true&w=majority"
-    
-    print(f"Connecting to MongoDB Atlas: {db_name}")
+
     try:
         disconnect(alias="default")
         connect(
-            db=db_name, 
-            host=MONGO_URI, 
+            db=db_name,
+            host=MONGO_URI,
             alias="default",
             tlsCAFile=certifi.where()
         )
         mongo_connected = True
-        print(f"Successfully connected to MongoDB Atlas: {db_name}")
-    except Exception as e:
-        print(f"MongoDB connection failed: {e}")
+    except Exception:
+        pass
 
 else:
-    print("MongoDB credentials missing - using SQLite only")
+    pass
 
 # Django SQLite database (for Django's built-in tables)
 DATABASES = {
@@ -181,7 +172,6 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Should be first
-    'admin_auth.middleware.DebugAuthenticationMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -299,8 +289,6 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-print(f"CORS Allowed Origins: {CORS_ALLOWED_ORIGINS}")  # Debug output
-
 # Security settings for production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
@@ -326,20 +314,15 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@pathfinder.com')
 OFFICIAL_EMAIL = os.getenv('OFFICIAL_EMAIL', 'hrpathfinder3@gmail.com')
 
-# Debugging the values read
-print(f"EMAIL_BACKEND from env: {os.getenv('EMAIL_BACKEND')}")
-print(f"EMAIL_HOST_USER from env: {os.getenv('EMAIL_HOST_USER')}")
-print(f"Actual EMAIL_BACKEND being used: {EMAIL_BACKEND}")
-
 # Frontend URLs
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 ADMIN_RESET_PASSWORD_URL = os.getenv('ADMIN_RESET_PASSWORD_URL', f'{FRONTEND_URL}/admin/reset-password')
 
 # Print email configuration for debugging
 if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
-    print("SMTP Email is configured correctly")
+    pass
 else:
-    print("Console Email Backend is active - emails will NOT be sent to real inboxes")
+    pass
 
 # ==================== END EMAIL CONFIGURATION ====================
 

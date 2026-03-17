@@ -20,7 +20,7 @@ class AdminJWTAuthentication(authentication.BaseAuthentication):
             else:
                 token = auth_header  # Simple token
             
-            print(f"🔐 Admin Auth - Token received: {token[:50]}...")  # Debug
+            
             
             # Decode JWT token
             payload = jwt.decode(
@@ -29,7 +29,7 @@ class AdminJWTAuthentication(authentication.BaseAuthentication):
                 algorithms=['HS256']
             )
             
-            print(f"🔐 Admin Auth - Token payload: {payload}")  # Debug
+            
             
             # Check for admin_id (your current token structure)
             admin_id = payload.get('admin_id')
@@ -44,7 +44,7 @@ class AdminJWTAuthentication(authentication.BaseAuthentication):
                 if not hasattr(admin, 'is_anonymous'):
                     admin.is_anonymous = False
                     
-                print(f"✅ Admin Auth - Success: {admin.email}")
+                    
                 return (admin, token)
             
             # If no admin_id, check for user_type
@@ -56,22 +56,12 @@ class AdminJWTAuthentication(authentication.BaseAuthentication):
                     admin = Admin.objects.get(id=user_id, is_active=True)
                     if not hasattr(admin, 'is_authenticated'):
                         admin.is_authenticated = True
-                    print(f"✅ Admin Auth - Success via user_type: {admin.email}")
+                    
                     return (admin, token)
             
             # If we reach here, this isn't an admin token
-            print("❌ Admin Auth - Not an admin token")
+            
             return None
             
-        except jwt.ExpiredSignatureError:
-            print("❌ Admin Auth - Token expired")
-            return None
-        except jwt.InvalidTokenError as e:
-            print(f"❌ Admin Auth - Invalid token: {e}")
-            return None
-        except Admin.DoesNotExist:
-            print("❌ Admin Auth - Admin not found")
-            return None
-        except Exception as e:
-            print(f"❌ Admin Auth - Unexpected Error: {e}")
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, Admin.DoesNotExist, Exception):
             return None

@@ -20,11 +20,29 @@ class JobPostSerializer(mongo_serializers.DocumentSerializer):
         fields = '__all__'
 
     def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        # Handle legacy 'company' field if department is missing
-        if not ret.get('department') and 'company' in instance._data:
-            ret['department'] = instance._data['company']
-        return ret
+        from mongoengine.errors import DoesNotExist
+        try:
+            ret = super().to_representation(instance)
+            # Handle legacy 'company' field if department is missing
+            if not ret.get('department') and 'company' in instance._data:
+                ret['department'] = instance._data['company']
+            
+            # Resolve created_by if it exists
+            if hasattr(instance, 'created_by') and instance.created_by:
+                ret['created_by_email'] = getattr(instance.created_by, 'email', None)
+                ret['created_by_name'] = getattr(instance.created_by, 'full_name', None)
+            
+            return ret
+        except DoesNotExist:
+            # If created_by is broken, super().to_representation(instance) might fail 
+            # if we are using mongoengine serializers that auto-dereference.
+            # Let's try to get a clean representation.
+            # Since we can't easily fix super() call if it fails inside, 
+            # we should have cleared it in the DB already.
+            # But just in case:
+            instance.created_by = None
+            instance.save()
+            return super().to_representation(instance)
 
 class JobApplicationSerializer(mongo_serializers.DocumentSerializer):
     work_experience = WorkExperienceSerializer(many=True, required=False)

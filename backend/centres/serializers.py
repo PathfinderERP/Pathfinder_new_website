@@ -126,11 +126,17 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
         if instance.updated_at and not data.get('updated_at'):
             data['updated_at'] = instance.updated_at.isoformat()
         
+        from mongoengine.errors import DoesNotExist
+        
         # Add created_by info
-        if hasattr(instance, 'created_by') and instance.created_by:
-            data['created_by_email'] = getattr(instance.created_by, 'email', None)
-            data['created_by_name'] = getattr(instance.created_by, 'full_name', None)
-        else:
+        try:
+            if hasattr(instance, 'created_by') and instance.created_by:
+                data['created_by_email'] = getattr(instance.created_by, 'email', None)
+                data['created_by_name'] = getattr(instance.created_by, 'full_name', None)
+            else:
+                data['created_by_email'] = None
+                data['created_by_name'] = None
+        except DoesNotExist:
             data['created_by_email'] = None
             data['created_by_name'] = None
             
