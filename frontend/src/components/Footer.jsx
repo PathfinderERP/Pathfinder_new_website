@@ -729,7 +729,7 @@ const Footer = () => {
               width: isToggleExpanded ? 24 : 8,
               height: isToggleExpanded ? 24 : 28,
               marginBottom: isToggleExpanded ? 4 : 0,
-              backgroundColor: isToggleExpanded ? "rgb(17, 24, 39)" : "transparent",
+              backgroundColor: isToggleExpanded ? "rgb(17, 24, 39)" : "rgba(17, 24, 39, 0)",
               boxShadow: isToggleExpanded ? "0 10px 15px -3px rgba(0, 0, 0, 0.1)" : "0 0 15px rgba(249, 115, 22, 0.7)",
             }}
             className={`lg:hidden flex items-center justify-center transition-all duration-300 border-l border-t border-b border-white/20 overflow-hidden ${isToggleExpanded

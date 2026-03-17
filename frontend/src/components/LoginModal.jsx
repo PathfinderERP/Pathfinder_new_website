@@ -65,7 +65,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
       });
 
       if (result.success) {
-        console.log("Login successful");
+        /* Login successful */
         // Reset form and close modal
         setFormData({ email: "", password: "" });
         setErrors({});
@@ -83,7 +83,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
         }
       }
     } catch (error) {
-      console.error("Login failed:", error);
+      /* Login failed */
       setApiError("Network error. Please check your connection.");
     } finally {
       setIsSubmitting(false);

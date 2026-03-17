@@ -7,6 +7,14 @@ import certifi
 import datetime
 from datetime import timedelta  # Add this import
 import socket
+import dns.resolver  # Add this for DNS patch
+
+# DNS Patch: Atlas SRV resolution often fails on local ISPs/routers 
+# (e.g., DNS request timeout). Using Google DNS (8.8.8.8) fixes this.
+try:
+    dns.resolver.get_default_resolver().nameservers = ['8.8.8.8', '8.8.4.4']
+except Exception as e:
+    print(f"DNS Patch warning: {e}")
 
 # Load environment variables FIRST
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,8 +93,9 @@ if mongo_uri:
         print(f"MongoDB connection failed: {e}")
 
 elif all([username, password, cluster, db_name]):
-    encoded_username = quote_plus(username)
-    encoded_password = quote_plus(password)
+    # Ensure they are strings for the type checker
+    encoded_username = quote_plus(str(username))
+    encoded_password = quote_plus(str(password))
     MONGO_URI = f"mongodb+srv://{encoded_username}:{encoded_password}@{cluster}.mongodb.net/{db_name}?retryWrites=true&w=majority"
     
     print(f"Connecting to MongoDB Atlas: {db_name}")

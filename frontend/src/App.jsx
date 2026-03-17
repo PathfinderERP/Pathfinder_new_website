@@ -14,9 +14,9 @@ const App = () => {
       <CartProvider>
         <FilterProvider>
           <ThemeProvider>
-            <Router>
+            <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <ScrollToTop />
-              <div className="App">
+              <div className="App relative">
                 {/* Debug info in development */}
                 {/* {import.meta.env.VITE_DEBUG === "true" && (
                   <div className="bg-yellow-100 text-yellow-800 text-center py-1 text-xs">

@@ -29,7 +29,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {popularItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}
@@ -48,7 +48,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {studyMaterialsItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}
@@ -67,7 +67,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {iitJeeItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}
@@ -97,7 +97,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {foundationItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}
@@ -116,7 +116,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {olympiadsItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}
@@ -135,7 +135,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {boardsItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}
@@ -154,7 +154,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {cbse10Items.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}
@@ -173,7 +173,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {cbse12Items.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}
@@ -192,7 +192,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {timetablesItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}
@@ -211,7 +211,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {merchandiseItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}
@@ -230,7 +230,7 @@ const HomeTab = ({
                     </div>
                     <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {stationeryItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px]">
+                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
                                 <ProductCard item={item} />
                             </div>
                         ))}

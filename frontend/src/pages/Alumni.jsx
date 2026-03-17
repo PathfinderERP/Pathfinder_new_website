@@ -231,7 +231,7 @@ const AlumniPage = () => {
                     {/* Desktop Only: Left Navigation */}
                     <div className="hidden md:flex w-[35%] justify-end pr-10 pt-8">
                         <div className="relative">
-                            <div className="flex flex-col items-end space-y-1">
+                            <div className="flex flex-col items-end space-y-1 relative">
                                 {professions.map((prof) => (
                                     <button
                                         key={prof}

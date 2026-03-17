@@ -594,26 +594,18 @@ const LocationFilter = forwardRef(({
     }
 
     setDetectingLocation(true);
-    console.log("📍 [LOCATION] Starting location detection...");
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const userLat = position.coords.latitude;
         const userLng = position.coords.longitude;
-        console.log("📍 [LOCATION] User coords:", { lat: userLat, lng: userLng });
-        console.log(`🌍 [LOCATION] Verify your location on map: https://www.google.com/maps/search/?api=1&query=${userLat},${userLng}`);
 
         let nearestCentre = null;
         let minDistance = Infinity;
 
-        // Debug: Log the first centre to see its structure
-        if (centres.length > 0) {
-          console.log("🔍 [LOCATION-DEBUG] First centre structure:", Object.keys(centres[0]));
-        }
 
         // Calculate distances to all valid centres
         const centresWithDistance = [];
-        console.group("📏 [LOCATION] Distances Calculated:");
 
         centres.forEach((centre) => {
           let lat, lng;
@@ -624,12 +616,9 @@ const LocationFilter = forwardRef(({
 
           const coords = extractCoordsFromUrl(url);
           if (coords) {
-            const dist = calculateDistance(userLat, userLng, coords.lat, coords.lng);
             centresWithDistance.push({ ...centre, distance: dist });
-            console.log(`${centre.centre || centre.name}: ${dist.toFixed(3)} km`);
           }
         });
-        console.groupEnd();
 
         // Sort by distance
         centresWithDistance.sort((a, b) => a.distance - b.distance);
@@ -637,14 +626,6 @@ const LocationFilter = forwardRef(({
         if (centresWithDistance.length > 0) {
           nearestCentre = centresWithDistance[0];
           minDistance = nearestCentre.distance;
-
-          console.log(`📍 [LOCATION] Winner: ${nearestCentre.centre} (${minDistance.toFixed(2)} km)`);
-          if (centresWithDistance.length > 1) {
-            console.log(`🥈 Runner Up: ${centresWithDistance[1].centre} (${centresWithDistance[1].distance.toFixed(2)} km)`);
-          }
-          if (centresWithDistance.length > 2) {
-            console.log(`🥉 Third Place: ${centresWithDistance[2].centre} (${centresWithDistance[2].distance.toFixed(2)} km)`);
-          }
 
           if (showOnlineCourses) {
             setShowOnlineCourses(false);
@@ -659,13 +640,11 @@ const LocationFilter = forwardRef(({
           setUserHasChangedFilters(true);
 
         } else {
-          console.warn("📍 [LOCATION] No centres with valid coordinates found.");
           alert("Sorry, we couldn't find a centre near you with valid location data.");
         }
         setDetectingLocation(false);
       },
       (error) => {
-        console.error("❌ [LOCATION] Error getting location:", error);
         let msg = "Unable to retrieve your location.";
         if (error.code === 1) msg = "Location permission denied.";
         else if (error.code === 2) msg = "Location unavailable.";
@@ -702,7 +681,6 @@ const LocationFilter = forwardRef(({
           // User made a change if they selected a specific centre OR changed state/district
           if (hasSpecificCentreSelected || (stateOrDistrictChanged && selectedCentre !== "all")) {
             setUserHasChangedFilters(true);
-            console.log("👤 [USER-ACTION] User has manually changed filters!");
           }
         }
       }
@@ -875,17 +853,9 @@ const LocationFilter = forwardRef(({
     }
   }, [selectedDistrict, availableCentres, showOnlineCourses, selectedCentre]);
 
-  // Debug log for important state changes only
+  // Debug log removed
   useEffect(() => {
     if (isInitialized.current) {
-      console.log("📊 [STATE] Filter state updated:", {
-        mode: showOnlineCourses ? "ONLINE" : "LOCATION",
-        selectedState,
-        selectedDistrict,
-        selectedCentre,
-        userHasChangedFilters,
-        hasPreviousFilters: !!previousFilters
-      });
     }
   }, [showOnlineCourses, selectedState, selectedDistrict, selectedCentre]);
 
@@ -1459,12 +1429,8 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
 
   // First, filter courses by location (state, district, centre) to get base set
   const locationFilteredCourses = useMemo(() => {
-    console.log("🗺️ [COURSES] Filtering by location first:", {
-      selectedState,
-      selectedDistrict,
-      selectedCentre,
-      totalCourses: courses.length
-    });
+    // Location filtering check
+
 
     return courses.filter((course) => {
       // State Filter
@@ -1499,15 +1465,14 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
   }, [courses, selectedState, selectedDistrict, selectedCentre]);
 
   // Log location-filtered results
-  useEffect(() => {
-    console.log("✅ [COURSES] Location-filtered courses:", locationFilteredCourses.length, "courses");
-  }, [locationFilteredCourses]);
+    // Location-filtered count check removed
+
 
   // Extract unique filter options from LOCATION-FILTERED courses only
   const uniqueCourseNames = useMemo(() => {
     const names = [...new Set(locationFilteredCourses.map((c) => c.name))];
     const result = ["All", ...names.filter(Boolean).sort()];
-    console.log("📋 [COURSES] Available course names for this location:", result.length - 1);
+
     return result;
   }, [locationFilteredCourses]);
 
@@ -1520,7 +1485,7 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
 
     const levels = [...new Set(filteredByCourse.map((c) => c.class_level))];
     const result = ["All", ...levels.filter(Boolean).sort()];
-    console.log("📋 [COURSES] Available class levels for this selection:", result.length - 1);
+
     return result;
   }, [locationFilteredCourses, selectedCourseName]);
 
@@ -1536,7 +1501,7 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
 
     const durations = [...new Set(filtered.map((c) => c.duration))];
     const result = ["All", ...durations.filter(Boolean).sort()];
-    console.log("📋 [COURSES] Available durations for this selection:", result.length - 1);
+
     return result;
   }, [locationFilteredCourses, selectedCourseName, selectedClassLevel]);
 
@@ -1552,7 +1517,7 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
 
   // Also reset course filters when location changes
   useEffect(() => {
-    console.log("🔄 [COURSES] Location changed, resetting course filters");
+
     setSelectedCourseName("All");
     setSelectedClassLevel("All");
     setSelectedDuration("All");
@@ -1560,7 +1525,7 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
 
   // Filter Logic - Start from location-filtered courses and apply course-specific filters
   const filteredCourses = useMemo(() => {
-    console.log("🔍 [COURSES] Applying course-specific filters to location-filtered courses");
+
 
     return locationFilteredCourses.filter((course) => {
       // 1. Course Name Filter (internal filter)
@@ -1600,10 +1565,6 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
     selectedDuration,
   ]);
 
-  // Log filtered results
-  useEffect(() => {
-    console.log("✅ [COURSES] Filtered courses:", filteredCourses.length, "courses");
-  }, [filteredCourses]);
 
   // Sort Logic
   const sortedCourses = useMemo(() => {
@@ -1690,7 +1651,6 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
   };
 
   const handleFormSubmit = (applicationData) => {
-    console.log("Application submitted:", applicationData);
     alert("Application submitted successfully!");
     setIsFormOpen(false);
   };

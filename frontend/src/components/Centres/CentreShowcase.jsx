@@ -140,7 +140,7 @@ const CentreShowcase = () => {
                 <div className="flex flex-col lg:flex-row gap-6 items-start relative">
                     {/* Centes Grid / List */}
                     <div className="w-full lg:w-[65%] order-2 lg:order-1">
-                        <div className="grid sm:grid-cols-2 gap-6">
+                        <div className="grid sm:grid-cols-2 gap-6 relative">
                             <AnimatePresence mode="popLayout">
                                 {filteredCentres.map((centre, idx) => (
                                     <motion.div

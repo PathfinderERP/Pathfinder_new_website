@@ -1,4 +1,4 @@
-﻿import { getImageUrl } from "../utils/imageUtils";
+import { getImageUrl } from "../utils/imageUtils";
 ﻿import React, { useState, useEffect, useRef } from "react";
 import Slider from "react-slick";
 import { useNavigate } from "react-router-dom";
@@ -867,7 +867,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                                                         {currentFAQs.map((faq, index) => (
                                                             <div
                                                                 key={index}
-                                                                className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 hover:shadow-md transition-shadow cursor-pointer group"
+                                                                className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 hover:shadow-md transition-shadow cursor-pointer group relative"
                                                                 onClick={() => setFaqOpenIndex(faqOpenIndex === index ? -1 : index)}
                                                             >
                                                                 <div className="flex justify-between items-center gap-4">

@@ -47,7 +47,7 @@ const StudentBag = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                     {/* Left Col: Cart Items */}
-                    <div className="lg:col-span-8">
+                    <div className="lg:col-span-8 relative">
                         <AnimatePresence mode="popLayout">
                             {cartItems.length > 0 ? (
                                 <motion.div

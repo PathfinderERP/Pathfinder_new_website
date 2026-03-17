@@ -10,7 +10,7 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-300 relative">
       {/* Sidebar */}
       <AdminSidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 

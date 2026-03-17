@@ -99,7 +99,7 @@ const RegistrationPage = ({ onClose, onSwitchToLogin }) => {
       );
 
       if (result.success) {
-        console.log("Registration successful");
+        /* Registration successful */
 
         if (onClose) {
           // If modal, close it
@@ -120,7 +120,7 @@ const RegistrationPage = ({ onClose, onSwitchToLogin }) => {
         alert(`Registration failed: ${result.error}`);
       }
     } catch (error) {
-      console.error("Registration failed:", error);
+      /* Registration failed */
       alert("Registration failed. Please try again.");
     } finally {
       setIsSubmitting(false);

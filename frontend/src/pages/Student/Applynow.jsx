@@ -32,8 +32,8 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
         const centreId = formData.selectedCentres[0];
         const centreObj = availableCentres.find(c => c.id === centreId);
         if (centreObj) {
-          console.log("🌍 Syncing ApplyNow selection to Global Filter:", centreObj.name);
           setGlobalSelectedCentre(centreObj.name);
+
         }
       } else {
         // Maybe don't reset to All if form is closed? Or do?
@@ -262,7 +262,8 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
         source: isFromHeader ? "header_dropdown" : "course_card"
       };
 
-      console.log("Submitting application:", applicationData);
+      /* application data ready */
+
 
       // Send to backend API
       if (API_BASE_URL) {
@@ -320,7 +321,8 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
           throw new Error(errorMessage);
         }
 
-        console.log("Application submitted successfully:", result);
+        /* submitted successfully */
+
 
         onSubmit(applicationData);
 
@@ -412,18 +414,9 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
     }
   };
 
-  // Debug logging for performance
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Form rendered', {
-        isOpen,
-        course: course?.name,
-        selectedCentres: formData.selectedCentres.length,
-        availableCentres: availableCentres.length,
-        isFromHeader
-      });
-    }
   });
+
 
   if (!isOpen) return null;
 

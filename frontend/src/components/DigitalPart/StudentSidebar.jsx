@@ -112,7 +112,7 @@ const StudentSidebar = () => {
 
                 {/* Floating Navigation Dock - Top */}
                 <div className="relative z-10 w-full max-w-xl mx-auto mb-2">
-                    <div className="bg-black/90 border border-white/10 rounded-[28px] p-1.5 flex items-center justify-between shadow-xl">
+                    <div className="bg-black/90 border border-white/10 rounded-[28px] p-1.5 flex items-center justify-between shadow-xl relative">
                         {dockItems.map((item) => {
                             const isActive = currentPath === item.href;
                             return (
