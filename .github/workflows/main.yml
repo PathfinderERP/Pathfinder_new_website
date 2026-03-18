@@ -28,10 +28,10 @@ jobs:
             
             cd /home/ubuntu/Pathfinder_new_website
             
-            # Stash any local server-side changes (e.g. settings.py) before pulling
-            git stash
-            git pull origin main
-            # Restore locally modified production files (e.g. settings.py)
+            # FIX: Use fetch and reset instead of pull to handle divergent branches
+            git fetch origin main
+            git reset --hard origin/main
+            # Restore locally modified production files (e.g. settings.py) if any (optional but safe)
             git stash pop || true
             
             # Backend
