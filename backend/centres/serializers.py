@@ -7,7 +7,7 @@ from contact_backend.utils.mixins import Base64R2FileMixin
 
 class TopperSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumentSerializer):
     image_url = serializers.SerializerMethodField()
-    image_file = serializers.CharField(write_only=True, required=False)
+    image_file = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     
     # Mixin configuration
     file_input_fields = ['image_file']
@@ -25,14 +25,6 @@ class TopperSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumentSeri
             'image': {'required': False, 'allow_null': True, 'allow_blank': True}
         }
     
-    def to_representation(self, instance):
-        """Object to JSON representation"""
-        data = super().to_representation(instance)
-        # Ensure 'image' in JSON response uses the model's computed property
-        # which handles both R2 URLs and legacy base64 binary fields
-        data['image'] = instance.get_image_url()
-        return data
-    
     def to_internal_value(self, data):
         data = self.extract_file_from_data(data)
         return super().to_internal_value(data)
@@ -43,24 +35,23 @@ class TopperSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumentSeri
     
     def to_representation(self, instance):
         """
-        Override to ensure image_url is properly included
+        Object to JSON representation with computed fields
         """
         data = super().to_representation(instance)
         
         # Ensure image_url is always included and properly formatted
-        if instance.image_data:
-            data['image_url'] = instance.get_image_url()
-        elif instance.image:
-            data['image_url'] = instance.image
-        else:
-            data['image_url'] = None
+        # Prioritize URLs but fallback to binary data if needed
+        data['image_url'] = instance.get_image_url()
+        
+        # Backward compatibility: ensure 'image' also contains the correct URL
+        data['image'] = instance.get_image_url()
             
         return data
 
 class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
     toppers = TopperSerializer(many=True, required=False)
     logo_url = serializers.SerializerMethodField()
-    logo_file = serializers.CharField(write_only=True, required=False)
+    logo_file = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     
     # Add explicit date formatting
     created_at = serializers.SerializerMethodField()
@@ -79,13 +70,6 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
             'logo': {'required': False, 'allow_null': True, 'allow_blank': True}
         }
     
-    def to_representation(self, instance):
-        """Object to JSON representation"""
-        data = super().to_representation(instance)
-        # Ensure 'logo' in JSON response uses the model's computed property
-        data['logo'] = instance.get_logo_url()
-        return data
-    
     def to_internal_value(self, data):
         data = self.extract_file_from_data(data)
         return super().to_internal_value(data)
@@ -97,38 +81,41 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
     def get_created_at(self, obj):
         """Format created_at for frontend"""
         if obj.created_at:
-            # Return ISO format string that JavaScript can parse
             return obj.created_at.isoformat()
         return None
     
     def get_updated_at(self, obj):
         """Format updated_at for frontend"""
         if obj.updated_at:
-            # Return ISO format string that JavaScript can parse
             return obj.updated_at.isoformat()
         return None
     
-    def validate_logo_data(self, value):
-        """Validate logo data with 12MB limit"""
-        if value and len(value) > 12 * 1024 * 1024:
+    def validate_logo_file(self, value):
+        """Validate logo file size (approx 12MB limit)"""
+        if value and len(value) > 16 * 1024 * 1024: # 16MB base64 is ~12MB binary
             raise serializers.ValidationError("Logo size cannot exceed 12MB")
         return value
     
     def to_representation(self, instance):
         """
-        Override to add computed fields and ensure proper date formatting
+        Custom representation to handle computed fields, proper dates, and logo URLs
         """
         data = super().to_representation(instance)
         
-        # Ensure dates are properly formatted (backup)
-        if instance.created_at and not data.get('created_at'):
+        # Ensure 'logo' and 'logo_url' in JSON response use the model's computed property
+        logo_url = instance.get_logo_url()
+        data['logo'] = logo_url
+        data['logo_url'] = logo_url
+        
+        # Ensure dates are properly formatted
+        if instance.created_at:
             data['created_at'] = instance.created_at.isoformat()
-        if instance.updated_at and not data.get('updated_at'):
+        if instance.updated_at:
             data['updated_at'] = instance.updated_at.isoformat()
         
         from mongoengine.errors import DoesNotExist
         
-        # Add created_by info
+        # Add created_by info if available
         try:
             if hasattr(instance, 'created_by') and instance.created_by:
                 data['created_by_email'] = getattr(instance.created_by, 'email', None)
@@ -136,7 +123,7 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
             else:
                 data['created_by_email'] = None
                 data['created_by_name'] = None
-        except DoesNotExist:
+        except (DoesNotExist, AttributeError):
             data['created_by_email'] = None
             data['created_by_name'] = None
             
@@ -145,7 +132,7 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
     def create(self, validated_data):
         toppers_data = validated_data.pop('toppers', [])
         
-        # Process toppers with image data
+        # Process toppers
         toppers = []
         for topper_data in toppers_data:
             toppers.append(Topper(**topper_data))
@@ -170,9 +157,10 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
         
         # Update basic fields
         for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+            if hasattr(instance, attr):
+                setattr(instance, attr, value)
         
-        # ✅ FIXED: Update toppers while preserving existing image data unless explicitly cleared
+        # Update toppers while preserving existing image data unless explicitly cleared
         if toppers_data is not None:
             updated_toppers = []
             for index, topper_data in enumerate(toppers_data):
@@ -189,7 +177,7 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
                         topper_data['image_content_type'] = None
                         topper_data['image_filename'] = None
                     else:
-                        # ✅ PRESERVE existing image data if not provided in update and not cleared
+                        # PRESERVE existing image data if not provided in update
                         if 'image_data' not in topper_data and existing_topper.image_data:
                             topper_data['image_data'] = existing_topper.image_data
                         if 'image_content_type' not in topper_data and existing_topper.image_content_type:
@@ -199,14 +187,17 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
                         if 'image' not in topper_data and existing_topper.image:
                             topper_data['image'] = existing_topper.image
                     
-                    # ✅ Also preserve timestamps
+                    # Preserve timestamps
                     if 'created_at' not in topper_data and existing_topper.created_at:
                         topper_data['created_at'] = existing_topper.created_at
-                    if 'updated_at' not in topper_data:
-                        topper_data['updated_at'] = datetime.now()
                 
-                # Create new topper with preserved data
-                updated_toppers.append(Topper(**topper_data))
+                # Update timestamp
+                topper_data['updated_at'] = datetime.now()
+                
+                # Create new topper with merged data
+                # We need to filter out serializer-only fields that might have leaked here
+                clean_topper_data = {k: v for k, v in topper_data.items() if k != 'image_file' and k != 'image_url'}
+                updated_toppers.append(Topper(**clean_topper_data))
             
             instance.toppers = updated_toppers
         

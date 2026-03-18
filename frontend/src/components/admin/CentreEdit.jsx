@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { centresAPI } from "../../services/api";
 import DragDropImageUpload from "../DragDropImageUpload";
-import { clearAdminCache } from "../../hooks/useAdminCache";
+import { clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
 import ImageModal from "../ImageModal";
+import { fileToBase64 } from "../../utils/fileUtils";
 
 const EXAM_OPTIONS = {
   "All India": ["JEE", "NEET", "WBJEE", "Others"],
@@ -104,9 +105,6 @@ const CentreEdit = () => {
       const response = await centresAPI.getById(id);
       const centre = response.data;
 
-      
-      
-
       // Format the centre data for the form
       setCentreData({
         state: centre.state || "West Bengal",
@@ -188,7 +186,6 @@ const CentreEdit = () => {
     setLogoFile(null);
     setCurrentLogoUrl("");
     setCentreData(prev => ({ ...prev, logo_url: "" }));
-    
   };
 
   const handleRemoveTopperImage = (index) => {
@@ -204,11 +201,11 @@ const CentreEdit = () => {
       const updatedToppers = [...prev.toppers];
       updatedToppers[index] = {
         ...updatedToppers[index],
-        image_url: ""
+        image_url: "",
+        image: ""
       };
       return { ...prev, toppers: updatedToppers };
     });
-    
   };
 
   const handleSubmit = async (e) => {
@@ -217,27 +214,30 @@ const CentreEdit = () => {
     setError("");
 
     try {
-      
-
-      // VALIDATE GOOGLE MAPS URL - ACCEPT ALL FORMATS
-      const isValidGoogleMapsUrl =
-        centreData.location &&
-        (centreData.location.startsWith("https://www.google.com/maps/") ||
-          centreData.location.startsWith("https://maps.google.com/") ||
-          centreData.location.startsWith("https://goo.gl/maps/") ||
-          centreData.location.includes("google.com/maps/embed") ||
-          centreData.location.includes("google.com/maps/d/embed"));
-
-      if (!isValidGoogleMapsUrl) {
-        setError("Please enter a valid Google Maps URL");
-        setSaving(false);
-        return;
+      // 1. Prepare Base64 data for logo if a new file was selected
+      let logoBase64 = null;
+      if (logoFile) {
+        try {
+          logoBase64 = await fileToBase64(logoFile);
+        } catch (err) {
+          console.error("❌ Failed to convert logo to base64:", err);
+        }
       }
 
+      // 2. Prepare Base64 data for topper images
+      const topperImagesBase64 = {};
       
+      // We need to use a regular for loop to handle async await correctly
+      for (const [index, file] of Object.entries(topperFiles)) {
+        try {
+          const base64 = await fileToBase64(file);
+          topperImagesBase64[index] = base64;
+        } catch (err) {
+          console.error(`❌ Failed to convert topper ${index} image to base64:`, err);
+        }
+      }
 
-      // ✅ FIXED: Update centre data WITHOUT image fields to prevent data loss 
-      // UNLESS they are explicitly cleared
+      // ✅ Prepare consolidated data to send
       const dataToSend = {
         state: centreData.state,
         district: centreData.district,
@@ -245,170 +245,47 @@ const CentreEdit = () => {
         centre_type: centreData.centre_type,
         location: centreData.location,
         address: centreData.address,
-        // Send clear signal for logo if removed
-        logo: currentLogoUrl === "" ? "" : undefined,
-        // ✅ Send topper text data
-        toppers: centreData.toppers.map((topper) => ({
-          name: topper.name,
-          exam: topper.exam || "",
-          category: topper.category || "All India",
-          rank: topper.rank ? parseInt(topper.rank) : 0,
-          topper_msg: topper.topper_msg || "",
-          percentages: topper.percentages ? parseFloat(topper.percentages) : 0,
-          year: topper.year ? parseInt(topper.year) : new Date().getFullYear(),
-          marks_obtained: topper.marks_obtained ? parseFloat(topper.marks_obtained) : null,
-          total_marks: topper.total_marks ? parseFloat(topper.total_marks) : null,
-          badge: topper.badge || "",
+        // Send Base64 logo if we have one, otherwise omit
+        ...(logoBase64 && { logo_file: logoBase64 }),
+        // Send clear signal for logo if explicitly removed and no new one selected
+        ...(currentLogoUrl === "" && !logoFile && { logo: "" }),
+        
+        // ✅ Send topper data with images
+        toppers: centreData.toppers.map((topper, index) => {
+          const topperPayload = {
+            name: topper.name,
+            exam: topper.exam || "",
+            category: topper.category || "All India",
+            rank: topper.rank ? parseInt(topper.rank) : 0,
+            topper_msg: topper.topper_msg || "",
+            percentages: topper.percentages ? parseFloat(topper.percentages) : 0,
+            year: topper.year ? parseInt(topper.year) : new Date().getFullYear(),
+            marks_obtained: topper.marks_obtained ? parseFloat(topper.marks_obtained) : null,
+            total_marks: topper.total_marks ? parseFloat(topper.total_marks) : null,
+            badge: topper.badge || "",
+          };
+
+          // Only include image_file if we have a base64 string
+          if (topperImagesBase64[index]) {
+            topperPayload.image_file = topperImagesBase64[index];
+          }
+          
           // Send clear signal for topper image if removed
-          image: topper.image_url === "" ? "" : undefined,
-        })),
+          if (topper.image_url === "" && !topperFiles[index]) {
+            topperPayload.image = "";
+          }
+
+          return topperPayload;
+        }),
       };
 
-      
-      
+      // Step 1: Send the consolidated update (all data + images in one request)
       await centresAPI.update(id, dataToSend);
-      
 
-      // Step 2: Upload new logo if provided
-      if (logoFile) {
-        try {
-          
-          await centresAPI.uploadCentreLogo(id, logoFile);
-          
-        } catch (logoError) {
-          console.error("❌ Logo upload failed:", logoError);
-          // Don't stop the process for logo errors
-        }
-      }
-
-      // Step 3: Handle topper image updates for EXISTING toppers
-      // Step 3: Handle topper image updates for EXISTING toppers
-      
-
-      const topperImageUploadPromises = Object.entries(topperFiles).map(
-        async ([index, file]) => {
-          const topperIndex = parseInt(index);
-          const topper = centreData.toppers[topperIndex];
-
-          if (!topper) {
-            console.error(`❌ Topper not found at index ${topperIndex}`);
-            return { success: false, error: "Topper not found" };
-          }
-
-          try {
-            
-            
-            
-
-            // ✅ Create FormData - SIMPLIFIED VERSION FOR TESTING
-            const formData = new FormData();
-
-            // ✅ CRITICAL: Make sure file is properly appended
-            formData.append("image", file);
-            formData.append("topper_index", topperIndex.toString());
-
-            // ✅ DEBUG: Check FormData contents
-            
-            
-            
-
-            // Try to log FormData entries (this might not work in all browsers)
-            try {
-              for (let [key, value] of formData.entries()) {
-                if (key === "image") {
-                  
-                } else {
-                  
-                }
-              }
-            } catch (e) {
-              
-            }
-
-            // ✅ Use the API call with better error handling
-            
-
-            const response = await centresAPI.uploadTopperImage(id, formData);
-
-            
-            
-
-            return {
-              success: true,
-              index: topperIndex,
-              topperName: topper.name,
-            };
-          } catch (topperError) {
-            console.error(
-              `❌ Failed to upload image for topper "${topper.name}":`,
-              topperError
-            );
-
-            // Log detailed error information
-            if (topperError.response) {
-              console.error(
-                "📋 Error response data:",
-                topperError.response.data
-              );
-              console.error("🔢 Error status:", topperError.response.status);
-              console.error("📋 Error headers:", topperError.response.headers);
-            } else if (topperError.request) {
-              console.error("❌ No response received:", topperError.request);
-            } else {
-              console.error(
-                "❌ Error setting up request:",
-                topperError.message
-              );
-            }
-
-            console.error("🔧 Error config:", topperError.config);
-
-            return {
-              success: false,
-              index: topperIndex,
-              topperName: topper.name,
-              error: topperError.response?.data || topperError.message,
-            };
-          }
-        }
-      );
-
-      // Wait for all topper image uploads to complete
-      if (topperImageUploadPromises.length > 0) {
-        
-        const results = await Promise.allSettled(topperImageUploadPromises);
-
-        // Count and log results
-        let successCount = 0;
-        let failCount = 0;
-
-        results.forEach((result, index) => {
-          if (result.status === "fulfilled") {
-            const uploadResult = result.value;
-            if (uploadResult.success) {
-              
-              successCount++;
-            } else {
-              
-              failCount++;
-            }
-          } else {
-            
-            failCount++;
-          }
-        });
-
-        
-        
-        
-        
-      } else {
-        
-      }
-
-      
       alert("Centre updated successfully!");
       clearAdminCache("admin_centres");
+      clearPublicCache("centres");
+      clearPublicCache("toppers");
       navigate("/business/admin/centres?refresh=true");
     } catch (err) {
       console.error("💥 CENTRE UPDATE FAILED:", err);
@@ -510,10 +387,17 @@ const CentreEdit = () => {
   };
 
   // Helper function to get topper image URL
-  const getTopperImageUrl = (topper) => {
-    // Try different possible image URL fields
+  const getTopperImageUrl = (topper, index) => {
+    // Priority 1: Check if a new file has been selected locally
+    if (topperFiles[index]) {
+      return URL.createObjectURL(topperFiles[index]);
+    }
+
+    // Priority 2: Try existing image URL fields
     if (topper.image_url) return topper.image_url;
     if (topper.image) return topper.image;
+    
+    // Priority 3: Fallback to binary data
     if (topper.image_data && topper.image_content_type) {
       return `data:${topper.image_content_type};base64,${topper.image_data}`;
     }
@@ -578,20 +462,6 @@ const CentreEdit = () => {
           </div>
         )}
 
-        {/* Debug Info */}
-        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
-          <strong>Debug Info:</strong>
-          <div className="text-sm mt-1">
-            Centre ID: {id} | Toppers Count: {centreData.toppers.length}
-          </div>
-          {centreData.toppers.map((topper, index) => (
-            <div key={index} className="text-sm mt-1">
-              Topper {index + 1}: "{topper.name}" - Has Image:{" "}
-              {getTopperImageUrl(topper) ? "Yes" : "No"}
-            </div>
-          ))}
-        </div>
-
         <div className="bg-white dark:bg-slate-900 shadow rounded-lg p-6 border border-gray-200 dark:border-slate-800">
           <form onSubmit={handleSubmit}>
             {/* Centre Logo Upload Section */}
@@ -650,9 +520,6 @@ const CentreEdit = () => {
                           Remove Logo
                         </button>
                       </div>
-                      <span className="text-sm text-green-600">
-                        Logo is stored in database
-                      </span>
                     </div>
                   ) : (
                     <div className="text-sm text-gray-500">
@@ -763,42 +630,10 @@ const CentreEdit = () => {
                     value={centreData.location}
                     onChange={handleChange}
                     rows={4}
-                    className={`mt-1 block w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 ${centreData.location &&
-                      !(
-                        centreData.location.startsWith(
-                          "https://www.google.com/maps/"
-                        ) ||
-                        centreData.location.startsWith(
-                          "https://maps.google.com/"
-                        ) ||
-                        centreData.location.startsWith(
-                          "https://goo.gl/maps/"
-                        ) ||
-                        centreData.location.includes("google.com/maps/embed") ||
-                        centreData.location.includes("google.com/maps/d/embed")
-                      )
-                      ? "border-red-300 bg-red-50"
-                      : "border-gray-300"
-                      }`}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     placeholder="Any Google Maps URL"
                   />
-                  {centreData.location &&
-                    !(
-                      centreData.location.startsWith(
-                        "https://www.google.com/maps/"
-                      ) ||
-                      centreData.location.startsWith(
-                        "https://maps.google.com/"
-                      ) ||
-                      centreData.location.startsWith("https://goo.gl/maps/") ||
-                      centreData.location.includes("google.com/maps/embed") ||
-                      centreData.location.includes("google.com/maps/d/embed")
-                    ) && (
-                      <p className="mt-1 text-sm text-red-600">
-                        Please enter a valid Google Maps URL
-                      </p>
-                    )}
                 </div>
 
                 <div className="sm:col-span-2">
@@ -834,7 +669,7 @@ const CentreEdit = () => {
               </div>
 
               {centreData.toppers.map((topper, index) => {
-                const imageUrl = getTopperImageUrl(topper);
+                const imageUrl = getTopperImageUrl(topper, index);
 
                 return (
                   <div
@@ -845,14 +680,6 @@ const CentreEdit = () => {
                     <div className="flex justify-between items-center mb-4">
                       <h4 className="text-md font-medium text-gray-900">
                         Topper #{index + 1}
-                        <span className="ml-2 text-xs text-gray-500">
-                          (Index: {index})
-                        </span>
-                        {topperFiles[index] && (
-                          <span className="ml-2 text-sm text-blue-600">
-                            (New image ready for upload)
-                          </span>
-                        )}
                       </h4>
                       <button
                         type="button"
@@ -908,24 +735,18 @@ const CentreEdit = () => {
                           ))}
                           <option value="Others">Others</option>
                         </select>
-                        {(() => {
-                          const category = topper.category || "All India";
-                          const options = EXAM_OPTIONS[category] || [];
-                          const isCustom = !options.includes(topper.exam) && topper.exam !== undefined;
-                          return (topper.exam === "Others" || (isCustom && topper.exam !== ""));
-                        })() && (
-                            <input
-                              type="text"
-                              value={topper.exam === "Others" ? "" : topper.exam}
-                              onChange={(e) =>
-                                updateTopper(index, "exam", e.target.value === "" ? "Others" : e.target.value)
-                              }
-                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                              placeholder="Enter Exam Name"
-                              required
-                              autoFocus
-                            />
-                          )}
+                        {topper.exam === "Others" || (!EXAM_OPTIONS[topper.category || "All India"]?.includes(topper.exam) && topper.exam !== "") ? (
+                          <input
+                            type="text"
+                            value={topper.exam === "Others" ? "" : topper.exam}
+                            onChange={(e) =>
+                              updateTopper(index, "exam", e.target.value === "" ? "Others" : e.target.value)
+                            }
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                            placeholder="Enter Exam Name"
+                            required
+                          />
+                        ) : null}
                       </div>
 
                       <div>
@@ -973,9 +794,6 @@ const CentreEdit = () => {
                           readOnly
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 cursor-not-allowed"
                           placeholder="Auto-calculated"
-                          step="0.1"
-                          min="0"
-                          max="100"
                         />
                       </div>
 
@@ -991,57 +809,6 @@ const CentreEdit = () => {
                           }
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                           placeholder="e.g., 2025"
-                          min="2000"
-                          max="2100"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Marks Obtained
-                        </label>
-                        <input
-                          type="number"
-                          value={topper.marks_obtained}
-                          onChange={(e) =>
-                            updateTopper(index, "marks_obtained", e.target.value)
-                          }
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                          placeholder="e.g., 680"
-                          min="0"
-                          step="0.01"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Total Marks
-                        </label>
-                        <input
-                          type="number"
-                          value={topper.total_marks}
-                          onChange={(e) =>
-                            updateTopper(index, "total_marks", e.target.value)
-                          }
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                          placeholder="e.g., 720"
-                          min="0"
-                          step="0.01"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Badge
-                        </label>
-                        <input
-                          type="text"
-                          value={topper.badge}
-                          onChange={(e) =>
-                            updateTopper(index, "badge", e.target.value)
-                          }
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                          placeholder="e.g., AIR 1, State Topper"
                         />
                       </div>
 
@@ -1067,24 +834,17 @@ const CentreEdit = () => {
                             Current Topper Photo
                           </label>
                           {imageUrl ? (
-                            <div className="flex flex-col space-y-2">
+                            <div className="flex flex-col items-start space-y-2">
                               <div
-                                className="relative group cursor-pointer transform hover:scale-110 transition duration-200 inline-block"
+                                className="relative group cursor-pointer inline-block"
                               >
                                 <img
                                   src={imageUrl}
                                   alt={topper.name}
-                                  className="h-16 w-16 rounded-full object-cover border border-gray-300"
+                                  className="h-20 w-20 rounded-full object-cover border-2 border-blue-100 shadow-sm hover:scale-105 transition duration-200"
                                   onClick={() =>
                                     handleTopperImageClick(imageUrl, topper.name)
                                   }
-                                  onError={(e) => {
-                                    console.error(
-                                      `Failed to load image for topper ${topper.name}:`,
-                                      imageUrl
-                                    );
-                                    e.target.style.display = "none";
-                                  }}
                                 />
                                 <button
                                   type="button"
@@ -1092,40 +852,18 @@ const CentreEdit = () => {
                                     e.stopPropagation();
                                     handleRemoveTopperImage(index);
                                   }}
-                                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md z-10 transition-colors"
                                   title="Remove Photo"
                                 >
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                                   </svg>
                                 </button>
                               </div>
-                              <div className="text-xs text-blue-600 text-center flex flex-col space-y-2 mt-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTopperImageClick(imageUrl, topper.name)}
-                                  className="hover:underline"
-                                >
-                                  Click to view full size
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveTopperImage(index)}
-                                  className="text-red-600 hover:text-red-700 font-medium hover:underline flex items-center justify-center gap-1"
-                                >
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                  Remove Photo
-                                </button>
-                              </div>
-                              <span className="text-sm text-green-600">
-                                Photo stored in database
-                              </span>
                             </div>
                           ) : (
-                            <div className="text-sm text-gray-500">
-                              No photo uploaded yet
+                            <div className="text-sm text-gray-400 italic bg-gray-50 p-3 rounded border border-dashed border-gray-200">
+                              No photo uploaded for this topper
                             </div>
                           )}
                         </div>
@@ -1140,11 +878,6 @@ const CentreEdit = () => {
                           existingImageUrl=""
                           uploading={false}
                         />
-                        {topperFiles[index] && (
-                          <p className="text-sm text-blue-600 mt-2">
-                            ✓ New photo ready for upload
-                          </p>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -1153,19 +886,6 @@ const CentreEdit = () => {
 
               {centreData.toppers.length === 0 && (
                 <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                  <svg
-                    className="w-12 h-12 text-gray-400 mx-auto mb-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
                   <p className="text-gray-500">No toppers added yet</p>
                   <button
                     type="button"
@@ -1184,32 +904,7 @@ const CentreEdit = () => {
                 disabled={saving}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition duration-200 disabled:opacity-50 flex items-center"
               >
-                {saving ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Updating Centre...
-                  </>
-                ) : (
-                  "Update Centre"
-                )}
+                {saving ? "Updating Centre..." : "Update Centre"}
               </button>
               <button
                 type="button"

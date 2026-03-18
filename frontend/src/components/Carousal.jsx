@@ -170,6 +170,7 @@ export const HeroCarousel = () => {
                         src={item.img}
                         alt={item.name}
                         className={`w-full h-full object-contain ${item.scaleClass || 'scale-110'}`}
+                        priority={true} // High priority for Hero section
                       />
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-full border-2 border-white flex items-center justify-center shadow-sm">

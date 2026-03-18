@@ -15,6 +15,8 @@ import AlumniCoursesSection from "../components/Alumni/AlumniCoursesSection";
 import { Skeleton, FadeInImage } from "../components/common/OptimizedImage";
 import { getImageUrl } from "../utils/imageUtils";
 import { alumniAPI } from "../services/api";
+import { useCachedData } from "../hooks/useCachedData";
+import { useCallback } from "react";
 
 
 const AlumniPage = () => {
@@ -23,80 +25,72 @@ const AlumniPage = () => {
     const yRange = useTransform(scrollYProgress, [0, 1], [0, -100]);
 
     // Dynamic State
-    const [years, setYears] = useState([]);
-    const [professions, setProfessions] = useState([]);
+
+
+    // Fetch Initial Data (Years & Professions) - Caching Years
+    const { data: years } = useCachedData("alumni_years", () => alumniAPI.getYears(), {
+        onSuccess: (data) => (Array.isArray(data) ? data : []).sort((a, b) => b - a),
+        initialData: []
+    });
+
+    // Caching Professions
+    const { data: professions } = useCachedData("alumni_professions", () => alumniAPI.getProfessions(), {
+        onSuccess: (data) => {
+            let profs = Array.isArray(data) ? data : [];
+            profs = Array.from(new Set(profs));
+            const otherIndex = profs.findIndex(p => p.toLowerCase() === 'others');
+            if (otherIndex > -1) {
+                const otherLabel = profs[otherIndex];
+                profs.splice(otherIndex, 1);
+                profs.sort();
+                profs.push(otherLabel);
+            } else {
+                profs.sort();
+            }
+            return profs;
+        },
+        initialData: []
+    });
+
     const [selectedYear, setSelectedYear] = useState(null);
     const [activeProfession, setActiveProfession] = useState("");
     const [alumniImages, setAlumniImages] = useState([]);
 
-    // Fetch Initial Data (Years & Professions)
+    // Initialize defaults when data arrives
     useEffect(() => {
-        const fetchInitialData = async () => {
-            try {
-                const [yearsRes, profsRes] = await Promise.all([
-                    alumniAPI.getYears(),
-                    alumniAPI.getProfessions()
-                ]);
+        if (years.length > 0 && selectedYear === null) {
+            setSelectedYear(years[0]);
+        }
+    }, [years, selectedYear]);
 
-                // Setup Dynamic Years
-                const sortedYears = (yearsRes.data || []).sort((a, b) => b - a);
-                setYears(sortedYears);
-                if (sortedYears.length > 0) setSelectedYear(sortedYears[0]);
-
-                // Setup Dynamic Professions
-                let profs = profsRes.data || [];
-                // Filter duplicates and handle "Others"
-                profs = Array.from(new Set(profs));
-                const otherIndex = profs.findIndex(p => p.toLowerCase() === 'others');
-                if (otherIndex > -1) {
-                    const otherLabel = profs[otherIndex];
-                    profs.splice(otherIndex, 1);
-                    profs.sort();
-                    profs.push(otherLabel);
-                } else {
-                    profs.sort();
-                }
-
-                setProfessions(profs);
-                if (profs.length > 0) setActiveProfession(profs[0]);
-
-            } catch (err) {
-                console.error("Error fetching alumni data:", err);
-            }
-        };
-        fetchInitialData();
-    }, []);
-
-    // Fetch Images when filters change
     useEffect(() => {
-        const fetchImages = async () => {
-            if (!activeProfession) return;
+        if (professions.length > 0 && activeProfession === "") {
+            setActiveProfession(professions[0]);
+        }
+    }, [professions, activeProfession]);
 
-            try {
-                // Fetch grouped data for the selected year (or all years if none/null, but we default to latest)
-                // Note: getByProfession(year) returns { count, results: { Profession: [records] } }
-                const res = await alumniAPI.getByProfession(selectedYear);
-                const results = res.data.results || {};
-
-                // Get records for active profession - Case Insensitive Match
+    // Fetch Images - Caching per profession/year combination
+    const { data: currentImages } = useCachedData(
+        `alumni_images_${selectedYear}_${activeProfession}`,
+        () => activeProfession ? alumniAPI.getByProfession(selectedYear) : Promise.resolve({ data: {} }),
+        {
+            onSuccess: (data) => {
+                const results = (data && data.results) ? data.results : (data || {});
                 const backendKey = Object.keys(results).find(
                     key => key.toLowerCase() === activeProfession.toLowerCase()
                 );
                 const professionRecords = results[backendKey] || results[activeProfession] || [];
+                return professionRecords.flatMap(record => record.image_urls || []);
+            },
+            persistent: false // Don't persist all combinations to localStorage
+        }
+    );
 
-                // Flatten image URLs from all records
-                const images = professionRecords.flatMap(record => record.image_urls || []);
-                setAlumniImages(images);
-
-            } catch (err) {
-                console.error("Error fetching alumni images:", err);
-                setAlumniImages([]);
-            }
-        };
-
-        // Debounce slightly or just fetch
-        fetchImages();
-    }, [selectedYear, activeProfession]);
+    useEffect(() => {
+        if (currentImages) {
+            setAlumniImages(currentImages);
+        }
+    }, [currentImages]);
 
     const stats = [
         { label: "Successful Alumni", value: "25k+", icon: UserGroupIcon, color: "from-orange-500 to-red-500" },

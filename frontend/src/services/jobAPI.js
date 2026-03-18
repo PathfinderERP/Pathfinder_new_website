@@ -17,28 +17,23 @@ export const jobAPI = {
   },
 
   createJob: (jobData) => {
-    
-    return api.post(env.endpoints.JOBS, jobData);
+    return api.post(env.endpoints.JOBS_ADMIN, jobData);
   },
 
   updateJob: (id, jobData) => {
-    
-    return api.put(`${env.endpoints.JOBS}${id}/`, jobData);
+    return api.put(`${env.endpoints.JOBS_ADMIN}${id}/`, jobData);
   },
 
   deleteJob: (id) => {
-    
-    return api.delete(`${env.endpoints.JOBS}${id}/`);
+    return api.delete(`${env.endpoints.JOBS_ADMIN}${id}/`);
   },
 
   toggleJobActive: (id) => {
-    
-    return api.post(`${env.endpoints.JOBS}${id}/toggle_active/`);
+    return api.post(`${env.endpoints.JOBS_ADMIN}${id}/toggle_active/`);
   },
 
   toggleJobFeatured: (id) => {
-    
-    return api.post(`${env.endpoints.JOBS}${id}/toggle_featured/`);
+    return api.post(`${env.endpoints.JOBS_ADMIN}${id}/toggle_featured/`);
   },
 
   // For public career page - get only active jobs
@@ -104,16 +99,14 @@ export const jobAPI = {
 
   // Job Applications
   getAllApplications: (params = {}) => {
-    
     const queryParams = new URLSearchParams(params).toString();
     return api.get(
-      `${env.endpoints.JOB_APPLICATIONS}${queryParams ? `?${queryParams}` : ""}`
+      `${env.endpoints.JOB_APPLICATIONS_ADMIN}${queryParams ? `?${queryParams}` : ""}`
     );
   },
 
   getApplicationById: (id) => {
-    
-    return api.get(`${env.endpoints.JOB_APPLICATIONS}${id}/`);
+    return api.get(`${env.endpoints.JOB_APPLICATIONS_ADMIN}${id}/`);
   },
 
   createApplication: (applicationData) => {
@@ -126,23 +119,20 @@ export const jobAPI = {
   },
 
   updateApplicationStatus: (id, status) => {
-    
-    return api.post(`${env.endpoints.JOB_APPLICATIONS}${id}/update_status/`, {
+    return api.post(`${env.endpoints.JOB_APPLICATIONS_ADMIN}${id}/update_status/`, {
       status: status,
     });
   },
 
   downloadCV: (id) => {
-    
-    return api.get(`${env.endpoints.JOB_APPLICATIONS}${id}/download-cv/`, {
+    return api.get(`${env.endpoints.JOB_APPLICATIONS_ADMIN}${id}/download-cv/`, {
       responseType: "blob",
     });
   },
 
   downloadCoverLetter: (id) => {
-    
     return api.get(
-      `${env.endpoints.JOB_APPLICATIONS}${id}/download-cover-letter/`,
+      `${env.endpoints.JOB_APPLICATIONS_ADMIN}${id}/download-cover-letter/`,
       {
         responseType: "blob",
       }
@@ -150,7 +140,6 @@ export const jobAPI = {
   },
 
   deleteApplication: (id) => {
-    
-    return api.delete(`${env.endpoints.JOB_APPLICATIONS}${id}/`);
+    return api.delete(`${env.endpoints.JOB_APPLICATIONS_ADMIN}${id}/`);
   },
 };

@@ -99,9 +99,12 @@ const env = {
     // Applications
     APPLICATIONS:
       import.meta.env.VITE_APPLICATIONS_ENDPOINT || "/api/applications/",
+    APPLICATIONS_ADMIN:
+      import.meta.env.VITE_APPLICATIONS_ADMIN_ENDPOINT || "/api/business/admin/applications/applications/",
 
     // Centres
     CENTRES: import.meta.env.VITE_CENTRES_ENDPOINT || "/api/centres/",
+    CENTRES_ADMIN: import.meta.env.VITE_CENTRES_ADMIN_ENDPOINT || "/api/business/admin/centres/",
     CENTRES_STATES:
       import.meta.env.VITE_CENTRES_STATES_ENDPOINT || "/api/centres/states/",
     CENTRES_DISTRICTS:
@@ -116,13 +119,13 @@ const env = {
     // Image Upload Endpoints
     IMAGE_UPLOAD:
       import.meta.env.VITE_IMAGE_UPLOAD_ENDPOINT ||
-      "/api/centres/upload/image/",
+      "/api/business/admin/centres/upload/image/",
     CENTRE_LOGO_UPLOAD:
       import.meta.env.VITE_CENTRE_LOGO_UPLOAD_ENDPOINT ||
-      "/api/centres/{centre_id}/upload-logo/",
+      "/api/business/admin/centres/{centre_id}/upload-logo/",
     TOPPER_IMAGE_UPLOAD:
       import.meta.env.VITE_TOPPER_IMAGE_UPLOAD_ENDPOINT ||
-      "/api/centres/{centre_id}/upload-topper-image/",
+      "/api/business/admin/centres/{centre_id}/upload-topper-image/",
     CENTRE_LOGO_GET:
       import.meta.env.VITE_CENTRE_LOGO_GET_ENDPOINT ||
       "/api/centres/{centre_id}/logo/",
@@ -140,9 +143,13 @@ const env = {
 
     // Job Post Endpoints
     JOBS: import.meta.env.VITE_JOBS_ENDPOINT || "/api/jobs/job-posts/",
+    JOBS_ADMIN: import.meta.env.VITE_JOBS_ADMIN_ENDPOINT || "/api/business/admin/jobs/job-posts/",
     JOB_APPLICATIONS:
       import.meta.env.VITE_JOB_APPLICATIONS_ENDPOINT ||
       "/api/jobs/applications/",
+    JOB_APPLICATIONS_ADMIN:
+      import.meta.env.VITE_JOB_APPLICATIONS_ADMIN_ENDPOINT ||
+      "/api/business/admin/jobs/applications/",
     JOBS_ACTIVE:
       import.meta.env.VITE_JOBS_ACTIVE_ENDPOINT ||
       "/api/jobs/job-posts/active_jobs/",

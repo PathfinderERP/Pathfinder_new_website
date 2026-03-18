@@ -13,45 +13,34 @@ import {
 } from '@heroicons/react/24/outline';
 import { blogAPI } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useCachedData } from '../hooks/useCachedData';
+import { useCallback } from 'react';
 
 const Blog = () => {
-    const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { data: posts, loading: postsLoading } = useCachedData("blog_posts", () => blogAPI.getAll(), {
+        onSuccess: (data) => {
+            const raw = data?.results || data || [];
+            return Array.isArray(raw) ? raw : [];
+        }
+    });
+
+    const { data: categories } = useCachedData("blog_categories", () => blogAPI.getCategories(), {
+        onSuccess: (data) => {
+            if (Array.isArray(data)) {
+                return ["All", ...data];
+            }
+            return ["All"];
+        },
+        initialData: ["All"]
+    });
+
+    const loading = postsLoading;
+
     const [searchQuery, setSearchQuery] = useState("");
     const [activeIndex, setActiveIndex] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-    const [categories, setCategories] = useState(["All"]);
     const [selectedCategory, setSelectedCategory] = useState("All");
     const carouselRef = useRef(null);
-
-    useEffect(() => {
-        fetchPosts();
-        fetchCategories();
-    }, []);
-
-    const fetchCategories = async () => {
-        try {
-            const response = await blogAPI.getCategories();
-            if (response.data && Array.isArray(response.data)) {
-                setCategories(["All", ...response.data]);
-            }
-        } catch (err) {
-            console.error("Error fetching categories:", err);
-        }
-    };
-
-    const fetchPosts = async () => {
-        try {
-            setLoading(true);
-            const response = await blogAPI.getAll();
-            const data = response.data.results || response.data || [];
-            setPosts(Array.isArray(data) ? data : []);
-        } catch (err) {
-            console.error("Error fetching blog posts:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const featuredPosts = useMemo(() => posts.filter(post => post.is_featured).slice(0, 5), [posts]);
 
@@ -76,17 +65,17 @@ const Blog = () => {
         return () => clearInterval(interval);
     }, [isAutoPlaying, featuredPosts.length]);
 
-    const handlePrev = (e) => {
+    const handlePrev = useCallback((e) => {
         e.stopPropagation();
         setActiveIndex((prev) => (prev - 1 + featuredPosts.length) % featuredPosts.length);
         setIsAutoPlaying(false);
-    };
+    }, [featuredPosts.length]);
 
-    const handleNext = (e) => {
+    const handleNext = useCallback((e) => {
         e.stopPropagation();
         setActiveIndex((prev) => (prev + 1) % featuredPosts.length);
         setIsAutoPlaying(false);
-    };
+    }, [featuredPosts.length]);
 
     if (loading) return <div className="pt-32"><LoadingSpinner /></div>;
 

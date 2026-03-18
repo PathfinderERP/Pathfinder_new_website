@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { studentCornerAPI } from "../../services/api";
-import { useAdminCache, clearAdminCacheByPrefix } from "../../hooks/useAdminCache";
+import { useAdminCache, clearAdminCacheByPrefix, clearPublicCache } from "../../hooks/useAdminCache";
 import {
     PlusIcon,
     PencilIcon,
@@ -232,6 +232,7 @@ const StudentCornerManagement = () => {
             }
 
             clearAdminCacheByPrefix("admin_student_corner");
+            clearPublicCache("student_corner_all");
             refreshItems();
             setIsModalOpen(false);
             resetForm();
@@ -258,6 +259,7 @@ const StudentCornerManagement = () => {
             await studentCornerAPI.deleteItem(id);
             setSuccess("Item deleted successfully!");
             clearAdminCacheByPrefix("admin_student_corner");
+            clearPublicCache("student_corner_all");
             refreshItems();
         } catch (err) {
             console.error("Error deleting item:", err);

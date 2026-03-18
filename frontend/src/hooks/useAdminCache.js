@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'; // Ensure React hooks are imported
+import { clearPublicCacheStore } from './useCachedData';
 
 const CACHE_EXPIRY_MINUTES = 24 * 60; // 24 Hours (effectively until logout)
 const ADMIN_CACHE_PREFIX = "admin_cache_";
@@ -45,7 +46,11 @@ export const clearAllAdminCache = () => {
 export const clearAdminCache = (key) => {
     const cacheKey = `${ADMIN_CACHE_PREFIX}${key}`;
     localStorage.removeItem(cacheKey);
-    
+};
+
+// Clear public website cache (from useCachedData)
+export const clearPublicCache = (key) => {
+    clearPublicCacheStore(key);
 };
 
 export const clearAdminCacheByPrefix = (prefix) => {

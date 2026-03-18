@@ -235,7 +235,7 @@ const JobPostList = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <Link
-                      to={`/admin/jobs/edit/${job.id}`}
+                      to={`/business/admin/jobs/edit/${job.id}`}
                       className="text-orange-600 hover:text-orange-900 dark:text-orange-500 dark:hover:text-orange-400 mr-3"
                     >
                       Edit

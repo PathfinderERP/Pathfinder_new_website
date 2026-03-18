@@ -1,5 +1,5 @@
 import { getImageUrl } from "../utils/imageUtils";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,26 +14,21 @@ import ProductCard from '../components/students-corner/ProductCard';
 import Sidebar from '../components/students-corner/Sidebar';
 import HomeTab from '../components/students-corner/HomeTab';
 import { useCart } from '../contexts/CartContext';
+import { useCachedData } from '../hooks/useCachedData';
 
-const StudentsCorner = () => {
+import LoadingSpinner from '../components/common/LoadingSpinner';
+
+export default function StudentsCorner() {
     const { cartCount } = useCart();
-    const [items, setItems] = useState([]);
-    const [popularItems, setPopularItems] = useState([]);
-    const [iitJeeItems, setIitJeeItems] = useState([]);
-    const [cbse10Items, setCbse10Items] = useState([]);
-    const [cbse12Items, setCbse12Items] = useState([]);
-    const [studyMaterialsItems, setStudyMaterialsItems] = useState([]);
-    const [foundationItems, setFoundationItems] = useState([]);
-    const [olympiadsItems, setOlympiadsItems] = useState([]);
-    const [boardsItems, setBoardsItems] = useState([]);
-    const [timetablesItems, setTimetablesItems] = useState([]);
-    const [stationeryItems, setStationeryItems] = useState([]);
-    const [merchandiseItems, setMerchandiseItems] = useState([]);
-    const [loading, setLoading] = useState(true);
+    // Global items cache
+    const { data: allItemsRaw, loading: globalLoading } = useCachedData("student_corner_all", () => studentCornerAPI.getAllItems());
+
     const [activeCategory, setActiveCategory] = useState('All');
     const [priceFilter, setPriceFilter] = useState(null);
     const [freeDelivery, setFreeDelivery] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [selectedBoard, setSelectedBoard] = useState('');
+    const [selectedClass, setSelectedClass] = useState('');
 
     useEffect(() => {
         // Show sidebar by default on desktop
@@ -53,88 +48,53 @@ const StudentsCorner = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [isSidebarOpen]);
 
-    const [selectedBoard, setSelectedBoard] = useState('');
-    const [selectedClass, setSelectedClass] = useState('');
+    const allItems = useMemo(() => {
+        const raw = allItemsRaw?.results || allItemsRaw || [];
+        return Array.isArray(raw) ? raw : [];
+    }, [allItemsRaw]);
 
-    useEffect(() => {
-        // Reset specific filters when category changes
-        setSelectedBoard('');
-        setSelectedClass('');
-    }, [activeCategory]);
+    const popularItems = useMemo(() => allItems.filter(item => item.popular), [allItems]);
+    const studyMaterialsItems = useMemo(() => allItems.filter(item => item.category === 'Study Materials'), [allItems]);
+    const iitJeeItems = useMemo(() => allItems.filter(item => item.category === 'All India'), [allItems]);
+    const foundationItems = useMemo(() => allItems.filter(item => item.category === 'Foundation'), [allItems]);
+    const olympiadsItems = useMemo(() => allItems.filter(item => item.category === 'Olympiads'), [allItems]);
+    const boardsItems = useMemo(() => allItems.filter(item => item.category === 'Boards'), [allItems]);
+    const cbse10Items = useMemo(() => allItems.filter(item => item.board === 'CBSE' && item.class_level === '10'), [allItems]);
+    const cbse12Items = useMemo(() => allItems.filter(item => item.board === 'CBSE' && item.class_level === '12'), [allItems]);
+    const timetablesItems = useMemo(() => allItems.filter(item => item.category === 'Timetables'), [allItems]);
+    const stationeryItems = useMemo(() => allItems.filter(item => item.category === 'Stationery'), [allItems]);
+    const merchandiseItems = useMemo(() => allItems.filter(item => item.category === 'Merchandise'), [allItems]);
 
-    useEffect(() => {
-        fetchItems();
-    }, [activeCategory, priceFilter, freeDelivery, selectedBoard, selectedClass]);
+    const filteredItems = useMemo(() => {
+        let result = allItems;
+        if (activeCategory !== 'All') {
+            result = result.filter(item => item.category === activeCategory);
+        }
+        if (freeDelivery) {
+            result = result.filter(item => item.free_delivery);
+        }
+        if (priceFilter) {
+            const min = priceFilter.min || 0;
+            const max = priceFilter.max || Infinity;
+            result = result.filter(item => item.price >= min && item.price <= max);
+        }
+        if (selectedBoard) {
+            result = result.filter(item => item.board === selectedBoard);
+        }
+        if (selectedClass) {
+            result = result.filter(item => item.class_level === selectedClass);
+        }
+        return result;
+    }, [allItems, activeCategory, freeDelivery, priceFilter, selectedBoard, selectedClass]);
 
-    useEffect(() => {
-        const fetchPopular = async () => {
-            try {
-                const [
-                    popRes,
-                    studyRes,
-                    iitRes,
-                    foundRes,
-                    olymRes,
-                    boardsRes,
-                    cbse10Res,
-                    cbse12Res,
-                    timeRes,
-                    statRes,
-                    merchRes
-                ] = await Promise.all([
-                    studentCornerAPI.getAllItems({ popular: true }),
-                    studentCornerAPI.getAllItems({ category: 'Study Materials' }),
-                    studentCornerAPI.getAllItems({ category: 'All India' }),
-                    studentCornerAPI.getAllItems({ category: 'Foundation' }),
-                    studentCornerAPI.getAllItems({ category: 'Olympiads' }),
-                    studentCornerAPI.getAllItems({ category: 'Boards' }),
-                    studentCornerAPI.getAllItems({ board: 'CBSE', class_level: '10' }),
-                    studentCornerAPI.getAllItems({ board: 'CBSE', class_level: '12' }),
-                    studentCornerAPI.getAllItems({ category: 'Timetables' }),
-                    studentCornerAPI.getAllItems({ category: 'Stationery' }),
-                    studentCornerAPI.getAllItems({ category: 'Merchandise' })
-                ]);
-                setPopularItems(popRes.data.results || popRes.data);
-                setStudyMaterialsItems(studyRes.data.results || studyRes.data);
-                setIitJeeItems(iitRes.data.results || iitRes.data);
-                setFoundationItems(foundRes.data.results || foundRes.data);
-                setOlympiadsItems(olymRes.data.results || olymRes.data);
-                setBoardsItems(boardsRes.data.results || boardsRes.data);
-                setCbse10Items(cbse10Res.data.results || cbse10Res.data);
-                setCbse12Items(cbse12Res.data.results || cbse12Res.data);
-                setTimetablesItems(timeRes.data.results || timeRes.data);
-                setStationeryItems(statRes.data.results || statRes.data);
-                setMerchandiseItems(merchRes.data.results || merchRes.data);
-            } catch (error) {
-                console.error("Error fetching section items:", error);
-            }
-        };
-        fetchPopular();
+    const handleCategoryChange = useCallback((cat) => {
+        setActiveCategory(cat);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
-    const fetchItems = async () => {
-        setLoading(true);
-        try {
-            const params = {
-                category: activeCategory === 'All' ? undefined : activeCategory,
-                free_delivery: freeDelivery,
-                min_price: priceFilter?.min,
-                max_price: priceFilter?.max,
-                board: selectedBoard || undefined,
-                class_level: selectedClass || undefined
-            };
-
-            // Remove null/undefined params
-            Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
-
-            const response = await studentCornerAPI.getAllItems(params);
-            setItems(response.data.results || response.data); // Handle both paginated and non-paginated
-        } catch (error) {
-            console.error("Error fetching items:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const handleSidebarToggle = useCallback(() => {
+        setIsSidebarOpen(prev => !prev);
+    }, []);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -184,7 +144,7 @@ const StudentsCorner = () => {
                         {/* Left Side: Toggle (Mobile) or Branding (Desktop) */}
                         <div className="flex items-center gap-4">
                             <button
-                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                                onClick={handleSidebarToggle}
                                 className="relative z-[70] p-2 sm:p-2.5 bg-[#FF7D54] text-white rounded-xl shadow-lg shadow-orange-200 hover:bg-[#FF6B3D] transition-all active:scale-95 flex-shrink-0"
                             >
                                 {isSidebarOpen ? (
@@ -241,10 +201,7 @@ const StudentsCorner = () => {
                         {['All', 'Study Materials', 'All India', 'Foundation', 'Olympiads', 'Boards', 'Timetables', 'Stationery', 'Merchandise'].map((cat) => (
                             <button
                                 key={cat}
-                                onClick={() => {
-                                    setActiveCategory(cat);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }}
+                                onClick={() => handleCategoryChange(cat)}
                                 className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${activeCategory === cat
                                     ? 'bg-[#FF7D54] text-white border-[#FF7D54] shadow-md shadow-orange-100'
                                     : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'
@@ -261,13 +218,13 @@ const StudentsCorner = () => {
                         {/* Sidebar: Handles both Mobile and Desktop internally */}
                         <Sidebar
                             activeCategory={activeCategory}
-                            onCategoryChange={setActiveCategory}
+                            onCategoryChange={handleCategoryChange}
                             priceFilter={priceFilter}
                             onPriceChange={setPriceFilter}
                             freeDelivery={freeDelivery}
                             onDeliveryChange={setFreeDelivery}
                             isOpen={isSidebarOpen}
-                            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+                            onToggle={handleSidebarToggle}
                             selectedBoard={selectedBoard}
                             onBoardChange={setSelectedBoard}
                             selectedClass={selectedClass}
@@ -306,14 +263,14 @@ const StudentsCorner = () => {
                                             {activeCategory}
                                         </h2>
                                         <span className="text-sm font-bold text-slate-400">
-                                            {items.length} Result{items.length !== 1 ? 's' : ''}
+                                            {filteredItems.length} Result{filteredItems.length !== 1 ? 's' : ''}
                                         </span>
                                     </div>
 
                                     <div className="min-h-[600px]">
-                                        {loading ? (
+                                        {globalLoading ? (
                                             <div className="flex items-center justify-center h-96">
-                                                <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                                                <LoadingSpinner />
                                             </div>
                                         ) : (
                                             <motion.div
@@ -322,8 +279,8 @@ const StudentsCorner = () => {
                                                 animate="visible"
                                                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 relative"
                                             >
-                                                {items.length > 0 ? (
-                                                    items.map((item) => (
+                                                {filteredItems.length > 0 ? (
+                                                    filteredItems.map((item) => (
                                                         <ProductCard key={item.id || item.unique_id} item={item} />
                                                     ))
                                                 ) : (
@@ -345,9 +302,7 @@ const StudentsCorner = () => {
                         </div>
                     </div>
                 </div>
-            </div >
-        </div >
+            </div>
+        </div>
     );
-};
-
-export default StudentsCorner;
+}

@@ -4,78 +4,58 @@ import ResultsSection from '../../components/Results/ResultsSection';
 import { centresAPI } from '../../services/api';
 import OtherCoursesResultSection from '../../components/Results/OtherCoursesResultSection';
 import FAQResultSection from '../../components/Results/FAQResultSection';
+import { useCachedData } from '../../hooks/useCachedData';
+import { useMemo, useCallback } from 'react';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 export default function BoardsResultPage() {
-    const [exams, setExams] = useState([]);
-    const [years, setYears] = useState([]);
+    const { data: centresDataRaw, loading } = useCachedData("centres", () => centresAPI.getAll());
+
+    const centresData = useMemo(() => Array.isArray(centresDataRaw) ? centresDataRaw : [], [centresDataRaw]);
+
+    const { exams, years } = useMemo(() => {
+        const allToppers = [];
+        centresData.forEach((centre) => {
+            if (centre.toppers && Array.isArray(centre.toppers)) {
+                centre.toppers.forEach((topper) => {
+                    let category = topper.category;
+                    if (!category) {
+                        const examLower = (topper.exam || "").toLowerCase();
+                        if (examLower.includes("board") || examLower.includes("cbse") || examLower.includes("icse") || examLower.includes("class")) {
+                            category = "Boards";
+                        } else if (examLower.includes("foundation")) {
+                            category = "Foundation";
+                        } else {
+                            category = "All India";
+                        }
+                    }
+
+                    if (category === "Boards") {
+                        allToppers.push({
+                            exam: topper.exam || "N/A",
+                            year: topper.year ? topper.year.toString() : "N/A"
+                        });
+                    }
+                });
+            }
+        });
+
+        const uniqueExams = [...new Set(allToppers.map(t => t.exam))].sort();
+        const uniqueYears = [...new Set(allToppers.map(t => t.year))].filter(y => y !== "N/A").sort().reverse();
+
+        return { exams: uniqueExams, years: uniqueYears };
+    }, [centresData]);
+
     const [activeExam, setActiveExam] = useState("All");
     const [activeYear, setActiveYear] = useState("All");
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchExamsAndYearsFromToppers();
+    const handleExamClick = useCallback((exam) => {
+        setActiveExam(exam);
     }, []);
 
-    const fetchExamsAndYearsFromToppers = async () => {
-        try {
-            setLoading(true);
-            const response = await centresAPI.getAll();
-
-            // Extract all toppers from all centres
-            const allToppers = [];
-            response.data.forEach((centre) => {
-                if (centre.toppers && Array.isArray(centre.toppers)) {
-                    centre.toppers.forEach((topper) => {
-                        // Infer category for legacy data
-                        let category = topper.category;
-                        if (!category) {
-                            const examLower = (topper.exam || "").toLowerCase();
-                            if (examLower.includes("board") || examLower.includes("cbse") || examLower.includes("icse") || examLower.includes("class")) {
-                                category = "Boards";
-                            } else if (examLower.includes("foundation")) {
-                                category = "Foundation";
-                            } else {
-                                category = "All India";
-                            }
-                        }
-
-                        // Only include Boards toppers
-                        if (category === "Boards") {
-                            allToppers.push({
-                                exam: topper.exam || "N/A",
-                                year: topper.year ? topper.year.toString() : "N/A",
-                                category: category
-                            });
-                        }
-                    });
-                }
-            });
-
-            // Extract unique exams from Boards toppers
-            const uniqueExams = [...new Set(allToppers.map(t => t.exam))].sort();
-            setExams(uniqueExams);
-
-            // Extract unique years from Boards toppers
-            const uniqueYears = [...new Set(allToppers.map(t => t.year))].filter(y => y !== "N/A").sort().reverse();
-            setYears(uniqueYears);
-
-        } catch (error) {
-            console.error('Error fetching exams from toppers:', error);
-            // Fallback
-            setExams(['CBSE', 'ICSE', 'State Board']);
-            setYears(['2025', '2024', '2023', '2022', '2021']);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleExamClick = (exam) => {
-        setActiveExam(exam);
-    };
-
-    const handleYearClick = (year) => {
+    const handleYearClick = useCallback((year) => {
         setActiveYear(year);
-    };
+    }, []);
 
     return (
         <div className="relative bg-gradient-to-br pt-[56px] md:pt-32 pb-0 w-full 2xl:max-w-7xl 2xl:mx-auto shadow-sm min-h-screen">

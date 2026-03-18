@@ -62,11 +62,11 @@ const AdminLogin = () => {
         </p>
 
         {/* Test credentials info */}
-        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4">
+        {/* <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-4">
           <p className="text-sm text-blue-800 text-center">
             <strong>Test Credentials Available</strong>
           </p>
-        </div>
+        </div> */}
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

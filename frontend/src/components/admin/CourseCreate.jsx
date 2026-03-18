@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { coursesAPI, centresAPI } from "../../services/api";
 import Papa from "papaparse";
-import { clearAdminCache } from "../../hooks/useAdminCache";
+import { clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
 
 const EXAM_OPTIONS = {
   "All India": ['JEE Main', 'JEE Advanced', 'NEET UG', 'NEET PG', 'WBJEE'],
@@ -333,6 +333,10 @@ const CourseCreate = () => {
     try {
       await createCourseForCentre(selectedCentres[0]);
       clearAdminCache("admin_courses");
+      clearPublicCache("all_courses");
+      clearPublicCache("courses");
+      clearPublicCache("centres");
+      clearPublicCache("toppers");
       setSuccess("Course created successfully!");
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setTimeout(() => {
@@ -390,6 +394,10 @@ const CourseCreate = () => {
 
       if (errors.length === 0) {
         clearAdminCache("admin_courses");
+        clearPublicCache("all_courses");
+        clearPublicCache("courses");
+        clearPublicCache("centres");
+        clearPublicCache("toppers");
         setSuccess(`✅ Successfully created course for ${successCount} centre(s)!`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(() => {
@@ -612,6 +620,10 @@ const CourseCreate = () => {
 
       if (errors.length === 0) {
         clearAdminCache("admin_courses");
+        clearPublicCache("all_courses");
+        clearPublicCache("courses");
+        clearPublicCache("centres");
+        clearPublicCache("toppers");
         setSuccess(`✅ Successfully created ${successCount} course(s) from CSV!`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(() => {

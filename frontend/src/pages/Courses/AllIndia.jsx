@@ -1,9 +1,12 @@
-﻿import { getImageUrl } from "../../utils/imageUtils";
+import { getImageUrl } from "../../utils/imageUtils";
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { coursesAPI, centresAPI } from "../../services/api";
 import CourseDetailModal from "../../components/CourseDetailModal";
+import { useCachedData } from "../../hooks/useCachedData";
+import { useCallback } from "react";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 // Helper to preload images
 const preloadImages = (srcs) => {
@@ -19,79 +22,18 @@ const preloadImages = (srcs) => {
 };
 
 export default function AllIndiaPage() {
-    const [isPageLoading, setIsPageLoading] = useState(true);
-    const [preFetchedData, setPreFetchedData] = useState({ courses: [], centres: [] });
+    const { data: coursesDataRaw, loading: coursesLoading } = useCachedData("all_courses", () => coursesAPI.getAll());
+    const { data: centresDataRaw, loading: centresLoading } = useCachedData("centres", () => centresAPI.getAll());
 
-    // Initial page load - fetch data and preload images
-    useEffect(() => {
-        const loadPageResources = async () => {
-            try {
-                // 1. Fetch Data
-                const [coursesResponse, centresResponse] = await Promise.all([
-                    coursesAPI.getAll(),
-                    centresAPI.getAll()
-                ]);
+    const isPageLoading = coursesLoading || centresLoading;
 
-                const coursesData = Array.isArray(coursesResponse.data) ? coursesResponse.data : [];
-                const centresData = Array.isArray(centresResponse.data) ? centresResponse.data : [];
-
-                // 2. Filter courses to find thumbnails to preload (All India specific logic)
-                const targetType = "all india";
-                const relevantCourses = coursesData.filter((course) => {
-                    const courseName = course.name?.toLowerCase() || "";
-                    const targetExam = course.target_exam?.toLowerCase() || "";
-
-                    if (courseName.includes("foundation") || courseName.includes("board")) {
-                        return false;
-                    }
-
-                    const examKeywords = ['jee', 'neet', 'cuet', 'nda', 'medical', 'engineering'];
-                    const nameHasKeyword = examKeywords.some(keyword => courseName.includes(keyword));
-                    const targetHasKeyword = examKeywords.some(keyword => targetExam.includes(keyword));
-
-                    return (targetHasKeyword || nameHasKeyword || courseName.includes("all india"));
-                });
-
-                // 3. Identify images to preload
-                const staticImages = [
-                    "/images/result/black  paper high res.webp",
-                    "/images/result/orange paper.webp",
-                    "/images/course_images/hero_leftside banner.webp",
-                    "/images/course_images/hero_rightside banner.webp"
-                ];
-
-                const courseThumbnails = relevantCourses
-                    .map(c => c.thumbnail_url)
-                    .filter(url => url && url.startsWith('http')) // Only valid URLs
-                    .slice(0, 10); // Limit to first 10 to avoid excessive loading
-
-                // 4. Preload all images
-                await preloadImages([...staticImages, ...courseThumbnails]);
-
-                // 5. Store data
-                setPreFetchedData({
-                    courses: coursesData,
-                    centres: centresData
-                });
-
-            } catch (error) {
-                console.error("Failed to load page resources:", error);
-            } finally {
-                setIsPageLoading(false);
-            }
-        };
-
-        loadPageResources();
-    }, []);
+    const coursesData = useMemo(() => Array.isArray(coursesDataRaw) ? coursesDataRaw : [], [coursesDataRaw]);
+    const centresData = useMemo(() => Array.isArray(centresDataRaw) ? centresDataRaw : [], [centresDataRaw]);
 
     if (isPageLoading) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-t-4 border-[#66090D] mb-4"></div>
-                    <p className="text-xl font-semibold text-gray-700">Loading All India Programs...</p>
-                    <p className="text-sm text-gray-500 mt-2">Preparing the best experience for you</p>
-                </div>
+                <LoadingSpinner />
             </div>
         );
     }
@@ -104,8 +46,8 @@ export default function AllIndiaPage() {
             {/* COURSES SECTION with Filters */}
             <CoursesSection
                 courseType="all india"
-                preFetchedCourses={preFetchedData.courses}
-                preFetchedCentres={preFetchedData.centres}
+                preFetchedCourses={coursesData}
+                preFetchedCentres={centresData}
             />
 
             {/* Features and Success Stories Section */}
@@ -545,14 +487,18 @@ function CoursesSection({ courseType = "foundation", preFetchedCourses, preFetch
         }
     }, [filteredCourses, sortBy]);
 
-    const handleExploreClick = (course) => {
+    const handleExploreClick = useCallback((course) => {
         setSelectedCourse(course);
         setIsModalOpen(true);
-    };
+    }, []);
 
-    const handleBuyNowClick = (course) => {
+    const handleBuyNowClick = useCallback((course) => {
         navigate("/buynow", { state: { courseData: course } });
-    };
+    }, [navigate]);
+
+    const handleSortChange = useCallback((e) => {
+        setSortBy(e.target.value);
+    }, []);
 
     if (loading || isLoading) {
         return (
@@ -587,7 +533,7 @@ function CoursesSection({ courseType = "foundation", preFetchedCourses, preFetch
                             <div className="relative group">
                                 <select
                                     value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
+                                    onChange={handleSortChange}
                                     className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-[10px] sm:text-xs font-bold py-1.5 px-3 sm:px-4 pr-7 sm:pr-9 rounded-full hover:border-orange-500 hover:text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer uppercase tracking-tight"
                                 >
                                     <option value="default">Sort</option>

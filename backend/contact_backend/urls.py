@@ -36,9 +36,15 @@ urlpatterns = [
     path('api/business/admin/auth/', include('admin_auth.urls')),  # ADD THIS LINE - Admin authentication
     path('api/courses/', include('courses.urls')),  # Courses URLs
     path('api/centres/', include('centres.urls')),
+    path('api/business/admin/centres/', include('centres.urls')), # Admin Centres
     path('api/jobs/', include('job_post.urls')),  
+    path('api/business/admin/jobs/', include('job_post.urls')), # Admin Jobs
     path('api/', include('alumni.urls')),  # Alumni URLs
+    path('api/business/admin/alumni/', include('alumni.urls')), # Admin Alumni
     path('api/student-corner/', include('student_corner.urls')),
+    path('api/business/admin/student-corner/', include('student_corner.urls')), # Admin Student Corner
     path('api/blog/', include('blog.urls')),
+    path('api/business/admin/blog/', include('blog.urls')), # Admin Blog
     path('api/landing/', include('landing_registrations.urls')),  # Landing page registrations
+    path('api/business/admin/applications/', include('contact_api.urls')), # Admin Applications
 ]

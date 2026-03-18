@@ -248,7 +248,7 @@ const ApplicantsList = () => {
         try {
             const token = localStorage.getItem('admin_token');
             await axios.patch(
-                `${import.meta.env.VITE_API_BASE_URL}/api/applications/${id}/`,
+                `${import.meta.env.VITE_API_BASE_URL}/api/business/admin/applications/applications/${id}/`,
                 { status: newStatus },
                 {
                     headers: {
@@ -276,7 +276,7 @@ const ApplicantsList = () => {
         try {
             const token = localStorage.getItem('admin_token');
             await axios.delete(
-                `${import.meta.env.VITE_API_BASE_URL}/api/applications/${id}/`,
+                `${import.meta.env.VITE_API_BASE_URL}/api/business/admin/applications/applications/${id}/`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

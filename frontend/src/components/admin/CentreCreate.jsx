@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { centresAPI } from "../../services/api";
 import DragDropImageUpload from "../DragDropImageUpload";
-import { clearAdminCache } from "../../hooks/useAdminCache";
+import { clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
+import { fileToBase64 } from "../../utils/fileUtils";
 
 const EXAM_OPTIONS = {
   "All India": ["JEE", "NEET", "WBJEE", "Others"],
@@ -92,27 +93,19 @@ const CentreCreate = () => {
     setError("");
 
     try {
-      
-
-      // VALIDATE GOOGLE MAPS URL - ACCEPT ALL FORMATS
-      const isValidGoogleMapsUrl =
-        centreData.location &&
-        (centreData.location.startsWith("https://www.google.com/maps/") ||
-          centreData.location.startsWith("https://maps.google.com/") ||
-          centreData.location.startsWith("https://goo.gl/maps/") ||
-          centreData.location.includes("google.com/maps/embed") ||
-          centreData.location.includes("google.com/maps/d/embed"));
-
-      if (!isValidGoogleMapsUrl) {
-        setError("Please enter a valid Google Maps URL");
-        setLoading(false);
-        return;
+      // 1. Prepare Base64 data for logo if a file was selected
+      let logoBase64 = null;
+      if (logoFile) {
+        logoBase64 = await fileToBase64(logoFile);
       }
 
-      
+      // 2. Prepare Base64 data for topper images
+      const topperImagesBase64 = {};
+      for (const [index, file] of Object.entries(topperFiles)) {
+        topperImagesBase64[index] = await fileToBase64(file);
+      }
 
-      // OPTION 1: Create centre WITH toppers data first (RECOMMENDED)
-      // This ensures all topper fields are saved properly
+      // 3. Prepare consolidated API data
       const apiCentreData = {
         state: centreData.state,
         district: centreData.district,
@@ -120,164 +113,41 @@ const CentreCreate = () => {
         centre_type: centreData.centre_type,
         location: centreData.location,
         address: centreData.address,
+        // Include Base64 logo only if we have one
+        ...(logoBase64 && { logo_file: logoBase64 }),
+        // Include toppers with their images
         toppers: centreData.toppers
-          .map((topper) => ({
-            name: topper.name,
-            exam: topper.exam || "",
-            category: topper.category || "All India",
-            rank: topper.rank ? parseInt(topper.rank) : 0,
-            year: topper.year ? parseInt(topper.year) : new Date().getFullYear(),
-            topper_msg: topper.topper_msg || "",
-            percentages: topper.percentages
-              ? parseFloat(topper.percentages)
-              : 0,
-            marks_obtained: topper.marks_obtained ? parseFloat(topper.marks_obtained) : null,
-            total_marks: topper.total_marks ? parseFloat(topper.total_marks) : null,
-            badge: topper.badge || "",
-            // image_data will be added later via image upload
-          }))
-          .filter((topper) => topper.name && topper.exam && topper.rank), // Only include valid toppers
-      };
-
-      
-
-      // Step 1: Create the centre first (WITH topper data)
-      
-      const createResponse = await centresAPI.create(apiCentreData);
-      const newCentre = createResponse.data;
-      const centreId = newCentre.id;
-
-      
-      
-      
-
-      // Step 2: Upload logo if provided
-      if (logoFile) {
-        try {
-          
-          await centresAPI.uploadCentreLogo(centreId, logoFile);
-          
-        } catch (logoError) {
-          console.error("❌ Logo upload failed:", logoError);
-        }
-      }
-
-      // Step 3: Upload topper images for existing toppers
-      
-
-      const topperUploadPromises = centreData.toppers.map(
-        async (topper, index) => {
-          
-          
-
-          // Validate topper has required data
-          if (
-            !topper.name ||
-            topper.name.trim() === "" ||
-            !topper.exam ||
-            topper.exam.trim() === "" ||
-            !topper.rank ||
-            topper.rank.toString().trim() === ""
-          ) {
-            
-            return {
-              success: false,
-              skipped: true,
-              reason: "Missing required fields",
-            };
-          }
-
-          const file = topperFiles[index];
-          if (!file) {
-            
-            return { success: true, skipped: true, reason: "No image file" };
-          }
-
-          
-
-          try {
-            // Send minimal data for image upload - the topper already exists
-            const topperData = {
-              name: topper.name.trim(),
-              exam: topper.exam.trim(),
-              rank: topper.rank.toString().trim(),
-              topper_index: index.toString(), // Tell backend which topper to update
-              // Include other fields to ensure they're processed
-              topper_msg: (topper.topper_msg || "").trim(),
-              year: topper.year || new Date().getFullYear(),
-              percentages: topper.percentages || "",
-              marks_obtained: topper.marks_obtained || "",
-              total_marks: topper.total_marks || "",
+          .map((topper, index) => {
+            const topperPayload = {
+              name: topper.name,
+              exam: topper.exam || "",
+              category: topper.category || "All India",
+              rank: topper.rank ? parseInt(topper.rank) : 0,
+              year: topper.year ? parseInt(topper.year) : new Date().getFullYear(),
+              topper_msg: topper.topper_msg || "",
+              percentages: topper.percentages ? parseFloat(topper.percentages) : 0,
+              marks_obtained: topper.marks_obtained ? parseFloat(topper.marks_obtained) : null,
+              total_marks: topper.total_marks ? parseFloat(topper.total_marks) : null,
               badge: topper.badge || "",
             };
 
-            
-
-            // Create FormData for image upload
-            const formData = new FormData();
-            formData.append("image", file);
-            formData.append("topper_index", index.toString());
-
-            // This should update the existing topper with the image
-            await centresAPI.uploadTopperImage(centreId, formData);
-
-            
-            return { success: true, topperName: topper.name };
-          } catch (topperError) {
-            console.error(
-              `❌ Topper image upload failed for "${topper.name}":`,
-              topperError
-            );
-            return {
-              success: false,
-              topperName: topper.name,
-              error: topperError.message,
-            };
-          }
-        }
-      );
-
-      // Wait for all topper image uploads to complete
-      if (topperUploadPromises.length > 0) {
-        
-        const results = await Promise.allSettled(topperUploadPromises);
-
-        // Count results
-        let successCount = 0;
-        let failCount = 0;
-        let skipCount = 0;
-
-        results.forEach((result, index) => {
-          if (result.status === "fulfilled") {
-            const uploadResult = result.value;
-            if (uploadResult.skipped) {
-              
-              skipCount++;
-            } else if (uploadResult.success) {
-              
-              successCount++;
-            } else {
-              
-              failCount++;
+            // Only include image_file if we have a base64 string
+            if (topperImagesBase64[index]) {
+              topperPayload.image_file = topperImagesBase64[index];
             }
-          } else {
-            
-            failCount++;
-          }
-        });
 
-        
-        
-        
-        
-        
-      } else {
-        
-      }
+            return topperPayload;
+          })
+          .filter((topper) => topper.name && topper.exam), // Basic validation
+      };
 
-      
+      // Create the centre with all data and images in ONE request
+      await centresAPI.create(apiCentreData);
+
       alert("Centre created successfully!");
       clearAdminCache("admin_centres");
+      clearPublicCache("centres");
+      clearPublicCache("toppers");
       navigate("/business/admin/centres?refresh=true");
     } catch (err) {
       console.error("💥 CENTRE CREATION FAILED:", err);
@@ -327,7 +197,7 @@ const CentreCreate = () => {
         [field]: value,
       };
 
-      // Auto-calculate percentage when marks_obtained or total_marks changes
+      // Auto-calculate percentage
       if (field === "marks_obtained" || field === "total_marks") {
         const marksObtained = parseFloat(
           field === "marks_obtained" ? value : updatedToppers[index].marks_obtained
@@ -352,7 +222,7 @@ const CentreCreate = () => {
       toppers: prev.toppers.filter((_, i) => i !== index),
     }));
 
-    // Remove any stored file for this topper
+    // Remove file
     setTopperFiles((prev) => {
       const newFiles = { ...prev };
       delete newFiles[index];
@@ -386,20 +256,9 @@ const CentreCreate = () => {
           </div>
         )}
 
-        {/* Debug Info */}
-        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
-          <strong>Debug Info:</strong>
-          {centreData.toppers.map((topper, index) => (
-            <div key={index} className="text-sm mt-1">
-              Topper {index + 1}: "{topper.name}" - "{topper.exam}" - Rank: "
-              {topper.rank}"
-            </div>
-          ))}
-        </div>
-
         <div className="bg-white dark:bg-slate-900 shadow rounded-lg p-6 border border-gray-200 dark:border-slate-800">
           <form onSubmit={handleSubmit}>
-            {/* Centre Logo Upload Section */}
+            {/* Centre Logo */}
             <div className="mb-8">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Centre Logo
@@ -410,11 +269,6 @@ const CentreCreate = () => {
                   existingImageUrl=""
                   uploading={false}
                 />
-                {logoFile && (
-                  <p className="text-sm text-blue-600 mt-2">
-                    ✓ Logo ready for upload
-                  </p>
-                )}
               </div>
             </div>
 
@@ -425,14 +279,14 @@ const CentreCreate = () => {
               </h3>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 uppercase">
                     State *
                   </label>
                   <select
                     name="state"
                     value={centreData.state}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 dark:border-slate-700 rounded-md shadow-sm p-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                   >
                     {states.map((state) => (
@@ -444,7 +298,7 @@ const CentreCreate = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 uppercase">
                     District *
                   </label>
                   <select
@@ -464,7 +318,7 @@ const CentreCreate = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 uppercase">
                     Centre Name *
                   </label>
                   <input
@@ -472,21 +326,20 @@ const CentreCreate = () => {
                     name="centre"
                     value={centreData.centre}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     required
-                    placeholder="e.g., hazra, saltlake"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Centre Type *
+                  <label className="block text-sm font-medium text-gray-700 uppercase">
+                    Type *
                   </label>
                   <select
                     name="centre_type"
                     value={centreData.centre_type}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     required
                   >
                     <option value="">Select Type</option>
@@ -496,54 +349,22 @@ const CentreCreate = () => {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Location (Google Maps link) *
+                  <label className="block text-sm font-medium text-gray-700 uppercase">
+                    Map Location URL *
                   </label>
-                  <textarea
+                  <input
+                    type="text"
                     name="location"
                     value={centreData.location}
                     onChange={handleChange}
-                    rows={4}
-                    className={`mt-1 block w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 ${centreData.location &&
-                      !(
-                        centreData.location.startsWith(
-                          "https://www.google.com/maps/"
-                        ) ||
-                        centreData.location.startsWith(
-                          "https://maps.google.com/"
-                        ) ||
-                        centreData.location.startsWith(
-                          "https://goo.gl/maps/"
-                        ) ||
-                        centreData.location.includes("google.com/maps/embed") ||
-                        centreData.location.includes("google.com/maps/d/embed")
-                      )
-                      ? "border-red-300 bg-red-50"
-                      : "border-gray-300"
-                      }`}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     required
-                    placeholder="Any Google Maps URL"
+                    placeholder="Google Maps URL"
                   />
-                  {centreData.location &&
-                    !(
-                      centreData.location.startsWith(
-                        "https://www.google.com/maps/"
-                      ) ||
-                      centreData.location.startsWith(
-                        "https://maps.google.com/"
-                      ) ||
-                      centreData.location.startsWith("https://goo.gl/maps/") ||
-                      centreData.location.includes("google.com/maps/embed") ||
-                      centreData.location.includes("google.com/maps/d/embed")
-                    ) && (
-                      <p className="mt-1 text-sm text-red-600">
-                        Please enter a valid Google Maps URL
-                      </p>
-                    )}
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 uppercase">
                     Full Address *
                   </label>
                   <textarea
@@ -551,19 +372,18 @@ const CentreCreate = () => {
                     value={centreData.address}
                     onChange={handleChange}
                     rows={3}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     required
-                    placeholder="Complete address with pin code"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Toppers Section */}
+            {/* Toppers */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Topper Details ({centreData.toppers.length})
+                  Toppers ({centreData.toppers.length})
                 </h3>
                 <button
                   type="button"
@@ -582,307 +402,75 @@ const CentreCreate = () => {
                   <div className="flex justify-between items-center mb-4">
                     <h4 className="text-md font-medium text-gray-900">
                       Topper #{index + 1}
-                      <span className="ml-2 text-xs text-gray-500">
-                        (Index: {index})
-                      </span>
-                      {topperFiles[index] && (
-                        <span className="ml-2 text-sm text-blue-600">
-                          (Image ready for upload)
-                        </span>
-                      )}
                     </h4>
                     <button
                       type="button"
                       onClick={() => removeTopper(index)}
-                      className="text-red-600 hover:text-red-800 text-sm"
+                      className="text-red-500 hover:text-red-600 text-sm"
                     >
-                      Remove Topper
+                      Remove
                     </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Topper Name *
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700">Name *</label>
                       <input
                         type="text"
                         value={topper.name}
-                        onChange={(e) =>
-                          updateTopper(index, "name", e.target.value)
-                        }
+                        onChange={(e) => updateTopper(index, "name", e.target.value)}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                        placeholder="Enter topper name"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Exam *
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700">Exam *</label>
                       <select
-                        value={(() => {
-                          const category = topper.category || "All India";
-                          const options = EXAM_OPTIONS[category] || [];
-                          if (options.includes(topper.exam)) return topper.exam;
-                          if (topper.exam) return "Others";
-                          return "";
-                        })()}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === "Others") {
-                            // Set to "Others" placeholder to show input, instead of clearing to ""
-                            updateTopper(index, "exam", "Others");
-                          } else {
-                            updateTopper(index, "exam", val);
-                          }
-                        }}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 mb-2"
+                        value={topper.exam}
+                        onChange={(e) => updateTopper(index, "exam", e.target.value)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                        required
                       >
                         <option value="">Select Exam</option>
-                        {(EXAM_OPTIONS[topper.category || "All India"] || []).filter(opt => opt !== "Others").map(opt => (
+                        {EXAM_OPTIONS[topper.category || "All India"].map(opt => (
                           <option key={opt} value={opt}>{opt}</option>
                         ))}
                         <option value="Others">Others</option>
                       </select>
-
-                      {/* Show input if "Others" is selected (placeholder) or value is custom */}
-                      {(() => {
-                        const category = topper.category || "All India";
-                        const options = EXAM_OPTIONS[category] || [];
-                        const isCustom = !options.includes(topper.exam) && topper.exam !== undefined;
-                        // Show if explicitly "Others" or it's a custom value (not in list and not empty)
-                        return (topper.exam === "Others" || (isCustom && topper.exam !== ""));
-                      })() && (
-                          <input
-                            type="text"
-                            value={topper.exam === "Others" ? "" : topper.exam}
-                            onChange={(e) =>
-                              // If user clears input, keep it as "Others" so input stays visible/valid logic works
-                              updateTopper(index, "exam", e.target.value === "" ? "Others" : e.target.value)
-                            }
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                            placeholder="Enter Exam Name"
-                            required
-                            autoFocus
-                          />
-                        )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Category *
-                      </label>
-                      <select
-                        value={topper.category || "All India"}
-                        onChange={(e) =>
-                          updateTopper(index, "category", e.target.value)
-                        }
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                        required
-                      >
-                        <option value="All India">All India</option>
-                        <option value="Boards">Boards</option>
-                        <option value="Foundation">Foundation</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Rank *
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700">Rank *</label>
                       <input
                         type="number"
                         value={topper.rank}
-                        onChange={(e) =>
-                          updateTopper(index, "rank", e.target.value)
-                        }
+                        onChange={(e) => updateTopper(index, "rank", e.target.value)}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                        placeholder="e.g., 1, 25, 100"
-                        min="1"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Percentage (Auto-calculated)
-                      </label>
-                      <input
-                        type="number"
-                        value={topper.percentages}
-                        readOnly
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 cursor-not-allowed"
-                        placeholder="Auto-calculated"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Year
-                      </label>
-                      <input
-                        type="number"
-                        value={topper.year}
-                        onChange={(e) =>
-                          updateTopper(index, "year", e.target.value)
-                        }
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                        placeholder="e.g., 2025"
-                        min="2000"
-                        max="2100"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Marks Obtained
-                      </label>
-                      <input
-                        type="number"
-                        value={topper.marks_obtained}
-                        onChange={(e) =>
-                          updateTopper(index, "marks_obtained", e.target.value)
-                        }
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                        placeholder="e.g., 680"
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Total Marks
-                      </label>
-                      <input
-                        type="number"
-                        value={topper.total_marks}
-                        onChange={(e) =>
-                          updateTopper(index, "total_marks", e.target.value)
-                        }
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                        placeholder="e.g., 720"
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Badge
-                      </label>
-                      <input
-                        type="text"
-                        value={topper.badge}
-                        onChange={(e) =>
-                          updateTopper(index, "badge", e.target.value)
-                        }
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                        placeholder="e.g., AIR 1, State Topper"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Topper Message
-                      </label>
-                      <textarea
-                        value={topper.topper_msg}
-                        onChange={(e) =>
-                          updateTopper(index, "topper_msg", e.target.value)
-                        }
-                        rows={3}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                        placeholder="Inspirational message from the topper"
-                      />
-                    </div>
-
-                    {/* Topper Image Upload */}
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Topper Photo
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700">Photo</label>
                       <DragDropImageUpload
-                        onImageUpload={(file) =>
-                          handleTopperImageSelect(file, index)
-                        }
+                        onImageUpload={(file) => handleTopperImageSelect(file, index)}
                         existingImageUrl=""
                         uploading={false}
                       />
-                      {topperFiles[index] && (
-                        <p className="text-sm text-blue-600 mt-2">
-                          ✓ Image ready for upload
-                        </p>
-                      )}
                     </div>
                   </div>
                 </div>
               ))}
-
-              {centreData.toppers.length === 0 && (
-                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                  <svg
-                    className="w-12 h-12 text-gray-400 mx-auto mb-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                  <p className="text-gray-500">No toppers added yet</p>
-                  <button
-                    type="button"
-                    onClick={addTopper}
-                    className="mt-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded text-sm"
-                  >
-                    Add First Topper
-                  </button>
-                </div>
-              )}
             </div>
 
             <div className="flex space-x-3 pt-6 border-t border-gray-200">
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition duration-200 disabled:opacity-50 flex items-center"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition duration-200 disabled:opacity-50"
               >
-                {loading ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Creating Centre & Uploading Images...
-                  </>
-                ) : (
-                  "Create Centre"
-                )}
+                {loading ? "Creating Centre..." : "Create Centre"}
               </button>
               <button
                 type="button"

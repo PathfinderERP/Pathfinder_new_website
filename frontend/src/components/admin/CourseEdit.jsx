@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { coursesAPI, centresAPI } from "../../services/api";
-import { clearAdminCache } from "../../hooks/useAdminCache";
+import { clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
 
 const EXAM_OPTIONS = {
   "All India": ['JEE Main', 'JEE Advanced', 'NEET UG', 'NEET PG', 'WBJEE'],
@@ -288,6 +288,10 @@ const CourseEdit = () => {
 
       await coursesAPI.update(id, dataToSend);
       clearAdminCache("admin_courses");
+      clearPublicCache("all_courses");
+      clearPublicCache("courses");
+      clearPublicCache("centres");
+      clearPublicCache("toppers");
       alert("Course updated successfully!");
       navigate("/business/admin/courses?refresh=true");
     } catch (err) {
@@ -384,6 +388,10 @@ const CourseEdit = () => {
       try {
         await coursesAPI.delete(id);
         clearAdminCache("admin_courses");
+        clearPublicCache("all_courses");
+        clearPublicCache("courses");
+        clearPublicCache("centres");
+        clearPublicCache("toppers");
         alert("Course deleted successfully!");
         navigate("/business/admin/courses?refresh=true");
       } catch (err) {

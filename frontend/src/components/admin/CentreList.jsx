@@ -587,12 +587,13 @@ const CentreList = () => {
                 {/* Operational Protocols */}
                 <div className="flex items-center gap-3 lg:flex-col lg:items-end w-full lg:w-auto">
                   <Link
-                    to={`/admin/centres/${centre.id}/edit`}
+                    to={`/business/admin/centres/${centre.id}/edit`}
                     className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-gray-50 dark:bg-slate-800/50 hover:bg-orange-50 dark:hover:bg-orange-900/10 text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 font-bold rounded-2xl transition-all border border-transparent hover:border-orange-100 dark:hover:border-orange-900/30 text-xs uppercase tracking-widest"
                   >
                     <Edit className="w-4 h-4" />
                     Configure
                   </Link>
+
                   <button
                     onClick={() => handleDeleteCentre(centre.id, centre.centre)}
                     className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl transition-all"

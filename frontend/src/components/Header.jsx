@@ -23,6 +23,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useCachedData } from "../hooks/useCachedData";
+import { centerdata } from "../data/data";
 import LoginModal from "../components/LoginModal";
 import ApplyNowForm from "../pages/Student/Applynow";
 import { centresAPI } from "../services/api";
@@ -52,7 +54,16 @@ const Header = () => {
   const [isApplyNowOpen, setIsApplyNowOpen] = useState(false);
   const [selectedCourseForApply, setSelectedCourseForApply] = useState(null);
   const [contextType, setContextType] = useState("course"); // 'course' or 'result'
-  const [dynamicCentres, setDynamicCentres] = useState([]);
+  // Fetch dynamic centres with caching for INSTANT loading
+  const { data: rawCentres } = useCachedData(
+    "centres",
+    () => centresAPI.getAll(),
+    {
+      initialData: centerdata, // Bedrock for instant UI
+      revalidate: true // Background update
+    }
+  );
+
   const [selectedCourseData, setSelectedCourseData] = useState({
     name: "",
     description: "",
@@ -61,26 +72,14 @@ const Header = () => {
     duration: "",
   });
 
-  // Fetch dynamic centres from backend
-  useEffect(() => {
-    const fetchCentres = async () => {
-      try {
-        const response = await centresAPI.getAll();
-        // Handle both direct array and paginated results
-        const centresData = Array.isArray(response.data)
-          ? response.data
-          : (response.data?.results || []);
-
-        const centreNames = centresData.map(c => c.centre).filter(Boolean);
-        setDynamicCentres(centreNames);
-
-      } catch (error) {
-        console.error("❌ [HEADER] Error fetching centres:", error);
-        setDynamicCentres(["Online", "Hazra", "Garia", "Salt Lake", "Howrah"]);
-      }
-    };
-    fetchCentres();
-  }, []);
+  // Memoize processed centres to prevent unnecessary rerenders
+  const dynamicCentres = React.useMemo(() => {
+    const centresArray = Array.isArray(rawCentres)
+      ? rawCentres
+      : (rawCentres?.results || []);
+    
+    return centresArray.map(c => c.centre || c.name).filter(Boolean);
+  }, [rawCentres]);
 
   const {
     user,
@@ -285,10 +284,10 @@ const Header = () => {
     Contact: { icon: PhoneIcon, href: "/contact" },
   };
 
-  const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
-  const itemVariants = { hidden: { y: -20, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } } };
+  const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.03 } } };
+  const itemVariants = { hidden: { y: -10, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } } };
   const mobileMenuVariants = { closed: { x: "100%", transition: { type: "spring", stiffness: 400, damping: 40 } }, open: { x: 0, transition: { type: "spring", stiffness: 400, damping: 40 } } };
-  const dropdownVariants = { closed: { opacity: 0, scale: 0.95, y: -10, transition: { duration: 0.2 } }, open: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } } };
+  const dropdownVariants = { closed: { opacity: 0, scale: 0.95, y: -5, transition: { duration: 0.15 } }, open: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" } } };
 
   const handleDropdownEnter = (title) => { setOpenDropdown(title); setOpenSubDropdown(null); };
   const handleDropdownLeave = () => { setOpenDropdown(null); setOpenSubDropdown(null); };
@@ -302,7 +301,7 @@ const Header = () => {
 
   return (
     <>
-      <motion.header className="w-full fixed top-0 z-[1000]" initial={{ y: -100 }} animate={{ y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}>
+      <motion.header className="w-full fixed top-0 z-[1000]" initial={{ y: -60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.3, ease: "easeOut" }}>
         <motion.div
           className={`relative bg-gradient-to-br from-white/80 to-white/60 backdrop-blur-2xl border-b transition-all duration-500 w-full shadow-sm ${isScrolled ? "border-orange-200/30 shadow-2xl shadow-orange-500/5 py-2" : "border-orange-100/20 py-2"}`}
           style={{ zIndex: 999 }}
@@ -313,9 +312,20 @@ const Header = () => {
               <motion.div className="flex items-center space-x-2 xs:space-x-3" variants={itemVariants} initial="hidden" animate="visible">
                 <Link to="/" title="Pathfinder" className="flex items-center space-x-2 xs:space-x-3">
                   <div className="relative">
-                    <img src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/03/logo-1.svg" alt="Pathfinder Logo" className="h-8 xs:h-10 sm:h-10 md:h-12 transition-all duration-300 filter drop-shadow-lg" />
+                    <img 
+                      src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/03/logo-1.svg" 
+                      alt="Pathfinder Logo" 
+                      className="h-8 xs:h-10 sm:h-10 md:h-12 transition-all duration-300 filter drop-shadow-lg"
+                      loading="eager"
+                      fetchpriority="high"
+                    />
                   </div>
-                  <img src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/03/excellence.svg" alt="Excellence" className="h-10 hidden sm:block" />
+                  <img 
+                    src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/03/excellence.svg" 
+                    alt="Excellence" 
+                    className="h-10 hidden sm:block" 
+                    loading="eager"
+                  />
                 </Link>
               </motion.div>
 
@@ -413,8 +423,9 @@ const Header = () => {
 
         {/* Bottom Header - Main Navigation */}
         <motion.div
-          className={`hidden lg:block bg-[#66090D] backdrop-blur-xl mx-auto max-w-7xl w-[95%] rounded-2xl shadow-2xl transition-all duration-500 border border-white/10 ${isScrolled ? "mt-2 scale-[0.98] rounded-2xl" : "mt-2 scale-[0.98]"}`}
+          className={`hidden lg:block bg-[#66090D] backdrop-blur-xl mx-auto max-w-7xl w-[95%] rounded-2xl shadow-2xl border border-white/10 ${isScrolled ? "mt-2 scale-[0.98]" : "mt-2"}`}
           animate={{ y: isScrolled ? -5 : 0, scale: isScrolled ? 0.98 : 1 }}
+          transition={{ duration: 0.3 }}
           ref={dropdownRef}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -423,9 +434,9 @@ const Header = () => {
                 <motion.div
                   key={title}
                   className="relative group py-2 xl:py-3"
-                  initial={{ opacity: 0, y: -20 }}
+                  initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 + 0.3 }}
+                  transition={{ duration: 0.2, delay: index * 0.03 }} // Significantly faster stagger or near-instant
                   onMouseEnter={() => section.items && handleDropdownEnter(title)}
                   onMouseLeave={handleDropdownLeave}
                 >

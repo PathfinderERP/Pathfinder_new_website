@@ -120,4 +120,4 @@ const CentreCard = ({ centre, onExplore }) => {
     );
 };
 
-export default CentreCard;
+export default React.memo(CentreCard);

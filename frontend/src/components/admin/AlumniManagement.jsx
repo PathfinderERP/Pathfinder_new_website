@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { alumniAPI } from "../../services/api";
-import { useAdminCache, clearAdminCache } from "../../hooks/useAdminCache";
+import { useAdminCache, clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
 import {
     Plus,
     Edit,
@@ -161,6 +161,7 @@ const AlumniManagement = () => {
             clearAdminCache("admin_alumni");
             clearAdminCache("admin_alumni_years");
             clearAdminCache("admin_alumni_professions");
+            clearPublicCache("alumni_"); // Clears alumni_years, alumni_professions, alumni_images_*
             fetchAlumni();
             fetchYears();
             fetchProfessions(); // Refresh professions list in case new one was added
@@ -209,6 +210,7 @@ const AlumniManagement = () => {
             setSuccess("Alumni deleted successfully!");
             clearAdminCache("admin_alumni");
             clearAdminCache("admin_alumni_years");
+            clearPublicCache("alumni_");
             fetchAlumni();
             fetchYears();
         } catch (err) {

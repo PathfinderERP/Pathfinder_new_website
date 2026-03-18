@@ -1,11 +1,12 @@
 import { getImageUrl } from "../utils/imageUtils";
 // Career.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
 import { ChevronLeftIcon, ChevronRightIcon, ArrowUpRightIcon, CurrencyDollarIcon, BookOpenIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { MapPinIcon } from "@heroicons/react/24/solid";
 import { jobAPI } from "../services/jobAPI";
+import { useCachedData } from "../hooks/useCachedData";
 
 const NextArrow = ({ onClick }) => (
   <button
@@ -26,10 +27,13 @@ const PrevArrow = ({ onClick }) => (
 );
 
 const Career = () => {
-  const [jobs, setJobs] = useState([]);
-  const [filteredJobs, setFilteredJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { data: jobs, loading: jobsLoading } = useCachedData("career_jobs", () => jobAPI.getActiveJobs(), {
+    onSuccess: (data) => {
+      const jobsData = data?.results || data || [];
+      return Array.isArray(jobsData) ? jobsData : [];
+    }
+  });
+
   const [filters, setFilters] = useState({
     jobType: "",
     experience: "",
@@ -38,48 +42,54 @@ const Career = () => {
     department: "",
   });
 
-  const [dynamicDepartments, setDynamicDepartments] = useState(["View all"]);
   const [teamSlidesToShow, setTeamSlidesToShow] = useState(3);
+  const loading = jobsLoading;
 
-  const jobTypeOptions = [
-    { value: "", label: "All Types" },
-    { value: "full_time", label: "Full Time" },
-    { value: "part_time", label: "Part Time" },
-    { value: "contract", label: "Contract" },
-    { value: "remote", label: "Remote" },
-    { value: "hybrid", label: "Hybrid" },
-  ];
+  const dynamicDepartments = useMemo(() => {
+    const uniqueDepts = [...new Set(jobs.map(job => job.department || job.company).filter(Boolean))];
+    return ["View all", ...uniqueDepts];
+  }, [jobs]);
 
-  const experienceOptions = [
-    { value: "", label: "All Experience" },
-    { value: "fresher", label: "Fresher (0-1 years)" },
-    { value: "entry", label: "Entry Level (1-2 years)" },
-    { value: "mid", label: "Mid Level (2-5 years)" },
-    { value: "senior", label: "Senior Level (5+ years)" },
-  ];
+  const filteredJobs = useMemo(() => {
+    let filtered = Array.isArray(jobs) ? jobs : [];
 
-  const fetchJobs = async () => {
-    try {
-      setLoading(true);
-      const response = await jobAPI.getActiveJobs();
-      const jobsData = response.data.results || response.data;
-      setJobs(jobsData);
-      setFilteredJobs(jobsData);
-
-      // Extract unique departments (handle legacy company field as fallback)
-      const uniqueDepts = [...new Set(jobsData.map(job => job.department || job.company).filter(Boolean))];
-      setDynamicDepartments(["View all", ...uniqueDepts]);
-    } catch (err) {
-      setError("Failed to fetch job openings");
-      console.error("Error fetching jobs:", err);
-    } finally {
-      setLoading(false);
+    if (filters.jobType) {
+      filtered = filtered.filter((job) => job.job_type === filters.jobType);
     }
-  };
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
+    if (filters.experience) {
+      filtered = filtered.filter(
+        (job) => job.experience_level === filters.experience
+      );
+    }
+
+    if (filters.location) {
+      const loc = filters.location.toLowerCase();
+      filtered = filtered.filter(
+        (job) =>
+          (job.location || "").toLowerCase().includes(loc) ||
+          (job.district || "").toLowerCase().includes(loc) ||
+          (job.state || "").toLowerCase().includes(loc)
+      );
+    }
+
+    if (filters.department && filters.department !== "View all") {
+      filtered = filtered.filter(
+        (job) => (job.department || job.company)?.toLowerCase() === filters.department.toLowerCase()
+      );
+    }
+
+    if (filters.search) {
+      const query = filters.search.toLowerCase();
+      filtered = filtered.filter(
+        (job) =>
+          job.title.toLowerCase().includes(query) ||
+          job.description?.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [filters, jobs]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -97,65 +107,23 @@ const Career = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    filterJobs();
-  }, [filters, jobs]);
 
-  const filterJobs = () => {
-    let filtered = jobs;
-
-    if (filters.jobType) {
-      filtered = filtered.filter((job) => job.job_type === filters.jobType);
-    }
-
-    if (filters.experience) {
-      filtered = filtered.filter(
-        (job) => job.experience_level === filters.experience
-      );
-    }
-
-    if (filters.location) {
-      filtered = filtered.filter(
-        (job) =>
-          job.location.toLowerCase().includes(filters.location.toLowerCase()) ||
-          job.district.toLowerCase().includes(filters.location.toLowerCase()) ||
-          job.state.toLowerCase().includes(filters.location.toLowerCase())
-      );
-    }
-
-    if (filters.department && filters.department !== "View all") {
-      filtered = filtered.filter(
-        (job) => job.department?.toLowerCase() === filters.department.toLowerCase()
-      );
-    }
-
-    if (filters.search) {
-      filtered = filtered.filter(
-        (job) =>
-          job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-          job.department?.toLowerCase().includes(filters.search.toLowerCase()) ||
-          job.description.toLowerCase().includes(filters.search.toLowerCase())
-      );
-    }
-
-    setFilteredJobs(filtered);
-  };
-
-  const handleFilterChange = (filterType, value) => {
+  const handleFilterChange = useCallback((filterType, value) => {
     setFilters((prev) => ({
       ...prev,
       [filterType]: value,
     }));
-  };
+  }, []);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setFilters({
       jobType: "",
       experience: "",
       location: "",
       search: "",
+      department: "",
     });
-  };
+  }, []);
 
   const formatJobType = (jobType) => {
     return jobType ? jobType.replace("_", " ").toUpperCase() : "N/A";

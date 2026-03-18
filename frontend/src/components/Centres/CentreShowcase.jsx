@@ -9,34 +9,28 @@ import {
 } from "@heroicons/react/24/outline";
 import { centresAPI } from "../../services/api";
 import CentreCard from "./CentreCard";
+import { useCachedData } from "../../hooks/useCachedData";
+import { useCallback } from "react";
 
 const CentreShowcase = () => {
-    const [centres, setCentres] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const { data: centres, loading, error } = useCachedData("centres", () => centresAPI.getAll(), {
+        onSuccess: (response) => Array.isArray(response.data) ? response.data : (response.data.results || [])
+    });
+
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedState, setSelectedState] = useState("All");
     const [activeCentre, setActiveCentre] = useState(null);
     const [viewMode, setViewMode] = useState("grid"); // grid or map-split
 
     useEffect(() => {
-        fetchCentres();
-    }, []);
-
-    const fetchCentres = async () => {
-        try {
-            setLoading(true);
-            const response = await centresAPI.getAll();
-            const data = Array.isArray(response.data) ? response.data : (response.data.results || []);
-            setCentres(data);
-            if (data.length > 0) setActiveCentre(data[0]);
-        } catch (err) {
-            console.error("Error fetching centres:", err);
-            setError("Failed to load centers data.");
-        } finally {
-            setLoading(false);
+        if (centres.length > 0 && !activeCentre) {
+            setActiveCentre(centres[0]);
         }
-    };
+    }, [centres, activeCentre]);
+
+    const handleCentreHover = useCallback((centre) => {
+        setActiveCentre(centre);
+    }, []);
 
     const states = useMemo(() => ["All", ...new Set(centres.map(c => c.state).filter(Boolean))], [centres]);
 
@@ -150,7 +144,7 @@ const CentreShowcase = () => {
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.9 }}
                                         transition={{ duration: 0.4, delay: idx * 0.05 }}
-                                        onMouseEnter={() => setActiveCentre(centre)}
+                                        onMouseEnter={() => handleCentreHover(centre)}
                                     >
                                         <CentreCard centre={centre} />
                                     </motion.div>

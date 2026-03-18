@@ -1220,7 +1220,7 @@ const CourseList = () => {
                       {/* Actions */}
                       <div className="lg:col-span-2 flex items-center justify-end gap-2">
                         <Link
-                          to={`/admin/courses/${course.id}/edit`}
+                          to={`/business/admin/courses/${course.id}/edit`}
                           className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-xl transition-all"
                           title="Edit Portfolio"
                         >

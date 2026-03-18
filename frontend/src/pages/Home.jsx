@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import React, { useMemo, useState, useEffect, useRef, forwardRef, useImperativeHandle, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -29,8 +29,8 @@ import { getImageUrl } from "../utils/imageUtils";
  * ROOT
  *******************/
 export default function PathVerseOverview() {
-  const [selectedState, setSelectedState] = useState("All");
-  const [selectedDistrict, setSelectedDistrict] = useState("All");
+  const [selectedState, setSelectedState] = useState("West Bengal"); // Default to Hazra's state
+  const [selectedDistrict, setSelectedDistrict] = useState("Kolkata"); // Default to Hazra's district
   const [selectedLocation, setSelectedLocation] = useState("All");
   const [selectedCentre, setSelectedCentre] = useState("hazra");
 
@@ -41,6 +41,7 @@ export default function PathVerseOverview() {
     "centres",
     () => centresAPI.getAll(),
     {
+      initialData: centerdata, // Use static data as the bedrock for INSTANT loading
       onSuccess: (data) => {
         const processedCentres = (data || []).map(backendCentre => {
           if (backendCentre.map_url || backendCentre.google_map_url) return backendCentre;
@@ -55,6 +56,10 @@ export default function PathVerseOverview() {
       }
     }
   );
+
+  const handleLocationDetectionTrigger = useCallback(() => {
+    locationFilterRef.current?.detectLocation();
+  }, []);
 
 
 
@@ -84,7 +89,7 @@ export default function PathVerseOverview() {
 
       {/* FILTERED SECTIONS */}
       <CoursesSection
-        triggerLocationDetection={() => locationFilterRef.current?.detectLocation()}
+        triggerLocationDetection={handleLocationDetectionTrigger}
         selectedState={selectedState}
         selectedDistrict={selectedDistrict}
         selectedLocation={selectedLocation}
@@ -567,11 +572,16 @@ const LocationFilter = forwardRef(({
   // Effect for default Hazra selection when data arrives
   useEffect(() => {
     if (centres && centres.length > 0 && !isInitialized.current && !defaultHazraSet.current) {
-      const hazraCentre = centres.find(c => c.centre?.toLowerCase() === "hazra");
+      // Find Hazra (handle both exact match and 'Hazra H.O.')
+      const hazraCentre = centres.find(c => {
+        const name = (c.centre || c.name || "").toLowerCase();
+        return name === "hazra" || name.includes("hazra");
+      });
+      
       if (hazraCentre) {
         if (hazraCentre.state) setSelectedState(hazraCentre.state);
         if (hazraCentre.district) setSelectedDistrict(hazraCentre.district);
-        setSelectedCentre("hazra");
+        setSelectedCentre(hazraCentre.centre?.toLowerCase() || "hazra");
         defaultHazraSet.current = true;
         initialFiltersSet.current = true;
       }
@@ -608,14 +618,12 @@ const LocationFilter = forwardRef(({
         const centresWithDistance = [];
 
         centres.forEach((centre) => {
-          let lat, lng;
-          // ... (existing url extraction logic) ... 
-          // Re-using existing loop logic but refactoring slightly to capture all distances
           const url = centre.map_url || centre.google_map_url || centre.mapEmbed || centre.map || centre.location;
           if (!url) return;
 
           const coords = extractCoordsFromUrl(url);
           if (coords) {
+            const dist = calculateDistance(userLat, userLng, coords.lat, coords.lng);
             centresWithDistance.push({ ...centre, distance: dist });
           }
         });
@@ -1377,40 +1385,42 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
   const scrollLeftValue = useRef(0);
 
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = useCallback((e) => {
     isDown.current = true;
     setIsDragging(true);
     sliderRef.current.classList.add("active");
     startX.current = e.pageX - sliderRef.current.offsetLeft;
     scrollLeftValue.current = sliderRef.current.scrollLeft;
     setIsPaused(true); // Pause on manual interaction
-  };
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     isDown.current = false;
     setIsDragging(false);
     sliderRef.current?.classList.remove("active");
-  };
+  }, []);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     isDown.current = false;
     setIsDragging(false);
     sliderRef.current?.classList.remove("active");
-  };
+  }, []);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     if (!isDown.current) return;
     e.preventDefault();
     const x = e.pageX - sliderRef.current.offsetLeft;
     const walk = (x - startX.current) * 2; // scroll-fast
     sliderRef.current.scrollLeft = scrollLeftValue.current - walk;
-  };
+  }, []);
 
   const { data: courses, loading, error } = useCachedData(
     "courses",
     () => coursesAPI.getAll(),
     {
-      onSuccess: (data) => Array.isArray(data) ? data : []
+      initialData: [], // Default empty but will load from localStorage instantly
+      onSuccess: (data) => Array.isArray(data) ? data : [],
+      revalidate: true // Background update
     }
   );
 
@@ -1454,7 +1464,9 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
             return false;
           }
         } else {
-          if (course.centre?.toLowerCase() !== selectedCentre.toLowerCase()) {
+          const courseCentre = normalizeStr(course.centre);
+          const filterCentre = normalizeStr(selectedCentre);
+          if (!courseCentre.includes(filterCentre) && !filterCentre.includes(courseCentre)) {
             return false;
           }
         }
@@ -2376,6 +2388,8 @@ function ResultsSection({ selectedCentre }) {
     "toppers",
     () => centresAPI.getAll(),
     {
+      revalidate: true, // Fetch fresh data in background
+      initialData: [], // Starts empty but uses localStorage instantly
       onSuccess: (data) => {
         const topperList = [];
         data.forEach((centre) => {
@@ -2426,11 +2440,22 @@ function ResultsSection({ selectedCentre }) {
 
   // Categorize toppers by exam type
   const categorizeToppers = () => {
+    // 1. Filter toppers by selected centre if specified
+    let filteredToppers = allToppers;
+    if (selectedCentre && selectedCentre.toLowerCase() !== "all" && selectedCentre.toLowerCase() !== "") {
+      filteredToppers = allToppers.filter(t => {
+        const tCentre = normalizeStr(t.centre);
+        const sCentre = normalizeStr(selectedCentre);
+        return tCentre.includes(sCentre) || sCentre.includes(tCentre);
+      });
+    }
+
+    // 2. Further categorize by tab
     const categorized = {
-      All: allToppers,
-      "All India": allToppers.filter((t) => t.category === "All India"),
-      Boards: allToppers.filter((t) => t.category === "Boards"),
-      Foundation: allToppers.filter((t) => t.category === "Foundation"),
+      All: filteredToppers,
+      "All India": filteredToppers.filter((t) => t.category === "All India"),
+      Boards: filteredToppers.filter((t) => t.category === "Boards"),
+      Foundation: filteredToppers.filter((t) => t.category === "Foundation"),
     };
     return categorized;
   };

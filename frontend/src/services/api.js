@@ -31,7 +31,8 @@ api.interceptors.request.use(
     const isAdminEndpoint = config.url.includes('/api/business/admin/') ||
       config.url.includes('/api/auth/users/') ||
       config.url.includes('/api/auth/business/admin/') ||
-      config.url.includes('/api/courses/business/admin/');
+      config.url.includes('/api/courses/business/admin/') ||
+      config.url.includes('/business/admin/'); // Catch any other admin paths
 
     const isStudentEndpoint = config.url.includes('/my_courses/') ||
       config.url.includes('/api/auth/profile/') ||
@@ -227,12 +228,12 @@ export const coursesAPI = {
 // Applications API (for students) - Using env configuration
 export const applicationsAPI = {
   create: (applicationData) => {
-    return api.post(env.endpoints.APPLICATIONS, applicationData);
+    return api.post(env.endpoints.APPLICATIONS_ADMIN, applicationData);
   },
 
-  getAll: () => api.get(env.endpoints.APPLICATIONS),
+  getAll: () => api.get(env.endpoints.APPLICATIONS_ADMIN),
 
-  getById: (id) => api.get(`${env.endpoints.APPLICATIONS}${id}/`),
+  getById: (id) => api.get(`${env.endpoints.APPLICATIONS_ADMIN}${id}/`),
 };
 
 // Student Auth API - Using env configuration
@@ -386,17 +387,22 @@ export const userManagementAPI = {
 export const centresAPI = {
   // Basic CRUD operations
   getAll: () => {
-    return api.get(env.endpoints.CENTRES);
+    return api.get(env.endpoints.CENTRES, {
+      params: {
+        _t: new Date().getTime(),
+        timestamp: new Date().toISOString()
+      }
+    });
   },
 
   getById: (id) => api.get(`${env.endpoints.CENTRES}${id}/`),
 
-  create: (centreData) => api.post(env.endpoints.CENTRES, centreData),
+  create: (centreData) => api.post(env.endpoints.CENTRES_ADMIN, centreData),
 
   update: (id, centreData) =>
-    api.patch(`${env.endpoints.CENTRES}${id}/`, centreData),
+    api.patch(`${env.endpoints.CENTRES_ADMIN}${id}/`, centreData),
 
-  delete: (id) => api.delete(`${env.endpoints.CENTRES}${id}/`),
+  delete: (id) => api.delete(`${env.endpoints.CENTRES_ADMIN}${id}/`),
 
   // NEW: MongoDB Image Upload Methods
   uploadCentreLogo: async (centreId, imageFile) => {
@@ -417,19 +423,19 @@ export const centresAPI = {
     return response.data;
   },
 
-  // In your api.js file - FIX THIS FUNCTION
+  // In your api.js file - Standardized image upload with admin prefix
   uploadTopperImage: async (centreId, formData) => {
     try {
       // Use the existing axios instance (api) which has the interceptors
       const response = await api.post(
-        `/api/centres/${centreId}/upload-topper-image/`,
+        env.endpoints.TOPPER_IMAGE_UPLOAD.replace("{centre_id}", centreId),
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
             // The Authorization header will be automatically added by the interceptor
           },
-          timeout: 30000,
+          timeout: 45000,
         }
       );
 
@@ -441,7 +447,12 @@ export const centresAPI = {
 
   getCentreLogo: (centreId) => {
     return api.get(
-      env.endpoints.CENTRE_LOGO_GET.replace("{centre_id}", centreId)
+      env.endpoints.CENTRE_LOGO_GET.replace("{centre_id}", centreId),
+      {
+        params: {
+          _t: new Date().getTime()
+        }
+      }
     );
   },
 
@@ -473,29 +484,31 @@ export const centresAPI = {
 
   getCentres: (state, district) => {
     let url = env.endpoints.CENTRES_LIST;
-    const params = new URLSearchParams();
+    const params = {
+      _t: new Date().getTime()
+    };
 
-    if (state) params.append("state", state);
-    if (district) params.append("district", district);
+    if (state) params.state = state;
+    if (district) params.district = district;
 
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
-
-    return api.get(url);
+    return api.get(url, { params });
   },
 
   getCentreDetails: (centreName) => {
     return api.get(
       `${env.endpoints.CENTRES_DETAILS}?centre=${encodeURIComponent(
         centreName
-      )}`
+      )}&_t=${new Date().getTime()}`
     );
   },
 
   // Fetch all toppers from all centres
   getToppers: () => {
-    return api.get(`${env.endpoints.CENTRES}toppers/`);
+    return api.get(`${env.endpoints.CENTRES}toppers/`, {
+      params: {
+        _t: new Date().getTime()
+      }
+    });
   },
 };
 
@@ -514,17 +527,17 @@ export const alumniAPI = {
 
   // Create new alumni entry (admin only)
   create: (alumniData) => {
-    return api.post("/api/alumni/", alumniData);
+    return api.post("/api/business/admin/alumni/alumni/", alumniData);
   },
 
   // Update alumni entry (admin only)
   update: (id, alumniData) => {
-    return api.patch(`/api/alumni/${id}/`, alumniData);
+    return api.patch(`/api/business/admin/alumni/alumni/${id}/`, alumniData);
   },
 
   // Delete alumni entry (admin only)
   delete: (id) => {
-    return api.delete(`/api/alumni/${id}/`);
+    return api.delete(`/api/business/admin/alumni/alumni/${id}/`);
   },
 
   // Get alumni grouped by profession
@@ -560,17 +573,17 @@ export const studentCornerAPI = {
 
   // Create item
   createItem: (itemData) => {
-    return api.post('/api/student-corner/items/', itemData);
+    return api.post('/api/business/admin/student-corner/items/', itemData);
   },
 
   // Update item
   updateItem: (id, itemData) => {
-    return api.patch(`/api/student-corner/items/${id}/`, itemData);
+    return api.patch(`/api/business/admin/student-corner/items/${id}/`, itemData);
   },
 
   // Delete item
   deleteItem: (id) => {
-    return api.delete(`/api/student-corner/items/${id}/`);
+    return api.delete(`/api/business/admin/student-corner/items/${id}/`);
   },
 
   // Upload image
@@ -578,7 +591,7 @@ export const studentCornerAPI = {
     const formData = new FormData();
 
     formData.append("image", imageFile);
-    return api.post('/api/student-corner/items/upload-image/', formData, {
+    return api.post('/api/business/admin/student-corner/items/upload-image/', formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -617,17 +630,17 @@ export const blogAPI = {
 
   // Create new blog post
   create: (blogData) => {
-    return api.post("/api/blog/posts/", blogData);
+    return api.post("/api/business/admin/blog/posts/", blogData);
   },
 
   // Update blog post
   update: (id, blogData) => {
-    return api.patch(`/api/blog/posts/${id}/`, blogData);
+    return api.patch(`/api/business/admin/blog/posts/${id}/`, blogData);
   },
 
   // Delete blog post
   delete: (id) => {
-    return api.delete(`/api/blog/posts/${id}/`);
+    return api.delete(`/api/business/admin/blog/posts/${id}/`);
   },
 
   // Get distinct categories

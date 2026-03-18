@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { blogAPI } from "../../services/api";
-import { useAdminCache, clearAdminCache } from "../../hooks/useAdminCache";
+import { useAdminCache, clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
 import LoadingSpinner from "../common/LoadingSpinner";
 import {
     PlusIcon,
@@ -153,6 +153,8 @@ const BlogManagement = () => {
             }
             handleCloseModal();
             clearAdminCache("admin_blogs");
+            clearPublicCache("blog_posts");
+            clearPublicCache("blog_categories");
             fetchPosts();
         } catch (err) {
             console.error("Error saving blog post:", err);
@@ -167,6 +169,8 @@ const BlogManagement = () => {
             try {
                 await blogAPI.delete(id);
                 clearAdminCache("admin_blogs");
+                clearPublicCache("blog_posts");
+                clearPublicCache("blog_categories");
                 fetchPosts();
             } catch (err) {
                 console.error("Error deleting blog post:", err);
