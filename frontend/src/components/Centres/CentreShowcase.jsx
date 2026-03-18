@@ -14,7 +14,10 @@ import { useCallback } from "react";
 
 const CentreShowcase = () => {
     const { data: centres, loading, error } = useCachedData("centres", () => centresAPI.getAll(), {
-        onSuccess: (response) => Array.isArray(response.data) ? response.data : (response.data.results || [])
+        onSuccess: (data) => {
+            const raw = data?.results || data || [];
+            return Array.isArray(raw) ? raw : [];
+        }
     });
 
     const [searchTerm, setSearchTerm] = useState("");
