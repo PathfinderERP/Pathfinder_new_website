@@ -72,8 +72,8 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
   // Get environment variables
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const APPLICATIONS_ENDPOINT = import.meta.env.VITE_APPLICATIONS_ENDPOINT || "/api/applications/";
-  const CONTACT_PHONE = import.meta.env.VITE_CONTACT_PHONE;
-  const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL;
+  const CONTACT_PHONE = import.meta.env.VITE_CONTACT_PHONE || "+91-9147178886";
+  const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL || "[EMAIL_ADDRESS]";
 
   // Initialize centres from course data (only for header dropdown)
   useEffect(() => {
@@ -341,7 +341,7 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
         onClose();
       } else {
         // For development without backend
-        
+
         onSubmit(applicationData);
         setFormData({
           fullName: "",

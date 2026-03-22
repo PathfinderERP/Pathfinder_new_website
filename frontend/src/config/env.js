@@ -10,11 +10,11 @@ const env = {
     import.meta.env.VITE_ADMIN_APP_TITLE || "Pathfinder Academy Admin",
 
   // Contact Information
-  CONTACT_PHONE: import.meta.env.VITE_CONTACT_PHONE || "+91-9876543210",
+  CONTACT_PHONE: import.meta.env.VITE_CONTACT_PHONE || "+91-9147178886",
   CONTACT_EMAIL:
-    import.meta.env.VITE_CONTACT_EMAIL || "admissions@yourinstitute.com",
+    import.meta.env.VITE_CONTACT_EMAIL || "[EMAIL_ADDRESS]",
   SUPPORT_EMAIL:
-    import.meta.env.VITE_SUPPORT_EMAIL || "support@yourinstitute.com",
+    import.meta.env.VITE_SUPPORT_EMAIL || "[EMAIL_ADDRESS]",
 
   // API Endpoints
   endpoints: {
