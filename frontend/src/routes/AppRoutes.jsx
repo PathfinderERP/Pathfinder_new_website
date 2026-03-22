@@ -75,6 +75,7 @@ import ChairmanMessage from "../pages/About/ChairmanMessage";
 import Franchise from "../pages/Franchise";
 import { AllIndiaLandingPage } from "../pages/add_landingpage/pages/Jeelandingpage";
 import { Neetlandingpage } from "../pages/add_landingpage/pages/Neetlandingpage";
+import Pais from "../pages/Pais";
 
 const AppRoutes = () => {
   return (
@@ -624,6 +625,11 @@ const AppRoutes = () => {
             <BoardsResult />
           </MainLayout>
         }
+      />
+
+      <Route
+        path="/pais"
+        element={<Pais />}
       />
 
       {/* 404 Page with Main Layout but NO Header and Footer */}
