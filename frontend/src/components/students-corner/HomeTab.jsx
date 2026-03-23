@@ -1,7 +1,8 @@
 import { getImageUrl } from "../../utils/imageUtils";
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import ProductCard from './ProductCard';
+import { motion } from 'framer-motion';
 
 const HomeTab = ({
     popularItems,
@@ -14,70 +15,88 @@ const HomeTab = ({
     cbse12Items,
     timetablesItems,
     stationeryItems,
-    merchandiseItems
+    merchandiseItems,
+    onCategoryChange
 }) => {
+    // Utility to create drag constraints for a section
+    const DraggableSection = ({ items, title, category, onCategoryChange }) => {
+        const carouselRef = useRef(null);
+        const [constraints, setConstraints] = useState({ left: 0, right: 0 });
+
+        useEffect(() => {
+            if (carouselRef.current) {
+                const scrollWidth = carouselRef.current.scrollWidth;
+                const offsetWidth = carouselRef.current.offsetWidth;
+                setConstraints({ left: -(scrollWidth - offsetWidth + 48), right: 0 });
+            }
+        }, [items]);
+
+        return (
+            <div className="mb-10 group/section">
+                <div className="flex items-center justify-between mb-1 px-6">
+                    <h2 className="text-2xl font-black text-slate-900">{title}</h2>
+                    {category && (
+                        <button
+                            onClick={() => onCategoryChange(category)}
+                            className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors"
+                        >
+                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
+                        </button>
+                    )}
+                </div>
+
+                <div className="relative overflow-hidden cursor-grab active:cursor-grabbing px-6">
+                    <motion.div
+                        ref={carouselRef}
+                        drag="x"
+                        dragConstraints={constraints}
+                        dragElastic={0.1}
+                        className="grid grid-rows-2 grid-flow-col gap-x-4 gap-y-8 pt-6 pb-14 w-fit"
+                    >
+                        {items.map((item) => (
+                            <div
+                                key={item.id || item.unique_id}
+                                className="min-w-[280px] w-[280px] flex-shrink-0 select-none px-2"
+                            >
+                                <ProductCard item={item} />
+                            </div>
+                        ))}
+                    </motion.div>
+                </div>
+            </div>
+        );
+    };
+
     return (
-        <div className="flex-1">
-            {/* Global Popular Items row (Curated) */}
+        <div className="flex-1 pb-20">
+            {/* 1. Popular Items */}
             {popularItems.length > 0 && (
-                <div className="mb-8">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Popular Books</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {popularItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <DraggableSection items={popularItems} title="Popular Books" />
             )}
 
-            {/* Study Materials Row */}
-            {studyMaterialsItems && studyMaterialsItems.length > 0 && (
-                <div className="mb-10">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Study Materials</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {studyMaterialsItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {/* 2. Study Materials */}
+            {studyMaterialsItems.length > 0 && (
+                <DraggableSection
+                    items={studyMaterialsItems}
+                    title="Study Materials"
+                    category="Study Materials"
+                    onCategoryChange={onCategoryChange}
+                />
             )}
 
-            {/* Popular IIT JEE Books Section (All India) */}
+            {/* 3. IIT JEE Books */}
             {iitJeeItems.length > 0 && (
-                <div className="mb-10">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Popular IIT JEE Books</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {iitJeeItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <DraggableSection
+                    items={iitJeeItems}
+                    title="Popular IIT JEE Books"
+                    category="All India"
+                    onCategoryChange={onCategoryChange}
+                />
             )}
 
             {/* Banner Row */}
-            <div className="mb-14 ">
-                <div className="">
+            <div className="mb-14 px-6">
+                <div className="rounded-3xl overflow-hidden shadow-xl shadow-orange-100/50">
                     <img
                         src={getImageUrl("/images/student corner/student corner home page  2nd banner.webp")}
                         alt="Pathfinder Promotion"
@@ -86,156 +105,84 @@ const HomeTab = ({
                 </div>
             </div>
 
-            {/* Foundation Section */}
-            {foundationItems && foundationItems.length > 0 && (
-                <div className="mb-10">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Foundation Courses</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {foundationItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {/* 4. Foundation */}
+            {foundationItems.length > 0 && (
+                <DraggableSection
+                    items={foundationItems}
+                    title="Foundation Courses"
+                    category="Foundation"
+                    onCategoryChange={onCategoryChange}
+                />
             )}
 
-            {/* Olympiads Section */}
-            {olympiadsItems && olympiadsItems.length > 0 && (
-                <div className="mb-10">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Olympiad Prep</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {olympiadsItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {/* 5. Olympiads */}
+            {olympiadsItems.length > 0 && (
+                <DraggableSection
+                    items={olympiadsItems}
+                    title="Olympiad Prep"
+                    category="Olympiads"
+                    onCategoryChange={onCategoryChange}
+                />
             )}
 
-            {/* Boards General Section */}
-            {boardsItems && boardsItems.length > 0 && (
-                <div className="mb-10">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Board Exam Essentials</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {boardsItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {/* 6. Boards General */}
+            {boardsItems.length > 0 && (
+                <DraggableSection
+                    items={boardsItems}
+                    title="Board Exam Essentials"
+                    category="Boards"
+                    onCategoryChange={onCategoryChange}
+                />
             )}
 
-            {/* Popular CBSE Class 10th Books Section */}
-            {cbse10Items && cbse10Items.length > 0 && (
-                <div className="mb-10">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Popular CBSE Class 10th Books</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {cbse10Items.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {/* 7. CBSE 10th */}
+            {cbse10Items.length > 0 && (
+                <DraggableSection
+                    items={cbse10Items}
+                    title="Popular CBSE Class 10th Books"
+                    category="Boards"
+                    onCategoryChange={onCategoryChange}
+                />
             )}
 
-            {/* Popular CBSE Class 12th Books Section */}
-            {cbse12Items && cbse12Items.length > 0 && (
-                <div className="mb-10">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Popular CBSE Class 12th Books</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {cbse12Items.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {/* 8. CBSE 12th */}
+            {cbse12Items.length > 0 && (
+                <DraggableSection
+                    items={cbse12Items}
+                    title="Popular CBSE Class 12th Books"
+                    category="Boards"
+                    onCategoryChange={onCategoryChange}
+                />
             )}
 
-            {/* Timetables Section */}
-            {timetablesItems && timetablesItems.length > 0 && (
-                <div className="mb-10">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Study Timetables</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {timetablesItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {/* 9. Timetables */}
+            {timetablesItems.length > 0 && (
+                <DraggableSection
+                    items={timetablesItems}
+                    title="Study Timetables"
+                    category="Timetables"
+                    onCategoryChange={onCategoryChange}
+                />
             )}
 
-            {/* Popular Merchandise Section */}
-            {merchandiseItems && merchandiseItems.length > 0 && (
-                <div className="mb-10">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Popular Merchandise</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {merchandiseItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {/* 10. Merchandise */}
+            {merchandiseItems.length > 0 && (
+                <DraggableSection
+                    items={merchandiseItems}
+                    title="Popular Merchandise"
+                    category="Merchandise"
+                    onCategoryChange={onCategoryChange}
+                />
             )}
 
-            {/* Popular Stationery Section */}
-            {stationeryItems && stationeryItems.length > 0 && (
-                <div className="mb-10">
-                    <div className="flex items-center justify-between mb-1 px-6">
-                        <h2 className="text-2xl font-black text-slate-900">Popular Stationery</h2>
-                        <button className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors">
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-6 pt-8 pb-8 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {stationeryItems.map((item) => (
-                            <div key={item.id || item.unique_id} className="min-w-[240px] w-[240px] relative">
-                                <ProductCard item={item} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {/* 11. Stationery */}
+            {stationeryItems.length > 0 && (
+                <DraggableSection
+                    items={stationeryItems}
+                    title="Popular Stationery"
+                    category="Stationery"
+                    onCategoryChange={onCategoryChange}
+                />
             )}
         </div>
     );

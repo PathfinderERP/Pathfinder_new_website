@@ -37,16 +37,6 @@ export default function StudentsCorner() {
         }
     }, []);
 
-    useEffect(() => {
-        const handleScroll = () => {
-            if (isSidebarOpen && window.scrollY > 300) {
-                setIsSidebarOpen(false);
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [isSidebarOpen]);
 
     const allItems = useMemo(() => {
         const raw = allItemsRaw?.results || allItemsRaw || [];
@@ -255,6 +245,7 @@ export default function StudentsCorner() {
                                     timetablesItems={timetablesItems}
                                     stationeryItems={stationeryItems}
                                     merchandiseItems={merchandiseItems}
+                                    onCategoryChange={handleCategoryChange}
                                 />
                             ) : (
                                 <>
