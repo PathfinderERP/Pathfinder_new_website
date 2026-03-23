@@ -1,5 +1,5 @@
 import { getImageUrl } from "../utils/imageUtils";
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Slider from "react-slick";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -64,6 +64,58 @@ const FOUNDATION_FAQS = [
     }
 ];
 
+const TABS = [
+    { id: "features", label: "Features" },
+    { id: "about", label: "About" },
+    { id: "teachers", label: "Teachers" },
+    { id: "toppers", label: "Toppers" },
+    { id: "free_content", label: "Free Content" },
+    { id: "more_details", label: "More Details" },
+];
+
+const DEFAULT_TOPPERS = [
+    {
+        name: "Rupayan Pal",
+        rank: "1026",
+        image: getImageUrl("/images/homepagecarousal_images/rupayan pal.webp")
+    },
+    {
+        name: "Devdutta Majhi",
+        rank: "1649",
+        image: getImageUrl("/images/homepagecarousal_images/devdutta majhi.webp")
+    },
+    {
+        name: "Adrita Mahata",
+        rank: "2022",
+        image: getImageUrl("/images/homepagecarousal_images/Adrita Mahata.webp")
+    },
+    {
+        name: "Adrita Sarkar",
+        rank: "2853",
+        image: getImageUrl("/images/homepagecarousal_images/Adrita Sarkar.webp")
+    },
+    {
+        name: "Chandrachur Sen",
+        rank: "312",
+        image: getImageUrl("/images/homepagecarousal_images/Chandrachur Sen.webp")
+    },
+    {
+        name: "Pranami Halder",
+        rank: "487",
+        image: getImageUrl("/images/homepagecarousal_images/Pranami halder.webp")
+    },
+    {
+        name: "Sourav Mukherjee",
+        rank: "721",
+        image: getImageUrl("/images/homepagecarousal_images/rupayan pal.webp") // Re-using for now or using common student
+    },
+    {
+        name: "Ishita Sen",
+        rank: "958",
+        image: getImageUrl("/images/homepagecarousal_images/devdutta majhi.webp") // Re-using for filler
+    }
+];
+
 const CourseDetailModal = ({ course, isOpen, onClose }) => {
     const navigate = useNavigate();
     const { user, token } = useAuth();
@@ -88,58 +140,88 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
         };
     }, [isOpen]);
 
-    if (!isOpen || !course) return null;
-
-    const handleBuyNow = () => {
+    const handleBuyNow = useCallback(() => {
+        if (!course) return;
         navigate("/buynow", { state: { courseData: course } });
-    };
+    }, [navigate, course]);
 
-    const tabs = [
-        { id: "features", label: "Features" },
-        { id: "about", label: "About" },
-        { id: "teachers", label: "Teachers" },
-        { id: "toppers", label: "Toppers" },
-        { id: "free_content", label: "Free Content" },
-        { id: "more_details", label: "More Details" },
-    ];
-
-    const scrollToSection = (id) => {
+    const scrollToSection = useCallback((id) => {
         setActiveTab(id);
         const element = document.getElementById(`section-${id}`);
         if (element) {
             element.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-    };
+    }, []);
 
-    // Helper to get plan price
-    const getPrice = () => {
-        // Use discounted_price if available, otherwise course_price
+    const { displayPrice, originalPrice, discount } = useMemo(() => {
+        if (!course) return { displayPrice: 0, originalPrice: 0, discount: 0 };
+        
+        let dp = 0;
+        let op = 0;
+
         if (course.discounted_price) {
-            return parseFloat(course.discounted_price);
-        }
-        if (course.plans && course.plans.length > 0) {
+            dp = parseFloat(course.discounted_price);
+        } else if (course.plans && course.plans.length > 0) {
             const prices = course.plans.map(p => p.discounted_price || p.base_price).filter(p => p);
-            return Math.min(...prices);
+            dp = Math.min(...prices);
+        } else {
+            dp = parseFloat(course.course_price);
         }
-        return parseFloat(course.course_price);
-    };
 
-    const getOriginalPrice = () => {
-        // Use course_price as original if discounted_price exists
         if (course.discounted_price && course.course_price) {
-            return parseFloat(course.course_price);
-        }
-        if (course.plans && course.plans.length > 0) {
+            op = parseFloat(course.course_price);
+        } else if (course.plans && course.plans.length > 0) {
             const prices = course.plans.map(p => p.base_price).filter(p => p);
-            return Math.max(...prices);
+            op = Math.max(...prices);
+        } else {
+            op = parseFloat(course.course_price);
         }
-        return parseFloat(course.course_price);
-    };
 
-    const displayPrice = getPrice();
-    const originalPrice = getOriginalPrice();
-    // Use offers field if available, otherwise calculate
-    const discount = course.offers ? parseInt(course.offers) : Math.round(((originalPrice - displayPrice) / originalPrice) * 100);
+        const disc = course.offers ? parseInt(course.offers) : (op > 0 ? Math.round(((op - dp) / op) * 100) : 0);
+
+        return { displayPrice: dp, originalPrice: op, discount: disc };
+    }, [course]);
+
+    const toppersToDisplay = useMemo(() => {
+        if (!course) return DEFAULT_TOPPERS;
+        return course.toppers && course.toppers.length > 0 ? course.toppers : DEFAULT_TOPPERS;
+    }, [course]);
+
+    const topperSliderSettings = useMemo(() => ({
+        className: "topper-hero-slider",
+        centerMode: true,
+        infinite: true,
+        centerPadding: isMobile ? "20px" : "0px",
+        slidesToShow: isMobile ? 3 : 7,
+        speed: 500,
+        autoplay: true,
+        autoplaySpeed: 2000,
+        focusOnSelect: true,
+        arrows: !isMobile,
+        responsive: [
+            { breakpoint: 1280, settings: { slidesToShow: 5, centerPadding: "0px" } },
+            { breakpoint: 1024, settings: { slidesToShow: 3, centerPadding: "20px" } },
+            { breakpoint: 640, settings: { slidesToShow: 3, centerPadding: "10px" } }
+        ]
+    }), [isMobile]);
+
+    const freeContentSliderSettings = useMemo(() => ({
+        className: "free-content-slider",
+        centerMode: !isMobile,
+        centerPadding: "0px",
+        dots: false,
+        infinite: true,
+        speed: 500,
+        slidesToShow: isMobile ? 1 : 3,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 3000,
+        focusOnSelect: true,
+        arrows: !isMobile,
+        responsive: [{ breakpoint: 1024, settings: { slidesToShow: isMobile ? 1 : 3 } }]
+    }), [isMobile]);
+
+    if (!isOpen || !course) return null;
 
     return (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/70 backdrop-blur-sm 2xl:p-4 overflow-hidden">
@@ -210,7 +292,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                         {/* Black Stripe Navigation */}
                         <div className="absolute top-64 left-0 w-full h-[60px] bg-black z-50 flex items-center shadow-2xl">
                             <div className="container max-w-7xl mx-auto px-6 md:px-12 md:pl-2 flex gap-8 overflow-x-auto no-scrollbar h-full items-center">
-                                {tabs.map((tab) => (
+                                {TABS.map((tab) => (
                                     <button
                                         key={tab.id}
                                         onClick={() => scrollToSection(tab.id)}
@@ -471,95 +553,10 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                                     {/* CONTENT */}
                                     <div className="relative z-10 w-full pt-10">
                                         {/* Animated Toppers List Container */}
-                                        {/* React Slick Carousel for Toppers */}
                                         <div className="container mx-auto px-4 sm:px-12">
-                                            {(() => {
-                                                const settings = {
-                                                    className: "topper-hero-slider",
-                                                    centerMode: true,
-                                                    infinite: true,
-                                                    centerPadding: isMobile ? "20px" : "0px",
-                                                    slidesToShow: isMobile ? 3 : 7,
-                                                    speed: 500,
-                                                    autoplay: true,
-                                                    autoplaySpeed: 2000,
-                                                    focusOnSelect: true,
-                                                    arrows: !isMobile,
-                                                    responsive: [
-                                                        {
-                                                            breakpoint: 1280,
-                                                            settings: {
-                                                                slidesToShow: 5,
-                                                                centerPadding: "0px",
-                                                            }
-                                                        },
-                                                        {
-                                                            breakpoint: 1024,
-                                                            settings: {
-                                                                slidesToShow: 3,
-                                                                centerPadding: "20px",
-                                                            }
-                                                        },
-                                                        {
-                                                            breakpoint: 640,
-                                                            settings: {
-                                                                slidesToShow: 3,
-                                                                centerPadding: "10px",
-                                                            }
-                                                        }
-                                                    ]
-                                                };
-
-                                                const toppersToDisplay =
-                                                    course.toppers && course.toppers.length > 0
-                                                        ? course.toppers
-                                                        : [
-                                                            {
-                                                                name: "Rupayan Pal",
-                                                                rank: "1026",
-                                                                image: "https://images.unsplash.com/photo-1607746882042-944635dfe10e"
-                                                            },
-                                                            {
-                                                                name: "Atrijo Pal",
-                                                                rank: "1649",
-                                                                image: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1"
-                                                            },
-                                                            {
-                                                                name: "Soumyadeep Das",
-                                                                rank: "2022",
-                                                                image: "https://images.unsplash.com/photo-1599566150163-29194dcaad36"
-                                                            },
-                                                            {
-                                                                name: "Prantik Ganguly",
-                                                                rank: "2853",
-                                                                image: "https://images.unsplash.com/photo-1618641986557-1ecd230959aa"
-                                                            },
-                                                            {
-                                                                name: "Anirban Chakraborty",
-                                                                rank: "312",
-                                                                image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d"
-                                                            },
-                                                            {
-                                                                name: "Riya Banerjee",
-                                                                rank: "487",
-                                                                image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e"
-                                                            },
-                                                            {
-                                                                name: "Sourav Mukherjee",
-                                                                rank: "721",
-                                                                image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2"
-                                                            },
-                                                            {
-                                                                name: "Ishita Sen",
-                                                                rank: "958",
-                                                                image: "https://images.unsplash.com/photo-1547425260-76bcadfb4f2c"
-                                                            }
-                                                        ];
-
-                                                return (
-                                                    <Slider {...settings}>
-                                                        {toppersToDisplay.map((topper, idx) => (
-                                                            <div key={idx} className="outline-none py-8 px-6">
+                                            <Slider {...topperSliderSettings}>
+                                                {toppersToDisplay.map((topper, idx) => (
+                                                    <div key={idx} className="outline-none py-8 px-6">
                                                                 <div className="w-32 mx-auto flex flex-col group cursor-pointer relative">
                                                                     <div className="absolute -top-2 -left-3 z-20">
                                                                         <div className="text-slate-900 font-black text-xl tracking-tight leading-none mb-0.5">RANK</div>
@@ -586,6 +583,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                                                                                     src={topper.image_url || topper.image}
                                                                                     alt={topper.name}
                                                                                     className="w-full h-full object-cover"
+                                                                                    style={{ objectPosition: '5% center' }}
                                                                                 />
                                                                             </div>
                                                                         </div>
@@ -601,8 +599,6 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                                                             </div>
                                                         ))}
                                                     </Slider>
-                                                );
-                                            })()}
                                         </div>
                                     </div>
                                 </div>
@@ -695,28 +691,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
 
                                     <div className="relative px-0 md:px-2 ml-0 md:ml-32">
                                         {course.free_contents && course.free_contents.length > 0 ? (
-                                            <Slider {...{
-                                                className: "free-content-slider",
-                                                centerMode: !isMobile,
-                                                centerPadding: "0px",
-                                                dots: false,
-                                                infinite: true,
-                                                speed: 500,
-                                                slidesToShow: isMobile ? 1 : 3,
-                                                slidesToScroll: 1,
-                                                autoplay: true,
-                                                autoplaySpeed: 3000,
-                                                focusOnSelect: true,
-                                                arrows: !isMobile,
-                                                responsive: [
-                                                    {
-                                                        breakpoint: 1024,
-                                                        settings: {
-                                                            slidesToShow: isMobile ? 1 : 3,
-                                                        }
-                                                    }
-                                                ]
-                                            }}>
+                                            <Slider {...freeContentSliderSettings}>
                                                 {course.free_contents.map((content, idx) => (
                                                     <div key={idx} className="px-0 md:px-4 pb-8 pt-1">
                                                         <div className="bg-black rounded-2xl overflow-hidden h-full flex flex-col shadow-lg border border-slate-800 transition-all duration-300">
@@ -755,31 +730,17 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
                                             </Slider>
                                         ) : (
                                             /* Dummy/Fallback Data for visualization if empty */
-                                            <Slider {...{
-                                                className: "free-content-slider",
-                                                centerMode: !isMobile,
-                                                centerPadding: "0px",
-                                                dots: false,
-                                                infinite: true,
-                                                speed: 500,
-                                                slidesToShow: isMobile ? 1 : 3,
-                                                slidesToScroll: 1,
-                                                autoplay: true,
-                                                autoplaySpeed: 3000,
-                                                focusOnSelect: true,
-                                                arrows: !isMobile,
-                                                responsive: [{ breakpoint: 1024, settings: { slidesToShow: isMobile ? 1 : 3 } }]
-                                            }}>
+                                            <Slider {...freeContentSliderSettings}>
                                                 {[1, 2, 3, 4].map((_, idx) => (
                                                     <div key={idx} className="px-0 md:px-4 pb-8 pt-1">
                                                         <div className="bg-black rounded-2xl overflow-hidden h-full flex flex-col shadow-lg border border-slate-800 transition-all duration-300">
                                                             <div className="relative h-72 md:h-48 w-full bg-slate-800 flex items-center justify-center overflow-hidden">
                                                                 <img
                                                                     src={[
-                                                                        "https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=800&auto=format&fit=crop",
-                                                                        "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop",
-                                                                        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop",
-                                                                        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop"
+                                                                        getImageUrl("/images/course_images/explore_img_1.webp"),
+                                                                        getImageUrl("/images/course_images/explore_img_2.webp"),
+                                                                        getImageUrl("/images/course_images/explore_img_3.webp"),
+                                                                        getImageUrl("/images/course_images/explore_img_4.webp")
                                                                     ][idx % 4]}
                                                                     alt="Thumbnail"
                                                                     className="w-full h-full object-cover opacity-80"
