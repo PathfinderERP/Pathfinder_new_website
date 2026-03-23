@@ -105,7 +105,7 @@ const AlumniPage = () => {
             achievement: "IIT Bombay, CSE | AIR 45",
             current: "Senior Architect, Google Mountain View",
             year: "2018 Batch",
-            image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=400",
+            image: getImageUrl("/images/homepagecarousal_images/rupayan pal.webp"),
             quote: "Pathfinder was more than just a coaching center; it was a launchpad for my dreams. The analytical mindset I built here stays with me in every project at Google.",
         },
         {
@@ -113,7 +113,7 @@ const AlumniPage = () => {
             achievement: "AIIMS New Delhi | AIR 12",
             current: "Chief Resident, AIIMS Cardiology",
             year: "2019 Batch",
-            image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
+            image: getImageUrl("/images/homepagecarousal_images/Pranami halder.webp"),
             quote: "The personalized attention and the 'never-give-up' attitude instilled by Pathfinder mentors were crucial during my preparation. Proud to be a Pathfinder alumna.",
         },
         {
@@ -121,7 +121,7 @@ const AlumniPage = () => {
             achievement: "Senior Scientist, ISRO",
             current: "Mission Specialist, Gaganyaan Program",
             year: "2012 Batch",
-            image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400",
+            image: getImageUrl("/images/homepagecarousal_images/devdutta majhi.webp"),
             quote: "Success in space science requires precision and foundation—both of which were forged during my JEE years at Pathfinder. The legacy continues.",
         },
     ];

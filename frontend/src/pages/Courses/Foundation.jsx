@@ -1023,22 +1023,22 @@ function FeaturesAndStoriesSection() {
 
     const stories = [
         {
-            name: "Arjun Das",
-            achievement: "NTSE Scholar 2023",
-            image: "https://randomuser.me/api/portraits/men/32.jpg",
-            quote: "Pathfinder's foundation course changed my approach to learning. The concepts I learned in Class 9 helped me crack NTSE with ease."
+            name: "Chandrachur Sen",
+            achievement: "Madhyamika 2024 Rank 1",
+            image: getImageUrl("/images/homepagecarousal_images/Chandrachur Sen.webp"),
+            quote: "Pathfinder's foundation course changed my approach to learning. The concepts I learned in Class 9 helped me crack Madhyamika with ease."
         },
         {
-            name: "Sneha Roy",
-            achievement: "KVPY Fellow",
-            image: "https://randomuser.me/api/portraits/women/44.jpg",
-            quote: "The faculty is amazing! They don't just teach; they inspire. The regular tests helped me identify my weak areas and improve."
+            name: "Adrita Sarkar",
+            achievement: "Madhyamik 2025 Rank 1",
+            image: getImageUrl("/images/homepagecarousal_images/Adrita Sarkar.webp"),
+            quote: "The faculty is amazing! They don't just teach; they inspire. The regular tests helped me identify my weak areas and improve my rank."
         },
         {
-            name: "Rahul Gupta",
-            achievement: "Olympiad Gold",
-            image: "https://randomuser.me/api/portraits/men/86.jpg",
-            quote: "I started with the Foundation program in Class 8. It gave me a huge advantage when I started my JEE preparation in Class 11."
+            name: "Adrita Mahata",
+            achievement: "ICSE 2025 AIR 2",
+            image: getImageUrl("/images/homepagecarousal_images/Adrita Mahata.webp"),
+            quote: "I started with the Foundation program in Class 8. It gave me a huge advantage when I started my competitive preparation later."
         }
     ];
 
@@ -1145,7 +1145,7 @@ function FeaturesAndStoriesSection() {
                                                 {/* Image with angular frame effect */}
                                                 <div className="relative mb-6">
                                                     <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-slate-900 shadow-xl relative z-10">
-                                                        <img src={story.image} alt={story.name} className="w-full h-full object-cover" />
+                                                        <img src={story.image} alt={story.name} className="w-full h-full object-cover object-top" />
                                                     </div>
                                                     <div className="absolute inset-0 bg-orange-500 rounded-full blur-md opacity-20 transform translate-y-2"></div>
                                                 </div>

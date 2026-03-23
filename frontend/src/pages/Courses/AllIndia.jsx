@@ -998,22 +998,22 @@ function FeaturesAndStoriesSection() {
 
     const stories = [
         {
-            name: "Arjun Das",
-            achievement: "JEE Advanced AIR 156",
-            image: "https://randomuser.me/api/portraits/men/32.jpg",
-            quote: "Pathfinder's targeted JEE preparation strategy and doubt-clearing sessions played a crucial role in securing my rank in JEE Advanced."
+            name: "Devdutta Majhi",
+            achievement: "JEE Advanced 2025 AIR 1",
+            image: getImageUrl("/images/homepagecarousal_images/devdutta majhi.webp"),
+            quote: "Pathfinder's targeted JEE preparation strategy and ranker test series were crucial in securing my rank in JEE Advanced."
         },
         {
-            name: "Sneha Roy",
-            achievement: "NEET UG Score 705/720",
-            image: "https://randomuser.me/api/portraits/women/44.jpg",
-            quote: "The faculty at Pathfinder is exceptional. Their focus on NCERT and consistent mock tests helped me achieve a high score in NEET."
+            name: "Rupayan Pal",
+            achievement: "NEET UG 2025 AIR 20",
+            image: getImageUrl("/images/homepagecarousal_images/rupayan pal.webp"),
+            quote: "The focus on doubt-clearing and consistent mock tests at Pathfinder helped me achieve medical college dream."
         },
         {
-            name: "Rahul Gupta",
-            achievement: "WBJEE Rank 12",
-            image: "https://randomuser.me/api/portraits/men/86.jpg",
-            quote: "For WBJEE, speed is crucial. Pathfinder's specialized test series helped me improve my time management and accuracy significantly."
+            name: "Chandrachur Sen",
+            achievement: "WBJEE 2025 Topper",
+            image: getImageUrl("/images/homepagecarousal_images/Chandrachur Sen.webp"),
+            quote: "Pathfinder's rigorous schedule and mentorship kept me motivated throughout my entrance preparation."
         }
     ];
 
@@ -1122,7 +1122,7 @@ function FeaturesAndStoriesSection() {
                                                 {/* Image with angular frame effect */}
                                                 <div className="relative mb-6">
                                                     <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-slate-900 shadow-xl relative z-10">
-                                                        <img src={story.image} alt={story.name} className="w-full h-full object-cover" />
+                                                        <img src={story.image} alt={story.name} className="w-full h-full object-cover object-top" />
                                                     </div>
                                                     <div className="absolute inset-0 bg-orange-500 rounded-full blur-md opacity-20 transform translate-y-2"></div>
                                                 </div>

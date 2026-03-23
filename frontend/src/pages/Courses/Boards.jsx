@@ -1011,21 +1011,21 @@ function FeaturesAndStoriesSection() {
 
     const stories = [
         {
-            name: "Amit Kumar",
-            achievement: "CBSE 12th 98.6%",
-            image: "https://randomuser.me/api/portraits/men/32.jpg",
+            name: "Adrita Sarkar",
+            achievement: "Madhyamik 2025 Rank 1",
+            image: getImageUrl("/images/homepagecarousal_images/Adrita Sarkar.webp"),
             quote: "Pathfinder's mock boards gave me the exact feel of the real exam. The feedback on my answer writing was invaluable."
         },
         {
-            name: "Priya Singh",
-            achievement: "ICSE 10th 99.2%",
-            image: "https://randomuser.me/api/portraits/women/44.jpg",
+            name: "Pranami halder",
+            achievement: "CBSE 10th 99.2%",
+            image: getImageUrl("/images/homepagecarousal_images/Pranami halder.webp"),
             quote: "The faculty helped me master the toughest concepts with ease. I owe my perfect score in Science to their guidance."
         },
         {
-            name: "Rahul Roy",
-            achievement: "WBCHSE Rank 5",
-            image: "https://randomuser.me/api/portraits/men/86.jpg",
+            name: "Adrita Mahata",
+            achievement: "ICSE 10th 99.8%",
+            image: getImageUrl("/images/homepagecarousal_images/Adrita Mahata.webp"),
             quote: "Consistent practice and concept clarity were key. Pathfinder's test series helped me manage my time effectively."
         }
     ];
@@ -1133,7 +1133,7 @@ function FeaturesAndStoriesSection() {
                                                 {/* Image with angular frame effect */}
                                                 <div className="relative mb-6">
                                                     <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-slate-900 shadow-xl relative z-10">
-                                                        <img src={story.image} alt={story.name} className="w-full h-full object-cover" />
+                                                        <img src={story.image} alt={story.name} className="w-full h-full object-cover object-top" />
                                                     </div>
                                                     <div className="absolute inset-0 bg-orange-500 rounded-full blur-md opacity-20 transform translate-y-2"></div>
                                                 </div>
