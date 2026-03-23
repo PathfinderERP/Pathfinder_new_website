@@ -157,7 +157,7 @@ export const Neetlandingpage = () => {
 
     const banners = [
         // {
-        //     src: "/Header Banner.webp",
+        //     src: "/images/Header Banner.webp",
         //     alt: "JEE WBJEE Header Banner"
         // },
         {
@@ -416,7 +416,7 @@ export const Neetlandingpage = () => {
                     {/* Right Side: Boy Image - Absolute Extreme Down */}
                     <div className="hidden md:block absolute right-0 bottom-0 z-0 pointer-events-none">
                         <img
-                            src="/Form Boy.webp"
+                            src="/images/Form Boy.webp"
                             alt="Pathfinder Student"
                             className="w-56 lg:w-[280px] h-auto object-contain block"
                         />
@@ -637,7 +637,7 @@ export const Neetlandingpage = () => {
                     <div className="max-w-7xl mx-auto">
                         <div className="h-[100px] md:h-[290px] flex items-start justify-center">
                             <img
-                                src="/Toppers.webp"
+                                src="/images/Toppers.webp"
                                 alt="Pathfinder Toppers"
                                 className="w-full h-auto object-contain -mt-[160px] md:-mt-[504px] scale-[1.4] translate-x-[6%] md:scale-[1.1] md:translate-x-0 pointer-events-none"
                             />
