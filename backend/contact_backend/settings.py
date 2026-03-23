@@ -137,6 +137,7 @@ INSTALLED_APPS = [
     'student_corner',
     'blog',
     'landing_registrations',  # New app for landing page registrations
+    'franchise_inquiry',
 ]
 
 

@@ -24,7 +24,9 @@ def root(request):
             "alumni_years": "/api/alumni/years/",
             "alumni_professions": "/api/alumni/professions/",
             "landing_register": "/api/landing/register/",
-            "landing_list": "/api/landing/list/"
+            "landing_list": "/api/landing/list/",
+            "franchise_register": "/api/franchise/register/",
+            "franchise_list": "/api/franchise/list/"
         }
     })
 
@@ -46,5 +48,6 @@ urlpatterns = [
     path('api/blog/', include('blog.urls')),
     path('api/business/admin/blog/', include('blog.urls')), # Admin Blog
     path('api/landing/', include('landing_registrations.urls')),  # Landing page registrations
+    path('api/franchise/', include('franchise_inquiry.urls')),  # Franchise inquiries
     path('api/business/admin/applications/', include('contact_api.urls')), # Admin Applications
 ]

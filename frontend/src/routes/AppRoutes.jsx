@@ -65,6 +65,7 @@ import AlumniManagement from "../components/admin/AlumniManagement";
 import StudentCornerManagement from "../components/admin/StudentCornerManagement";
 import BlogManagement from "../components/admin/BlogManagement";
 import AdsLeadsList from "../components/admin/AdsLeadsList";
+import FranchiseInquiryList from "../components/admin/FranchiseInquiryList";
 import Centres from "../pages/Centres/Centres";
 import ContactUs from "../pages/ContactUs";
 import Blog from "../pages/Blog";
@@ -467,6 +468,17 @@ const AppRoutes = () => {
           <AdminProtectedRoute requiredPermission="manage_applications">
             <AdminLayout>
               <AdsLeadsList />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/business/admin/franchise-inquiries"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_applications">
+            <AdminLayout>
+              <FranchiseInquiryList />
             </AdminLayout>
           </AdminProtectedRoute>
         }

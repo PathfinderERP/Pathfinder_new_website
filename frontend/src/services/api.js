@@ -660,3 +660,11 @@ export const landingAPI = {
   }
 };
 
+// Franchise Inquiry API
+export const franchiseAPI = {
+  submit: (data) => api.post("/api/franchise/register/", data),
+  list: () => api.get("/api/franchise/list/"),
+  updateStatus: (id, status) => api.patch(`/api/franchise/registrations/${id}/`, { is_contacted: status }),
+  delete: (id) => api.delete(`/api/franchise/registrations/${id}/`),
+};
+
