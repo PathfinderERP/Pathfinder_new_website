@@ -265,9 +265,9 @@ const Header = () => {
                             <motion.div className="flex items-center space-x-2 xs:space-x-3" variants={itemVariants} initial="hidden" animate="visible">
                                 <a href="/" title="Pathfinder" className="flex items-center space-x-2 xs:space-x-3">
                                     <div className="relative">
-                                        <img src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/03/logo-1.svg" alt="Pathfinder Logo" className="h-8 xs:h-10 sm:h-10 md:h-12 transition-all duration-300 filter drop-shadow-lg" />
+                                        <img src="/images/icon/logo-1.svg" alt="Pathfinder Logo" className="h-8 xs:h-10 sm:h-10 md:h-12 transition-all duration-300 filter drop-shadow-lg" />
                                     </div>
-                                    <img src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/03/excellence.svg" alt="Excellence" className="h-10 hidden sm:block" />
+                                    <img src="/images/icon/35_year.jpeg" alt="Excellence" className="h-16 hidden sm:block" />
                                 </a>
                             </motion.div>
 

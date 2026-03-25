@@ -313,7 +313,7 @@ const Header = () => {
                 <Link to="/" title="Pathfinder" className="flex items-center space-x-2 xs:space-x-3">
                   <div className="relative">
                     <img 
-                      src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/03/logo-1.svg" 
+                      src="/images/icon/logo-1.svg" 
                       alt="Pathfinder Logo" 
                       className="h-8 xs:h-10 sm:h-10 md:h-12 transition-all duration-300 filter drop-shadow-lg"
                       loading="eager"
@@ -321,9 +321,9 @@ const Header = () => {
                     />
                   </div>
                   <img 
-                    src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/03/excellence.svg" 
+                    src="/images/icon/35_year.jpeg" 
                     alt="Excellence" 
-                    className="h-10 hidden sm:block" 
+                    className="h-16 hidden sm:block" 
                     loading="eager"
                   />
                 </Link>
@@ -403,7 +403,7 @@ const Header = () => {
                   ) : (
                     <>
                       <motion.button onClick={() => setIsLoginModalOpen(true)} className="hidden lg:flex items-center space-x-2 px-6 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border-2 border-orange-500/30 text-orange-600 hover:bg-orange-500 hover:text-white hover:border-orange-600 text-sm font-semibold transition-all duration-300 group overflow-hidden relative" whileHover={{ scale: 1.05, y: -1 }} whileTap={{ scale: 0.95 }}>
-                        <motion.img src="https://pathfinder-wp-new.s3.ap-south-1.amazonaws.com/wp-content/uploads/2025/04/user_icon.svg" alt="User" className="h-8 group-hover:scale-110 transition-transform duration-300 z-10" />
+                        <motion.img src="/images/icon/user_icon.svg" alt="User" className="h-8 group-hover:scale-110 transition-transform duration-300 z-10" />
                         <div className="flex flex-col items-start leading-none ml-1 z-10">
                           <span className="text-sm font-bold">Student Login</span>
                           <span className="text-[10px] font-medium text-orange-600/80 group-hover:text-white/90">for Digital Portal</span>
