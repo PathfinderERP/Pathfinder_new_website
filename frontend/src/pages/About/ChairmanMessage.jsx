@@ -121,7 +121,7 @@ function FreeContentSection() {
     const freeContents = [
         {
             title: "Pathfinder's 30-Year Legacy: A Message from the Chairman",
-            description: "Mr. T.K. Banerjee shares the inspiring journey of Pathfinder and our commitment to excellence.",
+            description: "Debdutta Sreemany shares the inspiring journey of Pathfinder and our commitment to excellence.",
             thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
             published_date: "2025-11-10"
         },
@@ -182,7 +182,7 @@ function FreeContentSection() {
                         Chairman_  <span className="text-orange-500">Speaks</span>
                     </h2>
                     <p className="text-xl text-slate-600 font-bold max-w-2xl mx-auto">
-                        Listen to our visionary Chairman, Mr. T.K. Banerjee, share his insights and guidance for the future of education.
+                        Listen to our visionary Chairman, Debdutta Sreemany, share his insights and guidance for the future of education.
                     </p>
                 </div>
 
