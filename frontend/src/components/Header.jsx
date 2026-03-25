@@ -321,7 +321,7 @@ const Header = () => {
                     />
                   </div>
                   <img 
-                    src="/images/icon/35_year.jpeg" 
+                    src="/images/icon/35.png" 
                     alt="Excellence" 
                     className="h-16 hidden sm:block" 
                     loading="eager"

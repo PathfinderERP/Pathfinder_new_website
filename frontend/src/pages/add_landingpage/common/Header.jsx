@@ -267,7 +267,7 @@ const Header = () => {
                                     <div className="relative">
                                         <img src="/images/icon/logo-1.svg" alt="Pathfinder Logo" className="h-8 xs:h-10 sm:h-10 md:h-12 transition-all duration-300 filter drop-shadow-lg" />
                                     </div>
-                                    <img src="/images/icon/35_year.jpeg" alt="Excellence" className="h-16 hidden sm:block" />
+                                    <img src="/images/icon/35.png" alt="Excellence" className="h-16 hidden sm:block" />
                                 </a>
                             </motion.div>
 
