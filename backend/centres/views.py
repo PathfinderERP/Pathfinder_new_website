@@ -203,7 +203,7 @@ def upload_image(request):
             image_data = image_file.read()
             image_file.seek(0)
             
-            print(f"🔍 DEBUG - Attempting Cloudflare R2 upload...")
+            print(f"[DEBUG] - Attempting Cloudflare R2 upload...")
             public_url = upload_to_r2(
                 file_data=image_data,
                 file_name=image_file.name,
@@ -219,7 +219,7 @@ def upload_image(request):
                 }, status=status.HTTP_201_CREATED)
                 
         except Exception as r2_err:
-            print(f"⚠️ Cloudflare R2 upload failed: {r2_err}. Falling back to local/other methods.")
+            print(f"[WARNING] Cloudflare R2 upload failed: {r2_err}. Falling back to local/other methods.")
             image_file.seek(0)
 
         # 2. Legacy/Secondary: Try Cloudflare Images (v1) if credentials exist
@@ -242,14 +242,14 @@ def upload_image(request):
                         'service': 'cloudflare_v1'
                     }, status=status.HTTP_201_CREATED)
             except Exception as e:
-                print(f"⚠️ Cloudflare Images v1 failed: {e}")
+                print(f"[WARNING] Cloudflare Images v1 failed: {e}")
                 image_file.seek(0)
         
         # 3. Fallback to local storage
         return save_image_locally(request, image_file)
         
     except Exception as e:
-        print(f"❌ Image upload error: {str(e)}")
+        print(f"[ERROR] Image upload error: {str(e)}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -281,7 +281,7 @@ def save_image_locally(request, image_file):
         }, status=status.HTTP_201_CREATED)
         
     except Exception as e:
-        print(f"❌ Local storage failed: {e}")
+        print(f"[ERROR] Local storage failed: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # NEW FUNCTIONS FOR MONGODB IMAGE STORAGE
@@ -441,9 +441,9 @@ def upload_topper_image(request, centre_id):
         )
         
     except Exception as e:
-        print(f"💥 BACKEND: Unexpected error - {str(e)}")
+        print(f"[CRITICAL] BACKEND: Unexpected error - {str(e)}")
         import traceback
-        print(f"🔍 BACKEND: Traceback: {traceback.format_exc()}")
+        print(f"[DEBUG] BACKEND: Traceback: {traceback.format_exc()}")
         return Response(
             {'error': 'Internal server error'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR

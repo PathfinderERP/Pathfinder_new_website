@@ -112,7 +112,7 @@ class JobPostViewSet(mongo_viewsets.ModelViewSet):
         job_post.save()
         
         # Debug log
-        print(f"🔄 Toggled job {job_post.id} active status to: {job_post.is_active}")
+        print(f"[TOGGLE] Toggled job {job_post.id} active status to: {job_post.is_active}")
         
         return Response({
             'id': str(job_post.id),

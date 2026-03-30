@@ -71,7 +71,7 @@ class AlumniSerializer(mongo_serializers.DocumentSerializer):
                 filename = f"alumni_image_{idx}{ext}"
                 
                 # Upload to R2
-                print(f"📤 Uploading image {idx + 1} to Cloudflare R2...")
+                print(f"[UPLOAD] Uploading image {idx + 1} to Cloudflare R2...")
                 url = upload_to_r2(
                     file_data=file_data,
                     file_name=filename,
@@ -80,10 +80,10 @@ class AlumniSerializer(mongo_serializers.DocumentSerializer):
                 )
                 
                 uploaded_urls.append(url)
-                print(f"✅ Image {idx + 1} uploaded successfully: {url}")
+                print(f"[SUCCESS] Image {idx + 1} uploaded successfully: {url}")
                 
             except Exception as e:
-                print(f"❌ Error uploading image {idx + 1}: {str(e)}")
+                print(f"[ERROR] Error uploading image {idx + 1}: {str(e)}")
                 # Continue with other images even if one fails
                 continue
         
@@ -99,24 +99,24 @@ class AlumniSerializer(mongo_serializers.DocumentSerializer):
         # Remove kept_image_urls if present (not used in create)
         validated_data.pop('kept_image_urls', None)
         
-        print(f"🆕 Creating new alumni entry")
-        print(f"📝 Validated data: {validated_data}")
-        print(f"🖼️ Images to upload: {len(images_data)}")
+        print(f"[CREATE] Creating new alumni entry")
+        print(f"[DATA] Validated data: {validated_data}")
+        print(f"[IMAGES] Images to upload: {len(images_data)}")
         
         # Upload images to R2 and get URLs (rest is same)
         
         # Upload images to R2 and get URLs
         if images_data:
             try:
-                print(f"📤 Uploading {len(images_data)} images to Cloudflare R2...")
+                print(f"[UPLOAD] Uploading {len(images_data)} images to Cloudflare R2...")
                 validated_data['image_urls'] = self._upload_images_to_r2(images_data)
-                print(f"✅ Successfully uploaded {len(validated_data['image_urls'])} images")
+                print(f"[SUCCESS] Successfully uploaded {len(validated_data['image_urls'])} images")
             except Exception as e:
-                print(f"❌ Error uploading images: {str(e)}")
+                print(f"[ERROR] Error uploading images: {str(e)}")
                 raise drf_serializers.ValidationError(f"Failed to upload images: {str(e)}")
         else:
             validated_data['image_urls'] = []
-            print("ℹ️ No images to upload")
+            print("[INFO] No images to upload")
         
         # Get user info from context if available
         request = self.context.get('request')
@@ -127,9 +127,9 @@ class AlumniSerializer(mongo_serializers.DocumentSerializer):
         try:
             alumni = Alumni(**validated_data)
             alumni.save()
-            print(f"✅ Alumni created successfully with ID: {alumni.id}")
+            print(f"[SUCCESS] Alumni created successfully with ID: {alumni.id}")
         except Exception as e:
-            print(f"❌ Error saving alumni: {str(e)}")
+            print(f"[ERROR] Error saving alumni: {str(e)}")
             raise drf_serializers.ValidationError(f"Failed to save alumni: {str(e)}")
         
         return alumni
@@ -145,7 +145,7 @@ class AlumniSerializer(mongo_serializers.DocumentSerializer):
         if kept_urls is None and 'kept_image_urls' in self.initial_data:
             kept_urls = self.initial_data.get('kept_image_urls', [])
         
-        print(f"🔄 Updating alumni {instance.id}")
+        print(f"[UPDATE] Updating alumni {instance.id}")
         
         # Update basic fields
         for attr, value in validated_data.items():
@@ -157,14 +157,14 @@ class AlumniSerializer(mongo_serializers.DocumentSerializer):
         
         # 2. Upload and append new images
         if images_data and len(images_data) > 0:
-            print(f"📤 Uploading {len(images_data)} new images...")
+            print(f"[UPLOAD] Uploading {len(images_data)} new images...")
             try:
                 new_urls = self._upload_images_to_r2(images_data)
                 if new_urls:
                     final_image_urls.extend(new_urls)
-                    print(f"✅ Successfully uploaded {len(new_urls)} new images")
+                    print(f"[SUCCESS] Successfully uploaded {len(new_urls)} new images")
             except Exception as e:
-                print(f"❌ Error uploading images: {str(e)}")
+                print(f"[ERROR] Error uploading images: {str(e)}")
                 raise drf_serializers.ValidationError(f"Failed to upload images: {str(e)}")
         
         # Update the instance with combined list
@@ -178,7 +178,7 @@ class AlumniSerializer(mongo_serializers.DocumentSerializer):
         # But validated_data.pop returns [] default above? Let's check keys
         
         instance.image_urls = final_image_urls
-        print(f"📊 Final image count: {len(instance.image_urls)}")
+        print(f"[INFO] Final image count: {len(instance.image_urls)}")
 
         # Update user info
         request = self.context.get('request')
@@ -187,9 +187,9 @@ class AlumniSerializer(mongo_serializers.DocumentSerializer):
         
         try:
             instance.save()
-            print(f"✅ Alumni updated successfully")
+            print(f"[SUCCESS] Alumni updated successfully")
         except Exception as e:
-            print(f"❌ Error saving alumni: {str(e)}")
+            print(f"[ERROR] Error saving alumni: {str(e)}")
             raise drf_serializers.ValidationError(f"Failed to save alumni: {str(e)}")
         
         return instance

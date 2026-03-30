@@ -17,7 +17,7 @@ def migrate_alumni_to_r2():
     # Connect to MongoDB directly
     mongo_uri = os.getenv('MONGO_URI')
     if not mongo_uri:
-        print("❌ MONGO_URI not found in environment variables")
+        print("[ERROR] MONGO_URI not found in environment variables")
         return
     
     client = MongoClient(mongo_uri)
@@ -25,17 +25,17 @@ def migrate_alumni_to_r2():
     db = client[db_name]
     collection = db['alumni']
     
-    print("🔍 Checking for documents with old 'images' field...")
+    print("[SEARCH] Checking for documents with old 'images' field...")
     
     # Find all documents with the old 'images' field
     old_docs = collection.find({'images': {'$exists': True}})
     count = collection.count_documents({'images': {'$exists': True}})
     
     if count == 0:
-        print("✅ No documents need migration")
+        print("[SUCCESS] No documents need migration")
         return
     
-    print(f"📊 Found {count} documents to migrate")
+    print(f"[INFO] Found {count} documents to migrate")
     
     migrated = 0
     for doc in old_docs:
@@ -54,13 +54,13 @@ def migrate_alumni_to_r2():
                 update_data
             )
             migrated += 1
-            print(f"✅ Migrated document {doc['_id']}")
+            print(f"[SUCCESS] Migrated document {doc['_id']}")
             
         except Exception as e:
-            print(f"❌ Error migrating document {doc['_id']}: {str(e)}")
+            print(f"[ERROR] Error migrating document {doc['_id']}: {str(e)}")
     
-    print(f"\n🎉 Migration complete! Migrated {migrated}/{count} documents")
-    print("ℹ️  Old embedded images have been removed. Please re-upload images through the admin panel.")
+    print(f"\n[DONE] Migration complete! Migrated {migrated}/{count} documents")
+    print("[NOTE] Old embedded images have been removed. Please re-upload images through the admin panel.")
 
 if __name__ == '__main__':
     migrate_alumni_to_r2()

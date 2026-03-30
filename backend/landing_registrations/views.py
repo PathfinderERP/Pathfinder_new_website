@@ -30,9 +30,9 @@ def create_registration(request):
                 from django.core.mail import EmailMultiAlternatives, get_connection
                 
                 # Use a single connection for both emails to be more efficient
-                print(f"📧 [EMAIL THREAD] Connecting to {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
-                print(f"📧 [EMAIL THREAD] SSL: {settings.EMAIL_USE_SSL} | TLS: {settings.EMAIL_USE_TLS}")
-                print(f"📧 [EMAIL THREAD] User: {settings.EMAIL_HOST_USER}")
+                print(f"[EMAIL] [EMAIL THREAD] Connecting to {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+                print(f"[EMAIL] [EMAIL THREAD] SSL: {settings.EMAIL_USE_SSL} | TLS: {settings.EMAIL_USE_TLS}")
+                print(f"[EMAIL] [EMAIL THREAD] User: {settings.EMAIL_HOST_USER}")
 
                 # Force explicit connection parameters to avoid any default fallback
                 connection = get_connection(
@@ -45,15 +45,15 @@ def create_registration(request):
                     timeout=getattr(settings, 'EMAIL_TIMEOUT', 30)
                 )
                 
-                print("📧 [EMAIL THREAD] Opening connection...")
+                print("[EMAIL] [EMAIL THREAD] Opening connection...")
                 connection.open()
-                print("✅ [EMAIL THREAD] Connection opened successfully")
+                print("[SUCCESS] [EMAIL THREAD] Connection opened successfully")
                 
                 messages_to_send = []
 
                 # 1. Prepare student confirmation (Professional HTML)
                 if reg.email:
-                    print(f"📧 [EMAIL THREAD] Preparing student email for: {reg.email}")
+                    print(f"[EMAIL] [EMAIL THREAD] Preparing student email for: {reg.email}")
                     student_subject = "Congratulations! Your Registration with Pathfinder is Received"
                     student_text = f"Dear {reg.name},\n\nCongratulations! We have successfully received your registration for Pathfinder's {reg.page_source} program.\n\nBest regards,\nPathfinder Team"
                     
@@ -97,7 +97,7 @@ def create_registration(request):
                     msg1.attach_alternative(html_content, "text/html")
                     messages_to_send.append(msg1)
                 else:
-                    print("⚠️ [EMAIL THREAD] No student email found, skipping student confirmation")
+                    print("[WARNING] [EMAIL THREAD] No student email found, skipping student confirmation")
 
                 # 2. Prepare official notification
                 frontend_url = getattr(settings, 'FRONTEND_URL', 'https://pathfinder-landing-3.vercel.app')
@@ -118,13 +118,13 @@ def create_registration(request):
                 messages_to_send.append(msg2)
                 
                 # Send both
-                print(f"📧 [EMAIL THREAD] Sending {len(messages_to_send)} messages...")
+                print(f"[EMAIL] [EMAIL THREAD] Sending {len(messages_to_send)} messages...")
                 connection.send_messages(messages_to_send)
                 connection.close()
-                print("✅ [EMAIL THREAD] Emails sent and connection closed")
+                print("[SUCCESS] [EMAIL THREAD] Emails sent and connection closed")
                     
             except Exception as e:
-                print(f"❌ [EMAIL THREAD] ERROR: {str(e)}")
+                print(f"[ERROR] [EMAIL THREAD] ERROR: {str(e)}")
 
         # Start the thread AFTER the database transaction is committed
         from django.db import transaction

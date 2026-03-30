@@ -18,7 +18,7 @@ from django.conf import settings
 mongo_uri = settings.MONGO_URI
 db_name = os.getenv('MONGO_DB_NAME', 'test01')  # Get from env, not Django settings
 
-print(f"🔗 Connecting to MongoDB: {db_name}")
+print(f"[CONN] Connecting to MongoDB: {db_name}")
 
 client = MongoClient(mongo_uri)
 db = client[db_name]
@@ -28,10 +28,10 @@ print("🔍 Checking for documents with old 'images' field...")
 
 # Count documents with old structure
 count = collection.count_documents({'images': {'$exists': True}})
-print(f"📊 Found {count} documents with old structure")
+print(f"[INFO] Found {count} documents with old structure")
 
 if count > 0:
-    print("🔄 Migrating documents...")
+    print("[UPDATE] Migrating documents...")
     
     # Remove 'images' field from all documents
     result = collection.update_many(
@@ -40,7 +40,7 @@ if count > 0:
             '$unset': {'images': ''}
         }
     )
-    print(f"✅ Removed 'images' field from {result.modified_count} documents")
+    print(f"[SUCCESS] Removed 'images' field from {result.modified_count} documents")
     
     # Ensure all documents have 'image_urls' field
     result2 = collection.update_many(
@@ -49,12 +49,12 @@ if count > 0:
             '$set': {'image_urls': []}
         }
     )
-    print(f"✅ Added 'image_urls' field to {result2.modified_count} documents")
+    print(f"[SUCCESS] Added 'image_urls' field to {result2.modified_count} documents")
     
-    print("\n🎉 Migration complete!")
-    print("ℹ️  Old embedded images have been removed.")
-    print("ℹ️  Please re-upload images through the admin panel.")
+    print("\n[DONE] Migration complete!")
+    print("[NOTE] Old embedded images have been removed.")
+    print("[NOTE] Please re-upload images through the admin panel.")
 else:
-    print("✅ No migration needed - all documents are up to date!")
+    print("[SUCCESS] No migration needed - all documents are up to date!")
 
-print("\n✨ Done!")
+print("\n[FINISH] Done!")
