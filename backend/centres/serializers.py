@@ -8,6 +8,7 @@ from contact_backend.utils.mixins import Base64R2FileMixin
 class TopperSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumentSerializer):
     image_url = serializers.SerializerMethodField()
     image_file = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    image = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     
     # Mixin configuration
     file_input_fields = ['image_file']
@@ -22,13 +23,18 @@ class TopperSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumentSeri
             'image_file', 'image', 'image_url'
         ]
         extra_kwargs = {
-            'image': {'required': False, 'allow_null': True, 'allow_blank': True}
+            'image': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'badge': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'topper_msg': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'percentages': {'required': False, 'allow_null': True}
         }
     
-    def to_internal_value(self, data):
-        data = self.extract_file_from_data(data)
-        return super().to_internal_value(data)
-    
+    def validate_image_file(self, value):
+        """Validate image file size before R2 upload (approx 12MB limit)"""
+        if value and 'base64,' in str(value) and len(str(value)) > 16 * 1024 * 1024:
+            raise serializers.ValidationError("Image size cannot exceed 12MB")
+        return value
+
     def get_image_url(self, obj):
         """Generate frontend-friendly image URL"""
         return obj.get_image_url()
@@ -69,10 +75,6 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
         extra_kwargs = {
             'logo': {'required': False, 'allow_null': True, 'allow_blank': True}
         }
-    
-    def to_internal_value(self, data):
-        data = self.extract_file_from_data(data)
-        return super().to_internal_value(data)
     
     def get_logo_url(self, obj):
         """Generate frontend-friendly logo URL"""
@@ -130,12 +132,30 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
         return data
     
     def create(self, validated_data):
-        toppers_data = validated_data.pop('toppers', [])
+        # 1. Process Logo only after validation
+        print("\n" + "="*50 + "\n[START CREATING CENTRE]\n" + "="*50)
+        validated_data = self.extract_file_from_data(validated_data)
         
-        # Process toppers
+        toppers_data = validated_data.pop('toppers', [])
+        print(f"[TOPPERS] Processing {len(toppers_data)} toppers")
+        
+        # 2. Process Toppers
         toppers = []
-        for topper_data in toppers_data:
-            toppers.append(Topper(**topper_data))
+        topper_serializer = TopperSerializer()
+        for i, topper_data in enumerate(toppers_data):
+            print(f"--- Topper {i} Input: { {k: (v[:20]+'...' if isinstance(v, str) and len(v)>20 else v) for k,v in topper_data.items()} }")
+            # Explicitly process images
+            topper_data = topper_serializer.extract_file_from_data(topper_data)
+            print(f"--- Topper {i} Post-Extraction: image={topper_data.get('image')}")
+            
+            # Ensure 'image' is in clean_data if it was extracted
+            allowed_fields = [
+                'name', 'exam', 'rank', 'category', 'year', 'topper_msg', 'percentages', 
+                'marks_obtained', 'total_marks', 'score', 'badge', 'image', 'created_at', 'updated_at'
+            ]
+            clean_topper_data = {k: v for k, v in topper_data.items() if k in allowed_fields}
+            print(f"--- Topper {i} Final Model Data: {clean_topper_data}")
+            toppers.append(Topper(**clean_topper_data))
         
         # Create centre
         centre = Centre(
@@ -143,63 +163,72 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
             toppers=toppers
         )
         centre.save()
+        print(f"[SUCCESS] Centre created successfully with ID: {centre.id}")
         return centre
     
     def update(self, instance, validated_data):
+        # 1. Process Logo only after validation
+        print("\n" + "="*50 + "\n[START UPDATING CENTRE]\n" + "="*50)
+        validated_data = self.extract_file_from_data(validated_data)
+
         toppers_data = validated_data.pop('toppers', None)
         
         # Handle explicitly clearing logo
         if 'logo' in validated_data and (validated_data['logo'] is None or validated_data['logo'] == ""):
             instance.logo = None
-            instance.logo_data = None
-            instance.logo_content_type = None
-            instance.logo_filename = None
         
         # Update basic fields
         for attr, value in validated_data.items():
             if hasattr(instance, attr):
                 setattr(instance, attr, value)
         
-        # Update toppers while preserving existing image data unless explicitly cleared
+        # 2. Update toppers while preserving existing image URLs
         if toppers_data is not None:
             updated_toppers = []
+            topper_serializer = TopperSerializer()
+            print(f"[TOPPERS] Updating {len(toppers_data)} toppers")
             for index, topper_data in enumerate(toppers_data):
-                # If this topper index exists, preserve its image data
+                print(f"--- Topper {index} Input: { {k: (v[:20]+'...' if isinstance(v, str) and len(v)>20 else v) for k,v in topper_data.items()} }")
+                # Process topper images after validation
+                topper_data = topper_serializer.extract_file_from_data(topper_data)
+                print(f"--- Topper {index} Post-Extraction: image={topper_data.get('image')}")
+
+                # Preserve existing topper data if available
                 if index < len(instance.toppers):
                     existing_topper = instance.toppers[index]
                     
-                    # Check if image is explicitly being cleared
-                    is_image_cleared = 'image' in topper_data and (topper_data['image'] is None or topper_data['image'] == "")
-                    
-                    if is_image_cleared:
-                        topper_data['image'] = None
-                        topper_data['image_data'] = None
-                        topper_data['image_content_type'] = None
-                        topper_data['image_filename'] = None
-                    else:
-                        # PRESERVE existing image data if not provided in update
-                        if 'image_data' not in topper_data and existing_topper.image_data:
-                            topper_data['image_data'] = existing_topper.image_data
-                        if 'image_content_type' not in topper_data and existing_topper.image_content_type:
-                            topper_data['image_content_type'] = existing_topper.image_content_type
-                        if 'image_filename' not in topper_data and existing_topper.image_filename:
-                            topper_data['image_filename'] = existing_topper.image_filename
-                        if 'image' not in topper_data and existing_topper.image:
+                    # Check if NEW image was extracted
+                    if not topper_data.get('image'):
+                        # Check if image was explicitly cleared or just missing
+                        is_explicit_clear = 'image' in topper_data and (topper_data['image'] is None or topper_data['image'] == "")
+                        
+                        if not is_explicit_clear and existing_topper.image:
+                            # Preserve existing URL
+                            print(f"--- Topper {index}: Preserving old image URL: {existing_topper.image}")
                             topper_data['image'] = existing_topper.image
+                        elif is_explicit_clear:
+                            print(f"--- Topper {index}: Image EXPLICITLY CLEARED")
+                    else:
+                        print(f"--- Topper {index}: NEW image uploaded: {topper_data.get('image')}")
                     
-                    # Preserve timestamps
-                    if 'created_at' not in topper_data and existing_topper.created_at:
+                    # Preserve timestamps if not provided
+                    if not topper_data.get('created_at') and existing_topper.created_at:
                         topper_data['created_at'] = existing_topper.created_at
                 
                 # Update timestamp
                 topper_data['updated_at'] = datetime.now()
                 
-                # Create new topper with merged data
-                # We need to filter out serializer-only fields that might have leaked here
-                clean_topper_data = {k: v for k, v in topper_data.items() if k != 'image_file' and k != 'image_url'}
+                # Cleanup and create new topper
+                allowed_fields = [
+                    'name', 'exam', 'rank', 'category', 'year', 'topper_msg', 'percentages', 
+                    'marks_obtained', 'total_marks', 'score', 'badge', 'image', 'created_at', 'updated_at'
+                ]
+                clean_topper_data = {k: v for k, v in topper_data.items() if k in allowed_fields}
+                print(f"--- Topper {index} Final Model Data: {clean_topper_data}")
                 updated_toppers.append(Topper(**clean_topper_data))
             
             instance.toppers = updated_toppers
         
         instance.save()
+        print(f"[SUCCESS] Centre updated successfully ID: {instance.id}")
         return instance

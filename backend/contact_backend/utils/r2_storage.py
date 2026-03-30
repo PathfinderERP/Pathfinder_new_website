@@ -52,7 +52,7 @@ def upload_to_r2(file_data, file_name, content_type, folder='uploads'):
             ContentType=content_type
         )
         
-        print(f"✅ Successfully uploaded to R2: bucket={bucket_name}, key={unique_filename}")
+        print(f"[SUCCESS] Successfully uploaded to R2: bucket={bucket_name}, key={unique_filename}")
         
         # Return the public URL
         # If public domain is configured, use it. Otherwise, return the key or a constructed URL.

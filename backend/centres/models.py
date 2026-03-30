@@ -13,24 +13,19 @@ class Topper(EmbeddedDocument):
     name = fields.StringField(max_length=100)
     exam = fields.StringField(max_length=100)
     category = fields.StringField(max_length=50, choices=['All India', 'Boards', 'Foundation'], default='All India')
-    rank = fields.IntField()
+    rank = fields.IntField(null=True, blank=True)
     year = fields.IntField(null=True, blank=True)
-    topper_msg = fields.StringField()
-    percentages = fields.DecimalField(precision=2)
+    topper_msg = fields.StringField(null=True, blank=True)
+    percentages = fields.DecimalField(precision=2, null=True, blank=True)
     marks_obtained = fields.DecimalField(precision=2, null=True, blank=True)
     total_marks = fields.DecimalField(precision=2, null=True, blank=True)
     
     # Keep for backward compatibility with existing data
     score = fields.IntField(null=True, blank=True)
     
-    badge = fields.StringField(max_length=50)
+    badge = fields.StringField(max_length=50, null=True, blank=True)
     
-    # NEW: Store image as binary data instead of URL
-    image_data = BinaryField()
-    image_content_type = fields.StringField(max_length=50)
-    image_filename = fields.StringField(max_length=255)
-    
-    # OLD: Keep for backward compatibility with existing data
+    # Cloudflare R2 / External URL for image
     image = fields.StringField(null=True, blank=True)
     
     # Add timestamps for topper
@@ -38,18 +33,11 @@ class Topper(EmbeddedDocument):
     updated_at = fields.DateTimeField(default=datetime.now)
     
     def get_image_url(self):
-        """Generate frontend-friendly image URL - handles both formats"""
-        # Prioritize URL (R2/Cloudflare)
-        if self.image:
-            return self.image
-        # Fallback to binary data
-        if self.image_data:
-            base64_data = base64.b64encode(self.image_data).decode('utf-8')
-            return f"data:{self.image_content_type};base64,{base64_data}"
-        return None
+        """Generate frontend-friendly image URL from Cloudflare R2"""
+        return self.image
     
     def compress_image(self, image_file, max_size=(1200, 900), quality=85):
-        """Compress and optimize image before storage"""
+        """Compress and optimize image before storage (if needed)"""
         try:
             # Open image
             img = Image.open(image_file)
@@ -73,10 +61,9 @@ class Topper(EmbeddedDocument):
             image_file.seek(0)
             return image_file.read()
     
-    def save(self, *args, **kwargs):
-        """Update updated_at timestamp"""
-        self.updated_at = datetime.now()
-        super().save(*args, **kwargs)
+    meta = {
+        'strict': False
+    }
 
 
 class Centre(Document):
@@ -91,12 +78,7 @@ class Centre(Document):
     address = fields.StringField()
     toppers = fields.ListField(fields.EmbeddedDocumentField(Topper))
     
-    # NEW: Centre logo/image stored directly in MongoDB
-    logo_data = BinaryField()
-    logo_content_type = fields.StringField(max_length=50)
-    logo_filename = fields.StringField(max_length=255)
-    
-    # OLD: Keep for backward compatibility with existing data
+    # Cloudflare R2 / External URL for logo
     logo = fields.StringField(null=True, blank=True)
     
     # Map URL for location detection
@@ -114,6 +96,7 @@ class Centre(Document):
     meta = {
         'collection': 'centres',
         'ordering': ['state', 'district', 'centre'],
+        'strict': False,
         'indexes': [
             'state',
             'district', 
@@ -129,15 +112,8 @@ class Centre(Document):
         return f"{self.centre} - {self.district}, {self.state}"
     
     def get_logo_url(self):
-        """Generate data URL for centre logo - handles both formats"""
-        # Prioritize URL (R2/Cloudflare)
-        if self.logo:
-            return self.logo
-        # Fallback to binary data
-        if self.logo_data:
-            base64_data = base64.b64encode(self.logo_data).decode('utf-8')
-            return f"data:{self.logo_content_type};base64,{base64_data}"
-        return None
+        """Generate URL for centre logo from Cloudflare R2"""
+        return self.logo
     
     def get_created_at_isoformat(self):
         """Get created_at in ISO format for frontend"""

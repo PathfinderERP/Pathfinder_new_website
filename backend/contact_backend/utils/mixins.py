@@ -15,9 +15,11 @@ class Base64R2FileMixin:
         """Process base64 file data, upload to R2, and return dict with URL field"""
         if data_uri and 'base64,' in str(data_uri):
             try:
+                print(f"[PROCESS] Processing base64 file prefix: {str(data_uri)[:30]}...")
                 header, encoded = data_uri.split('base64,', 1)
                 file_data = base64.b64decode(encoded)
                 content_type = header.replace('data:', '').replace(';', '')
+                print(f"[INFO] Content Type: {content_type}, Data Length: {len(file_data)} bytes")
                 
                 # Determine extension
                 ext = '.bin'
@@ -32,15 +34,19 @@ class Base64R2FileMixin:
                     ext = '.docx'
                 
                 filename = f"{self.file_name_prefix}_{uuid.uuid4().hex[:8]}{ext}"
+                print(f"[UPLOAD] Uploading to R2: {filename}")
                 
                 # Upload to R2
                 r2_url = upload_to_r2(file_data, filename, content_type, folder=self.file_name_prefix)
+                print(f"[SUCCESS] R2 URL: {r2_url}")
                 
                 return {
                     self.file_url_field: r2_url
                 }
             except Exception as e:
-                print(f"Error processing {self.file_name_prefix} through Base64R2FileMixin: {e}")
+                print(f"[ERROR] Error processing {self.file_name_prefix} through Base64R2FileMixin: {e}")
+                # Don't silence it, raise it to the user
+                raise e
         return None
     
     def extract_file_from_data(self, data):
@@ -50,6 +56,7 @@ class Base64R2FileMixin:
             
         for field in self.file_input_fields:
             if field in data and data[field] and 'base64,' in str(data.get(field, '')):
+                print(f"[SEARCH] Found field '{field}' in data for extraction.")
                 data_uri = data.pop(field)
                 processed = self.process_base64_file(data_uri)
                 if processed:

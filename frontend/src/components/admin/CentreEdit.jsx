@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 import { centresAPI } from "../../services/api";
 import DragDropImageUpload from "../DragDropImageUpload";
 import { clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
@@ -256,7 +257,7 @@ const CentreEdit = () => {
             name: topper.name,
             exam: topper.exam || "",
             category: topper.category || "All India",
-            rank: topper.rank ? parseInt(topper.rank) : 0,
+            rank: topper.rank ? parseInt(topper.rank) : null,
             topper_msg: topper.topper_msg || "",
             percentages: topper.percentages ? parseFloat(topper.percentages) : 0,
             year: topper.year ? parseInt(topper.year) : new Date().getFullYear(),
@@ -282,16 +283,40 @@ const CentreEdit = () => {
       // Step 1: Send the consolidated update (all data + images in one request)
       await centresAPI.update(id, dataToSend);
 
-      alert("Centre updated successfully!");
+      toast.success("Centre updated successfully!");
       clearAdminCache("admin_centres");
       clearPublicCache("centres");
       clearPublicCache("toppers");
       navigate("/business/admin/centres?refresh=true");
     } catch (err) {
       console.error("💥 CENTRE UPDATE FAILED:", err);
-      setError(
-        err.response?.data?.error || err.message || "Failed to update centre"
-      );
+      // Recursive function to parse potential DRF validation errors
+      const parseBackendErrors = (errors, prefix = "") => {
+        if (typeof errors === 'string') return `${prefix}${errors}`;
+        if (Array.isArray(errors)) {
+          return errors.map(err => parseBackendErrors(err, prefix)).join(" | ");
+        }
+        if (typeof errors === 'object' && errors !== null) {
+          return Object.entries(errors)
+            .map(([key, value]) => {
+              const currentPrefix = isNaN(key) ? `${key}: ` : `[Topper ${parseInt(key) + 1}]: `;
+              return parseBackendErrors(value, currentPrefix);
+            })
+            .filter(msg => msg !== "")
+            .join(" | ");
+        }
+        return "";
+      };
+
+      let errorMessage = "Failed to update centre";
+      if (err.response?.data) {
+        errorMessage = parseBackendErrors(err.response.data);
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -769,7 +794,7 @@ const CentreEdit = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
-                          Rank *
+                          Rank
                         </label>
                         <input
                           type="number"
@@ -780,6 +805,37 @@ const CentreEdit = () => {
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                           placeholder="e.g., 1, 25, 100"
                           min="1"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Total Marks *
+                        </label>
+                        <input
+                          type="number"
+                          value={topper.total_marks}
+                          onChange={(e) =>
+                            updateTopper(index, "total_marks", e.target.value)
+                          }
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                          placeholder="e.g., 500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Marks Obtained *
+                        </label>
+                        <input
+                          type="number"
+                          value={topper.marks_obtained}
+                          onChange={(e) =>
+                            updateTopper(index, "marks_obtained", e.target.value)
+                          }
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                          placeholder="e.g., 450"
                           required
                         />
                       </div>
@@ -792,7 +848,7 @@ const CentreEdit = () => {
                           type="number"
                           value={topper.percentages}
                           readOnly
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 cursor-not-allowed"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 cursor-not-allowed dark:bg-slate-800 dark:text-gray-300"
                           placeholder="Auto-calculated"
                         />
                       </div>

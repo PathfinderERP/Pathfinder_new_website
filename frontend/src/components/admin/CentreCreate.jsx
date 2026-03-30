@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { centresAPI } from "../../services/api";
 import DragDropImageUpload from "../DragDropImageUpload";
 import { clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
@@ -122,7 +123,7 @@ const CentreCreate = () => {
               name: topper.name,
               exam: topper.exam || "",
               category: topper.category || "All India",
-              rank: topper.rank ? parseInt(topper.rank) : 0,
+              rank: topper.rank ? parseInt(topper.rank) : null,
               year: topper.year ? parseInt(topper.year) : new Date().getFullYear(),
               topper_msg: topper.topper_msg || "",
               percentages: topper.percentages ? parseFloat(topper.percentages) : 0,
@@ -144,16 +145,40 @@ const CentreCreate = () => {
       // Create the centre with all data and images in ONE request
       await centresAPI.create(apiCentreData);
 
-      alert("Centre created successfully!");
+      toast.success("Centre created successfully!");
       clearAdminCache("admin_centres");
       clearPublicCache("centres");
       clearPublicCache("toppers");
       navigate("/business/admin/centres?refresh=true");
     } catch (err) {
       console.error("💥 CENTRE CREATION FAILED:", err);
-      setError(
-        err.response?.data?.error || err.message || "Failed to create centre"
-      );
+      // Recursive function to parse potential DRF validation errors
+      const parseBackendErrors = (errors, prefix = "") => {
+        if (typeof errors === 'string') return `${prefix}${errors}`;
+        if (Array.isArray(errors)) {
+          return errors.map(err => parseBackendErrors(err, prefix)).join(" | ");
+        }
+        if (typeof errors === 'object' && errors !== null) {
+          return Object.entries(errors)
+            .map(([key, value]) => {
+              const currentPrefix = isNaN(key) ? `${key}: ` : `[Topper ${parseInt(key) + 1}]: `;
+              return parseBackendErrors(value, currentPrefix);
+            })
+            .filter(msg => msg !== "")
+            .join(" | ");
+        }
+        return "";
+      };
+
+      let errorMessage = "Failed to create centre";
+      if (err.response?.data) {
+        errorMessage = parseBackendErrors(err.response.data);
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -420,6 +445,7 @@ const CentreCreate = () => {
                         value={topper.name}
                         onChange={(e) => updateTopper(index, "name", e.target.value)}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                        placeholder="Enter topper name"
                         required
                       />
                     </div>
@@ -433,7 +459,7 @@ const CentreCreate = () => {
                         required
                       >
                         <option value="">Select Exam</option>
-                        {EXAM_OPTIONS[topper.category || "All India"].map(opt => (
+                        {(EXAM_OPTIONS[topper.category || "All India"] || []).map(opt => (
                           <option key={opt} value={opt}>{opt}</option>
                         ))}
                         <option value="Others">Others</option>
@@ -441,17 +467,89 @@ const CentreCreate = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Rank *</label>
+                      <label className="block text-sm font-medium text-gray-700">Category *</label>
+                      <select
+                        value={topper.category || "All India"}
+                        onChange={(e) => updateTopper(index, "category", e.target.value)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                        required
+                      >
+                        <option value="All India">All India</option>
+                        <option value="Boards">Boards</option>
+                        <option value="Foundation">Foundation</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Rank</label>
                       <input
                         type="number"
                         value={topper.rank}
                         onChange={(e) => updateTopper(index, "rank", e.target.value)}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                        placeholder="e.g., 1, 25, 100"
+                        min="1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Total Marks *</label>
+                      <input
+                        type="number"
+                        value={topper.total_marks}
+                        onChange={(e) => updateTopper(index, "total_marks", e.target.value)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                        placeholder="e.g., 500"
                         required
                       />
                     </div>
 
                     <div>
+                      <label className="block text-sm font-medium text-gray-700">Marks Obtained *</label>
+                      <input
+                        type="number"
+                        value={topper.marks_obtained}
+                        onChange={(e) => updateTopper(index, "marks_obtained", e.target.value)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                        placeholder="e.g., 450"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Percentage (Auto-calculated)</label>
+                      <input
+                        type="number"
+                        value={topper.percentages}
+                        readOnly
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 cursor-not-allowed dark:bg-slate-800 dark:text-gray-300"
+                        placeholder="Auto-calculated"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Year</label>
+                      <input
+                        type="number"
+                        value={topper.year}
+                        onChange={(e) => updateTopper(index, "year", e.target.value)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                        placeholder="e.g., 2026"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">Topper Message</label>
+                      <textarea
+                        value={topper.topper_msg}
+                        onChange={(e) => updateTopper(index, "topper_msg", e.target.value)}
+                        rows={3}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                        placeholder="Inspirational message from the topper"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700">Photo</label>
                       <DragDropImageUpload
                         onImageUpload={(file) => handleTopperImageSelect(file, index)}

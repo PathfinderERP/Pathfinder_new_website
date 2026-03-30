@@ -331,9 +331,8 @@ def upload_centre_logo(request, centre_id):
             )
             
             if public_url:
-                # Store URL and clear old binary data
+                # Store URL
                 centre.logo = public_url
-                centre.logo_data = None 
                 centre.save()
                 
                 return Response({
@@ -341,21 +340,15 @@ def upload_centre_logo(request, centre_id):
                     'logo_url': public_url,
                     'service': 'r2'
                 }, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'error': 'Failed to get public URL from R2'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
         except Exception as r2_err:
             logger.error(f"Cloudflare R2 upload failed: {r2_err}")
-            # Fallback to local MongoDB storage if R2 fails
-            centre.logo_data = processed_logo['data']
-            centre.logo_content_type = processed_logo['content_type']
-            centre.logo_filename = processed_logo['filename']
-            centre.logo = None
-            centre.save()
-            
-            return Response({
-                'message': 'Logo uploaded to MongoDB (R2 upload failed)',
-                'logo_url': centre.get_logo_url(),
-                'service': 'mongodb'
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {'error': f'Cloudflare R2 upload failed: {str(r2_err)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         
     except Exception as e:
         logger.error(f"Logo upload error: {e}")
@@ -422,7 +415,6 @@ def upload_topper_image(request, centre_id):
                 # Update topper and save centre
                 topper = centre.toppers[index]
                 topper.image = public_url
-                topper.image_data = None # Clear old binary data
                 centre.save()
                 
                 return Response({
@@ -430,22 +422,16 @@ def upload_topper_image(request, centre_id):
                     'image_url': public_url,
                     'service': 'r2'
                 }, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Failed to get public URL from R2'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
         except Exception as r2_err:
             logger.error(f"Cloudflare R2 upload failed for topper: {r2_err}")
-            # Fallback to MongoDB
-            topper = centre.toppers[index]
-            topper.image_data = processed_image['data']
-            topper.image_content_type = processed_image['content_type']
-            topper.image_filename = processed_image['filename']
-            topper.image = None
-            centre.save()
-            
-            return Response({
-                'message': 'Topper image uploaded to MongoDB (R2 upload failed)',
-                'image_url': topper.get_image_url(),
-                'service': 'mongodb'
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {'error': f'Cloudflare R2 upload failed: {str(r2_err)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
             
     except Exception as e:
         logger.error(f"Topper upload error: {e}")
