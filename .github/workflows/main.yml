@@ -21,43 +21,64 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # Check disk space and memory before doing anything
-            echo "=== DISK SPACE ==="
-            df -h
-            echo "=== MEMORY ==="
+            echo "=== SYSTEM STATUS ==="
+            df -h /
             free -h
             
-            cd /home/ubuntu/Pathfinder_new_website
-            
-            # FIX: Use fetch and reset instead of pull to handle divergent branches
+            # --- CODE UPDATE ---
+            cd /home/ubuntu/Pathfinder_new_website || exit 1
+            echo "=== UPDATING CODEBASE ==="
             git fetch origin main
             git reset --hard origin/main
-            # Restore locally modified production files (e.g. settings.py) if any (optional but safe)
-            git stash pop || true
             
-            # Backend
+            # --- BACKEND DEPLOYMENT ---
+            echo "=== DEPLOYING BACKEND ==="
             cd backend
-            source venv/bin/activate
-            pip install -r requirements.txt
-            sudo systemctl restart gunicorn
+            if [ ! -f .env ]; then
+              echo "⚠️ WARNING: .env file not found in backend directory!"
+            fi
             
-            # Frontend - clean up old files first to free space
+            # Ensure venv exists and is up to date
+            [ -d venv ] || python3 -m venv venv
+            source venv/bin/activate
+            # Use pip sync/install with cache to speed up
+            pip install --no-cache-dir -r requirements.txt
+            
+            # Restart Gunicorn service
+            echo "=== RESTARTING GUNICORN ==="
+            sudo systemctl restart gunicorn
+            sudo systemctl status gunicorn --no-pager | head -n 10
+            
+            # --- FRONTEND DEPLOYMENT ---
+            echo "=== DEPLOYING FRONTEND ==="
             cd ../frontend
+            # Clean up old dependencies caches
             rm -rf node_modules/.cache
             npm ci --prefer-offline || npm install
             
-            # Build with increased Node.js memory limit
-            export NODE_OPTIONS="--max-old-space-size=1024"
+            # Build with optimized memory limit
+            export NODE_OPTIONS="--max-old-space-size=2048"
+            echo "=== STARTING NPM BUILD ==="
             npm run build
             
-            echo "=== BUILD COMPLETE - DIST CONTENTS ==="
-            ls -la dist/
+            # --- SERVER CONFIGURATION & DEPLOY ---
+            echo "=== UPDATING NGINX CONFIGURATION ==="
+            # Ensure client_max_body_size is set to 20M (fixes 413 Request Entity Too Large)
+            # This updates the main nginx.conf if not already set high
+            if ! grep -q "client_max_body_size" /etc/nginx/nginx.conf; then
+              sudo sed -i '/http {/a \    client_max_body_size 20M;' /etc/nginx/nginx.conf
+              echo "✅ Added client_max_body_size 20M to nginx.conf"
+            else
+              sudo sed -i 's/client_max_body_size [0-9]*[a-zA-Z]*;/client_max_body_size 20M;/g' /etc/nginx/nginx.conf
+              echo "✅ Updated client_max_body_size to 20M in nginx.conf"
+            fi
             
             # Copy built files to Nginx web root
+            echo "=== COPYING DIST TO WEB ROOT ==="
             sudo rm -rf /var/www/html/*
             sudo cp -r dist/* /var/www/html/
             
-            echo "=== NGINX ROOT CONTENTS ==="
-            ls -la /var/www/html/
+            # Reload Nginx to apply changes (reload is zero-downtime, restart is safer for config changes)
+            sudo nginx -t && sudo systemctl restart nginx
             
-            sudo systemctl restart nginx
-            echo "=== DEPLOYMENT DONE ==="
+            echo "=== DEPLOYMENT SUCCESSFULLY COMPLETED ==="

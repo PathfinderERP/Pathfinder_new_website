@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { coursesAPI, centresAPI } from "../../services/api";
 import Papa from "papaparse";
 import { clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
+import { compressImage } from "../../utils/fileUtils";
 
 const EXAM_OPTIONS = {
   "All India": ['JEE Main', 'JEE Advanced', 'NEET UG', 'NEET PG', 'WBJEE'],
@@ -913,18 +914,25 @@ const CourseCreate = () => {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const file = e.target.files[0];
                             if (file) {
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                setCourseData(prev => ({
-                                  ...prev,
-                                  thumbnail_image_file: reader.result,
-                                  thumbnail_url: reader.result // Preview
-                                }));
-                              };
-                              reader.readAsDataURL(file);
+                              try {
+                                  // Compress thumbnail before conversion
+                                  const compressed = await compressImage(file, { maxWidth: 1000, quality: 0.75 });
+                                  
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setCourseData(prev => ({
+                                      ...prev,
+                                      thumbnail_image_file: reader.result,
+                                      thumbnail_url: reader.result // Preview
+                                    }));
+                                  };
+                                  reader.readAsDataURL(compressed);
+                              } catch (err) {
+                                  console.error("❌ Failed to compress course thumbnail:", err);
+                              }
                             }
                           }}
                           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"

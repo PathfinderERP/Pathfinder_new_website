@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { alumniAPI } from "../../services/api";
 import { useAdminCache, clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
+import { compressImage } from "../../utils/fileUtils";
 import {
     Plus,
     Edit,
@@ -101,20 +102,26 @@ const AlumniManagement = () => {
     const fetchProfessions = refetchProfessions;
 
 
-    const handleImageUpload = (e) => {
+    const handleImageUpload = async (e) => {
         const files = Array.from(e.target.files);
 
-        files.forEach(file => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result;
-                // Just add to previews, we'll separate them at submit time
-                setImagePreviews(prev => [...prev, base64String]);
-            };
-            reader.readAsDataURL(file);
-        });
+        for (const file of files) {
+            try {
+                // Compress image before Base64 conversion
+                const compressed = await compressImage(file, { maxWidth: 1000, quality: 0.75 });
+                
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64String = reader.result;
+                    setImagePreviews(prev => [...prev, base64String]);
+                };
+                reader.readAsDataURL(compressed);
+            } catch (err) {
+                console.error("❌ Failed to compress alumni image:", err);
+            }
+        }
 
-        // Reset input value so same file can be selected again if needed
+        // Reset input value
         e.target.value = null;
     };
 

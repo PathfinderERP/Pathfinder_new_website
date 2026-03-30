@@ -5,7 +5,7 @@ import { centresAPI } from "../../services/api";
 import DragDropImageUpload from "../DragDropImageUpload";
 import { clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
 import ImageModal from "../ImageModal";
-import { fileToBase64 } from "../../utils/fileUtils";
+import { fileToBase64, compressImage } from "../../utils/fileUtils";
 
 const EXAM_OPTIONS = {
   "All India": ["JEE", "NEET", "WBJEE", "Others"],
@@ -219,22 +219,24 @@ const CentreEdit = () => {
       let logoBase64 = null;
       if (logoFile) {
         try {
-          logoBase64 = await fileToBase64(logoFile);
+          const compressedLogo = await compressImage(logoFile, { maxWidth: 1000, quality: 0.75 });
+          logoBase64 = await fileToBase64(compressedLogo);
         } catch (err) {
-          console.error("❌ Failed to convert logo to base64:", err);
+          console.error("❌ Failed to compress/convert logo:", err);
         }
       }
 
       // 2. Prepare Base64 data for topper images
       const topperImagesBase64 = {};
       
-      // We need to use a regular for loop to handle async await correctly
       for (const [index, file] of Object.entries(topperFiles)) {
         try {
-          const base64 = await fileToBase64(file);
+          // Compress topper photos - they don't need to be huge
+          const compressedTopper = await compressImage(file, { maxWidth: 800, quality: 0.7 });
+          const base64 = await fileToBase64(compressedTopper);
           topperImagesBase64[index] = base64;
         } catch (err) {
-          console.error(`❌ Failed to convert topper ${index} image to base64:`, err);
+          console.error(`❌ Failed to compress/convert topper ${index} image:`, err);
         }
       }
 

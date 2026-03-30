@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { centresAPI } from "../../services/api";
 import DragDropImageUpload from "../DragDropImageUpload";
 import { clearAdminCache, clearPublicCache } from "../../hooks/useAdminCache";
-import { fileToBase64 } from "../../utils/fileUtils";
+import { fileToBase64, compressImage } from "../../utils/fileUtils";
 
 const EXAM_OPTIONS = {
   "All India": ["JEE", "NEET", "WBJEE", "Others"],
@@ -97,13 +97,23 @@ const CentreCreate = () => {
       // 1. Prepare Base64 data for logo if a file was selected
       let logoBase64 = null;
       if (logoFile) {
-        logoBase64 = await fileToBase64(logoFile);
+        try {
+          const compressedLogo = await compressImage(logoFile, { maxWidth: 1000, quality: 0.75 });
+          logoBase64 = await fileToBase64(compressedLogo);
+        } catch (err) {
+          console.error("❌ Failed to compress logo:", err);
+        }
       }
 
       // 2. Prepare Base64 data for topper images
       const topperImagesBase64 = {};
       for (const [index, file] of Object.entries(topperFiles)) {
-        topperImagesBase64[index] = await fileToBase64(file);
+        try {
+          const compressedTopper = await compressImage(file, { maxWidth: 800, quality: 0.7 });
+          topperImagesBase64[index] = await fileToBase64(compressedTopper);
+        } catch (err) {
+          console.error(`❌ Failed to compress topper ${index} image:`, err);
+        }
       }
 
       // 3. Prepare consolidated API data
