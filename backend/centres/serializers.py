@@ -26,7 +26,9 @@ class TopperSerializer(Base64R2FileMixin, mongo_serializers.EmbeddedDocumentSeri
             'image': {'required': False, 'allow_null': True, 'allow_blank': True},
             'badge': {'required': False, 'allow_null': True, 'allow_blank': True},
             'topper_msg': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'percentages': {'required': False, 'allow_null': True}
+            'percentages': {'required': False, 'allow_null': True},
+            'marks_obtained': {'required': False, 'allow_null': True},
+            'total_marks': {'required': False, 'allow_null': True}
         }
     
     def validate_image_file(self, value):

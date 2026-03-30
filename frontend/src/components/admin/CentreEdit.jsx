@@ -372,6 +372,8 @@ const CentreEdit = () => {
         if (!isNaN(marksObtained) && !isNaN(totalMarks) && totalMarks > 0) {
           const percentage = (marksObtained / totalMarks) * 100;
           updatedToppers[index].percentages = percentage.toFixed(2);
+        } else {
+          updatedToppers[index].percentages = "";
         }
       }
 
@@ -810,7 +812,7 @@ const CentreEdit = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
-                          Total Marks *
+                          Total Marks
                         </label>
                         <input
                           type="number"
@@ -820,13 +822,12 @@ const CentreEdit = () => {
                           }
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                           placeholder="e.g., 500"
-                          required
                         />
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
-                          Marks Obtained *
+                          Marks Obtained
                         </label>
                         <input
                           type="number"
@@ -836,7 +837,6 @@ const CentreEdit = () => {
                           }
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                           placeholder="e.g., 450"
-                          required
                         />
                       </div>
 
