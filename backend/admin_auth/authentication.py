@@ -35,7 +35,6 @@ class AdminJWTAuthentication(authentication.BaseAuthentication):
             admin_id = payload.get('admin_id')
             if admin_id:
                 # This is an admin token
-                from .models import Admin
                 admin = Admin.objects.get(id=admin_id, is_active=True)
                 
                 # Ensure admin has required Django user attributes
@@ -50,7 +49,6 @@ class AdminJWTAuthentication(authentication.BaseAuthentication):
             # If no admin_id, check for user_type
             user_type = payload.get('user_type')
             if user_type == 'admin':
-                from .models import Admin
                 user_id = payload.get('user_id')  # Some tokens might use user_id
                 if user_id:
                     admin = Admin.objects.get(id=user_id, is_active=True)
