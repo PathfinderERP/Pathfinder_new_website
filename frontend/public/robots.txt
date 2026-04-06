@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://pathfinder.edu.in/sitemap.xml
+
+# Disallow admin pages from search results
+Disallow: /admin/
+Disallow: /business/admin/
+Disallow: /login/
+Disallow: /register/
