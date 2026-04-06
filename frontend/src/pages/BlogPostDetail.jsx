@@ -24,6 +24,45 @@ const BlogPostDetail = () => {
                 setLoading(true);
                 const response = await blogAPI.getById(slug);
                 setPost(response.data);
+                
+                // --- ADVANCED SEO MANAGEMENT ---
+                if (response.data) {
+                    const post = response.data;
+                    const siteTitle = "Pathfinder Institute";
+                    const pageTitle = `${post.title} | ${siteTitle}`;
+                    document.title = pageTitle;
+
+                    // Helper to update/create meta tags
+                    const updateMeta = (name, content, attr = 'name') => {
+                        let tag = document.querySelector(`meta[${attr}="${name}"]`);
+                        if (!tag) {
+                            tag = document.createElement('meta');
+                            tag.setAttribute(attr, name);
+                            document.head.appendChild(tag);
+                        }
+                        tag.setAttribute('content', content || "");
+                    };
+
+                    // Extract a clean description from the HTML content (max 160 chars)
+                    const plainText = (post.content || "").replace(/<[^>]*>/g, '').substring(0, 160).trim();
+
+                    // Standard SEO
+                    updateMeta('description', plainText);
+                    updateMeta('keywords', `${post.category}, NEET, JEE, Pathfinder, ${post.author}`);
+
+                    // OpenGraph (Social Sharing: WhatsApp, Facebook, etc.)
+                    updateMeta('og:title', pageTitle, 'property');
+                    updateMeta('og:description', plainText, 'property');
+                    updateMeta('og:image', post.image_url || "/images/blog/placeholder.webp", 'property');
+                    updateMeta('og:url', window.location.href, 'property');
+                    updateMeta('og:type', 'article', 'property');
+
+                    // Twitter Card
+                    updateMeta('twitter:card', 'summary_large_image');
+                    updateMeta('twitter:title', pageTitle);
+                    updateMeta('twitter:description', plainText);
+                    updateMeta('twitter:image', post.image_url || "/images/blog/placeholder.webp");
+                }
             } catch (err) {
                 console.error("Error fetching post:", err);
                 setError("Post not found.");
@@ -32,6 +71,11 @@ const BlogPostDetail = () => {
             }
         };
         fetchPost();
+
+        // Cleanup: Reset title when leaving the page
+        return () => {
+            document.title = "Pathfinder Institute";
+        };
     }, [slug]);
 
     if (loading) return <div className="min-h-screen pt-32"><LoadingSpinner /></div>;

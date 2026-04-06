@@ -42,6 +42,17 @@ const Blog = () => {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const carouselRef = useRef(null);
 
+    useEffect(() => {
+        document.title = "Blog | Pathfinder Institute Articles & Success Stories";
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+            metaDesc.setAttribute('content', "Read the latest preparation tips, topper interviews, and academic strategies from Pathfinder Institute's expert faculty and successful students.");
+        }
+        return () => {
+            document.title = "Pathfinder Institute";
+        };
+    }, []);
+
     const featuredPosts = useMemo(() => posts.filter(post => post.is_featured).slice(0, 5), [posts]);
 
     const latestPosts = useMemo(() => {

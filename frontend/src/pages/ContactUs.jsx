@@ -65,6 +65,14 @@ const ContactUs = () => {
     const [userLoc, setUserLoc] = useState(null);
 
     useEffect(() => {
+        document.title = "Contact Us | Pathfinder Institute Official Support & Centres";
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+            metaDesc.setAttribute('content', "Get in touch with Pathfinder Institute for admissions, course queries, and support. Locate your nearest centre across West Bengal and India.");
+        }
+    }, []);
+
+    useEffect(() => {
         const fetchCentres = async () => {
             try {
                 const response = await centresAPI.getAll();

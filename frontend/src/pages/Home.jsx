@@ -57,6 +57,14 @@ export default function PathVerseOverview() {
     }
   );
 
+  useEffect(() => {
+    document.title = "Pathfinder Institute | Best Coaching for JEE, NEET, WBJEE & Foundation";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', "Join Pathfinder Institute, India's premier coaching center for JEE, NEET, and Foundation courses. 30 years of excellence in building careers.");
+    }
+  }, []);
+
   const handleLocationDetectionTrigger = useCallback(() => {
     locationFilterRef.current?.detectLocation();
   }, []);
