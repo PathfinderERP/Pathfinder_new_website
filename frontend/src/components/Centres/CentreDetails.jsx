@@ -160,11 +160,11 @@ const CentreDetails = ({ centre }) => {
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <PhoneIcon className="w-6 h-6 text-orange-400" />
-                                    <p className="text-white/70 text-sm font-bold">+91 900 700 8000</p>
+                                    <p className="text-white/70 text-sm font-bold">{centre.mobile || "9147178886"}</p>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <EnvelopeIcon className="w-6 h-6 text-amber-300" />
-                                    <p className="text-white/70 text-sm font-bold">contact@pathfinder.org</p>
+                                    <p className="text-white/70 text-sm font-bold">{centre.email || "support@pathfinder.edu.in"}</p>
                                 </div>
                             </div>
 

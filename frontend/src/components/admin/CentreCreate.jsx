@@ -26,6 +26,8 @@ const CentreCreate = () => {
     centre_type: "",
     location: "",
     address: "",
+    mobile: "",
+    email: "",
     toppers: [],
   });
 
@@ -124,6 +126,8 @@ const CentreCreate = () => {
         centre_type: centreData.centre_type,
         location: centreData.location,
         address: centreData.address,
+        mobile: centreData.mobile,
+        email: centreData.email,
         // Include Base64 logo only if we have one
         ...(logoBase64 && { logo_file: logoBase64 }),
         // Include toppers with their images
@@ -186,7 +190,7 @@ const CentreCreate = () => {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -413,6 +417,34 @@ const CentreCreate = () => {
                     required
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 uppercase">
+                    Mobile Number
+                  </label>
+                  <input
+                    type="text"
+                    name="mobile"
+                    value={centreData.mobile}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    placeholder="e.g. 9147178886"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 uppercase">
+                    Email ID
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={centreData.email}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    placeholder="e.g. support@pathfinder.edu.in"
+                  />
+                </div>
               </div>
             </div>
 
@@ -502,7 +534,8 @@ const CentreCreate = () => {
                         placeholder="e.g., 1, 25, 100"
                         min="1"
                       />
-                    </div>                    <div>
+                    </div>
+                    <div>
                       <label className="block text-sm font-medium text-gray-700">Total Marks</label>
                       <input
                         type="number"
@@ -512,7 +545,7 @@ const CentreCreate = () => {
                         placeholder="e.g., 500"
                       />
                     </div>
- 
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Marks Obtained</label>
                       <input

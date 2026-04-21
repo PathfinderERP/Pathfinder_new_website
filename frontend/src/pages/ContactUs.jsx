@@ -257,6 +257,24 @@ const ContactUs = () => {
                                     </p>
                                 </div>
 
+                                <div className="flex items-start gap-3 mb-4">
+                                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                                        <PhoneIcon className="w-5 h-5 text-orange-500" />
+                                    </div>
+                                    <p className="text-slate-600 text-lg font-medium leading-relaxed">
+                                        {displayedCentre.mobile || "9147178886"}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-start gap-3 mb-8">
+                                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                                        <EnvelopeIcon className="w-5 h-5 text-orange-500" />
+                                    </div>
+                                    <p className="text-slate-600 text-lg font-medium leading-relaxed">
+                                        {displayedCentre.email || "support@pathfinder.edu.in"}
+                                    </p>
+                                </div>
+
                                 {displayedCentre.distance && (
                                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 rounded-full border border-green-200 mb-4">
                                         <MapPinIcon className="w-5 h-5 text-green-600" />

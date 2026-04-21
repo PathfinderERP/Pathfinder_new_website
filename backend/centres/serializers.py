@@ -72,7 +72,7 @@ class CentreSerializer(Base64R2FileMixin, mongo_serializers.DocumentSerializer):
     
     class Meta:
         model = Centre
-        fields = ['id', 'state', 'district', 'centre', 'centre_type', 'location', 'address', 'map_url',
+        fields = ['id', 'state', 'district', 'centre', 'centre_type', 'location', 'address', 'mobile', 'email', 'map_url',
                  'toppers', 'logo_file', 'logo', 'logo_url', 'created_by', 'created_at', 'updated_at']
         extra_kwargs = {
             'logo': {'required': False, 'allow_null': True, 'allow_blank': True}

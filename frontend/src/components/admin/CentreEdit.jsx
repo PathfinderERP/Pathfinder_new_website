@@ -38,6 +38,8 @@ const CentreEdit = () => {
     centre_type: "",
     location: "",
     address: "",
+    mobile: "",
+    email: "",
     toppers: [],
   });
 
@@ -114,6 +116,8 @@ const CentreEdit = () => {
         centre_type: centre.centre_type || "",
         location: centre.location || "",
         address: centre.address || "",
+        mobile: centre.mobile || "",
+        email: centre.email || "",
         logo_url: centre.logo_url || "", // Track logo URL in centreData
         toppers: (centre.toppers || []).map(topper => ({
           ...topper,
@@ -228,7 +232,7 @@ const CentreEdit = () => {
 
       // 2. Prepare Base64 data for topper images
       const topperImagesBase64 = {};
-      
+
       for (const [index, file] of Object.entries(topperFiles)) {
         try {
           // Compress topper photos - they don't need to be huge
@@ -248,11 +252,13 @@ const CentreEdit = () => {
         centre_type: centreData.centre_type,
         location: centreData.location,
         address: centreData.address,
+        mobile: centreData.mobile,
+        email: centreData.email,
         // Send Base64 logo if we have one, otherwise omit
         ...(logoBase64 && { logo_file: logoBase64 }),
         // Send clear signal for logo if explicitly removed and no new one selected
         ...(currentLogoUrl === "" && !logoFile && { logo: "" }),
-        
+
         // ✅ Send topper data with images
         toppers: centreData.toppers.map((topper, index) => {
           const topperPayload = {
@@ -272,7 +278,7 @@ const CentreEdit = () => {
           if (topperImagesBase64[index]) {
             topperPayload.image_file = topperImagesBase64[index];
           }
-          
+
           // Send clear signal for topper image if removed
           if (topper.image_url === "" && !topperFiles[index]) {
             topperPayload.image = "";
@@ -316,7 +322,7 @@ const CentreEdit = () => {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -425,7 +431,7 @@ const CentreEdit = () => {
     // Priority 2: Try existing image URL fields
     if (topper.image_url) return topper.image_url;
     if (topper.image) return topper.image;
-    
+
     // Priority 3: Fallback to binary data
     if (topper.image_data && topper.image_content_type) {
       return `data:${topper.image_content_type};base64,${topper.image_data}`;
@@ -677,6 +683,34 @@ const CentreEdit = () => {
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                     placeholder="Complete address with pin code"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 uppercase">
+                    Mobile Number
+                  </label>
+                  <input
+                    type="text"
+                    name="mobile"
+                    value={centreData.mobile}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    placeholder="e.g. 9147178886"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 uppercase">
+                    Email ID
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={centreData.email}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    placeholder="e.g. support@pathfinder.edu.in"
                   />
                 </div>
               </div>

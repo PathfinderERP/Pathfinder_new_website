@@ -60,7 +60,7 @@ const CentreList = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('refresh') === 'true') {
-      
+
       const cacheKey = `admin_cache_admin_centres`;
       localStorage.removeItem(cacheKey);
       fetchCentres();

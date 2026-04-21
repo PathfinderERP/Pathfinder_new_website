@@ -76,6 +76,8 @@ class Centre(Document):
     ], null=True, blank=True)
     location = fields.StringField()
     address = fields.StringField()
+    mobile = fields.StringField(max_length=20, null=True, blank=True)
+    email = fields.StringField(max_length=100, null=True, blank=True)
     toppers = fields.ListField(fields.EmbeddedDocumentField(Topper))
     
     # Cloudflare R2 / External URL for logo
@@ -235,6 +237,8 @@ class Centre(Document):
             'centre_type': self.centre_type,
             'location': self.location,
             'address': self.address,
+            'mobile': self.mobile,
+            'email': self.email,
             'map_url': self.map_url,
             'logo_url': self.get_logo_url(),
             'created_at': self.get_created_at_isoformat(),
