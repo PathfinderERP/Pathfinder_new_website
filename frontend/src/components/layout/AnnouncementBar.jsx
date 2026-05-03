@@ -43,6 +43,20 @@ const AnnouncementBar = () => {
     }, [fetchAnnouncements]);
 
     useEffect(() => {
+        const hasContent = !isLoading && announcements.length > 0;
+        const height = (isVisible && hasContent) ? (window.innerWidth < 640 ? "40px" : "48px") : "0px";
+        document.documentElement.style.setProperty('--announcement-height', height);
+        
+        // Also handle window resize for height accuracy
+        const handleResize = () => {
+            const newHeight = (isVisible && hasContent) ? (window.innerWidth < 640 ? "40px" : "48px") : "0px";
+            document.documentElement.style.setProperty('--announcement-height', newHeight);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [isVisible, isLoading, announcements]);
+
+    useEffect(() => {
         if (announcements.length <= 1) return;
 
         const timer = setInterval(() => {
@@ -57,20 +71,12 @@ const AnnouncementBar = () => {
     const current = announcements[currentIndex];
     const Icon = IconMap[current?.icon_type] || MegaphoneIcon;
 
-    const containerStyle = {
-        background: current?.bg_color_2 
-            ? `linear-gradient(90deg, ${current.bg_color}, ${current.bg_color_2})`
-            : current?.bg_color || '#66090D',
-        color: current?.text_color || '#FFFFFF'
-    };
-
     return (
         <motion.div 
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className={`relative overflow-hidden z-[100] border-b border-white/10`}
-            style={containerStyle}
+            className="w-full bg-gradient-to-r from-[#FF823E] via-[#FF6B44] to-[#F14641] text-white relative z-[1001] shadow-lg border-b border-white/10"
         >
             {/* Animated Shine Effect */}
             {current?.show_shine !== false && (
@@ -93,7 +99,7 @@ const AnnouncementBar = () => {
                 />
             )}
 
-            <div className="max-w-7xl mx-auto px-4 py-2 sm:py-2.5 flex items-center gap-4">
+            <div className="max-w-[1920px] mx-auto px-2 sm:px-4 h-10 sm:h-12 flex items-center justify-between gap-2 sm:gap-4">
                 {/* Left Side: Icon */}
                 <div className="flex-shrink-0 p-1.5 bg-white/20 rounded-lg backdrop-blur-sm shadow-sm z-20">
                     <Icon className="w-4 h-4 sm:w-5 h-5 text-white" />
@@ -118,7 +124,7 @@ const AnnouncementBar = () => {
                                 {[...Array(10)].map((_, i) => (
                                     <p 
                                         key={i}
-                                        className={`text-xs sm:text-sm font-black tracking-wide flex-shrink-0 ${current?.is_blinking ? 'animate-pulse' : ''}`}
+                                        className={`text-[10px] sm:text-xs font-black tracking-wide flex-shrink-0 ${current?.is_blinking ? 'animate-pulse' : ''}`}
                                     >
                                         {current.text}
                                     </p>
@@ -132,7 +138,7 @@ const AnnouncementBar = () => {
                                 exit={{ y: -20, opacity: 0 }}
                                 className="w-full flex justify-center items-center"
                             >
-                                <p className={`text-xs sm:text-sm font-black tracking-wide ${current?.is_blinking ? 'animate-pulse' : ''}`}>
+                                <p className={`text-[10px] sm:text-xs font-black tracking-wide ${current?.is_blinking ? 'animate-pulse' : ''}`}>
                                     {current.text}
                                 </p>
                             </motion.div>
@@ -143,27 +149,30 @@ const AnnouncementBar = () => {
                 {/* Right Side: Action Button & Close */}
                 <div className="flex items-center gap-3 sm:gap-4 z-20 flex-shrink-0">
                     {current.button_text && (
-                        <motion.a 
-                            href={current.link || '#'}
+                        <motion.a
+                            href={current.button_link || '#'}
+                            className="flex-shrink-0 flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-1 sm:py-1.5 bg-white/10 backdrop-blur-sm rounded-full shadow-[0_0_15px_rgba(255,255,255,0.15)] group hover:shadow-xl transition-all border sm:border-2 border-white relative overflow-hidden"
+                            initial={{ scale: 1 }}
                             animate={{ 
-                                scale: [1, 1.08, 1],
-                                opacity: [1, 0.7, 1]
+                                scale: [1, 1.05, 1],
+                                boxShadow: [
+                                    "0 0 10px rgba(255,255,255,0.2)",
+                                    "0 0 25px rgba(255,255,255,0.4)",
+                                    "0 0 10px rgba(255,255,255,0.2)"
+                                ]
                             }}
                             transition={{ 
-                                duration: 1.5, 
-                                repeat: Infinity, 
-                                ease: "easeInOut" 
+                                duration: 2, 
+                                repeat: Infinity,
+                                ease: "easeInOut"
                             }}
-                            whileHover={{ scale: 1.15 }}
-                            whileTap={{ scale: 0.9 }}
-                            style={{
-                                backgroundColor: current.button_bg_color || '#FFFFFF',
-                                color: current.button_text_color || '#66090D'
-                            }}
-                            className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase shadow-lg shadow-black/20 transition-all group whitespace-nowrap"
                         >
-                            {current.button_text}
-                            <ChevronRightIcon className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                            <span className="text-[10px] sm:text-xs font-black text-white uppercase tracking-tight">
+                                {current.button_text}
+                            </span>
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white flex items-center justify-center text-[#F14641] shadow-lg group-hover:scale-110 transition-transform">
+                                <ChevronRightIcon className="w-3 h-3 sm:w-4 h-4 stroke-[3]" />
+                            </div>
                         </motion.a>
                     )}
 

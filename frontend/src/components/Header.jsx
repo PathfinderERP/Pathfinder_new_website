@@ -425,7 +425,7 @@ const Header = () => {
 
         {/* Bottom Header - Main Navigation */}
         <motion.div
-          className={`hidden lg:block bg-[#66090D] backdrop-blur-xl mx-auto max-w-7xl w-[95%] rounded-2xl shadow-2xl border border-white/10 ${isScrolled ? "mt-2 scale-[0.98]" : "mt-2"}`}
+          className={`hidden lg:block bg-[#66090D] backdrop-blur-xl mx-auto max-w-7xl w-[95%] rounded-2xl shadow-2xl border border-white/10 ${isScrolled ? "scale-[0.98]" : "mt-1"}`}
           animate={{ y: isScrolled ? -5 : 0, scale: isScrolled ? 0.98 : 1 }}
           transition={{ duration: 0.3 }}
           ref={dropdownRef}
