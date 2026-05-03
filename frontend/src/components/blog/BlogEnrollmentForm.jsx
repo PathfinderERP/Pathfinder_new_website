@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import env from '../../config/env';
 
-const BlogEnrollmentForm = () => {
+const BlogEnrollmentForm = ({ onSuccess }) => {
     const [formData, setFormData] = useState({
         fullName: "",
         phone: "",
@@ -73,6 +73,7 @@ const BlogEnrollmentForm = () => {
 
             setStatus('success');
             setFormData({ fullName: "", phone: "", email: "", class: "", area: "", schoolName: "" });
+            if (onSuccess) onSuccess();
         } catch (err) {
             console.error("Submission error:", err);
             setStatus('error');
