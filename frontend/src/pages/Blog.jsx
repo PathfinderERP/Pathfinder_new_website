@@ -56,7 +56,7 @@ const Blog = () => {
     const featuredPosts = useMemo(() => posts.filter(post => post.is_featured).slice(0, 5), [posts]);
 
     const latestPosts = useMemo(() => {
-        let filtered = posts.filter(post => !post.is_featured);
+        let filtered = [...posts];
 
         if (selectedCategory !== "All") {
             filtered = filtered.filter(post => post.category === selectedCategory);

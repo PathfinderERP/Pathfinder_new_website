@@ -11,6 +11,7 @@ import { ChevronUp, Heart, Volume2, VolumeX, Play, Pause } from "lucide-react";
 import ApplicationForm from "./Student/Applynow";
 import { useAuth } from "../contexts/AuthContext";
 import { centresAPI, coursesAPI } from "../services/api";
+import PredictionPopup from "../components/common/PredictionPopup";
 
 // Helper function to normalize strings for comparison
 const normalizeStr = (str) => str ? str.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
@@ -123,10 +124,11 @@ export default function PathVerseOverview() {
       {/* <PathTex />
       <Blog />
       <Community /> */}
+      {/* FAQ */}
       <FAQ />
-      {/* <FinalCTA /> */}
-
-
+      
+      {/* Popups */}
+      <PredictionPopup />
     </div>
   );
 }
