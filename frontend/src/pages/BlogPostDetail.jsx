@@ -46,11 +46,6 @@ const BlogPostDetail = () => {
                     const plainText = (postData.content || "").replace(/<[^>]*>/g, '').substring(0, 160).trim();
                     updateMeta('description', plainText);
                     updateMeta('keywords', `${postData.category}, NEET, JEE, Pathfinder, ${postData.author}`);
-                    updateMeta('og:title', pageTitle, 'property');
-                    updateMeta('og:description', plainText, 'property');
-                    updateMeta('og:image', postData.image_url || "/images/blog/placeholder.webp", 'property');
-                    updateMeta('og:url', window.location.href, 'property');
-                    updateMeta('og:type', 'article', 'property');
                 }
             } catch (err) {
                 console.error("Error fetching post:", err);
@@ -78,6 +73,7 @@ const BlogPostDetail = () => {
 
     return (
         <div className="min-h-screen bg-white pb-20">
+            {/* Full Screen Hero Section Restored */}
             <section className="relative h-[95vh] min-h-[800px] overflow-hidden">
                 <img
                     src={post.image_url || "/images/blog/placeholder.webp"}
@@ -123,9 +119,9 @@ const BlogPostDetail = () => {
                                     <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <TagIcon className="w-10 h-10 text-orange-600" />
                                     </div>
-                                    <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4 tracking-tight">Unlock Full Article</h2>
-                                    <p className="text-slate-500 mb-10 text-lg font-medium">
-                                        This premium article is reserved for enrolled students. Please complete the form below to get instant access.
+                                    <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4 tracking-tight">NEET 2026 Answer Key Download</h2>
+                                    <p className="text-slate-500 mb-10 text-lg font-medium leading-relaxed">
+                                        Get the most accurate, subject-wise Answer Key and Video Solutions by Pathfinder experts. Enter your details below to unlock the full PDF instantly.
                                     </p>
                                     <div className="text-left">
                                         <BlogEnrollmentForm onSuccess={() => setIsEnrolled(true)} />

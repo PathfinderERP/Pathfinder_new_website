@@ -37,11 +37,29 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
     const [error, setError] = useState("");
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        
+        // Mobile validation: only allow 10 digits
+        if (name === 'phone') {
+            const numericValue = value.replace(/[^0-9]/g, '');
+            if (numericValue.length <= 10) {
+                setFormData({ ...formData, [name]: numericValue });
+            }
+            return;
+        }
+
+        setFormData({ ...formData, [name]: value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Final phone validation
+        if (formData.phone.length !== 10) {
+            setError("Please enter a valid 10-digit mobile number.");
+            return;
+        }
+
         setStatus('submitting');
         setError("");
 
@@ -113,15 +131,10 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
 
     return (
         <div className="bg-white rounded-[2rem] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.08)] border border-slate-100 max-w-2xl mx-auto group transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
-            <div className="bg-[#66090D] text-white p-6 text-center relative overflow-hidden">
+            <div className="bg-[#66090D] text-white p-8 text-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-24 -mt-24 blur-3xl"></div>
                 <div className="relative z-10">
-                    <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-2 backdrop-blur-sm border border-white/10">
-                        <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></span>
-                        Limited Seats
-                    </div>
-                    <h3 className="text-2xl font-black mb-1 tracking-tight">Enroll Now</h3>
-                    <p className="text-orange-100/80 font-medium text-sm">Secure your future with Pathfinder</p>
+                    <h3 className="text-3xl font-black mb-1 tracking-tight">Download Now</h3>
                 </div>
             </div>
 
@@ -151,10 +164,10 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
                                 type="tel"
                                 name="phone"
                                 required
-                                pattern="[0-9]{10}"
                                 value={formData.phone}
                                 onChange={handleChange}
                                 placeholder="10-digit mobile number"
+                                maxLength={10}
                                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-orange-500 transition-all bg-white text-sm text-slate-900 placeholder-slate-400 shadow-sm"
                             />
                         </InputWrapper>
@@ -170,27 +183,6 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
                             />
                         </InputWrapper>
 
-                        <InputWrapper label="Target Class" icon={AcademicCapIcon} required>
-                            <select
-                                name="class"
-                                required
-                                value={formData.class}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-orange-500 transition-all bg-white text-sm text-slate-900 shadow-sm appearance-none cursor-pointer"
-                            >
-                                <option value="">Select Target Class</option>
-                                <option value="Class 5">Class 5</option>
-                                <option value="Class 6">Class 6</option>
-                                <option value="Class 7">Class 7</option>
-                                <option value="Class 8">Class 8</option>
-                                <option value="Class 9">Class 9</option>
-                                <option value="Class 10">Class 10</option>
-                                <option value="Class 11">Class 11</option>
-                                <option value="Class 12">Class 12</option>
-                                <option value="Repeater">Repeater (Dropper)</option>
-                            </select>
-                        </InputWrapper>
-
                         <InputWrapper label="Area/Locality" icon={MapPinIcon} required>
                             <input
                                 type="text"
@@ -199,17 +191,6 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
                                 value={formData.area}
                                 onChange={handleChange}
                                 placeholder="e.g. Salt Lake, Howrah"
-                                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-orange-500 transition-all bg-white text-sm text-slate-900 placeholder-slate-400 shadow-sm"
-                            />
-                        </InputWrapper>
-
-                        <InputWrapper label="Current School" icon={BuildingLibraryIcon}>
-                            <input
-                                type="text"
-                                name="schoolName"
-                                value={formData.schoolName}
-                                onChange={handleChange}
-                                placeholder="Enter your school name"
                                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-orange-500 transition-all bg-white text-sm text-slate-900 placeholder-slate-400 shadow-sm"
                             />
                         </InputWrapper>
@@ -225,7 +206,7 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
                                 <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
                             ) : (
                                 <>
-                                    <span>Enroll Now</span>
+                                    <span>Download Now</span>
                                     <PaperAirplaneIcon className="w-5 h-5 -rotate-45" />
                                 </>
                             )}
