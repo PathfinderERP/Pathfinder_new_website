@@ -50,6 +50,7 @@ const BlogManagement = () => {
         read_time: "5 min read",
         is_featured: false,
         is_active: true,
+        show_enroll_form: false,
         image_file: null // Base64 image
     });
 
@@ -72,6 +73,7 @@ const BlogManagement = () => {
                 read_time: post.read_time,
                 is_featured: post.is_featured,
                 is_active: post.is_active,
+                show_enroll_form: post.show_enroll_form || false,
                 image_url: post.image_url,
                 image_file: null
             });
@@ -86,6 +88,7 @@ const BlogManagement = () => {
                 read_time: "5 min read",
                 is_featured: false,
                 is_active: true,
+                show_enroll_form: false,
                 image_url: null,
                 image_file: null
             });
@@ -430,7 +433,44 @@ const BlogManagement = () => {
                                         />
                                         <span className="text-sm font-medium text-slate-700 dark:text-gray-300">Is Active?</span>
                                     </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="show_enroll_form"
+                                            checked={formData.show_enroll_form}
+                                            onChange={handleInputChange}
+                                            className="w-4 h-4 text-orange-600 rounded bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600 focus:ring-orange-500"
+                                        />
+                                        <span className="text-sm font-medium text-slate-700 dark:text-gray-300">Show Enrollment Form</span>
+                                    </label>
                                 </div>
+
+                                {formData.show_enroll_form && (
+                                    <div className="col-span-2 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-orange-600">
+                                                <CheckIcon className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 dark:text-white">Enrollment Form Preview</h4>
+                                                <p className="text-sm text-slate-500">This form will be shown at the end of the blog post.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Mock Preview of the Enrollment Form */}
+                                        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+                                            <div className="text-center">
+                                                <h3 className="text-lg font-bold text-slate-800 dark:text-white">Enroll Now</h3>
+                                                <p className="text-xs text-slate-500">Secure your future with us</p>
+                                            </div>
+                                            <div className="space-y-3">
+                                                <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-lg border dark:border-slate-700 flex items-center px-3 text-slate-400 text-xs">Enter your full name</div>
+                                                <div className="h-10 bg-slate-100 dark:bg-slate-800 rounded-lg border dark:border-slate-700 flex items-center px-3 text-slate-400 text-xs">10-digit mobile number</div>
+                                                <div className="h-10 bg-orange-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">Enroll Now</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex justify-end gap-3 pt-6 border-t dark:border-slate-800">

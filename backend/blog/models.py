@@ -19,6 +19,7 @@ class BlogPost(Document):
     # Status and Metadata
     is_featured = fields.BooleanField(default=False)
     is_active = fields.BooleanField(default=True)
+    show_enroll_form = fields.BooleanField(default=False)
     published_date = fields.DateTimeField(default=datetime.datetime.utcnow)
     created_at = fields.DateTimeField(default=datetime.datetime.utcnow)
     updated_at = fields.DateTimeField(default=datetime.datetime.utcnow)

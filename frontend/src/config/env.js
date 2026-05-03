@@ -156,6 +156,10 @@ const env = {
     JOBS_FEATURED:
       import.meta.env.VITE_JOBS_FEATURED_ENDPOINT ||
       "/api/jobs/job-posts/featured_jobs/",
+    
+    // Announcements
+    ANNOUNCEMENTS: import.meta.env.VITE_ANNOUNCEMENTS_ENDPOINT || "/api/announcements/admin/announcements/",
+    ANNOUNCEMENTS_ACTIVE: import.meta.env.VITE_ANNOUNCEMENTS_ACTIVE_ENDPOINT || "/api/announcements/active/",
   },
 };
 

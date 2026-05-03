@@ -12,7 +12,8 @@ import {
     BookOpenIcon,
     NewspaperIcon,
     Cog6ToothIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    MegaphoneIcon
 } from "@heroicons/react/24/outline";
 
 const AdminSidebar = ({ isOpen, toggleSidebar }) => {
@@ -34,6 +35,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         { name: "Users", path: "/business/admin/users", icon: UserIcon, permission: "manage_users" },
         { name: "Student Corner", path: "/business/admin/student-corner", icon: BookOpenIcon, permission: "manage_courses" },
         { name: "Blog", path: "/business/admin/blog", icon: NewspaperIcon, permission: "manage_blogs" },
+        { name: "Top Banner", path: "/business/admin/announcements", icon: MegaphoneIcon, permission: "manage_blogs" },
         { name: "Jobs", path: "/business/admin/jobs", icon: BriefcaseIcon, permission: "manage_applications" },
     ];
 

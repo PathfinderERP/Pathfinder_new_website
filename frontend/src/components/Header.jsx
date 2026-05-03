@@ -28,6 +28,7 @@ import { centerdata } from "../data/data";
 import LoginModal from "../components/LoginModal";
 import ApplyNowForm from "../pages/Student/Applynow";
 import { centresAPI } from "../services/api";
+import AnnouncementBar from "./layout/AnnouncementBar";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -302,6 +303,7 @@ const Header = () => {
   return (
     <>
       <motion.header className="w-full fixed top-0 z-[1000]" initial={{ y: -60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.3, ease: "easeOut" }}>
+        <AnnouncementBar />
         <motion.div
           className={`relative bg-gradient-to-br from-white/80 to-white/60 backdrop-blur-2xl border-b transition-all duration-500 w-full shadow-sm ${isScrolled ? "border-orange-200/30 shadow-2xl shadow-orange-500/5 py-2" : "border-orange-100/20 py-2"}`}
           style={{ zIndex: 999 }}

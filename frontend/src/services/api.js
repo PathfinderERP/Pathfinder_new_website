@@ -668,3 +668,13 @@ export const franchiseAPI = {
   delete: (id) => api.delete(`/api/franchise/registrations/${id}/`),
 };
 
+// Announcements API
+export const announcementsAPI = {
+  getAll: () => api.get(env.endpoints.ANNOUNCEMENTS),
+  getActive: () => api.get(env.endpoints.ANNOUNCEMENTS_ACTIVE),
+  create: (data) => api.post(env.endpoints.ANNOUNCEMENTS, data),
+  update: (id, data) => api.patch(`${env.endpoints.ANNOUNCEMENTS}${id}/`, data),
+  delete: (id) => api.delete(`${env.endpoints.ANNOUNCEMENTS}${id}/`),
+};
+
+

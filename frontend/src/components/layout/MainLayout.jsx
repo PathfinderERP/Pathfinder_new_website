@@ -6,7 +6,7 @@ const MainLayout = ({ children, showHeader = true, showFooter = true }) => {
   return (
     <div className="main-layout relative">
       {showHeader && <Header />}
-      <main className="min-h-screen">{children}</main>
+      <main className="min-h-screen pt-32 sm:pt-36 md:pt-40">{children}</main>
       {showFooter && <Footer />}
     </div>
   );

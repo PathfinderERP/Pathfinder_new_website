@@ -74,11 +74,11 @@ class BlogPostViewSet(mongo_viewsets.ModelViewSet):
         return Response(categories)
 
     def retrieve(self, request, *args, **kwargs):
-        """Retrieve by ID or Slug with is_active security"""
+        """Retrieve by ID or Slug with is_active security and robust error handling"""
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         lookup_value = self.kwargs[lookup_url_kwarg]
         
-        # Admin check
+        # Admin check for viewing drafts
         user = self.request.user
         is_admin = user and user.is_authenticated and (
             getattr(user, 'is_superuser', False) or 
@@ -86,19 +86,39 @@ class BlogPostViewSet(mongo_viewsets.ModelViewSet):
             getattr(user, 'role', '') in ['admin', 'superadmin']
         )
         
+        from mongoengine.errors import ValidationError, DoesNotExist, MultipleObjectsReturned
+        import re
+        
+        instance = None
+        
+        # 1. Determine if lookup_value is likely an ObjectId or a Slug
+        is_object_id = re.match(r'^[0-9a-fA-F]{24}$', str(lookup_value))
+        
         try:
-            # Try to find by ID first
-            instance = BlogPost.objects.get(id=lookup_value)
-        except:
-            try:
-                # Then try by slug
+            if is_object_id:
+                # Try ID first if it looks like one
+                instance = BlogPost.objects.filter(id=lookup_value).first()
+            
+            # 2. If not found by ID, try by slug
+            if not instance:
                 instance = BlogPost.objects.get(slug=lookup_value)
-            except BlogPost.DoesNotExist:
-                return Response({'error': 'Blog post not found'}, status=status.HTTP_404_NOT_FOUND)
                 
-        # If not active and not admin, deny access
+        except DoesNotExist:
+            return Response({'error': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
+        except MultipleObjectsReturned:
+            # Handle rare case of duplicate slugs
+            instance = BlogPost.objects.filter(slug=lookup_value).first()
+        except Exception as e:
+            # Log any other unexpected errors to prevent 500
+            print(f"[BLOG_ERROR] Error retrieving post '{lookup_value}': {str(e)}")
+            return Response({'error': 'Server error retrieving post'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+        if not instance:
+            return Response({'error': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
+                
+        # 3. Security: If not active and not admin, hide it
         if not instance.is_active and not is_admin:
-            return Response({'error': 'Blog post not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
             
         serializer = self.get_serializer(instance)
         return Response(serializer.data)

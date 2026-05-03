@@ -50,4 +50,5 @@ urlpatterns = [
     path('api/landing/', include('landing_registrations.urls')),  # Landing page registrations
     path('api/franchise/', include('franchise_inquiry.urls')),  # Franchise inquiries
     path('api/business/admin/applications/', include('contact_api.urls')), # Admin Applications
+    path('api/announcements/', include('announcements.urls')), # Announcements API
 ]

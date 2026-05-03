@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { blogAPI } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import BlogEnrollmentForm from '../components/blog/BlogEnrollmentForm';
 
 const BlogPostDetail = () => {
     const { slug } = useParams();
@@ -89,13 +90,13 @@ const BlogPostDetail = () => {
     );
 
     return (
-        <div className="min-h-screen bg-white pt-24 pb-20">
+        <div className="min-h-screen bg-white pb-20">
             {/* Header / Hero */}
-            <section className="relative h-[40vh] md:h-[60vh] min-h-[400px] overflow-hidden">
+            <section className="relative h-[95vh] min-h-[800px] overflow-hidden">
                 <img
                     src={post.image_url || "/images/blog/placeholder.webp"}
                     alt={post.title}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover object-top"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
 
@@ -170,22 +171,26 @@ const BlogPostDetail = () => {
                 </div>
             </article>
 
-            {/* Newsletter Call to Action */}
-            <section className="max-w-4xl mx-auto px-4 mt-12">
-                <div className="bg-orange-50 rounded-[2.5rem] p-8 md:p-12 border border-orange-100 text-center">
-                    <h3 className="text-2xl font-black text-slate-900 mb-4">Enjoyed this article?</h3>
-                    <p className="text-slate-600 mb-8">Subscribe to our newsletter and get the latest updates right in your inbox.</p>
-                    <form className="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
-                        <input
-                            type="email"
-                            placeholder="Your email address"
-                            className="flex-grow px-5 py-3 rounded-xl border border-orange-200 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
-                        />
-                        <button className="px-8 py-3 bg-orange-600 text-white font-bold rounded-xl hover:bg-orange-700 transition shadow-lg shadow-orange-600/20 whitespace-nowrap">
-                            Join Now
-                        </button>
-                    </form>
-                </div>
+            {/* CTA Section: Enrollment Form or Newsletter */}
+            <section className="max-w-4xl mx-auto px-4 mt-12 mb-20">
+                {post.show_enroll_form ? (
+                    <BlogEnrollmentForm />
+                ) : (
+                    <div className="bg-orange-50 rounded-[2.5rem] p-8 md:p-12 border border-orange-100 text-center">
+                        <h3 className="text-2xl font-black text-slate-900 mb-4">Enjoyed this article?</h3>
+                        <p className="text-slate-600 mb-8">Subscribe to our newsletter and get the latest updates right in your inbox.</p>
+                        <form className="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
+                            <input
+                                type="email"
+                                placeholder="Your email address"
+                                className="flex-grow px-5 py-3 rounded-xl border border-orange-200 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                            />
+                            <button className="px-8 py-3 bg-orange-600 text-white font-bold rounded-xl hover:bg-orange-700 transition shadow-lg shadow-orange-600/20 whitespace-nowrap">
+                                Join Now
+                            </button>
+                        </form>
+                    </div>
+                )}
             </section>
         </div>
     );

@@ -138,6 +138,7 @@ INSTALLED_APPS = [
     'blog',
     'landing_registrations',  # New app for landing page registrations
     'franchise_inquiry',
+    'announcements',
 ]
 
 
