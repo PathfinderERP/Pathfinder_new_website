@@ -11,6 +11,19 @@ import {
 } from '@heroicons/react/24/outline';
 import env from '../../config/env';
 
+const InputWrapper = ({ label, icon: Icon, children, required }) => (
+    <div className="space-y-2">
+        <label className="text-sm font-bold text-slate-700 flex items-center gap-2 ml-1">
+            <Icon className="w-4 h-4 text-slate-400" />
+            {label} {required && <span className="text-red-500">*</span>}
+        </label>
+        <div className="relative group">
+            {children}
+            <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-within:border-orange-500/20 pointer-events-none transition-all duration-300"></div>
+        </div>
+    </div>
+);
+
 const BlogEnrollmentForm = ({ onSuccess }) => {
     const [formData, setFormData] = useState({
         fullName: "",
@@ -66,7 +79,6 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error("Backend validation errors:", errorData);
-                // Extract specific field errors if they exist
                 const fieldError = errorData.phone?.[0] || errorData.full_name?.[0] || errorData.email?.[0] || errorData.student_class?.[0];
                 throw new Error(fieldError || "Failed to submit application");
             }
@@ -80,19 +92,6 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
             setError("Something went wrong. Please try again.");
         }
     };
-
-    const InputWrapper = ({ label, icon: Icon, children, required }) => (
-        <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 flex items-center gap-2 ml-1">
-                <Icon className="w-4 h-4 text-slate-400" />
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>
-            <div className="relative group">
-                {children}
-                <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-within:border-orange-500/20 pointer-events-none transition-all duration-300"></div>
-            </div>
-        </div>
-    );
 
     if (status === 'success') {
         return (
@@ -114,10 +113,8 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
 
     return (
         <div className="bg-white rounded-[2rem] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.08)] border border-slate-100 max-w-2xl mx-auto group transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
-            {/* Compact Premium Header */}
             <div className="bg-[#66090D] text-white p-6 text-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-24 -mt-24 blur-3xl"></div>
-                
                 <div className="relative z-10">
                     <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-2 backdrop-blur-sm border border-white/10">
                         <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></span>
@@ -137,7 +134,6 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                        {/* Full Name */}
                         <InputWrapper label="Full Name" icon={UserIcon} required>
                             <input
                                 type="text"
@@ -150,7 +146,6 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
                             />
                         </InputWrapper>
 
-                        {/* Phone Number */}
                         <InputWrapper label="Phone Number" icon={PhoneIcon} required>
                             <input
                                 type="tel"
@@ -164,7 +159,6 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
                             />
                         </InputWrapper>
 
-                        {/* Email Address */}
                         <InputWrapper label="Email Address" icon={EnvelopeIcon}>
                             <input
                                 type="email"
@@ -176,7 +170,6 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
                             />
                         </InputWrapper>
 
-                        {/* Class Selection */}
                         <InputWrapper label="Target Class" icon={AcademicCapIcon} required>
                             <select
                                 name="class"
@@ -198,7 +191,6 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
                             </select>
                         </InputWrapper>
 
-                        {/* Area/Locality */}
                         <InputWrapper label="Area/Locality" icon={MapPinIcon} required>
                             <input
                                 type="text"
@@ -211,7 +203,6 @@ const BlogEnrollmentForm = ({ onSuccess }) => {
                             />
                         </InputWrapper>
 
-                        {/* School Name */}
                         <InputWrapper label="Current School" icon={BuildingLibraryIcon}>
                             <input
                                 type="text"
