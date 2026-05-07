@@ -85,7 +85,7 @@ const AboutUs = () => {
         }
       `}</style>
       {/* Hero Section */}
-      <section className="relative w-full overflow-hidden bg-white pt-12 lg:pt-24">
+      <section className="relative w-full overflow-hidden bg-white">
 
 
         <div className="max-w-[1536px] mx-auto px-6 md:px-12 lg:px-20 container relative">

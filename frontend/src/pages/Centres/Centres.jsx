@@ -8,7 +8,7 @@ import { ChevronUp } from "lucide-react";
 const CentresPage = () => {
 
     return (
-        <div className="pt-[70px] lg:pt-[120px]">
+        <div className="">
             {/* Hero Header for Centres Page - Premium Boxed Version */}
             <section className="max-w-7xl mx-auto px-4 mt-2 sm:mt-12">
                 <motion.div

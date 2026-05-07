@@ -97,8 +97,8 @@ export default function StudentsCorner() {
     };
 
     return (
-        <div className="min-h-screen font-sans pt-[56px] lg:pt-[140px] bg-slate-50 text-slate-900">
-            <div className="2xl:max-w-[1600px] mx-auto bg-white sm:shadow-2xl sm:shadow-gray-200 sm:border-x sm:border-gray-100 min-h-screen">
+        <div className="min-h-screen font-sans bg-slate-50 text-slate-900">
+            <div className="2xl:max-w-[1600px] mx-auto bg-white sm:shadow-2xl sm:shadow-gray-200 sm:border-x sm:border-gray-100 min-h-screen pt-6 md:pt-10">
                 <style>
                     {`
                     @keyframes marquee {

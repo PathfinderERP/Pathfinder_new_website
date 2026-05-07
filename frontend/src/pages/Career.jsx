@@ -177,7 +177,7 @@ const Career = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white pt-[80px]">
+    <div className="min-h-screen bg-white">
       <div className="2xl:max-w-7xl mx-auto bg-white shadow-2xl shadow-gray-200 border-x border-gray-100 min-h-screen">
         {/* Hero Section - Constrained width Gradient */}
         <div className="relative bg-gradient-to-r from-[#FF6332] to-[#FF9D66] overflow-hidden">

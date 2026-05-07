@@ -20,7 +20,7 @@ const CentreDetails = ({ centre }) => {
     return (
         <div className="bg-white min-h-screen">
             {/* Hero Header */}
-            <section className="relative pt-16 md:pt-32 pb-10 md:pb-20 overflow-hidden bg-gradient-to-br from-orange-600 to-red-700">
+            <section className="relative pb-10 md:pb-20 overflow-hidden bg-gradient-to-br from-orange-600 to-red-700">
                 <div className="absolute inset-0 opacity-20 pointer-events-none">
                     <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-white rounded-full blur-[150px] -mr-[20%]" />
                     <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-amber-400 rounded-full blur-[150px] -ml-[10%]" />

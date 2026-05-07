@@ -61,7 +61,7 @@ const ChairmanMessage = () => {
     return (
         <div className="min-h-screen ">
             {/* Hero Section with CEO Image - Full Width */}
-            <div className="w-full mt-16 lg:mt-32">
+            <div className="w-full">
                 <div className="max-w-[1400px] mx-auto">
 
                     <div className="relative w-full h-[220px] sm:h-[450px] md:h-[600px] lg:h-[750px] overflow-hidden">

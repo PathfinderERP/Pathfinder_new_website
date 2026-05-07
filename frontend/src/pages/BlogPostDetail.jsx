@@ -13,7 +13,7 @@ import { blogAPI } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import BlogEnrollmentForm from '../components/blog/BlogEnrollmentForm';
 
-const BlogPostDetail = () => {
+export default function BlogPostDetail() {
     const { slug } = useParams();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -61,9 +61,9 @@ const BlogPostDetail = () => {
         };
     }, [slug]);
 
-    if (loading) return <div className="min-h-screen pt-32"><LoadingSpinner /></div>;
+    if (loading) return <div className="min-h-screen"><LoadingSpinner /></div>;
     if (error || !post) return (
-        <div className="min-h-screen flex flex-col items-center justify-center pt-24">
+        <div className="min-h-screen flex flex-col items-center justify-center">
             <h2 className="text-2xl font-bold mb-4">{error || "Post not found"}</h2>
             <Link to="/blog" className="text-orange-600 font-bold hover:underline flex items-center gap-2">
                 <ArrowLeftIcon className="w-4 h-4" /> Back to Blog
@@ -73,8 +73,8 @@ const BlogPostDetail = () => {
 
     return (
         <div className="min-h-screen bg-white pb-20">
-            {/* Full Screen Hero Section Restored */}
-            <section className="relative h-[95vh] min-h-[800px] overflow-hidden">
+            {/* Full Screen Hero Section */}
+            <section className="relative h-[60vh] min-h-[500px] overflow-hidden">
                 <img
                     src={post.image_url || "/images/blog/placeholder.webp"}
                     alt={post.title}
@@ -84,8 +84,8 @@ const BlogPostDetail = () => {
 
                 <div className="absolute bottom-0 left-0 w-full pb-12">
                     <div className="max-w-4xl mx-auto px-4">
-                        <Link to="/blog" className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-8 transition-colors">
-                            <ArrowLeftIcon className="w-4 h-4" />
+                        <Link to="/blog" className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full mb-8 hover:bg-orange-600 hover:border-orange-500 transition-all duration-300 font-bold group">
+                            <ArrowLeftIcon className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                             Back to Articles
                         </Link>
                         <div className="flex items-center gap-4 mb-4">
@@ -173,6 +173,6 @@ const BlogPostDetail = () => {
             </section>
         </div>
     );
-};
+}
 
-export default BlogPostDetail;
+

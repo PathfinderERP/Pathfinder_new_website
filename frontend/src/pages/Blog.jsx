@@ -91,7 +91,7 @@ const Blog = () => {
     if (loading) return <div className="pt-32"><LoadingSpinner /></div>;
 
     return (
-        <div className="min-h-screen bg-white pt-20">
+        <div className="min-h-screen bg-white">
             {/* Top Brand Banner */}
             <div className="h-16 md:h-32 w-full bg-gradient-to-r from-[#FF823E] via-[#FF6B44] to-[#F14641]" />
             <div className="h-6 md:h-10 w-full bg-black" />

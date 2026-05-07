@@ -29,8 +29,8 @@ const StudentBag = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans pt-[80px] lg:pt-[120px] pb-20">
-            <div className="2xl:max-w-7xl mx-auto px-6 md:py-6 lg:px-8">
+        <div className="min-h-screen bg-slate-50 font-sans pb-20">
+            <div className="2xl:max-w-7xl mx-auto px-6 pt-10 md:pt-16 lg:px-8">
                 {/* Header Navigation */}
                 <div className="flex items-center gap-4 mb-10">
                     <button

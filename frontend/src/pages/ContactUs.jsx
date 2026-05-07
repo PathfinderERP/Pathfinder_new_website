@@ -189,7 +189,7 @@ const ContactUs = () => {
 
 
     return (
-        <div className="min-h-screen bg-white pt-[70px] lg:pt-[100px]">
+        <div className="min-h-screen bg-white">
             {/* Hero Section */}
             <section className="pt-10 pb-12 md:pt-16 md:pb-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4">

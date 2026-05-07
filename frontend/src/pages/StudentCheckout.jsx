@@ -98,8 +98,8 @@ const StudentCheckout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans pt-[100px] lg:pt-[160px] pb-20">
-            <div className="2xl:max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="min-h-screen bg-slate-50 font-sans pb-20">
+            <div className="2xl:max-w-7xl mx-auto px-6 pt-10 md:pt-16 lg:px-8">
                 <button
                     onClick={() => navigate('/students-corner/bag')}
                     className="flex items-center gap-2 text-slate-500 hover:text-[#FF7D54] font-bold text-sm uppercase tracking-widest transition-colors mb-8"

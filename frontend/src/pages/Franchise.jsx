@@ -120,7 +120,7 @@ const Franchise = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white pt-[56px] lg:pt-[120px]">
+        <div className="min-h-screen bg-white">
             {/* Hero Section - Full Width Banner */}
             <section className="relative bg-black overflow-hidden">
                 <motion.div

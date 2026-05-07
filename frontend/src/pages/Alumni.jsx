@@ -127,7 +127,7 @@ const AlumniPage = () => {
     ];
 
     return (
-        <div className="bg-[#fdfcfb] pt-[64px] md:pt-24 min-h-screen overflow-hidden 2xl:max-w-7xl 2xl:mx-auto shadow-2xl">
+        <div className="bg-[#fdfcfb] min-h-screen overflow-hidden 2xl:max-w-7xl 2xl:mx-auto shadow-2xl">
 
             {/* Exactly Seamless Hero Section - Dynamically Generated Years Ticker */}
             <section className="relative w-full leading-[0] font-[0]">

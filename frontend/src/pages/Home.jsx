@@ -150,7 +150,7 @@ function Hero() {
   return (
     <section
       id="hero"
-      className="bg-white pb-8 sm:pb-12 md:pb-16"
+      className="bg-white pt-10 md:pt-16 pb-8 sm:pb-12 md:pb-16"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Mobile: Single column layout with full width content */}

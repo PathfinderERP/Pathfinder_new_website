@@ -39,7 +39,7 @@ export default function FoundationPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 scroll-smooth lg:mt-20">
+        <div className="min-h-screen bg-slate-50 text-slate-900 scroll-smooth">
             {/* Hero Section - Unique Design */}
             <FoundationHero />
 
@@ -65,7 +65,7 @@ export default function FoundationPage() {
  *******************/
 function FoundationHero() {
     return (
-        <section className="relative bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 pt-24 sm:pt-16 md:pt-20 pb-10 sm:pb-16 md:pb-20 overflow-hidden w-full 2xl:mx-auto 2xl:max-w-7xl 2xl:rounded-3xl 2xl:mt-10 shadow-sm">
+        <section className="relative bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 pb-10 sm:pb-16 md:pb-20 overflow-hidden w-full 2xl:mx-auto 2xl:max-w-7xl 2xl:rounded-3xl shadow-sm">
             {/* Animated Background Pattern - Softer version */}
             <div className="absolute inset-0 opacity-5">
                 <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-orange-200 to-red-200 rounded-full filter blur-3xl animate-pulse"></div>

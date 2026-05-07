@@ -58,7 +58,7 @@ export default function BoardsResultPage() {
     }, []);
 
     return (
-        <div className="relative bg-gradient-to-br pt-[56px] md:pt-32 pb-0 w-full 2xl:max-w-7xl 2xl:mx-auto shadow-sm min-h-screen">
+        <div className="relative bg-gradient-to-br pb-0 w-full 2xl:max-w-7xl 2xl:mx-auto shadow-sm min-h-screen">
 
             {/* Hero Image Section */}
             <div className="w-full bg-white overflow-hidden">
