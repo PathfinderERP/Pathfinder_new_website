@@ -1,0 +1,47 @@
+from mongoengine import Document, fields
+import datetime
+
+class WBJEEHub(Document):
+    """
+    Configuration and resources for the WBJEE Answer Key / Analysis Hub
+    """
+    # Hero Section
+    title = fields.StringField(required=True, default="WBJEE 2026: Answer Key & Analysis")
+    description = fields.StringField()
+    sub_description = fields.StringField()
+    hero_image_url = fields.StringField()
+    meta_title = fields.StringField()
+    meta_description = fields.StringField()
+    
+    # Subject Resources (Mathematics, Physics, Chemistry)
+    # Each dict: { "subject": str, "icon": str, "weightage_url": str, "pdf_url": str, "video_url": str, "bg_color": str }
+    resources = fields.ListField(fields.DictField(), default=[])
+    
+    # Marks Division Table
+    # Each dict: { "subject": str, "questions": str, "marks": str, "weightage": str }
+    marks_division = fields.ListField(fields.DictField(), default=[])
+    
+    # Expert Guidance Videos
+    # Each dict: { "label": str, "url": str, "description": str }
+    videos = fields.ListField(fields.DictField(), default=[])
+    
+    # Custom Meta Tags (SEO/Social)
+    # Each dict: { "name": str, "content": str, "property": bool }
+    custom_meta_tags = fields.ListField(fields.DictField(), default=[])
+    
+    # Metadata
+    is_active = fields.BooleanField(default=True)
+    created_at = fields.DateTimeField(default=datetime.datetime.utcnow)
+    updated_at = fields.DateTimeField(default=datetime.datetime.utcnow)
+
+    meta = {
+        'collection': 'wbjee_hub',
+        'ordering': ['-created_at']
+    }
+
+    def save(self, *args, **kwargs):
+        self.updated_at = datetime.datetime.utcnow()
+        return super(WBJEEHub, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title

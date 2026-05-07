@@ -139,6 +139,7 @@ INSTALLED_APPS = [
     'landing_registrations',  # New app for landing page registrations
     'franchise_inquiry',
     'announcements',
+    'wbjee',
 ]
 
 

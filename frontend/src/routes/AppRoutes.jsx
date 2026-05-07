@@ -65,12 +65,14 @@ import AlumniManagement from "../components/admin/AlumniManagement";
 import StudentCornerManagement from "../components/admin/StudentCornerManagement";
 import BlogManagement from "../components/admin/BlogManagement";
 import AnnouncementManagement from "../components/admin/AnnouncementManagement";
+import WBJEEAnalysisManagement from "../components/admin/WBJEEAnalysisManagement.jsx";
 import AdsLeadsList from "../components/admin/AdsLeadsList";
 import FranchiseInquiryList from "../components/admin/FranchiseInquiryList";
 import Centres from "../pages/Centres/Centres";
 import ContactUs from "../pages/ContactUs";
 import Blog from "../pages/Blog";
 import BlogPostDetail from "../pages/BlogPostDetail";
+import WBJEEAnswerKey from "../pages/WBJEEAnswerKey";
 import AboutUs from "../pages/About/AboutUs";
 import CEOMessage from "../pages/About/CEOMessage";
 import ChairmanMessage from "../pages/About/ChairmanMessage";
@@ -274,6 +276,15 @@ const AppRoutes = () => {
           </MainLayout>
         }
       />
+      <Route
+        path="/wbjee-answer-key"
+        element={
+          <MainLayout>
+            <WBJEEAnswerKey />
+          </MainLayout>
+        }
+      />
+
       <Route
         path="/about-us"
         element={
@@ -526,6 +537,17 @@ const AppRoutes = () => {
           <AdminProtectedRoute requiredPermission="manage_blogs">
             <AdminLayout>
               <AnnouncementManagement />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/business/admin/wbjee-analysis"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_blogs">
+            <AdminLayout>
+              <WBJEEAnalysisManagement />
             </AdminLayout>
           </AdminProtectedRoute>
         }

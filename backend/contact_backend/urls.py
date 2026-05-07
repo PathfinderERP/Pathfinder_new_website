@@ -51,4 +51,6 @@ urlpatterns = [
     path('api/franchise/', include('franchise_inquiry.urls')),  # Franchise inquiries
     path('api/business/admin/applications/', include('contact_api.urls')), # Admin Applications
     path('api/announcements/', include('announcements.urls')), # Announcements API
+    path('api/wbjee/', include('wbjee.urls')), # WBJEE Hub API
+    path('api/business/admin/wbjee/', include('wbjee.urls')), # Admin WBJEE
 ]

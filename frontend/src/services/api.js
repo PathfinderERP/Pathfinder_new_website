@@ -677,4 +677,13 @@ export const announcementsAPI = {
   delete: (id) => api.delete(`${env.endpoints.ANNOUNCEMENTS}${id}/`),
 };
 
-
+// WBJEE Hub API
+export const wbjeeAPI = {
+  getLatest: () => api.get("/api/wbjee/wbjee-hub/latest/"),
+  getById: (id) => api.get(`/api/wbjee/wbjee-hub/${id}/`),
+  create: (data) => api.post("/api/business/admin/wbjee/wbjee-hub/", data),
+  update: (id, data) => api.patch(`/api/business/admin/wbjee/wbjee-hub/${id}/`, data),
+  uploadFile: (id, formData) => api.post(`/api/business/admin/wbjee/wbjee-hub/${id}/upload_file/`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  })
+};

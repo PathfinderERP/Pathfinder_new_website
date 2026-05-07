@@ -13,7 +13,8 @@ import {
     NewspaperIcon,
     Cog6ToothIcon,
     DocumentTextIcon,
-    MegaphoneIcon
+    MegaphoneIcon,
+    PresentationChartLineIcon
 } from "@heroicons/react/24/outline";
 
 const AdminSidebar = ({ isOpen, toggleSidebar }) => {
@@ -37,6 +38,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         { name: "Blog", path: "/business/admin/blog", icon: NewspaperIcon, permission: "manage_blogs" },
         { name: "Top Banner", path: "/business/admin/announcements", icon: MegaphoneIcon, permission: "manage_blogs" },
         { name: "Jobs", path: "/business/admin/jobs", icon: BriefcaseIcon, permission: "manage_applications" },
+        { name: "WBJEE Analysis", path: "/business/admin/wbjee-analysis", icon: PresentationChartLineIcon, permission: "manage_blogs" },
     ];
 
     // Filter items based on permissions
