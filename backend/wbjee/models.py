@@ -15,7 +15,7 @@ class WBJEEHub(Document):
     meta_description = fields.StringField()
     
     # Subject Resources (Mathematics, Physics, Chemistry)
-    # Each dict: { "subject": str, "icon": str, "weightage_url": str, "pdf_url": str, "video_url": str, "bg_color": str }
+    # Each dict: { "subject": str, "icon": str, "weightage_url": str, "pdf_url": str, "video_url": str, "video_download_url": str, "bg_color": str }
     resources = fields.ListField(fields.DictField(), default=[])
     
     # Marks Division Table
@@ -23,7 +23,7 @@ class WBJEEHub(Document):
     marks_division = fields.ListField(fields.DictField(), default=[])
     
     # Expert Guidance Videos
-    # Each dict: { "label": str, "url": str, "description": str }
+    # Each dict: { "label": str, "url": str, "description": str, "download_url": str }
     videos = fields.ListField(fields.DictField(), default=[])
     
     # Custom HTML Section (Injection)

@@ -15,7 +15,8 @@ import {
     PhotoIcon,
     LinkIcon,
     EyeIcon,
-    CodeBracketIcon
+    CodeBracketIcon,
+    TableCellsIcon
 } from "@heroicons/react/24/outline";
 
 const WBJEEAnalysisManagement = () => {
@@ -462,18 +463,130 @@ const WBJEEAnalysisManagement = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-[9px] font-black text-slate-500 mb-2 uppercase tracking-widest">YouTube Video Solution URL</label>
-                                        <input 
-                                            type="text" 
-                                            value={res.video_url}
-                                            onChange={(e) => handleResourceChange(idx, 'video_url', e.target.value)}
-                                            className="w-full px-4 py-3 bg-white/50 border-2 border-black/10 rounded-xl outline-none focus:border-orange-500 text-xs font-bold"
-                                            placeholder="https://www.youtube.com/watch?v=..."
-                                        />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-[9px] font-black text-slate-500 mb-2 uppercase tracking-widest">YouTube Video Solution URL</label>
+                                            <input 
+                                                type="text" 
+                                                value={res.video_url}
+                                                onChange={(e) => handleResourceChange(idx, 'video_url', e.target.value)}
+                                                className="w-full px-4 py-3 bg-white/50 border-2 border-black/10 rounded-xl outline-none focus:border-orange-500 text-xs font-bold"
+                                                placeholder="https://www.youtube.com/watch?v=..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[9px] font-black text-slate-500 mb-2 uppercase tracking-widest">Video Download URL (Optional)</label>
+                                            <input 
+                                                type="text" 
+                                                value={res.video_download_url || ""}
+                                                onChange={(e) => handleResourceChange(idx, 'video_download_url', e.target.value)}
+                                                className="w-full px-4 py-3 bg-white/50 border-2 border-black/10 rounded-xl outline-none focus:border-orange-500 text-xs font-bold"
+                                                placeholder="R2 Link or External URL"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </section>
+
+                    {/* Marks Division Table */}
+                    <section className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center gap-2">
+                                <TableCellsIcon className="w-6 h-6 text-orange-500" />
+                                <h2 className="text-xl font-black uppercase tracking-tight">Marks Division Analysis</h2>
+                            </div>
+                            <button 
+                                onClick={() => handleInputChange('marks_division', [...(config.marks_division || []), { subject: "", questions: "", marks: "", weightage: "" }])}
+                                className="px-4 py-2 bg-orange-600 text-white rounded-xl oswald font-bold uppercase text-[10px] tracking-widest hover:bg-orange-700 transition flex items-center gap-2"
+                            >
+                                <PlusIcon className="w-4 h-4" /> Add Row
+                            </button>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        <th className="p-4 text-left">Subject</th>
+                                        <th className="p-4 text-left">Questions</th>
+                                        <th className="p-4 text-left">Marks</th>
+                                        <th className="p-4 text-left">Weightage</th>
+                                        <th className="p-4"></th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y dark:divide-slate-800">
+                                    {(config.marks_division || []).map((row, idx) => (
+                                        <tr key={idx}>
+                                            <td className="p-2">
+                                                <input 
+                                                    type="text" 
+                                                    value={row.subject}
+                                                    onChange={(e) => {
+                                                        const newData = [...config.marks_division];
+                                                        newData[idx].subject = e.target.value;
+                                                        handleInputChange('marks_division', newData);
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-transparent focus:border-orange-500 outline-none text-xs font-bold"
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <input 
+                                                    type="text" 
+                                                    value={row.questions}
+                                                    onChange={(e) => {
+                                                        const newData = [...config.marks_division];
+                                                        newData[idx].questions = e.target.value;
+                                                        handleInputChange('marks_division', newData);
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-transparent focus:border-orange-500 outline-none text-xs font-bold"
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <input 
+                                                    type="text" 
+                                                    value={row.marks}
+                                                    onChange={(e) => {
+                                                        const newData = [...config.marks_division];
+                                                        newData[idx].marks = e.target.value;
+                                                        handleInputChange('marks_division', newData);
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-transparent focus:border-orange-500 outline-none text-xs font-bold"
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <input 
+                                                    type="text" 
+                                                    value={row.weightage}
+                                                    onChange={(e) => {
+                                                        const newData = [...config.marks_division];
+                                                        newData[idx].weightage = e.target.value;
+                                                        handleInputChange('marks_division', newData);
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-transparent focus:border-orange-500 outline-none text-xs font-bold"
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <button 
+                                                    onClick={() => {
+                                                        const newData = config.marks_division.filter((_, i) => i !== idx);
+                                                        handleInputChange('marks_division', newData);
+                                                    }}
+                                                    className="p-2 text-slate-400 hover:text-red-500 transition"
+                                                >
+                                                    <TrashIcon className="w-4 h-4" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            {(!config.marks_division || config.marks_division.length === 0) && (
+                                <div className="text-center py-8 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl mt-4">
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">No table data added yet</p>
+                                </div>
+                            )}
                         </div>
                     </section>
                 </div>
@@ -521,17 +634,30 @@ const WBJEEAnalysisManagement = () => {
                                         placeholder="YouTube Embed URL"
                                         className="w-full bg-transparent text-[10px] text-slate-500 outline-none mb-2 break-all min-h-[50px]"
                                     />
-                                    <textarea 
-                                        value={vid.description || ""}
-                                        onChange={(e) => {
-                                            const newVids = [...config.videos];
-                                            newVids[idx].description = e.target.value;
-                                            handleInputChange('videos', newVids);
-                                        }}
-                                        placeholder="Video Description (Optional)"
-                                        rows="2"
-                                        className="w-full bg-slate-100 dark:bg-slate-700/50 rounded-xl px-3 py-2 text-[10px] text-slate-600 dark:text-slate-400 outline-none border border-transparent focus:border-orange-500 transition font-medium"
-                                    />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <textarea 
+                                            value={vid.description || ""}
+                                            onChange={(e) => {
+                                                const newVids = [...config.videos];
+                                                newVids[idx].description = e.target.value;
+                                                handleInputChange('videos', newVids);
+                                            }}
+                                            placeholder="Video Description (Optional)"
+                                            rows="2"
+                                            className="w-full bg-slate-100 dark:bg-slate-700/50 rounded-xl px-3 py-2 text-[10px] text-slate-600 dark:text-slate-400 outline-none border border-transparent focus:border-orange-500 transition font-medium"
+                                        />
+                                        <textarea 
+                                            value={vid.download_url || ""}
+                                            onChange={(e) => {
+                                                const newVids = [...config.videos];
+                                                newVids[idx].download_url = e.target.value;
+                                                handleInputChange('videos', newVids);
+                                            }}
+                                            placeholder="Download URL (Optional)"
+                                            rows="2"
+                                            className="w-full bg-slate-100 dark:bg-slate-700/50 rounded-xl px-3 py-2 text-[10px] text-slate-600 dark:text-slate-400 outline-none border border-transparent focus:border-orange-500 transition font-medium"
+                                        />
+                                    </div>
                                 </div>
                             ))}
                             <button 
