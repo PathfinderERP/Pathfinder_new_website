@@ -6,7 +6,8 @@ class WBJEEHub(Document):
     Configuration and resources for the WBJEE Answer Key / Analysis Hub
     """
     # Hero Section
-    title = fields.StringField(required=True, default="WBJEE 2026: Answer Key & Analysis")
+    title = fields.StringField(required=True, default="WBJEE 2026")
+    title_highlight = fields.StringField(default="Answer Key & Analysis")
     description = fields.StringField()
     sub_description = fields.StringField()
     hero_image_url = fields.StringField()

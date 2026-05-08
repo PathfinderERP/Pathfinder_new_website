@@ -213,14 +213,25 @@ const WBJEEAnalysisManagement = () => {
                         </div>
                         
                         <div className="space-y-4">
-                            <div>
-                                <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-[0.2em]">Main Heading Title</label>
-                                <textarea 
-                                    rows="1"
-                                    value={config.title}
-                                    onChange={(e) => handleInputChange('title', e.target.value)}
-                                    className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-orange-500 rounded-2xl outline-none transition font-black text-slate-900 resize-none min-h-[58px]"
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-[0.2em]">Main Title (White)</label>
+                                    <textarea 
+                                        rows="1"
+                                        value={config.title}
+                                        onChange={(e) => handleInputChange('title', e.target.value)}
+                                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-orange-500 rounded-2xl outline-none transition font-black text-slate-900 resize-none min-h-[58px]"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-[0.2em]">Highlighted Title (Orange)</label>
+                                    <textarea 
+                                        rows="1"
+                                        value={config.title_highlight || ""}
+                                        onChange={(e) => handleInputChange('title_highlight', e.target.value)}
+                                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-orange-500 rounded-2xl outline-none transition font-black text-orange-600 resize-none min-h-[58px]"
+                                    />
+                                </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>

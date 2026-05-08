@@ -141,44 +141,11 @@ const WBJEEAnswerKey = () => {
     };
 
 
-    const marksData = dynamicConfig?.marks_division?.length > 0 ? dynamicConfig.marks_division : [
-        { subject: "Mathematics", questions: "75 (Cat 1: 50, Cat 2: 15, Cat 3: 10)", marks: "100", weightage: "50%" },
-        { subject: "Physics", questions: "40 (Cat 1: 30, Cat 2: 5, Cat 3: 5)", marks: "50", weightage: "25%" },
-        { subject: "Chemistry", questions: "40 (Cat 1: 30, Cat 2: 5, Cat 3: 5)", marks: "50", weightage: "25%" },
-    ];
+    const marksData = dynamicConfig?.marks_division || [];
 
-    const resources = dynamicConfig?.resources?.length > 0 ? dynamicConfig.resources : [
-        {
-            subject: "Mathematics",
-            icon: "📐",
-            bg_color: "bg-yellow-50",
-            weightage_url: "https://drive.google.com/file/d/1sC7QCiztc-_7_ilkKpeJpy1roCP_m5CN/view?usp=sharing",
-            pdf_url: "https://drive.google.com/file/d/1r7LxJgvyEPatmZr07l2eSvKsGS-dHQrL/view?usp=sharing",
-            video_url: "https://www.youtube.com/live/uUZqQD_1_ow?si=_zWeo8y8Hqx53yOL"
-        },
-        {
-            subject: "Physics",
-            icon: "⚛️",
-            bg_color: "bg-orange-50",
-            weightage_url: "https://drive.google.com/file/d/1Dr9JQNoanPqcIb-Q0_pY4ahFkG2j7GTQ/view?usp=sharing",
-            pdf_url: "https://drive.google.com/file/d/1_LVHQBKTCyJqeHfT0aNsnAxRXgjSEj9C/view?usp=sharing",
-            video_url: "https://www.youtube.com/live/uUZqQD_1_ow?si=_zWeo8y8Hqx53yOL"
-        },
-        {
-            subject: "Chemistry",
-            icon: "🧪",
-            bg_color: "bg-emerald-50",
-            weightage_url: "https://drive.google.com/file/d/160XqChmZICHN4GORLXBibENcSjZa13Su/view?usp=sharing",
-            pdf_url: "https://drive.google.com/file/d/1Qr91_knw683n5lxC1fZWx5gM5q7rd8DW/view?usp=sharing",
-            video_url: "https://www.youtube.com/live/uUZqQD_1_ow?si=_zWeo8y8Hqx53yOL"
-        }
-    ];
+    const resources = dynamicConfig?.resources || [];
 
-    const videos = dynamicConfig?.videos?.length > 0 ? dynamicConfig.videos : [
-        { id: 1, label: "Topper's Talk", url: "https://www.youtube.com/embed/dl-QLpDplLE?vq=hd1080", description: "" },
-        { id: 2, label: "Success Story", url: "https://www.youtube.com/embed/wGnX7j4EULA?vq=hd1080", description: "" },
-        { id: 3, label: "Expert Guidance", url: "https://www.youtube.com/embed/KOFomNzzluc?vq=hd1080", description: "" }
-    ];
+    const videos = dynamicConfig?.videos || [];
 
     const getEmbedUrl = (url) => {
         if (!url) return "";
@@ -231,11 +198,11 @@ const WBJEEAnswerKey = () => {
                                 Analysis Hub 2026
                             </div>
                             <h1 className="oswald text-4xl md:text-6xl lg:text-7xl uppercase text-white mb-6 leading-tight">
-                                {dynamicConfig?.title?.split(':')[0] || "WBJEE 2026"}{" "}
-                                <span className="text-orange-600">{dynamicConfig?.title?.split(':')[1]?.replace('& Analysis', '') || "Answer Key"}</span>
+                                {dynamicConfig?.title}{" "}
+                                <span className="text-orange-600 block md:inline">{dynamicConfig?.title_highlight}</span>
                             </h1>
                             <p className="text-sm md:text-lg text-slate-300 max-w-xl font-medium leading-relaxed">
-                                {dynamicConfig?.description || "Get official answer keys, detailed weightage analysis, and video solutions prepared by Pathfinder's expert faculty."}
+                                {dynamicConfig?.description}
                             </p>
                             {dynamicConfig?.sub_description && (
                                 <div className="mt-6 inline-block bg-orange-600 text-white px-4 py-2 rounded-lg oswald text-[10px] md:text-sm uppercase tracking-widest neo-shadow">
