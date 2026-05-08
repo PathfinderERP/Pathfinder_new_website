@@ -30,6 +30,10 @@ class Application(Document):
     # Course Information (Embedded document)
     course = fields.EmbeddedDocumentField(Course, required=True)
     
+    # Extra fields for Contact Form
+    contact_message = fields.StringField(null=True, blank=True)
+    preferred_center = fields.StringField(null=True, blank=True)
+    
     # Metadata
     submitted_at = fields.DateTimeField(required=True)
     status = fields.StringField(

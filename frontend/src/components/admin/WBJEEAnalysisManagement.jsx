@@ -14,7 +14,8 @@ import {
     TrashIcon,
     PhotoIcon,
     LinkIcon,
-    EyeIcon
+    EyeIcon,
+    CodeBracketIcon
 } from "@heroicons/react/24/outline";
 
 const WBJEEAnalysisManagement = () => {
@@ -53,7 +54,8 @@ const WBJEEAnalysisManagement = () => {
                         { subject: "Chemistry", icon: "🧪", weightage_url: "", pdf_url: "", video_url: "", bg_color: "bg-emerald-50" }
                     ],
                     marks_division: [],
-                    videos: []
+                    videos: [],
+                    custom_html: ""
                 });
             } else {
                 setError("Failed to load configuration. Please try again.");
@@ -160,29 +162,29 @@ const WBJEEAnalysisManagement = () => {
     if (loading) return <LoadingSpinner />;
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-8">
-            <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-                        <PresentationChartLineIcon className="w-10 h-10 text-orange-600" />
-                        WBJEE Analysis Hub
+        <div className="p-3 md:p-6 max-w-7xl mx-auto space-y-4 md:space-y-8">
+            <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-900 p-4 md:p-8 rounded-2xl md:rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 gap-4 md:gap-0">
+                <div className="text-center md:text-left">
+                    <h1 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white flex items-center justify-center md:justify-start gap-2 md:gap-3">
+                        <PresentationChartLineIcon className="w-6 h-6 md:w-10 md:h-10 text-orange-600" />
+                        WBJEE Hub
                     </h1>
-                    <p className="text-slate-500 font-medium mt-1 uppercase tracking-widest text-xs">Page Configuration & Cloud Resource Manager</p>
+                    <p className="text-slate-500 font-medium mt-1 uppercase tracking-widest text-[8px] md:text-xs">Page Configuration & Cloud Resource Manager</p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto">
                     <button 
                         onClick={fetchData}
-                        className="p-3 text-slate-500 hover:text-orange-600 bg-slate-50 dark:bg-slate-800 rounded-2xl transition"
+                        className="p-2 md:p-3 text-slate-500 hover:text-orange-600 bg-slate-50 dark:bg-slate-800 rounded-xl md:rounded-2xl transition flex-1 md:flex-none flex justify-center"
                     >
-                        <ArrowPathIcon className={`w-6 h-6 ${saving ? 'animate-spin' : ''}`} />
+                        <ArrowPathIcon className={`w-5 h-5 md:w-6 md:h-6 ${saving ? 'animate-spin' : ''}`} />
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="bg-orange-600 text-white px-8 py-3 rounded-2xl font-black uppercase text-sm tracking-widest hover:bg-orange-700 transition shadow-xl shadow-orange-600/20 disabled:opacity-50 flex items-center gap-2"
+                        className="bg-orange-600 text-white px-4 py-2.5 md:px-8 md:py-3 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-sm tracking-widest hover:bg-orange-700 transition shadow-xl shadow-orange-600/20 disabled:opacity-50 flex items-center justify-center gap-2 flex-[2] md:flex-none"
                     >
                         {saving ? "Processing..." : "Sync Changes"}
-                        <CheckCircleIcon className="w-5 h-5" />
+                        <CheckCircleIcon className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                 </div>
             </div>
@@ -201,13 +203,13 @@ const WBJEEAnalysisManagement = () => {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
                 {/* Left Panel: Hero & SEO */}
-                <div className="lg:col-span-2 space-y-8">
-                    <section className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <SparklesIcon className="w-6 h-6 text-orange-500" />
-                            <h2 className="text-xl font-black uppercase tracking-tight">Hero Section Configuration</h2>
+                <div className="lg:col-span-2 space-y-4 md:space-y-8">
+                    <section className="bg-white dark:bg-slate-900 p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 shadow-sm space-y-4 md:space-y-6">
+                        <div className="flex items-center gap-2 mb-2 md:mb-4">
+                            <SparklesIcon className="w-5 h-5 md:w-6 md:h-6 text-orange-500" />
+                            <h2 className="text-base md:text-xl font-black uppercase tracking-tight">Hero Section</h2>
                         </div>
                         
                         <div className="space-y-4">
@@ -528,6 +530,27 @@ const WBJEEAnalysisManagement = () => {
                                 <PlusIcon className="w-5 h-5" />
                                 Add Video Card
                             </button>
+                        </div>
+                    </section>
+
+                    <section className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <CodeBracketIcon className="w-6 h-6 text-orange-500" />
+                            <h2 className="text-xl font-black uppercase tracking-tight">Custom HTML Section</h2>
+                        </div>
+                        
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-[0.2em]">Raw HTML Content</label>
+                            <textarea 
+                                rows="10"
+                                value={config.custom_html || ""}
+                                onChange={(e) => handleInputChange('custom_html', e.target.value)}
+                                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-orange-500 rounded-2xl outline-none transition font-mono text-[11px] text-slate-600 dark:text-slate-400"
+                                placeholder="<div>Your custom HTML here...</div>"
+                            />
+                            <p className="text-[10px] text-slate-400 mt-2 font-medium italic">
+                                Use this section to add custom tables, announcements, or specialized tracking scripts.
+                            </p>
                         </div>
                     </section>
 

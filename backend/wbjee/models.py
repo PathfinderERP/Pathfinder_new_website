@@ -25,6 +25,9 @@ class WBJEEHub(Document):
     # Each dict: { "label": str, "url": str, "description": str }
     videos = fields.ListField(fields.DictField(), default=[])
     
+    # Custom HTML Section (Injection)
+    custom_html = fields.StringField()
+    
     # Custom Meta Tags (SEO/Social)
     # Each dict: { "name": str, "content": str, "property": bool }
     custom_meta_tags = fields.ListField(fields.DictField(), default=[])

@@ -22,7 +22,10 @@ class ApplicationListCreateView(APIView):
         # Verify reCAPTCHA
         captcha_token = request.data.get('captcha_token')
         if not captcha_token:
-            return Response({'error': 'reCAPTCHA token is missing.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'success': False,
+                'error': 'reCAPTCHA token is missing.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             verify_response = requests.post(
@@ -35,9 +38,15 @@ class ApplicationListCreateView(APIView):
             verify_result = verify_response.json()
             
             if not verify_result.get('success'):
-                return Response({'error': 'reCAPTCHA verification failed.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({
+                    'success': False,
+                    'error': 'reCAPTCHA verification failed.'
+                }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({'error': f'Error verifying reCAPTCHA: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({
+                'success': False,
+                'error': f'Error verifying reCAPTCHA: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Remove captcha_token from data before serializing
         data = request.data.copy()
@@ -48,11 +57,16 @@ class ApplicationListCreateView(APIView):
         if serializer.is_valid():
             application = serializer.save()
             return Response({
+                'success': True,
                 'message': 'Application submitted successfully!',
                 'data': ApplicationSerializer(application).data
             }, status=status.HTTP_201_CREATED)
         
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'success': False,
+            'errors': serializer.errors,
+            'error': 'Validation failed. Please check your input.'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 class ApplicationDetailView(APIView):
     permission_classes = [IsAuthenticated]

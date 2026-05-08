@@ -2,6 +2,7 @@ from django.urls import path
 from .views import ApplicationListCreateView, ApplicationDetailView
 
 urlpatterns = [
+    path('contact/submit/', ApplicationListCreateView.as_view(), name='contact-submit'),
     path('applications/', ApplicationListCreateView.as_view(), name='application-list-create'),
     path('applications/<str:pk>/', ApplicationDetailView.as_view(), name='application-detail'),
 ]

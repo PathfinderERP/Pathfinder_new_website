@@ -230,9 +230,9 @@ const WBJEEAnswerKey = () => {
                                 <SparklesIcon className="w-3.5 h-3.5" />
                                 Analysis Hub 2026
                             </div>
-                            <h1 className="oswald text-3xl md:text-6xl lg:text-7xl uppercase text-white mb-6 leading-tight">
-                                {dynamicConfig?.title?.split(':')[0] || "WBJEE 2026"} <br />
-                                <span className="text-orange-600">{dynamicConfig?.title?.split(':')[1] || "Answer Key"}</span>
+                            <h1 className="oswald text-4xl md:text-6xl lg:text-7xl uppercase text-white mb-6 leading-tight">
+                                {dynamicConfig?.title?.split(':')[0] || "WBJEE 2026"}{" "}
+                                <span className="text-orange-600">{dynamicConfig?.title?.split(':')[1]?.replace('& Analysis', '') || "Answer Key"}</span>
                             </h1>
                             <p className="text-sm md:text-lg text-slate-300 max-w-xl font-medium leading-relaxed">
                                 {dynamicConfig?.description || "Get official answer keys, detailed weightage analysis, and video solutions prepared by Pathfinder's expert faculty."}
@@ -257,8 +257,8 @@ const WBJEEAnswerKey = () => {
                     className="mb-16 bg-black text-[#FFF200] p-6 md:p-10 rounded-2xl border-2 border-[#FF8C00] flex flex-col md:flex-row items-center justify-between gap-8 neo-shadow-large"
                 >
                     <div className="md:max-w-xl text-center md:text-left">
-                        <span className="font-bold text-white text-xs uppercase tracking-[0.2em] block mb-2">Pathfinder Edge</span>
-                        <p className="text-xl md:text-2xl font-bold leading-tight italic oswald uppercase">
+                        <span className="font-bold text-white text-[10px] uppercase tracking-[0.2em] block mb-2">Pathfinder Edge</span>
+                        <p className="text-base md:text-lg font-bold leading-tight italic oswald uppercase">
                             Post-Exam Analysis Series – <span className="text-white">Understand the "why" behind every answer with our expert-led solutions.</span>
                         </p>
                     </div>
@@ -266,6 +266,61 @@ const WBJEEAnswerKey = () => {
                         <img src="/WHY PATH IMAGES/Tick mark.webp" alt="Tick" className="w-16 h-16 md:w-20 md:h-20" />
                     </div>
                 </motion.div>
+
+                {/* Download Resources */}
+                <motion.section 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="mb-24"
+                >
+                    <div className="flex items-center gap-3 mb-10">
+                        <DocumentTextIcon className="w-8 h-8 text-orange-600" />
+                        <h2 className="oswald text-2xl md:text-4xl uppercase brand-border-left pl-6">
+                            📥 Download <span className="text-slate-400">Solutions</span>
+                        </h2>
+                    </div>
+                    
+                    <div className="flex flex-col gap-6">
+                        {resources.map((res, i) => (
+                            <motion.div 
+                                key={i}
+                                whileHover={{ x: 10 }}
+                                className={`${res.bg_color} border-2 border-black p-4 md:p-8 rounded-xl neo-shadow flex flex-col lg:flex-row items-center gap-4 lg:gap-10 group transition-all`}
+                            >
+                                <div className="text-3xl md:text-5xl filter grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110">
+                                    {res.icon}
+                                </div>
+                                <div className="flex-grow text-center lg:text-left">
+                                    <h3 className="oswald text-xl md:text-3xl uppercase tracking-tighter text-slate-900 mb-1">{res.subject}</h3>
+                                    <p className="text-slate-400 font-bold text-[8px] md:text-[10px] uppercase tracking-[0.3em]">Expert Faculty Analysis</p>
+                                </div>
+                                <div className="flex flex-col md:flex-row justify-center lg:justify-end gap-3 md:gap-3 w-full lg:w-auto">
+                                    <button 
+                                        onClick={() => handleDownload(res.weightage_url)}
+                                        className="w-full md:w-auto px-4 py-3 md:px-5 md:py-3 bg-[#FFF200] border-2 border-black rounded-lg oswald font-bold uppercase text-xs md:text-base neo-shadow hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+                                    >
+                                        {!isEnrolled && <LockClosedIcon className="w-4 h-4" />}
+                                        📄 Weightage
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDownload(res.pdf_url)}
+                                        className="w-full md:w-auto px-4 py-3 md:px-5 md:py-3 bg-white border-2 border-black rounded-lg oswald font-bold uppercase text-xs md:text-base neo-shadow hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+                                    >
+                                        {!isEnrolled && <LockClosedIcon className="w-4 h-4" />}
+                                        📄 Answer PDF
+                                    </button>
+                                    <a 
+                                        href={res.video_url} target="_blank" rel="noopener noreferrer"
+                                        className="w-full md:w-auto px-4 py-3 md:px-5 md:py-3 bg-black border-2 border-[#FF8C00] text-white rounded-lg oswald font-bold uppercase text-xs md:text-base neo-shadow hover:bg-orange-500 hover:text-black transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+                                    >
+                                        🎥 Video Solution
+                                    </a>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.section>
 
                 {/* Marks Division */}
                 <motion.section 
@@ -276,7 +331,7 @@ const WBJEEAnswerKey = () => {
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <TableCellsIcon className="w-8 h-8 text-orange-600" />
-                        <h2 className="oswald text-3xl md:text-4xl uppercase brand-border-left pl-6">
+                        <h2 className="oswald text-2xl md:text-4xl uppercase brand-border-left pl-6">
                             Marks Division <span className="text-slate-400">Analysis</span>
                         </h2>
                     </div>
@@ -304,61 +359,6 @@ const WBJEEAnswerKey = () => {
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </motion.section>
-
-                {/* Download Resources */}
-                <motion.section 
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="mb-24"
-                >
-                    <div className="flex items-center gap-3 mb-10">
-                        <DocumentTextIcon className="w-8 h-8 text-orange-600" />
-                        <h2 className="oswald text-3xl md:text-4xl uppercase brand-border-left pl-6">
-                            📥 Download <span className="text-slate-400">Solutions</span>
-                        </h2>
-                    </div>
-                    
-                    <div className="flex flex-col gap-6">
-                        {resources.map((res, i) => (
-                            <motion.div 
-                                key={i}
-                                whileHover={{ x: 10 }}
-                                className={`${res.bg_color} border-2 border-black p-6 md:p-8 rounded-xl neo-shadow flex flex-col lg:flex-row items-center gap-6 lg:gap-10 group transition-all`}
-                            >
-                                <div className="text-5xl filter grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110">
-                                    {res.icon}
-                                </div>
-                                <div className="flex-grow text-center lg:text-left">
-                                    <h3 className="oswald text-2xl md:text-3xl uppercase tracking-tighter text-slate-900 mb-1">{res.subject}</h3>
-                                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.3em]">Expert Faculty Analysis</p>
-                                </div>
-                                <div className="flex flex-row justify-center lg:justify-end gap-3 w-full lg:w-auto overflow-x-auto lg:overflow-visible no-scrollbar">
-                                    <button 
-                                        onClick={() => handleDownload(res.weightage_url)}
-                                        className="px-5 py-3 bg-[#FFF200] border-2 border-black rounded-lg oswald font-bold uppercase text-base neo-shadow hover:bg-orange-500 hover:text-white transition-all flex items-center gap-2"
-                                    >
-                                        {!isEnrolled && <LockClosedIcon className="w-4 h-4" />}
-                                        📄 Weightage
-                                    </button>
-                                    <button 
-                                        onClick={() => handleDownload(res.pdf_url)}
-                                        className="px-5 py-3 bg-white border-2 border-black rounded-lg oswald font-bold uppercase text-base neo-shadow hover:bg-orange-500 hover:text-white transition-all flex items-center gap-2"
-                                    >
-                                        {!isEnrolled && <LockClosedIcon className="w-4 h-4" />}
-                                        📄 Answer PDF
-                                    </button>
-                                    <a 
-                                        href={res.video_url} target="_blank" rel="noopener noreferrer"
-                                        className="px-5 py-3 bg-black border-2 border-[#FF8C00] text-white rounded-lg oswald font-bold uppercase text-base neo-shadow hover:bg-orange-500 hover:text-black transition-all flex items-center gap-2"
-                                    >
-                                        🎥 Video Solution
-                                    </a>
-                                </div>
-                            </motion.div>
-                        ))}
                     </div>
                 </motion.section>
 
@@ -496,6 +496,20 @@ const WBJEEAnswerKey = () => {
                         ))}
                     </div>
                 </motion.section>
+
+                {/* Custom HTML Section (Dynamic) */}
+                {dynamicConfig?.custom_html && (
+                    <motion.section 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="mb-24"
+                    >
+                        <div className="bg-white rounded-2xl border-2 border-black/5 shadow-sm overflow-hidden p-1">
+                            <div dangerouslySetInnerHTML={{ __html: dynamicConfig.custom_html }} />
+                        </div>
+                    </motion.section>
+                )}
 
                 {/* Final Share Section */}
                 <motion.section 

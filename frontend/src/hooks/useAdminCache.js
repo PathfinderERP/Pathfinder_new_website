@@ -147,15 +147,21 @@ export const useAdminCache = (key, fetchFunction, options = {}) => {
     }, [fetchData]);
 
     // External update helper (e.g., after delete/edit)
-    const updateCache = (newData) => {
-        setData(newData);
-        if (cacheKey) {
-            safeSetLocalStorage(cacheKey, JSON.stringify({
-                timestamp: new Date().getTime(),
-                data: newData
-            }));
-        }
-    };
+    const updateCache = useCallback((newDataOrUpdater) => {
+        setData(prev => {
+            const resolvedData = typeof newDataOrUpdater === 'function' ? newDataOrUpdater(prev) : newDataOrUpdater;
+            
+            // Save resolved data to cache
+            if (cacheKey) {
+                safeSetLocalStorage(cacheKey, JSON.stringify({
+                    timestamp: new Date().getTime(),
+                    data: resolvedData
+                }));
+            }
+            
+            return resolvedData;
+        });
+    }, [cacheKey]);
 
     // Clear cache helper
     const clearCache = () => {

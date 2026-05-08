@@ -247,7 +247,7 @@ const ApplicantsList = () => {
     const updateStatus = async (id, newStatus) => {
         try {
             const token = localStorage.getItem('admin_token');
-            await axios.patch(
+            const response = await axios.patch(
                 `${import.meta.env.VITE_API_BASE_URL}/api/business/admin/applications/applications/${id}/`,
                 { status: newStatus },
                 {
@@ -257,11 +257,11 @@ const ApplicantsList = () => {
                 }
             );
 
-            setAllApplicants(prev =>
-                prev.map(app => app.id === id ? { ...app, status: newStatus } : app)
+            // Use functional update to ensure we have latest state
+            setApplicantsCache(prev =>
+                prev.map(app => app.id === id ? { ...app, ...response.data } : app)
             );
-            clearAdminCache("admin_applicants");
-            fetchAllApplicants();
+            // No need to clear cache and refetch everything, we just updated the specific item
         } catch (err) {
             console.error('Error updating status:', err);
             alert('Failed to update status');
@@ -284,7 +284,7 @@ const ApplicantsList = () => {
                 }
             );
 
-            setAllApplicants(prev => prev.filter(app => app.id !== id));
+            setApplicantsCache(prev => prev.filter(app => app.id !== id));
             clearAdminCache("admin_applicants");
             fetchAllApplicants();
         } catch (err) {
@@ -550,6 +550,8 @@ const ApplicantsList = () => {
                             <option value="foundation">Foundation</option>
                             <option value="all india">All India</option>
                             <option value="boards">Boards</option>
+                            <option value="enrollment">Blog Enrollment</option>
+                            <option value="material">Material Download</option>
                         </select>
                     </div>
 
@@ -736,7 +738,7 @@ const ApplicantsList = () => {
                                             {getStatusBadge(app.status)}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center justify-end gap-2 transition-opacity">
                                                 <button
                                                     onClick={() => viewDetails(app)}
                                                     className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-xl transition-all"
