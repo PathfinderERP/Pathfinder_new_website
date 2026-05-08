@@ -80,6 +80,8 @@ import Franchise from "../pages/Franchise";
 import { AllIndiaLandingPage } from "../pages/add_landingpage/pages/Jeelandingpage";
 import { Neetlandingpage } from "../pages/add_landingpage/pages/Neetlandingpage";
 import Pais from "../pages/Pais";
+import TermsAndConditions from "../pages/TermsAndConditions";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
 
 const AppRoutes = () => {
   return (
@@ -676,6 +678,24 @@ const AppRoutes = () => {
       <Route
         path="/pais"
         element={<Pais />}
+      />
+
+      {/* Legal Pages */}
+      <Route
+        path="/terms-and-conditions"
+        element={
+          <MainLayout>
+            <TermsAndConditions />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/privacy-policy"
+        element={
+          <MainLayout>
+            <PrivacyPolicy />
+          </MainLayout>
+        }
       />
 
       {/* 404 Page with Main Layout but NO Header and Footer */}

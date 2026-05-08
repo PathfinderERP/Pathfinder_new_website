@@ -12,6 +12,7 @@ import {
     ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import env from '../../config/env';
+import ReCAPTCHA from "react-google-recaptcha";
 
 const InputWrapper = ({ label, icon: Icon, children, required }) => (
     <div className="space-y-2">
@@ -38,6 +39,7 @@ const BlogEnrollmentForm = ({ onSuccess, mode = 'enroll' }) => {
     });
     const [status, setStatus] = useState('idle'); // idle, submitting, success, error
     const [error, setError] = useState("");
+    const [captchaToken, setCaptchaToken] = useState(null);
 
     const isDownloadMode = mode === 'download';
 
@@ -55,11 +57,20 @@ const BlogEnrollmentForm = ({ onSuccess, mode = 'enroll' }) => {
         setFormData({ ...formData, [name]: value });
     };
 
+    const onCaptchaChange = (token) => {
+        setCaptchaToken(token);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (formData.phone.length !== 10) {
             setError("Please enter a valid 10-digit mobile number.");
+            return;
+        }
+
+        if (!captchaToken) {
+            setError("Please complete the reCAPTCHA.");
             return;
         }
 
@@ -89,7 +100,8 @@ const BlogEnrollmentForm = ({ onSuccess, mode = 'enroll' }) => {
                 },
                 source: isDownloadMode ? "blog_download_form" : "blog_enroll_form",
                 application_date: new Date().toISOString(),
-                status: "pending"
+                status: "pending",
+                captcha_token: captchaToken
             };
 
             const response = await fetch(`${API_BASE_URL}${APPLICATIONS_ENDPOINT}`, {
@@ -106,6 +118,10 @@ const BlogEnrollmentForm = ({ onSuccess, mode = 'enroll' }) => {
 
             setStatus('success');
             setFormData({ fullName: "", phone: "", email: "", class: "", board: "", area: "", schoolName: "" });
+            setCaptchaToken(null);
+            if (window.grecaptcha) {
+                window.grecaptcha.reset();
+            }
             if (onSuccess) onSuccess();
         } catch (err) {
             console.error("Submission error:", err);
@@ -279,6 +295,14 @@ const BlogEnrollmentForm = ({ onSuccess, mode = 'enroll' }) => {
                             </InputWrapper>
                         </div>
                     )}
+
+                    {/* reCAPTCHA */}
+                    <div className="flex justify-center md:justify-start py-2">
+                        <ReCAPTCHA
+                            sitekey={env.RECAPTCHA_SITE_KEY}
+                            onChange={onCaptchaChange}
+                        />
+                    </div>
 
                     <div className="pt-4">
                         <button

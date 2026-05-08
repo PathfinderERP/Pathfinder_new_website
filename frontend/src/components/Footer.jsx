@@ -54,6 +54,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import {
   FaFacebookF,
   FaLinkedinIn,
@@ -692,14 +693,17 @@ const Footer = () => {
                 initial="hidden"
                 animate={isInView ? "visible" : "hidden"}
               >
-                {["Privacy Policy", "Cookie Policy", "Disclaimer"].map((item) => (
-                  <motion.li key={item} variants={itemVariants}>
-                    <a
-                      href={`/${item.toLowerCase().replace(" ", "-")}`}
+                {[
+                  { label: "Privacy Policy", to: "/privacy-policy" },
+                  { label: "Terms and Conditions", to: "/terms-and-conditions" },
+                ].map((item) => (
+                  <motion.li key={item.to} variants={itemVariants}>
+                    <Link
+                      to={item.to}
                       className="text-gray-400 hover:text-orange-500 transition-colors duration-300"
                     >
-                      {item}
-                    </a>
+                      {item.label}
+                    </Link>
                   </motion.li>
                 ))}
               </motion.ul>

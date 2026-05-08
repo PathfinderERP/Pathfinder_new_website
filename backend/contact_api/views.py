@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Application
 from .serializers import ApplicationSerializer
+from django.conf import settings
+import requests
 
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
@@ -17,7 +19,32 @@ class ApplicationListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = ApplicationSerializer(data=request.data)
+        # Verify reCAPTCHA
+        captcha_token = request.data.get('captcha_token')
+        if not captcha_token:
+            return Response({'error': 'reCAPTCHA token is missing.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            verify_response = requests.post(
+                'https://www.google.com/recaptcha/api/siteverify',
+                data={
+                    'secret': settings.RECAPTCHA_SECRET_KEY,
+                    'response': captcha_token
+                }
+            )
+            verify_result = verify_response.json()
+            
+            if not verify_result.get('success'):
+                return Response({'error': 'reCAPTCHA verification failed.'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': f'Error verifying reCAPTCHA: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Remove captcha_token from data before serializing
+        data = request.data.copy()
+        if 'captcha_token' in data:
+            del data['captcha_token']
+
+        serializer = ApplicationSerializer(data=data)
         if serializer.is_valid():
             application = serializer.save()
             return Response({

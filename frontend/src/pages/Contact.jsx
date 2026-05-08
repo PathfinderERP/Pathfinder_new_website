@@ -10,6 +10,7 @@ import ModernAbstractDesign, {
 import BannerSlider, { ExcellenceCarousal } from "../components/Carousal";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope } from "react-icons/fa";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +26,7 @@ const Contact = () => {
   const [submitMessage, setSubmitMessage] = useState("");
   const [errors, setErrors] = useState({});
   const [showMessage, setShowMessage] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   // Get API base URL from environment variables
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -59,8 +61,19 @@ const Contact = () => {
     }
   };
 
+  const onCaptchaChange = (token) => {
+    setCaptchaToken(token);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!captchaToken) {
+      setSubmitMessage("Please complete the reCAPTCHA.");
+      setShowMessage(true);
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitMessage("");
     setErrors({});
@@ -74,7 +87,10 @@ const Contact = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          captcha_token: captchaToken
+        }),
       });
 
       const result = await response.json();
@@ -92,6 +108,10 @@ const Contact = () => {
           center_name: "",
           message: "",
         });
+        setCaptchaToken(null);
+        if (window.grecaptcha) {
+          window.grecaptcha.reset();
+        }
       } else {
         // Handle field-specific errors
         if (result.field_errors) {
@@ -1091,6 +1111,14 @@ const Contact = () => {
                               </motion.div>
                             </div>
                           </div>
+                          {/* reCAPTCHA */}
+                          <div className="flex justify-center md:justify-start py-2">
+                            <ReCAPTCHA
+                              sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
+                              onChange={onCaptchaChange}
+                            />
+                          </div>
+
                           {/* Submit Button */}
                           <motion.div
                             className="row con_inf_rb flex flex-wrap items-center mt-8 mb-10"

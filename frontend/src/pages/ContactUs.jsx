@@ -4,10 +4,14 @@ import {
     PhoneIcon,
     EnvelopeIcon,
     MapPinIcon,
-    ClockIcon
+    ClockIcon,
+    ChevronDownIcon,
+    CheckCircleIcon
 } from "@heroicons/react/24/outline";
+import { AnimatePresence } from "framer-motion";
 import { centresAPI } from "../services/api";
 import { centerdata } from "../data/data";
+import ReCAPTCHA from "react-google-recaptcha";
 
 // Helper function to normalize strings for comparison
 const normalizeStr = (str) => str ? str.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
@@ -64,6 +68,25 @@ const ContactUs = () => {
     const [locationDetected, setLocationDetected] = useState(false);
     const [userLoc, setUserLoc] = useState(null);
 
+    // Form State
+    const [formData, setFormData] = useState({
+        first_name: "",
+        last_name: "",
+        contact_number: "",
+        email: "",
+        course: "",
+        center_name: "",
+        message: "",
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState("");
+    const [errors, setErrors] = useState({});
+    const [showMessage, setShowMessage] = useState(false);
+    const [captchaToken, setCaptchaToken] = useState(null);
+
+    // Get API base URL from environment variables
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
     useEffect(() => {
         document.title = "Contact Us | Pathfinder Institute Official Support & Centres";
         const metaDesc = document.querySelector('meta[name="description"]');
@@ -113,6 +136,168 @@ const ContactUs = () => {
 
         fetchCentres();
     }, []);
+
+    // Form Handlers
+    const onCaptchaChange = (token) => {
+        setCaptchaToken(token);
+    };
+
+    const validate = () => {
+        let newErrors = {};
+        if (!formData.first_name.trim()) newErrors.first_name = "First name is required";
+        if (!formData.last_name.trim()) newErrors.last_name = "Last name is required";
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.email.match(emailRegex)) {
+            newErrors.email = "Please enter a valid email address";
+        }
+        
+        // Phone validation (exactly 10 digits)
+        const phoneRegex = /^\d{10}$/;
+        if (!formData.contact_number.match(phoneRegex)) {
+            newErrors.contact_number = "Please enter a valid 10-digit number";
+        }
+        
+        if (!formData.course) newErrors.course = "Please select a course";
+        if (!formData.center_name) newErrors.center_name = "Please select a centre";
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleChange = (e) => {
+        const { id, value } = e.target;
+
+        // Map frontend field names to backend field names
+        const fieldMapping = {
+            fname: "first_name",
+            lname: "last_name",
+            contactno: "contact_number",
+            emailid: "email",
+            course: "course",
+            centername: "center_name",
+            floatingTextarea2: "message",
+        };
+
+        const backendFieldName = fieldMapping[id] || id;
+
+        // Special handling for contact number (only digits)
+        if (id === 'contactno' && value !== '' && !/^\d*$/.test(value)) {
+            return;
+        }
+
+        // Limit contact number to 10 digits
+        if (id === 'contactno' && value.length > 10) {
+            return;
+        }
+
+        setFormData((prev) => ({
+            ...prev,
+            [backendFieldName]: value,
+        }));
+
+        // Clear error when user starts typing
+        if (errors[backendFieldName]) {
+            setErrors((prev) => ({
+                ...prev,
+                [backendFieldName]: "",
+            }));
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!validate()) {
+            return;
+        }
+
+        if (!captchaToken) {
+            setSubmitMessage("Please complete the reCAPTCHA.");
+            setShowMessage(true);
+            return;
+        }
+
+        setIsSubmitting(true);
+        setSubmitMessage("");
+        setErrors({});
+        setShowMessage(false);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/contact/submit/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    ...formData,
+                    captcha_token: captchaToken
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setSubmitMessage(result.message);
+                setShowMessage(true);
+                // Reset form
+                setFormData({
+                    first_name: "",
+                    last_name: "",
+                    contact_number: "",
+                    email: "",
+                    course: "",
+                    center_name: "",
+                    message: "",
+                });
+                setCaptchaToken(null);
+                if (window.grecaptcha) {
+                    window.grecaptcha.reset();
+                }
+            } else {
+                // Handle field-specific errors
+                if (result.field_errors) {
+                    setErrors(result.field_errors);
+                    setSubmitMessage("Please correct the errors below.");
+                    setShowMessage(true);
+                } else {
+                    setSubmitMessage(
+                        result.error || "Something went wrong. Please try again."
+                    );
+                    setShowMessage(true);
+                }
+            }
+        } catch (error) {
+            console.error("Submission error:", error);
+            setSubmitMessage(
+                `Network error: ${error.message}. Please check your connection and try again.`
+            );
+            setShowMessage(true);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    useEffect(() => {
+        let timer;
+        if (showMessage && submitMessage) {
+            timer = setTimeout(() => {
+                setShowMessage(false);
+                setTimeout(() => setSubmitMessage(""), 300);
+            }, 5000);
+        }
+        return () => {
+            if (timer) {
+                clearTimeout(timer);
+            }
+        };
+    }, [showMessage, submitMessage]);
+
+    const handleCloseMessage = () => {
+        setShowMessage(false);
+        setTimeout(() => setSubmitMessage(""), 300);
+    };
 
     const handleFindNearest = () => {
         if (!navigator.geolocation) {
@@ -380,47 +565,277 @@ const ContactUs = () => {
                 </section>
             )}
 
-            {/* FAQ Section */}
-            <section className="py-12 md:py-24 bg-white">
-                <div className="max-w-4xl mx-auto px-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
-                    >
-                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-12">
-                            Frequently Asked <span className="text-orange-600">Questions</span>
-                        </h2>
+            {/* Form & FAQ Combined Section */}
+            <section className="py-12 md:py-20 bg-slate-50 border-t border-slate-100">
+                <div className="max-w-7xl mx-auto px-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                        {/* FAQ Side */}
+                        <div className="w-full">
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.6 }}
+                            >
+                                <div className="mb-8">
+                                    <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">
+                                        Frequently Asked <span className="text-orange-600">Questions</span>
+                                    </h2>
+                                    <p className="text-slate-500 font-medium">Quick answers to common queries about Pathfinder.</p>
+                                </div>
 
-                        <div className="space-y-4">
-                            {[
-                                {
-                                    question: "How do I contact a Pathfinder counsellor?",
-                                    answer: "You can contact our counsellors by calling our 24x7 helpline at  9147178886 or by emailing us at support@pathfinder.edu.in. You can also visit any of our centres during working hours (Mon-Sat: 9:00 AM - 8:00 PM) for in-person counselling."
-                                },
-                                {
-                                    question: "What is the official website of Pathfinder?",
-                                    answer: "The official website of Pathfinder is www.pathfinder.edu.in. Please be cautious of fake websites and always verify the URL before sharing any personal information."
-                                },
-                                {
-                                    question: "How can I contact the Pathfinder customer care?",
-                                    answer: "You can reach our customer care team through multiple channels: Call us at  9147178886 (24x7), email us at support@pathfinder.edu.in, or visit the nearest Pathfinder centre. Our team aims to resolve all queries within 7 days."
-                                },
-                                {
-                                    question: "How will I get my doubts answered?",
-                                    answer: "We provide 24x7 doubt support through our online platform. You can also attend doubt-clearing sessions at our centres, connect with faculty during class hours, or use our dedicated doubt resolution portal available to all enrolled students."
-                                },
-                                {
-                                    question: "What Competitive mentorship does Pathfinder Hazra provide?",
-                                    answer: "Pathfinder Hazra provides comprehensive mentorship for JEE, NEET, and other competitive exams. Our mentorship includes personalized study plans, regular performance tracking, one-on-one counselling sessions, and guidance from experienced faculty who are experts in their respective fields."
-                                }
-                            ].map((faq, index) => (
-                                <FAQItem key={index} question={faq.question} answer={faq.answer} />
-                            ))}
+                                <div className="space-y-3">
+                                    {[
+                                        {
+                                            question: "How do I contact a Pathfinder counsellor?",
+                                            answer: "You can contact our counsellors by calling our 24x7 helpline at  9147178886 or by emailing us at support@pathfinder.edu.in. You can also visit any of our centres."
+                                        },
+                                        {
+                                            question: "What is the official website of Pathfinder?",
+                                            answer: "The official website of Pathfinder is www.pathfinder.edu.in. Please be cautious of fake websites."
+                                        },
+                                        {
+                                            question: "How can I contact the Pathfinder customer care?",
+                                            answer: "Reach us at 9147178886 (24x7), email support@pathfinder.edu.in, or visit the nearest centre."
+                                        },
+                                        {
+                                            question: "How will I get my doubts answered?",
+                                            answer: "We provide 24x7 doubt support online, doubt-clearing sessions at centres, and class-hour faculty access."
+                                        },
+                                        {
+                                            question: "What mentorship does Pathfinder Hazra provide?",
+                                            answer: "Hazra provides JEE, NEET, and competitive mentorship with personalized study plans and expert tracking."
+                                        }
+                                    ].map((faq, index) => (
+                                        <FAQItem key={index} question={faq.question} answer={faq.answer} />
+                                    ))}
+                                </div>
+                            </motion.div>
                         </div>
-                    </motion.div>
+
+                        {/* Contact Form Side */}
+                        <div className="w-full">
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.6 }}
+                            >
+                                <div className="bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-100">
+                                    <div className="bg-gradient-to-r from-orange-600 to-red-600 p-5 md:p-6 text-center relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse"></div>
+                                        <div className="relative z-10">
+                                            <h2 className="text-xl md:text-2xl font-black text-white mb-1 tracking-tight">
+                                                Get in <span className="text-orange-200">Touch</span>
+                                            </h2>
+                                            <p className="text-white/80 text-sm font-medium">Have a question? We're here to help.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-5 md:p-6">
+                                        <form onSubmit={handleSubmit} className="space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                {/* First Name */}
+                                                <div className="space-y-2">
+                                                    <label htmlFor="fname" className="text-sm font-bold text-slate-700 ml-1">
+                                                        First Name <span className="text-orange-500">*</span>
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        id="fname"
+                                                        value={formData.first_name}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className={`w-full px-3 py-2.5 rounded-lg border ${errors.first_name ? 'border-red-500' : 'border-slate-200'} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
+                                                        placeholder="Enter your first name"
+                                                    />
+                                                    {errors.first_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.first_name}</p>}
+                                                </div>
+
+                                                {/* Last Name */}
+                                                <div className="space-y-2">
+                                                    <label htmlFor="lname" className="text-sm font-bold text-slate-700 ml-1">
+                                                        Last Name <span className="text-orange-500">*</span>
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        id="lname"
+                                                        value={formData.last_name}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className={`w-full px-3 py-2.5 rounded-lg border ${errors.last_name ? 'border-red-500' : 'border-slate-200'} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
+                                                        placeholder="Enter your last name"
+                                                    />
+                                                    {errors.last_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.last_name}</p>}
+                                                </div>
+
+                                                {/* Phone */}
+                                                <div className="space-y-2">
+                                                    <label htmlFor="contactno" className="text-sm font-bold text-slate-700 ml-1">
+                                                        Contact Number <span className="text-orange-500">*</span>
+                                                    </label>
+                                                    <input
+                                                        type="tel"
+                                                        id="contactno"
+                                                        value={formData.contact_number}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className={`w-full px-3 py-2.5 rounded-lg border ${errors.contact_number ? 'border-red-500' : 'border-slate-200'} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
+                                                        placeholder="Enter 10-digit number"
+                                                    />
+                                                    {errors.contact_number && <p className="text-red-500 text-xs font-bold ml-1">{errors.contact_number}</p>}
+                                                </div>
+
+                                                {/* Email */}
+                                                <div className="space-y-2">
+                                                    <label htmlFor="emailid" className="text-sm font-bold text-slate-700 ml-1">
+                                                        Email Address <span className="text-orange-500">*</span>
+                                                    </label>
+                                                    <input
+                                                        type="email"
+                                                        id="emailid"
+                                                        value={formData.email}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className={`w-full px-3 py-2.5 rounded-lg border ${errors.email ? 'border-red-500' : 'border-slate-200'} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
+                                                        placeholder="your.email@example.com"
+                                                    />
+                                                    {errors.email && <p className="text-red-500 text-xs font-bold ml-1">{errors.email}</p>}
+                                                </div>
+
+                                                {/* Course */}
+                                                <div className="space-y-2">
+                                                    <label htmlFor="course" className="text-sm font-bold text-slate-700 ml-1">
+                                                        Select Course <span className="text-orange-500">*</span>
+                                                    </label>
+                                                    <div className="relative">
+                                                        <select
+                                                            id="course"
+                                                            value={formData.course}
+                                                            onChange={handleChange}
+                                                            required
+                                                            className={`w-full px-3 py-2.5 rounded-lg border ${errors.course ? 'border-red-500' : 'border-slate-200'} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium appearance-none text-sm`}
+                                                        >
+                                                            <option value="">Select a course</option>
+                                                            <option value="Engineering">Engineering</option>
+                                                            <option value="Foundation">Foundation</option>
+                                                            <option value="Medical">Medical</option>
+                                                            <option value="NCRP">NCRP</option>
+                                                        </select>
+                                                        <ChevronDownIcon className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                                                    </div>
+                                                    {errors.course && <p className="text-red-500 text-xs font-bold ml-1">{errors.course}</p>}
+                                                </div>
+
+                                                {/* Centre Name */}
+                                                <div className="space-y-2">
+                                                    <label htmlFor="centername" className="text-sm font-bold text-slate-700 ml-1">
+                                                        Centre Name <span className="text-orange-500">*</span>
+                                                    </label>
+                                                    <div className="relative">
+                                                        <select
+                                                            id="centername"
+                                                            value={formData.center_name}
+                                                            onChange={handleChange}
+                                                            required
+                                                            className={`w-full px-3 py-2.5 rounded-lg border ${errors.center_name ? 'border-red-500' : 'border-slate-200'} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium appearance-none text-sm`}
+                                                        >
+                                                            <option value="">Select a centre</option>
+                                                            {centres.map((centre) => (
+                                                                <option key={centre.id || centre._id} value={centre.centre}>
+                                                                    {centre.centre}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <ChevronDownIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                                    </div>
+                                                    {errors.center_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.center_name}</p>}
+                                                </div>
+                                            </div>
+
+                                            {/* Message */}
+                                            <div className="space-y-2">
+                                                <label htmlFor="floatingTextarea2" className="text-sm font-bold text-slate-700 ml-1">
+                                                    Your Message
+                                                </label>
+                                                <textarea
+                                                    id="floatingTextarea2"
+                                                    rows="2"
+                                                    value={formData.message}
+                                                    onChange={handleChange}
+                                                    className={`w-full px-3 py-2.5 rounded-lg border ${errors.message ? 'border-red-500' : 'border-slate-200'} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium resize-none text-sm`}
+                                                    placeholder="Tell us how we can help..."
+                                                ></textarea>
+                                                {errors.message && <p className="text-red-500 text-xs font-bold ml-1">{errors.message}</p>}
+                                            </div>
+
+                                            {/* reCAPTCHA */}
+                                            <div className="flex justify-center md:justify-start py-2">
+                                                <ReCAPTCHA
+                                                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LdGdd8sAAAAAGnXDx7IDnHOiOWDtF9yQ4pVvwYD"}
+                                                    onChange={onCaptchaChange}
+                                                />
+                                            </div>
+
+                                            <motion.button
+                                                type="submit"
+                                                disabled={isSubmitting}
+                                                whileHover={{ scale: 1.01 }}
+                                                whileTap={{ scale: 0.99 }}
+                                                className="w-full py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-black rounded-lg shadow-xl shadow-orange-600/20 hover:shadow-orange-600/40 transition-all duration-300 disabled:opacity-50 text-base tracking-tight"
+                                            >
+                                                {isSubmitting ? (
+                                                    <div className="flex items-center justify-center gap-3">
+                                                        <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                        <span>Sending...</span>
+                                                    </div>
+                                                ) : (
+                                                    "Send Message"
+                                                )}
+                                            </motion.button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
                 </div>
+
+                <AnimatePresence>
+                    {showMessage && submitMessage && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-50 px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border-l-4 ${submitMessage.includes("success") || submitMessage.includes("Thank")
+                                ? "bg-white border-green-500 text-slate-900"
+                                : "bg-white border-red-500 text-slate-900"
+                                }`}
+                        >
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${submitMessage.includes("success") || submitMessage.includes("Thank")
+                                ? "bg-green-100 text-green-600"
+                                : "bg-red-100 text-red-600"
+                                }`}>
+                                {submitMessage.includes("success") || submitMessage.includes("Thank") ? (
+                                    <MapPinIcon className="w-6 h-6" />
+                                ) : (
+                                    <div className="font-bold">!</div>
+                                )}
+                            </div>
+                            <div>
+                                <p className="font-black text-slate-900 leading-tight">
+                                    {submitMessage.includes("success") || submitMessage.includes("Thank") ? "Message Sent!" : "Error"}
+                                </p>
+                                <p className="text-sm font-medium text-slate-500">{submitMessage}</p>
+                            </div>
+                            <button onClick={handleCloseMessage} className="ml-4 text-slate-400 hover:text-slate-600">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </section>
         </div>
     );

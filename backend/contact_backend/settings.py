@@ -27,6 +27,7 @@ if os.path.exists(env_path):
 
 # SECRET_KEY with proper fallback for production
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-development-key-change-in-production-123456')
+RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '')
 
 # Debug settings for production - ALWAYS False on Render
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'

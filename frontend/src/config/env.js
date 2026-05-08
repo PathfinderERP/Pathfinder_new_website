@@ -15,6 +15,7 @@ const env = {
     import.meta.env.VITE_CONTACT_EMAIL || "[EMAIL_ADDRESS]",
   SUPPORT_EMAIL:
     import.meta.env.VITE_SUPPORT_EMAIL || "[EMAIL_ADDRESS]",
+  RECAPTCHA_SITE_KEY: import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LdGdd8sAAAAAGnXDx7IDnHOiOWDtF9yQ4pVvwYD",
 
   // API Endpoints
   endpoints: {
