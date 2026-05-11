@@ -19,34 +19,32 @@ class ApplicationListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        # Verify reCAPTCHA
+        # Verify reCAPTCHA only if token is provided
         captcha_token = request.data.get('captcha_token')
-        if not captcha_token:
-            return Response({
-                'success': False,
-                'error': 'reCAPTCHA token is missing.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            verify_response = requests.post(
-                'https://www.google.com/recaptcha/api/siteverify',
-                data={
-                    'secret': settings.RECAPTCHA_SECRET_KEY,
-                    'response': captcha_token
-                }
-            )
-            verify_result = verify_response.json()
-            
-            if not verify_result.get('success'):
+        
+        if captcha_token:
+            try:
+                verify_response = requests.post(
+                    'https://www.google.com/recaptcha/api/siteverify',
+                    data={
+                        'secret': settings.RECAPTCHA_SECRET_KEY,
+                        'response': captcha_token
+                    }
+                )
+                verify_result = verify_response.json()
+                
+                if not verify_result.get('success'):
+                    return Response({
+                        'success': False,
+                        'error': 'reCAPTCHA verification failed.'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
                 return Response({
                     'success': False,
-                    'error': 'reCAPTCHA verification failed.'
-                }, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({
-                'success': False,
-                'error': f'Error verifying reCAPTCHA: {str(e)}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    'error': f'Error verifying reCAPTCHA: {str(e)}'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # If no token is provided, we proceed for now to support all forms
+
 
         # Remove captcha_token from data before serializing
         data = request.data.copy()
