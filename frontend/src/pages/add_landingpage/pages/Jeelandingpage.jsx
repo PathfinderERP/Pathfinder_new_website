@@ -482,7 +482,7 @@ export const AllIndiaLandingPage = () => {
                                 2 Year Classroom Programme for
                             </h2>
                             <h3 className="text-xl md:text-3xl font-extrabold text-gray-900 text-center mb-4 px-2">
-                                JEE Main & Advanced | <span className="text-orange-500">WBJEE</span>
+                                <span className="text-orange-500">JEE Main & Advanced</span> | WBJEE
                             </h3>
                         </div>
                     </div>
@@ -612,7 +612,7 @@ export const AllIndiaLandingPage = () => {
                         {/* Add-ons */}
                         < div className="text-center" >
                             <h3 className="text-3xl md:text-4xl font-extrabold mb-6">
-                                <span className="text-orange-500">Add ons</span> <span className="text-gray-900">(Till Official NEET Exam)</span>
+                                <span className="text-orange-500">Add ons</span> <span className="text-gray-900">(Till Official JEE Advanced Exam)</span>
                             </h3>
                             <div className="flex flex-wrap justify-center items-center gap-6 md:gap-12">
                                 <div className="flex items-center gap-3">

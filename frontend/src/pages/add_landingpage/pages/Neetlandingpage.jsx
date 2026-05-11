@@ -158,7 +158,7 @@ export const Neetlandingpage = () => {
     const banners = [
         // {
         //     src: "/images/Header Banner.webp",
-        //     alt: "JEE WBJEE Header Banner"
+        //     alt: "NEET Header Banner"
         // },
         {
             src: "/WHY PATH IMAGES/NEET BANNER.webp",
@@ -482,7 +482,7 @@ export const Neetlandingpage = () => {
                                 2 Year Classroom Programme for
                             </h2>
                             <h3 className="text-xl md:text-3xl font-extrabold text-gray-900 text-center mb-4 px-2">
-                                JEE Main & Advanced | <span className="text-orange-500">WBJEE</span>
+                                <span className="text-orange-500">NEET (UG)</span> | Medical Entrance Exams
                             </h3>
                         </div>
                     </div>
