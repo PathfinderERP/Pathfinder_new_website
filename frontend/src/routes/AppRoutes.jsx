@@ -68,6 +68,7 @@ import AnnouncementManagement from "../components/admin/AnnouncementManagement";
 import WBJEEAnalysisManagement from "../components/admin/WBJEEAnalysisManagement.jsx";
 import AdsLeadsList from "../components/admin/AdsLeadsList";
 import FranchiseInquiryList from "../components/admin/FranchiseInquiryList";
+import PopupManagement from "../components/admin/PopupManagement";
 import Centres from "../pages/Centres/Centres";
 import ContactUs from "../pages/ContactUs";
 import Blog from "../pages/Blog";
@@ -550,6 +551,17 @@ const AppRoutes = () => {
           <AdminProtectedRoute requiredPermission="manage_blogs">
             <AdminLayout>
               <WBJEEAnalysisManagement />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/business/admin/popups"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_blogs">
+            <AdminLayout>
+              <PopupManagement />
             </AdminLayout>
           </AdminProtectedRoute>
         }

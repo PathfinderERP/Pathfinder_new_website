@@ -109,22 +109,19 @@ export default function BlogPostDetail() {
                 <div className="flex flex-col md:flex-row gap-12">
                     <div className="flex-grow relative">
                         {post.show_enroll_form && !isEnrolled ? (
-                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                                <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[20px]" />
+                            <div className="fixed inset-0 z-[2000] flex items-start justify-center p-4 pt-48">
+                                <div className="absolute inset-0 bg-slate-900/60" />
                                 <motion.div 
-                                    initial={{ scale: 0.9, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    className="relative bg-white border border-slate-200 p-8 md:p-12 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.5)] max-w-2xl w-full text-center border-t-8 border-t-orange-500 z-10 overflow-y-auto max-h-[90vh] custom-scrollbar"
+                                    initial={{ scale: 0.9, opacity: 0, y: -20 }}
+                                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                                    className="relative bg-white border border-slate-200 p-2 md:p-4 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.5)] max-w-2xl w-full text-center border-t-8 border-t-orange-500 z-10 overflow-y-auto max-h-[90vh] custom-scrollbar"
                                 >
-                                    <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <TagIcon className="w-10 h-10 text-orange-600" />
-                                    </div>
-                                    <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4 tracking-tight">NEET 2026 Answer Key Download</h2>
-                                    <p className="text-slate-500 mb-10 text-lg font-medium leading-relaxed">
-                                        Get the most accurate, subject-wise Answer Key and Video Solutions by Pathfinder experts. Enter your details below to unlock the full PDF instantly.
-                                    </p>
                                     <div className="text-left">
-                                        <BlogEnrollmentForm onSuccess={() => setIsEnrolled(true)} />
+                                        <BlogEnrollmentForm 
+                                            title="Unlock Full Article"
+                                            subtitle="Enter your details to get instant access to our expert insights"
+                                            onSuccess={() => setIsEnrolled(true)} 
+                                        />
                                     </div>
                                 </motion.div>
                             </div>

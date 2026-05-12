@@ -53,4 +53,5 @@ urlpatterns = [
     path('api/announcements/', include('announcements.urls')), # Announcements API
     path('api/wbjee/', include('wbjee.urls')), # WBJEE Hub API
     path('api/business/admin/wbjee/', include('wbjee.urls')), # Admin WBJEE
+    path('api/site-config/', include('site_config.urls')),
 ]

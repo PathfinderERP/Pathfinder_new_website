@@ -141,6 +141,7 @@ INSTALLED_APPS = [
     'franchise_inquiry',
     'announcements',
     'wbjee',
+    'site_config',
 ]
 
 

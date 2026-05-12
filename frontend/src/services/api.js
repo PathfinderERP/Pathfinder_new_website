@@ -687,3 +687,12 @@ export const wbjeeAPI = {
     headers: { "Content-Type": "multipart/form-data" }
   })
 };
+
+// Site Config API
+export const siteConfigAPI = {
+  getPopupLatest: () => api.get("/api/site-config/public/popup-config/latest/"),
+  getPopupAll: () => api.get("/api/site-config/admin/popup-config/"),
+  updatePopup: (id, data) => api.patch(`/api/site-config/admin/popup-config/${id}/`, data),
+  createPopup: (data) => api.post("/api/site-config/admin/popup-config/", data),
+  deletePopup: (id) => api.delete(`/api/site-config/admin/popup-config/${id}/`),
+};

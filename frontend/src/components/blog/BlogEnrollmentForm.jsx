@@ -26,7 +26,7 @@ const InputWrapper = ({ label, icon: Icon, children, required }) => (
     </div>
 );
 
-const BlogEnrollmentForm = ({ onSuccess, mode = 'enroll' }) => {
+const BlogEnrollmentForm = ({ onSuccess, mode = 'enroll', title, subtitle, buttonText }) => {
     const [formData, setFormData] = useState({
         fullName: "",
         phone: "",
@@ -40,6 +40,9 @@ const BlogEnrollmentForm = ({ onSuccess, mode = 'enroll' }) => {
     const [error, setError] = useState("");
 
     const isDownloadMode = mode === 'download';
+
+    const displayTitle = title || (isDownloadMode ? "Download Now" : "Enroll Now");
+    const displaySubtitle = subtitle || "Fill in your details to proceed";
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -138,9 +141,9 @@ const BlogEnrollmentForm = ({ onSuccess, mode = 'enroll' }) => {
                 <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-24 -mt-24 blur-3xl"></div>
                 <div className="relative z-10">
                     <h3 className="text-3xl font-black mb-1 tracking-tight">
-                        {isDownloadMode ? "Download Now" : "Enroll Now"}
+                        {displayTitle}
                     </h3>
-                    <p className="text-white/70 text-sm font-medium">Fill in your details to proceed</p>
+                    <p className="text-white/70 text-sm font-medium">{displaySubtitle}</p>
                 </div>
             </div>
 
@@ -293,7 +296,7 @@ const BlogEnrollmentForm = ({ onSuccess, mode = 'enroll' }) => {
                                 <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
                             ) : (
                                 <>
-                                    <span>{isDownloadMode ? "Download Now" : "Submit Application"}</span>
+                                    <span>{buttonText || (isDownloadMode ? "Download Now" : "Unlock Article")}</span>
                                     <PaperAirplaneIcon className="w-6 h-6 -rotate-45" />
                                 </>
                             )}
