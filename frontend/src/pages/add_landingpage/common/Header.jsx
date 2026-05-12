@@ -71,7 +71,7 @@ const Header = () => {
 
                 const centreNames = centresData.map(c => c.centre).filter(Boolean);
                 setDynamicCentres(centreNames);
-                
+
             } catch (error) {
                 console.error("❌ [HEADER] Error fetching centres:", error);
                 setDynamicCentres(["Online", "Hazra", "Garia", "Salt Lake", "Howrah"]);
@@ -190,7 +190,7 @@ const Header = () => {
 
     // Handle form submission
     const handleApplyNowSubmit = (applicationData) => {
-        
+
 
         // Determine base path based on context type
         const basePath = contextType === "result" ? "/results" : "/courses";
@@ -263,7 +263,7 @@ const Header = () => {
                         <div className="flex justify-between items-center">
                             {/* Logo */}
                             <motion.div className="flex items-center space-x-2 xs:space-x-3" variants={itemVariants} initial="hidden" animate="visible">
-                                <a href="/" title="Pathfinder" className="flex items-center space-x-2 xs:space-x-3">
+                                <a title="Pathfinder" className="flex items-center space-x-2 xs:space-x-3">
                                     <div className="relative">
                                         <img src="/images/icon/logo-1.svg" alt="Pathfinder Logo" className="h-8 xs:h-10 sm:h-10 md:h-12 transition-all duration-300 filter drop-shadow-lg" />
                                     </div>

@@ -1,12 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
-    FaFacebookF,
-    FaLinkedinIn,
-    FaYoutube,
-    FaWhatsapp,
-    FaInstagram,
-    FaTwitter,
     FaMapMarkerAlt,
     FaPhone,
     FaEnvelope,
@@ -127,44 +121,6 @@ const Footer = () => {
         ],
     };
 
-    const socialMedia = [
-        {
-            name: "Facebook",
-            icon: FaFacebookF,
-            href: "https://www.facebook.com/officialPathfinder/",
-            color: "hover:bg-[#1877F2]",
-        },
-        {
-            name: "YouTube",
-            icon: FaYoutube,
-            href: "https://www.youtube.com/channel/UCfi5HAZ_rEcnVnXmrB2kcXg",
-            color: "hover:bg-[#FF0000]",
-        },
-        {
-            name: "LinkedIn",
-            icon: FaLinkedinIn,
-            href: "https://www.linkedin.com/company/pathfinder-institutes/",
-            color: "hover:bg-[#0A66C2]",
-        },
-        {
-            name: "WhatsApp",
-            icon: FaWhatsapp,
-            href: "https://api.whatsapp.com/send/?phone=9147178886",
-            color: "hover:bg-[#25D366]",
-        },
-        {
-            name: "Instagram",
-            icon: FaInstagram,
-            href: "https://www.instagram.com/pathfinderinstitutewb/",
-            color: "hover:bg-[#E4405F]",
-        },
-        {
-            name: "Twitter",
-            icon: FaTwitter,
-            href: "https://x.com/pathfinder_2016",
-            color: "hover:bg-[#000000]"
-        },
-    ];
 
     const stats = [
         {
@@ -265,29 +221,6 @@ const Footer = () => {
         },
     };
 
-    const [isSocialVisible, setIsSocialVisible] = useState(true);
-    const [isToggleExpanded, setIsToggleExpanded] = useState(true);
-
-    // Auto-hide social sidebar on mobile after 1 second
-    useEffect(() => {
-        if (window.innerWidth < 1024) {
-            const hideTimer = setTimeout(() => {
-                setIsSocialVisible(false);
-                setIsToggleExpanded(false);
-            }, 1500);
-            return () => clearTimeout(hideTimer);
-        }
-    }, []);
-
-    // Shrink toggle button after 1s of being expanded
-    useEffect(() => {
-        if (isToggleExpanded) {
-            const timer = setTimeout(() => {
-                setIsToggleExpanded(false);
-            }, 1200);
-            return () => clearTimeout(timer);
-        }
-    }, [isToggleExpanded]);
 
     return (
         <>
@@ -368,7 +301,7 @@ const Footer = () => {
                             <motion.p className="text-gray-500 text-center md:text-left font-medium">
                                 2026 © All rights reserved by Pathfinder. Developed by{" "}
                                 <a
-                                    href=""
+
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-[#FFE5B4] font-bold hover:text-white transition-colors"
@@ -395,86 +328,6 @@ const Footer = () => {
                 </motion.div>
 
             </footer>
-            {createPortal(
-                /* Stylish Vertical Sticky Social Sidebar */
-                <div className="fixed right-0 top-1/2 -translate-y-1/2 z-[2147483647] flex flex-col items-end">
-                    {/* Minimalist Mobile Toggle Handle */}
-                    <motion.button
-                        onClick={() => {
-                            if (isSocialVisible) {
-                                // If sidebar is open, hide it
-                                setIsSocialVisible(false);
-                                setIsToggleExpanded(false);
-                            } else {
-                                // If sidebar is closed, open it and show icon briefly
-                                setIsSocialVisible(true);
-                                setIsToggleExpanded(true);
-                            }
-                        }}
-                        initial={false}
-                        animate={{
-                            width: isToggleExpanded ? 24 : 8,
-                            height: isToggleExpanded ? 24 : 28,
-                            marginBottom: isToggleExpanded ? 4 : 0,
-                            backgroundColor: isToggleExpanded ? "rgb(17, 24, 39)" : "transparent",
-                            boxShadow: isToggleExpanded ? "0 10px 15px -3px rgba(0, 0, 0, 0.1)" : "0 0 15px rgba(249, 115, 22, 0.7)",
-                        }}
-                        className={`lg:hidden flex items-center justify-center transition-all duration-300 border-l border-t border-b border-white/20 overflow-hidden ${isToggleExpanded
-                            ? "rounded-none"
-                            : "bg-gradient-to-b from-orange-400 via-red-600 to-orange-400 rounded-none"
-                            }`}
-                        whileTap={{ scale: 0.9 }}
-                    >
-                        <motion.div
-                            animate={{
-                                rotate: isSocialVisible ? 0 : 0,
-                                scale: isToggleExpanded ? 1 : 0.7
-                            }}
-                        >
-                            <FaChevronDown
-                                size={isToggleExpanded ? 10 : 8}
-                                className="text-white"
-                                style={{ transform: "rotate(-90deg)" }}
-                            />
-                        </motion.div>
-                    </motion.button>
-
-                    <motion.div
-                        className="flex flex-col gap-0 items-end w-10 sm:w-11"
-                        animate={{ x: isSocialVisible ? 0 : "100%" }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                    >
-                        {[
-                            { name: "Facebook", icon: FaFacebookF, color: "bg-[#1877F2]", href: "https://www.facebook.com/officialPathfinder/" },
-                            { name: "Youtube", icon: FaYoutube, color: "bg-[#FF0000]", href: "https://www.youtube.com/channel/UCfi5HAZ_rEcnVnXmrB2kcXg" },
-                            { name: "LinkedIn", icon: FaLinkedinIn, color: "bg-[#0A66C2]", href: "https://www.linkedin.com/company/pathfinder-institutes/" },
-                            { name: "Whatsapp", icon: FaWhatsapp, color: "bg-[#25D366]", href: "https://api.whatsapp.com/send/?phone=9147178886" },
-                            { name: "Instagram", icon: FaInstagram, color: "bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600", href: "https://www.instagram.com/pathfinderinstitutewb/" },
-                            { name: "X", icon: FaTwitter, color: "bg-black", href: "https://x.com/pathfinder_2016" }
-                        ].map((social) => (
-                            <motion.a
-                                key={social.name}
-                                href={social.href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`flex items-center overflow-hidden h-10 sm:h-11 ${social.color} text-white rounded-none shadow-lg pointer-events-auto flex-shrink-0`}
-                                initial={{ width: "40px" }}
-                                whileHover={{ width: "170px" }}
-                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                            >
-                                <div className="flex-shrink-0 w-[40px] sm:w-[44px] flex items-center justify-center">
-                                    <social.icon className="text-lg sm:text-xl" />
-                                </div>
-                                <span className="whitespace-nowrap font-bold text-base sm:text-lg pr-4">
-                                    {social.name}
-                                </span>
-                            </motion.a>
-                        ))}
-                    </motion.div>
-                </div>,
-                document.body
-            )}
-
 
         </>
     );

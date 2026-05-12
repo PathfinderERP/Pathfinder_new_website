@@ -9,16 +9,19 @@ class LandingPageRegistration(Document):
         ('BOARDS', 'Boards'),
         ('CRP', 'CRP (Classroom Program)'),
         ('NCRP', 'NCRP (Non-Classroom Program)'),
+        ('Online Program', 'Online Program'),
+        ('Offline Program', 'Offline Program'),
     ]
     
     # Student Information
     name = fields.StringField(max_length=255, required=True)
     phone = fields.StringField(max_length=20, required=True)
-    email = fields.EmailField(required=True)
+    email = fields.EmailField(required=False, null=True)
     student_class = fields.StringField(max_length=50)
     board = fields.StringField(max_length=100)
     course_type = fields.StringField(max_length=50, choices=COURSE_TYPE_CHOICES)
     centre = fields.StringField(max_length=255)
+    last_exam_percentage = fields.StringField(max_length=10, required=False, null=True)
     
     # Metadata
     page_source = fields.StringField(max_length=50)

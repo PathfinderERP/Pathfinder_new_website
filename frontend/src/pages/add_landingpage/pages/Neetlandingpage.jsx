@@ -1,12 +1,107 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from 'react-toastify';
 import { MapPin, Mail, X, CheckCircle, ChevronLeft, ChevronRight, Lock, GraduationCap, Award, ShieldCheck } from 'lucide-react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import RegistrationPopup from '../common/RegistrationPopup';
 import { landingAPI, centresAPI, coursesAPI } from "../../../services/api";
 import { useCachedData } from "../../../hooks/useCachedData";
-import { useMemo } from "react";
 import CourseDetailModal from "../../../components/CourseDetailModal";
+
+const FloatingStickyBadge = ({ scrollToForm, onScholarshipClick }) => {
+    const [studentCount, setStudentCount] = useState(2450);
+
+    useEffect(() => {
+        const incrementCounter = () => {
+            setStudentCount(prev => prev + 1);
+            const nextTimeout = Math.floor(Math.random() * 8000) + 3000;
+            setTimeout(incrementCounter, nextTimeout);
+        };
+        const timer = setTimeout(incrementCounter, 5000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    return (
+        <motion.div
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            className="fixed right-0 top-1/2 -translate-y-1/2 z-[9999] flex flex-col gap-2 items-end pointer-events-none"
+        >
+            {/* Admissions Badge */}
+            <motion.div
+                animate={{ 
+                    scale: [1, 1.05, 1],
+                    boxShadow: [
+                        "0 10px 15px -3px rgba(234, 88, 12, 0.2)",
+                        "0 10px 15px -3px rgba(234, 88, 12, 0.4)",
+                        "0 10px 15px -3px rgba(234, 88, 12, 0.2)"
+                    ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="bg-gradient-to-l from-orange-600 to-orange-500 text-white py-3 px-4 rounded-l-2xl shadow-2xl pointer-events-auto cursor-pointer group hover:pr-6 transition-all"
+                onClick={scrollToForm}
+            >
+                <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Batch 2026-27</span>
+                        <span className="text-sm font-black whitespace-nowrap">ADMISSIONS OPEN</span>
+                    </div>
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center animate-pulse">
+                        <GraduationCap className="w-6 h-6" />
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* Scholarship Badge */}
+            <motion.div
+                animate={{ 
+                    x: [0, -5, 0]
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="bg-white border-y border-l border-orange-200 text-orange-600 py-2.5 px-4 rounded-l-xl shadow-xl pointer-events-auto cursor-pointer flex items-center gap-3 hover:bg-orange-50 transition-colors"
+                onClick={onScholarshipClick}
+            >
+                <div className="flex flex-col items-end">
+                    <span className="text-[9px] font-bold text-gray-500 uppercase">Scholarship</span>
+                    <span className="text-xs font-black">UP TO 100% OFF</span>
+                </div>
+                <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Award className="w-5 h-5" />
+                </div>
+            </motion.div>
+
+            {/* Urgency & Counter */}
+            <div className="mr-2 flex flex-col items-end gap-1.5">
+                <motion.div
+                    animate={{ opacity: [1, 0.4, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg flex items-center gap-2"
+                >
+                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
+                    LAST 06 HOURS
+                </motion.div>
+                
+                <motion.div
+                    className="bg-white/95 backdrop-blur-sm border border-orange-200 text-gray-900 text-[10px] font-black px-3 py-2 rounded-xl shadow-xl flex items-center gap-2"
+                >
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                    <AnimatePresence mode="wait">
+                        <motion.span
+                            key={studentCount}
+                            initial={{ y: 5, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -5, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {studentCount}+ ENROLLED
+                        </motion.span>
+                    </AnimatePresence>
+                </motion.div>
+            </div>
+        </motion.div>
+    );
+};
 
 export const Neetlandingpage = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -18,6 +113,8 @@ export const Neetlandingpage = () => {
     });
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isRegistrationPopupOpen, setIsRegistrationPopupOpen] = useState(false);
+    const [popupShowPercentage, setPopupShowPercentage] = useState(false);
     const [allCoursesRaw, setAllCoursesRaw] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -25,10 +122,8 @@ export const Neetlandingpage = () => {
         name: '',
         phone: '',
         student_class: '',
-        board: '',
         course_type: '',
         centre: '',
-        email: '',
         page_source: window.location.pathname.includes('neet') ? 'NEET' : 'JEE'
     });
 
@@ -182,14 +277,16 @@ export const Neetlandingpage = () => {
         e.preventDefault();
 
         // Basic validation
-        if (!formData.name || !formData.phone || !formData.email) {
-            alert("Please fill in all required fields (Name, Phone, Email)");
+        if (!formData.name || !formData.phone) {
+            alert("Please fill in all required fields (Name, Phone)");
             return;
         }
 
         setIsSubmitting(true);
         try {
-            const response = await landingAPI.register(formData);
+            const submitData = { ...formData };
+            delete submitData.last_exam_percentage; // Static form doesn't use this
+            const response = await landingAPI.register(submitData);
             if (response.data.success) {
                 setShowSuccess(true);
                 localStorage.setItem('pathfinder_lead_captured', 'true');
@@ -199,10 +296,8 @@ export const Neetlandingpage = () => {
                     name: '',
                     phone: '',
                     student_class: '',
-                    board: '',
                     course_type: '',
                     centre: '',
-                    email: '',
                     page_source: window.location.pathname.includes('neet') ? 'NEET' : 'JEE'
                 });
             } else {
@@ -247,6 +342,13 @@ export const Neetlandingpage = () => {
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 selection:bg-indigo-500 selection:text-white font-sans overflow-x-hidden">
             <Header />
+            <FloatingStickyBadge 
+                scrollToForm={scrollToForm} 
+                onScholarshipClick={() => {
+                    setPopupShowPercentage(true);
+                    setIsRegistrationPopupOpen(true);
+                }}
+            />
 
             {/* Main Content Boxed Wrapper */}
             <div className="2xl:max-w-7xl mx-auto bg-white shadow-2xl relative">
@@ -314,160 +416,140 @@ export const Neetlandingpage = () => {
                 <section id="landing-registration-form" className="bg-black text-white pt-12 md:pt-18 pb-1 relative overflow-hidden">
                     <div className="max-w-6xl mx-auto px-6 relative z-10">
                         {/* Centered Form Container */}
-                        <div className="w-full">
-                            <div className="max-w-5xl mx-auto">
-                                <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center leading-tight">
-                                    Register Now To get <span className="text-[#FF9F00]">AIR 1</span> Topper's Notes!
+                        {isLeadCaptured ? (
+                            <div className="py-20 text-center">
+                                <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-8 ring-8 ring-green-500/10">
+                                    <CheckCircle className="w-14 h-14 text-green-500" />
+                                </div>
+                                <h2 className="text-3xl md:text-5xl font-black text-white mb-6 leading-tight">
+                                    Thank <span className="text-[#FF9F00]">You!</span>
                                 </h2>
+                                <p className="text-xl md:text-2xl text-gray-300 font-medium max-w-2xl mx-auto leading-relaxed">
+                                    Our expert team will contact you soon to guide you through your NEET success journey.
+                                </p>
                             </div>
+                        ) : (
+                            <div className="w-full">
+                                <div className="max-w-5xl mx-auto">
+                                    <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center leading-tight">
+                                        India’s Future <span className="text-[#FF9F00]">NEET Toppers</span> Start Here.
+                                    </h2>
+                                </div>
 
-                            <div className="max-w-4xl mx-auto">
-                                <form onSubmit={handleSubmit} className="space-y-3">
-                                    {/* ... grid items ... */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                                        <div className="space-y-2">
-                                            <label className="block text-sm font-bold">Your Name</label>
-                                            <input
-                                                type="text"
-                                                name="name"
-                                                value={formData.name}
-                                                onChange={handleInputChange}
-                                                placeholder="Name"
-                                                required
-                                                className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="block text-sm font-bold">Phone Number</label>
-                                            <input
-                                                type="tel"
-                                                name="phone"
-                                                value={formData.phone}
-                                                onChange={handleInputChange}
-                                                placeholder="+91"
-                                                required
-                                                className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                                        <div className="space-y-2">
-                                            <label className="block text-sm font-bold">Your Class</label>
-                                            <select
-                                                name="student_class"
-                                                value={formData.student_class}
-                                                onChange={handleInputChange}
-                                                className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                                required
-                                            >
-                                                <option value="">Select Class</option>
-                                                <option value="6">6</option>
-                                                <option value="7">7</option>
-                                                <option value="8">8</option>
-                                                <option value="9">9</option>
-                                                <option value="10">10</option>
-                                                <option value="11">11</option>
-                                                <option value="12">12</option>
-                                                <option value="Repeater">Repeater</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="block text-sm font-bold">Your Board</label>
-                                            <select
-                                                name="board"
-                                                value={formData.board}
-                                                onChange={handleInputChange}
-                                                className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                                required
-                                            >
-                                                <option value="">Select Board</option>
-                                                <option value="CBSE">CBSE</option>
-                                                <option value="ICSE">ICSE</option>
-                                                <option value="WB Board">West Bengal Board</option>
-                                                <option value="Others">Others</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="block text-sm font-bold">Course Type</label>
-                                            <select
-                                                name="course_type"
-                                                value={formData.course_type}
-                                                onChange={handleInputChange}
-                                                className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                                required
-                                            >
-                                                <option value="">Course Type</option>
-                                                <option value="CRP">CRP (Classroom Program)</option>
-                                                <option value="NCRP">NCRP (Non-Classroom Program)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                                        <div className="space-y-2 md:flex-[3]">
-                                            <label className="block text-sm font-bold">Centre</label>
-                                            <div className="relative group">
-                                                <select
-                                                    name="centre"
-                                                    value={formData.centre}
+                                <div className="max-w-4xl mx-auto">
+                                    <form onSubmit={handleSubmit} className="space-y-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                            <div className="space-y-2">
+                                                <label className="block text-sm font-bold">Your Name</label>
+                                                <input
+                                                    type="text"
+                                                    name="name"
+                                                    value={formData.name}
                                                     onChange={handleInputChange}
-                                                    className="w-full pl-5 pr-24 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none"
+                                                    placeholder="Name"
+                                                    required
+                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="block text-sm font-bold">Phone Number</label>
+                                                <input
+                                                    type="tel"
+                                                    name="phone"
+                                                    value={formData.phone}
+                                                    onChange={handleInputChange}
+                                                    placeholder="+91"
+                                                    required
+                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                            <div className="space-y-2">
+                                                <label className="block text-sm font-bold">Your Class</label>
+                                                <select
+                                                    name="student_class"
+                                                    value={formData.student_class}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
                                                     required
                                                 >
-                                                    <option value="">Select Centre</option>
-                                                    {centres.map((centre, index) => (
-                                                        <option key={index} value={centre.centre || centre.name}>
-                                                            {centre.centre || centre.name}
-                                                        </option>
-                                                    ))}
+                                                    <option value="">Select Class</option>
+                                                    <option value="11">11</option>
+                                                    <option value="12">12</option>
+                                                    <option value="12 Passout">12 Passout</option>
                                                 </select>
-                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            handleDetectLocation();
-                                                        }}
-                                                        disabled={isDetecting}
-                                                        className="pointer-events-auto flex items-center gap-1 text-[9px] font-bold text-white bg-orange-500 hover:bg-orange-600 px-2 py-1 rounded-md transition-colors shine-effect"
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="block text-sm font-bold">Course Type</label>
+                                                <select
+                                                    name="course_type"
+                                                    value={formData.course_type}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
+                                                    required
+                                                >
+                                                    <option value="">Course Type</option>
+                                                    <option value="Online Program">Online Program</option>
+                                                    <option value="Offline Program">Offline Program</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                                            <div className="space-y-2 flex-1">
+                                                <label className="block text-sm font-bold">Centre</label>
+                                                <div className="relative group">
+                                                    <select
+                                                        name="centre"
+                                                        value={formData.centre}
+                                                        onChange={handleInputChange}
+                                                        className="w-full pl-5 pr-24 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none"
+                                                        required
                                                     >
-                                                        <MapPin className="w-3 h-3" />
-                                                        {isDetecting ? '...' : 'AUTO'}
-                                                    </button>
-                                                    <div className="w-px h-4 bg-gray-200"></div>
-                                                    <ChevronRight className="w-4 h-4 text-gray-400 rotate-90" />
+                                                        <option value="">Select Centre</option>
+                                                        {centres.map((centre, index) => (
+                                                            <option key={index} value={centre.centre || centre.name}>
+                                                                {centre.centre || centre.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                handleDetectLocation();
+                                                            }}
+                                                            disabled={isDetecting}
+                                                            className="pointer-events-auto flex items-center gap-1 text-[9px] font-bold text-white bg-orange-500 hover:bg-orange-600 px-2 py-1 rounded-md transition-colors shine-effect"
+                                                        >
+                                                            <MapPin className="w-3 h-3" />
+                                                            {isDetecting ? '...' : 'AUTO'}
+                                                        </button>
+                                                        <div className="w-px h-4 bg-gray-200"></div>
+                                                        <ChevronRight className="w-4 h-4 text-gray-400 rotate-90" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="space-y-2 md:flex-[7]">
-                                            <label className="block text-sm font-bold invisible">Email</label>
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                value={formData.email}
-                                                onChange={handleInputChange}
-                                                placeholder="Email"
-                                                required
-                                                className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                            />
-                                        </div>
-                                    </div>
 
-                                    <div className="flex justify-center ">
-                                        <div className="flex justify-center pb-4 ">
-                                            <button
-                                                type="submit"
-                                                disabled={isSubmitting}
-                                                className={`px-12 py-3 mb-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-lg rounded-lg transition-all transform hover:scale-105 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                                {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
-                                            </button>
+                                        <div className="flex justify-center ">
+                                            <div className="flex justify-center pb-4 ">
+                                                <button
+                                                    type="submit"
+                                                    disabled={isSubmitting}
+                                                    className={`px-12 py-3 mb-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-lg rounded-lg transition-all transform hover:scale-105 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                >
+                                                    {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
                     {/* Right Side: Boy Image - Absolute Extreme Down */}
@@ -554,7 +636,10 @@ export const Neetlandingpage = () => {
                                         To view our complete list of Classroom and Digital programs for NEET, please complete your registration.
                                     </p>
                                     <button
-                                        onClick={scrollToForm}
+                                        onClick={() => {
+                                            setPopupShowPercentage(false);
+                                            setIsRegistrationPopupOpen(true);
+                                        }}
                                         className="px-10 py-4 bg-orange-600 text-white rounded-2xl font-black text-lg hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center gap-3"
                                     >
                                         Unlock Course List
@@ -736,14 +821,14 @@ export const Neetlandingpage = () => {
                     <div className="absolute bottom-0 left-0 w-96 h-96 bg-red-500/5 rounded-full -ml-48 -mb-48 blur-3xl" />
 
                     <div className="max-w-6xl mx-auto px-6 relative z-10">
-                        <div className="text-center mb-16">
+                        {/* <div className="text-center mb-16">
                             <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">
                                 Scholarship <span className="text-orange-500">Opportunities</span>
                             </h2>
                             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
                                 Pathfinder provides extensive scholarships to meritorious students based on their academic performance and entrance exams.
                             </p>
-                        </div>
+                        </div> */}
 
                         {!isLeadCaptured ? (
                             <div className="relative group">
@@ -752,15 +837,18 @@ export const Neetlandingpage = () => {
                                     <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-6 animate-bounce">
                                         <Lock className="w-10 h-10 text-orange-600" />
                                     </div>
-                                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Content Locked</h3>
+                                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Get Upto 100% Scholarship Now</h3>
                                     <p className="text-gray-600 text-center mb-8 max-w-md font-medium">
-                                        To view detailed scholarship criteria and award amounts, please complete your registration.
+                                        Please complete your registration.
                                     </p>
                                     <button
-                                        onClick={scrollToForm}
+                                        onClick={() => {
+                                            setPopupShowPercentage(true);
+                                            setIsRegistrationPopupOpen(true);
+                                        }}
                                         className="px-10 py-4 bg-orange-600 text-white rounded-2xl font-black text-lg hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center gap-3"
                                     >
-                                        Unlock Scholarship Details
+                                        Check Your Eligiblity
                                         <ShieldCheck className="w-6 h-6" />
                                     </button>
                                 </div>
@@ -779,39 +867,14 @@ export const Neetlandingpage = () => {
                             </div>
                         ) : (
                             /* Unlocked State UI */
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-10 duration-1000">
-                                <div className="bg-white p-8 rounded-[2.5rem] border border-orange-100 shadow-xl shadow-orange-500/5 hover:border-orange-300 transition-colors group">
-                                    <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                        <GraduationCap className="w-8 h-8 text-orange-600" />
-                                    </div>
-                                    <h4 className="text-xl font-bold text-gray-900 mb-4">Merit Scholarship</h4>
-                                    <p className="text-gray-600 leading-relaxed">
-                                        Up to <span className="text-orange-600 font-bold">100% scholarship</span> on tuition fees for students securing top ranks in national entrance exams.
-                                    </p>
+                            <div className="py-12 text-center bg-white rounded-[3rem] border border-orange-100 shadow-xl shadow-orange-500/5">
+                                <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <CheckCircle className="w-10 h-10 text-green-600" />
                                 </div>
-
-                                <div className="bg-white p-8 rounded-[2.5rem] border border-orange-100 shadow-xl shadow-orange-500/5 hover:border-orange-300 transition-colors group">
-                                    <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                        <Award className="w-8 h-8 text-orange-600" />
-                                    </div>
-                                    <h4 className="text-xl font-bold text-gray-900 mb-4">Board Toppers</h4>
-                                    <p className="text-gray-600 leading-relaxed">
-                                        Special fee waivers for State and Central Board toppers (CBSE, ICSE, WB Board). Guaranteed support for <span className="text-orange-600 font-bold">90%+ scorers</span>.
-                                    </p>
-                                </div>
-
-                                <div className="bg-white p-8 rounded-[2.5rem] border border-orange-100 shadow-xl shadow-orange-500/5 hover:border-orange-300 transition-colors group">
-                                    <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                        <ShieldCheck className="w-8 h-8 text-orange-600" />
-                                    </div>
-                                    <h4 className="text-xl font-bold text-gray-900 mb-4">Admission Test</h4>
-                                    <p className="text-gray-600 mb-4 leading-relaxed">
-                                        Take our scholarship-cum-admission test to avail up to <span className="text-orange-600 font-bold">50% waiver</span> based on your potential.
-                                    </p>
-                                    <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-xl px-4 py-2.5 w-fit">
-                                        <span className="text-orange-600 text-xs font-black uppercase tracking-wider">📝 PSAT Exam</span>
-                                    </div>
-                                </div>
+                                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Registration Complete!</h3>
+                                <p className="text-gray-600 max-w-md mx-auto font-medium">
+                                    Our team will contact you soon with your scholarship eligibility details.
+                                </p>
                             </div>
                         )}
                     </div>
@@ -1085,8 +1148,12 @@ export const Neetlandingpage = () => {
                     }}
                 />
             </div >
-        </div >
+            <RegistrationPopup 
+                isOpen={isRegistrationPopupOpen} 
+                onClose={() => setIsRegistrationPopupOpen(false)} 
+                pageSource="NEET Landing Page"
+                showPercentage={popupShowPercentage}
+            />
+        </div>
     );
 };
-
-
