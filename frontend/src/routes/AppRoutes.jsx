@@ -78,7 +78,7 @@ import AboutUs from "../pages/About/AboutUs";
 import CEOMessage from "../pages/About/CEOMessage";
 import ChairmanMessage from "../pages/About/ChairmanMessage";
 import Franchise from "../pages/Franchise";
-import { AllIndiaLandingPage } from "../pages/add_landingpage/pages/Jeelandingpage";
+import { Jeelandingpage } from "../pages/add_landingpage/pages/Jeelandingpage";
 import { Neetlandingpage } from "../pages/add_landingpage/pages/Neetlandingpage";
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
@@ -324,7 +324,7 @@ const AppRoutes = () => {
       {/* Ads Landing Pages */}
       <Route
         path="/apply_now/allindia/jee"
-        element={<AllIndiaLandingPage />}
+        element={<Jeelandingpage />}
       />
       <Route
         path="/apply_now/allindia/neet"
@@ -724,3 +724,5 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
+
+

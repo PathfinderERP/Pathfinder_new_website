@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { MapPin, Mail, X, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { MapPin, Mail, X, CheckCircle, ChevronLeft, ChevronRight, Lock, GraduationCap, Award, ShieldCheck } from 'lucide-react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
-import { landingAPI, centresAPI } from "../../../services/api";
+import { landingAPI, centresAPI, coursesAPI } from "../../../services/api";
+import { useCachedData } from "../../../hooks/useCachedData";
+import { useMemo } from "react";
+import CourseDetailModal from "../../../components/CourseDetailModal";
 
-
-export const AllIndiaLandingPage = () => {
+export const Jeelandingpage = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [centres, setCentres] = useState([]);
+    const [isLeadCaptured, setIsLeadCaptured] = useState(() => {
+        return localStorage.getItem('pathfinder_lead_captured') === 'true';
+    });
+    const [selectedCourse, setSelectedCourse] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [allCoursesRaw, setAllCoursesRaw] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
+
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -19,6 +30,48 @@ export const AllIndiaLandingPage = () => {
         email: '',
         page_source: window.location.pathname.includes('neet') ? 'NEET' : 'JEE'
     });
+
+    const scrollToForm = () => {
+        const formElement = document.getElementById('landing-registration-form');
+        if (formElement) {
+            formElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    const { data: coursesDataRaw, loading: loadingCourses } = useCachedData("all_courses", () => coursesAPI.getAll());
+
+    const allCourses = useMemo(() => {
+        const dataArray = Array.isArray(coursesDataRaw) ? coursesDataRaw : [];
+
+        // 1. Strict filtering (JEE only)
+        const filtered = dataArray.filter(c => {
+            const name = (c.name || '').toLowerCase();
+            const target = (c.target_exam || '').toLowerCase();
+            const cat = (c.category?.name || '').toLowerCase();
+
+            const classLevel = (c.class_level || '').toLowerCase();
+            const desc = (c.short_description || '').toLowerCase();
+
+            const matchesJee = name.includes('jee') || target.includes('jee') || cat.includes('jee') ||
+                classLevel.includes('jee') || desc.includes('jee') ||
+                name.includes('wbjee') || target.includes('wbjee') || cat.includes('wbjee') ||
+                classLevel.includes('wbjee') || desc.includes('wbjee') ||
+                name.includes('engineering') || target.includes('engineering') || cat.includes('engineering') ||
+                classLevel.includes('engineering') || desc.includes('engineering');
+
+            if (!matchesJee) return false;
+
+            // Apply search query filter if present
+            if (searchQuery.trim()) {
+                const query = searchQuery.toLowerCase();
+                return name.includes(query) || target.includes(query) || (c.course_title || "").toLowerCase().includes(query);
+            }
+
+            return true;
+        });
+
+        return filtered;
+    }, [coursesDataRaw, searchQuery]);
 
     useEffect(() => {
         const fetchCentres = async () => {
@@ -49,6 +102,14 @@ export const AllIndiaLandingPage = () => {
             };
         }
         return null;
+    };
+
+    const formatClassLevel = (level) => {
+        if (!level) return "Not specified";
+        if (/^\d+$/.test(level.toString().trim())) {
+            return `Class ${level}`;
+        }
+        return level;
     };
 
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -133,6 +194,8 @@ export const AllIndiaLandingPage = () => {
             const response = await landingAPI.register(formData);
             if (response.data.success) {
                 setShowSuccess(true);
+                localStorage.setItem('pathfinder_lead_captured', 'true');
+                setIsLeadCaptured(true);
                 // Reset form
                 setFormData({
                     name: '',
@@ -254,7 +317,7 @@ export const AllIndiaLandingPage = () => {
                 </section>
 
                 {/* Registration Section */}
-                <section className="bg-black text-white pt-12 md:pt-18 pb-1 relative overflow-hidden">
+                <section id="landing-registration-form" className="bg-black text-white pt-12 md:pt-18 pb-1 relative overflow-hidden">
                     <div className="max-w-6xl mx-auto px-6 relative z-10">
                         {/* Centered Form Container */}
                         <div className="w-full">
@@ -473,23 +536,318 @@ export const AllIndiaLandingPage = () => {
                     </div>
                 </section>
 
-                {/* Program Information Section */}
+                {/* Related Courses Section */}
+                <section className="py-20 bg-white relative overflow-hidden">
+                    <div className="max-w-6xl mx-auto px-6 relative z-10">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">
+                                Related <span className="text-orange-500">JEE & WBJEE</span> Courses
+                            </h2>
+                            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                                Explore our specialized programs designed to help you ace the JEE Main, Advanced & WBJEE exams.
+                            </p>
+                        </div>
+
+                        {!isLeadCaptured ? (
+                            <div className="relative group">
+                                {/* Locked State UI */}
+                                <div className="absolute inset-0 bg-white/40 backdrop-blur-md rounded-[3rem] z-20 flex flex-col items-center justify-center p-8 border-2 border-dashed border-orange-200 shadow-2xl shadow-orange-500/5">
+                                    <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                                        <Lock className="w-10 h-10 text-orange-600" />
+                                    </div>
+                                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">View All JEE Courses</h3>
+                                    <p className="text-gray-600 text-center mb-8 max-w-md font-medium">
+                                        To view our complete list of Classroom and Digital programs for JEE, please complete your registration.
+                                    </p>
+                                    <button
+                                        onClick={scrollToForm}
+                                        className="px-10 py-4 bg-orange-600 text-white rounded-2xl font-black text-lg hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center gap-3"
+                                    >
+                                        Unlock Course List
+                                        <ShieldCheck className="w-6 h-6" />
+                                    </button>
+                                </div>
+
+                                {/* Blurred Placeholder Content */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-20 select-none pointer-events-none filter blur-sm">
+                                    {[1, 2, 3].map((i) => (
+                                        <div key={i} className="bg-gray-50 p-8 rounded-3xl border border-gray-100">
+                                            <div className="h-40 bg-gray-200 rounded-2xl mb-6"></div>
+                                            <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-full"></div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto pb-8 custom-scrollbar snap-x">
+                                <div className="grid grid-rows-2 grid-flow-col gap-8 animate-in fade-in slide-in-from-bottom-10 duration-1000 w-max min-w-full">
+                                    {allCourses.length > 0 ? (
+                                        allCourses.map((c, idx) => {
+                                            const displayPrice = c.discounted_price ? parseFloat(c.discounted_price) : parseFloat(c.course_price);
+                                            const originalPrice = c.course_price ? parseFloat(c.course_price) : 0;
+                                            const discount = c.offers ? parseInt(c.offers) : 0;
+                                            const hasDiscount = c.discounted_price && discount > 0;
+
+                                            return (
+                                                <div
+                                                    key={c.id || c._id}
+                                                    className="w-[350px] md:w-[400px] rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300 relative flex flex-col group bg-white border border-gray-100 snap-start"
+                                                >
+                                                    {/* Mode Ribbon */}
+                                                    <div className="absolute top-0 left-0 z-10">
+                                                        <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-br-xl shadow-md uppercase tracking-wide">
+                                                            {c.mode || "Online"}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Banner Image Section with Orange Gradient */}
+                                                    <div className="relative h-48 bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 overflow-hidden">
+                                                        {c.thumbnail_url ? (
+                                                            <img
+                                                                src={c.thumbnail_url}
+                                                                alt={c.name}
+                                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                            />
+                                                        ) : (
+                                                            <div className="absolute inset-0 flex items-center justify-center p-4">
+                                                                <div className="text-center">
+                                                                    <h4 className="text-white/90 font-black text-3xl uppercase tracking-wider mb-1" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+                                                                        WARRIORS
+                                                                    </h4>
+                                                                    <div className="flex items-center justify-center gap-2 mb-1">
+                                                                        <div className="h-px bg-white/60 w-8"></div>
+                                                                        <span className="text-white/90 font-bold text-xs">AND</span>
+                                                                        <div className="h-px bg-white/60 w-8"></div>
+                                                                    </div>
+                                                                    <h4 className="text-white font-black text-3xl uppercase tracking-wider" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+                                                                        WINNERS
+                                                                    </h4>
+                                                                    <div className="mt-2 bg-black/80 text-white text-[10px] font-semibold px-3 py-1 rounded inline-block">
+                                                                        {c.programme || 'JEE CLASSROOM PROGRAM'}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Black Content Section */}
+                                                    <div className="bg-black text-white p-6 flex flex-col flex-grow">
+                                                        {/* Course Title */}
+                                                        {c.course_title && (
+                                                            <div className="text-orange-500 text-[10px] font-black uppercase tracking-widest mb-3 text-center border-b border-orange-500/20 pb-2">
+                                                                {c.course_title}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Title Row with Decorative Lines and Language Badge */}
+                                                        <div className="flex flex-col items-center justify-center gap-3 mb-4">
+                                                            <div className="flex items-center gap-2 w-full">
+                                                                <div className="h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent flex-1"></div>
+                                                                <h3 className="font-bold text-lg text-white leading-tight text-center whitespace-nowrap">
+                                                                    {c.name}
+                                                                </h3>
+                                                                <div className="h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent flex-1"></div>
+                                                            </div>
+                                                            <div className="px-2 py-0.5 border border-white/50 text-white text-[8px] font-bold uppercase rounded w-fit">
+                                                                ENGLISH
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Details with Icons */}
+                                                        <div className="space-y-2.5 mb-5">
+                                                            <div className="flex items-center gap-3 text-white text-[13px]">
+                                                                <GraduationCap className="w-4 h-4 text-orange-500" />
+                                                                <span>For {formatClassLevel(c.class_level)} Aspirants</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-3 text-white text-[13px]">
+                                                                <CheckCircle className="w-4 h-4 text-orange-500" />
+                                                                <span>
+                                                                    Starts on {c.starting_date
+                                                                        ? new Date(c.starting_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                                                                        : "Coming Soon"
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                            {c.centre && (
+                                                                <div className="flex items-center gap-3 text-white text-[13px]">
+                                                                    <MapPin className="w-4 h-4 text-orange-500" />
+                                                                    <span>Centre : {c.centre}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Price Section */}
+                                                        <div className="flex items-center flex-wrap gap-3 mb-5 mt-auto">
+                                                            <div className="text-2xl font-bold text-orange-500 leading-none">
+                                                                ₹{displayPrice.toLocaleString()}
+                                                            </div>
+                                                            {hasDiscount && (
+                                                                <>
+                                                                    <div className="text-sm text-gray-400 line-through">
+                                                                        ₹{originalPrice.toLocaleString()}
+                                                                    </div>
+                                                                    <div className="ml-auto bg-green-600 text-white text-[10px] font-bold px-2 py-1 rounded">
+                                                                        {discount}% OFF
+                                                                    </div>
+                                                                </>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Action Buttons */}
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSelectedCourse(c);
+                                                                    setIsModalOpen(true);
+                                                                }}
+                                                                className="py-2.5 rounded-xl border border-white text-white font-bold text-[10px] hover:bg-white hover:text-black transition-all duration-200 uppercase tracking-wider"
+                                                            >
+                                                                EXPLORE
+                                                            </button>
+                                                            <button
+                                                                onClick={() => toast.info("To purchase this course, please contact our Help Desk or visit the nearest Pathfinder centre.", {
+                                                                    position: "top-center",
+                                                                    autoClose: 5000,
+                                                                    hideProgressBar: false,
+                                                                    closeOnClick: true,
+                                                                    pauseOnHover: true,
+                                                                    draggable: true,
+                                                                    theme: "colored",
+                                                                })}
+                                                                className="py-2.5 rounded-xl bg-gradient-to-r from-gray-700 to-gray-800 text-white font-bold text-[10px] hover:from-gray-800 hover:to-gray-900 transition-all duration-200 shadow-md hover:shadow-lg uppercase tracking-wider"
+                                                            >
+                                                                BUY NOW
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="col-span-full text-center py-10">
+                                            <p className="text-gray-500 font-medium">No active JEE or WBJEE courses found at the moment.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* Scholarship Section */}
+                <section className="py-20 bg-slate-50 relative overflow-hidden">
+                    {/* Decorative Elements */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/5 rounded-full -mr-48 -mt-48 blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-red-500/5 rounded-full -ml-48 -mb-48 blur-3xl" />
+
+                    <div className="max-w-6xl mx-auto px-6 relative z-10">
+                        <div className="text-center mb-16">
+                            <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">
+                                Scholarship <span className="text-orange-500">Opportunities</span>
+                            </h2>
+                            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                                Pathfinder provides extensive scholarships to meritorious students based on their academic performance and entrance exams.
+                            </p>
+                        </div>
+
+                        {!isLeadCaptured ? (
+                            <div className="relative group">
+                                {/* Locked State UI */}
+                                <div className="absolute inset-0 bg-white/40 backdrop-blur-md rounded-[3rem] z-20 flex flex-col items-center justify-center p-8 border-2 border-dashed border-orange-200 shadow-2xl shadow-orange-500/5">
+                                    <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                                        <Lock className="w-10 h-10 text-orange-600" />
+                                    </div>
+                                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Content Locked</h3>
+                                    <p className="text-gray-600 text-center mb-8 max-w-md font-medium">
+                                        To view detailed scholarship criteria and award amounts, please complete your registration.
+                                    </p>
+                                    <button
+                                        onClick={scrollToForm}
+                                        className="px-10 py-4 bg-orange-600 text-white rounded-2xl font-black text-lg hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center gap-3"
+                                    >
+                                        Unlock Scholarship Details
+                                        <ShieldCheck className="w-6 h-6" />
+                                    </button>
+                                </div>
+
+                                {/* Blurred Placeholder Content */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 opacity-20 select-none pointer-events-none filter blur-sm">
+                                    {[1, 2, 3].map((i) => (
+                                        <div key={i} className="bg-white p-8 rounded-3xl border border-gray-100">
+                                            <div className="w-12 h-12 bg-gray-100 rounded-xl mb-6"></div>
+                                            <div className="h-6 bg-gray-100 rounded w-3/4 mb-4"></div>
+                                            <div className="h-4 bg-gray-100 rounded w-full mb-2"></div>
+                                            <div className="h-4 bg-gray-100 rounded w-5/6"></div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            /* Unlocked State UI */
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-orange-100 shadow-xl shadow-orange-500/5 hover:border-orange-300 transition-colors group">
+                                    <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                        <GraduationCap className="w-8 h-8 text-orange-600" />
+                                    </div>
+                                    <h4 className="text-xl font-bold text-gray-900 mb-4">Merit Scholarship</h4>
+                                    <p className="text-gray-600 leading-relaxed">
+                                        Up to <span className="text-orange-600 font-bold">100% scholarship</span> on tuition fees for students securing top ranks in national entrance exams.
+                                    </p>
+                                </div>
+
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-orange-100 shadow-xl shadow-orange-500/5 hover:border-orange-300 transition-colors group">
+                                    <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                        <Award className="w-8 h-8 text-orange-600" />
+                                    </div>
+                                    <h4 className="text-xl font-bold text-gray-900 mb-4">Board Toppers</h4>
+                                    <p className="text-gray-600 leading-relaxed">
+                                        Special fee waivers for State and Central Board toppers (CBSE, ICSE, WB Board). Guaranteed support for <span className="text-orange-600 font-bold">90%+ scorers</span>.
+                                    </p>
+                                </div>
+
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-orange-100 shadow-xl shadow-orange-500/5 hover:border-orange-300 transition-colors group">
+                                    <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                        <ShieldCheck className="w-8 h-8 text-orange-600" />
+                                    </div>
+                                    <h4 className="text-xl font-bold text-gray-900 mb-4">Admission Test</h4>
+                                    <p className="text-gray-600 mb-4 leading-relaxed">
+                                        Take our scholarship-cum-admission test to avail up to <span className="text-orange-600 font-bold">50% waiver</span> based on your potential.
+                                    </p>
+                                    <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-xl px-4 py-2.5 w-fit">
+                                        <span className="text-orange-600 text-xs font-black uppercase tracking-wider">📝 PSAT Exam</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* Expert Section */}
                 <section className="py-16 bg-white">
                     <div className="max-w-6xl mx-auto px-6">
-                        {/* Header - Compact Design */}
-                        <div className="mb-4">
-                            <h2 className="text-xl md:text-3xl font-extrabold text-gray-900 text-center mb-2 px-2">
-                                2 Year Classroom Programme for
+                        {/* Premium Section Header */}
+                        <div className="text-center mb-8">
+                            {/* <span className="inline-block bg-orange-50 text-orange-600 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full border border-orange-200 mb-4">
+                                📚 Classroom Programme
+                            </span> */}
+                            <h2 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-3">
+                                1-Year, 2-Year & Repeater
+                                <br />
+                                <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                                    Programmes
+                                </span>
                             </h2>
-                            <h3 className="text-xl md:text-3xl font-extrabold text-gray-900 text-center mb-4 px-2">
-                                <span className="text-orange-500">JEE Main & Advanced</span> | WBJEE
-                            </h3>
+                            <p className="text-gray-600 text-base md:text-lg font-semibold">
+                                JEE Main & Advanced &nbsp;|&nbsp; <span className="text-orange-500 font-black">JEE</span>
+                            </p>
+                            <div className="mt-4 h-1 w-24 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mx-auto"></div>
                         </div>
                     </div>
 
                     {/* Full-width Orange Bar - Outside Container */}
                     <div className="bg-orange-500 text-white text-lg md:text-xl font-bold py-1 text-center w-full mb-8">
-                        For 11 students
+                        For 11, 12 & Repeater Students
                     </div>
 
                     <div className="max-w-6xl mx-auto px-6">
@@ -612,7 +970,7 @@ export const AllIndiaLandingPage = () => {
                         {/* Add-ons */}
                         < div className="text-center" >
                             <h3 className="text-3xl md:text-4xl font-extrabold mb-6">
-                                <span className="text-orange-500">Add ons</span> <span className="text-gray-900">(Till Official JEE Advanced Exam)</span>
+                                <span className="text-orange-500">Add ons</span> <span className="text-gray-900">(Till Official NEET Exam)</span>
                             </h3>
                             <div className="flex flex-wrap justify-center items-center gap-6 md:gap-12">
                                 <div className="flex items-center gap-3">
@@ -723,7 +1081,18 @@ export const AllIndiaLandingPage = () => {
                         </div>
                     </div>
                 )}
+
+                <CourseDetailModal
+                    course={selectedCourse}
+                    isOpen={isModalOpen}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setSelectedCourse(null);
+                    }}
+                />
             </div >
         </div >
     );
 };
+
+

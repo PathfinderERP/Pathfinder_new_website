@@ -1,4 +1,5 @@
 import { getImageUrl } from "../utils/imageUtils";
+import { toast } from 'react-toastify';
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Slider from "react-slick";
 import { useNavigate } from "react-router-dom";
@@ -142,8 +143,12 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
 
     const handleBuyNow = useCallback(() => {
         if (!course) return;
-        navigate("/buynow", { state: { courseData: course } });
-    }, [navigate, course]);
+        toast.info("To purchase this course, please contact our Help Desk or visit the nearest Pathfinder centre.", {
+            position: "top-center",
+            autoClose: 5000,
+            theme: "colored"
+        });
+    }, [course]);
 
     const scrollToSection = useCallback((id) => {
         setActiveTab(id);
@@ -501,7 +506,7 @@ const CourseDetailModal = ({ course, isOpen, onClose }) => {
 
                                             <button
                                                 onClick={handleBuyNow}
-                                                className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold rounded-lg shadow-lg transition-all transform active:scale-95 mb-4 uppercase tracking-wide"
+                                                className="w-full py-3.5 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white font-bold rounded-lg shadow-lg transition-all transform active:scale-95 mb-4 uppercase tracking-wide"
                                             >
                                                 Continue with Batch
                                             </button>
