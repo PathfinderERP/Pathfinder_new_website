@@ -565,7 +565,7 @@ export const Neetlandingpage = () => {
                                 {/* Blurred Placeholder Content */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-20 select-none pointer-events-none filter blur-sm">
                                     {[1, 2, 3].map((i) => (
-                                        <div key={i} className="bg-gray-50 p-8 rounded-3xl border border-gray-100">
+                                        <div key={i} className={`${i > 1 ? 'hidden md:block' : ''} bg-gray-50 p-8 rounded-3xl border border-gray-100`}>
                                             <div className="h-40 bg-gray-200 rounded-2xl mb-6"></div>
                                             <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
                                             <div className="h-4 bg-gray-200 rounded w-full"></div>
@@ -768,7 +768,7 @@ export const Neetlandingpage = () => {
                                 {/* Blurred Placeholder Content */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 opacity-20 select-none pointer-events-none filter blur-sm">
                                     {[1, 2, 3].map((i) => (
-                                        <div key={i} className="bg-white p-8 rounded-3xl border border-gray-100">
+                                        <div key={i} className={`${i > 1 ? 'hidden md:block' : ''} bg-white p-8 rounded-3xl border border-gray-100`}>
                                             <div className="w-12 h-12 bg-gray-100 rounded-xl mb-6"></div>
                                             <div className="h-6 bg-gray-100 rounded w-3/4 mb-4"></div>
                                             <div className="h-4 bg-gray-100 rounded w-full mb-2"></div>
