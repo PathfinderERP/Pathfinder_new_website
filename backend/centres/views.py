@@ -23,21 +23,8 @@ from .services.image_service import ImageProcessor
 
 logger = logging.getLogger(__name__)
 
-# Indian States and Districts Data (Same as courses)
-INDIAN_STATES_DISTRICTS = {
-    "West Bengal": [
-        "Howrah", "Kolkata", "Darjeeling", "Hooghly", "North 24 Parganas", 
-        "South 24 Parganas", "Bankura", "Purba Bardhaman", "Paschim Bardhaman",
-        "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Kalimpong", "Malda",
-        "Murshidabad", "Nadia", "Paschim Medinipur", "Purba Medinipur",
-        "Purulia", "Uttar Dinajpur", "Alipurduar", "Jhargram"
-    ],
-    "Delhi": ["New Delhi", "Central Delhi", "North Delhi", "South Delhi"],
-    "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Thane"],
-    "Karnataka": ["Bangalore", "Mysore", "Hubli", "Mangalore"],
-    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem"],
-    "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra"],
-}
+# Indian States and Districts Data (Comprehensive list imported)
+from .states_data import INDIAN_STATES_DISTRICTS
 
 CENTRES = [
     "hazra", "saltlake", "dumdum", "garia", "barasat", "barrackpore",
