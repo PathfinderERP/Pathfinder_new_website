@@ -47,6 +47,11 @@ const CentreCard = ({ centre, onExplore }) => {
                             }`}>
                             {centre.centre_type || 'General'}
                         </span>
+                        {centre.is_franchise && (
+                            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">
+                                Franchise
+                            </span>
+                        )}
                         <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
                             <StarIcon className="w-3 h-3 text-amber-500 fill-amber-500" />
                             <span className="text-[10px] font-bold text-amber-700">4.9</span>

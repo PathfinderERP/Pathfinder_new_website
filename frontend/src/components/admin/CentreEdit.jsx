@@ -40,6 +40,7 @@ const CentreEdit = () => {
     address: "",
     mobile: "",
     email: "",
+    is_franchise: false,
     toppers: [],
   });
 
@@ -118,6 +119,7 @@ const CentreEdit = () => {
         address: centre.address || "",
         mobile: centre.mobile || "",
         email: centre.email || "",
+        is_franchise: centre.is_franchise || false,
         logo_url: centre.logo_url || "", // Track logo URL in centreData
         toppers: (centre.toppers || []).map(topper => ({
           ...topper,
@@ -254,6 +256,7 @@ const CentreEdit = () => {
         address: centreData.address,
         mobile: centreData.mobile,
         email: centreData.email,
+        is_franchise: centreData.is_franchise,
         // Send Base64 logo if we have one, otherwise omit
         ...(logoBase64 && { logo_file: logoBase64 }),
         // Send clear signal for logo if explicitly removed and no new one selected
@@ -331,10 +334,10 @@ const CentreEdit = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setCentreData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -712,6 +715,23 @@ const CentreEdit = () => {
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     placeholder="e.g. support@pathfinder.edu.in"
                   />
+                </div>
+
+                <div className="flex items-center space-x-2 pt-6">
+                  <input
+                    type="checkbox"
+                    name="is_franchise"
+                    id="is_franchise"
+                    checked={centreData.is_franchise}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="is_franchise"
+                    className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase cursor-pointer"
+                  >
+                    Is Franchise?
+                  </label>
                 </div>
               </div>
             </div>

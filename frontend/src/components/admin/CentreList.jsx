@@ -498,6 +498,11 @@ const CentreList = () => {
                           {centre.centre_type}
                         </span>
                       )}
+                      {centre.is_franchise && (
+                        <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-500 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                          Franchise
+                        </span>
+                      )}
                     </div>
                   </div>
 

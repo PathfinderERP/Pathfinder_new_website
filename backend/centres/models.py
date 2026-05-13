@@ -94,6 +94,7 @@ class Centre(Document):
     
     # Add a unique identifier for better frontend handling
     centre_code = fields.StringField(max_length=50, unique=True, sparse=True)
+    is_franchise = fields.BooleanField(default=False)
     
     meta = {
         'collection': 'centres',
@@ -239,6 +240,7 @@ class Centre(Document):
             'address': self.address,
             'mobile': self.mobile,
             'email': self.email,
+            'is_franchise': self.is_franchise,
             'map_url': self.map_url,
             'logo_url': self.get_logo_url(),
             'created_at': self.get_created_at_isoformat(),

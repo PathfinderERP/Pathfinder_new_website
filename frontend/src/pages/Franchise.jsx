@@ -12,10 +12,14 @@ import {
     ArrowRightIcon,
     BuildingOfficeIcon,
     BanknotesIcon,
-    XMarkIcon
+    XMarkIcon,
+    MapIcon,
+    ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import { FadeInImage } from "../components/common/OptimizedImage";
-import { franchiseAPI } from "../services/api";
+import { franchiseAPI, centresAPI } from "../services/api";
+import CentreCard from "../components/Centres/CentreCard";
+import { useCachedData } from "../hooks/useCachedData";
 
 const Franchise = () => {
     const [activeTab, setActiveTab] = useState("Financial Results");
@@ -23,6 +27,14 @@ const Franchise = () => {
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [loadingInquiry, setLoadingInquiry] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+
+    // Fetch and filter franchise centres
+    const { data: centres, loading: loadingCentres } = useCachedData("centres", () => centresAPI.getAll(), {
+        onSuccess: (data) => {
+            const raw = data?.results || data || [];
+            return Array.isArray(raw) ? raw.filter(c => c.is_franchise) : [];
+        }
+    });
 
     const [formData, setFormData] = useState({
         name: '',
@@ -32,6 +44,8 @@ const Franchise = () => {
         state: '',
         experience: ''
     });
+
+    const [activeCentre, setActiveCentre] = useState(null);
 
     const investorData = {
         "Financial Results": {
@@ -91,6 +105,17 @@ const Franchise = () => {
             ]
         }
     };
+
+    const handleCentreHover = (centre) => {
+        setActiveCentre(centre);
+    };
+
+    // Set initial active centre
+    React.useEffect(() => {
+        if (centres && centres.length > 0 && !activeCentre) {
+            setActiveCentre(centres[0]);
+        }
+    }, [centres, activeCentre]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -287,6 +312,137 @@ const Franchise = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Our Current Franchises Section */}
+            {centres && centres.length > 0 && (
+                <section className="py-24 bg-white border-y border-slate-100">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                            <div className="max-w-2xl">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full border border-orange-100 mb-6"
+                                >
+                                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+                                    <span className="text-orange-700 text-xs font-bold uppercase tracking-wider">Our Trusted Partners</span>
+                                </motion.div>
+
+                                <motion.h2
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.1 }}
+                                    className="text-4xl md:text-5xl font-black text-slate-900 leading-tight mb-6 uppercase"
+                                >
+                                    Our Current <br />
+                                    <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">Franchise Network</span>
+                                </motion.h2>
+
+                                <motion.p
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.2 }}
+                                    className="text-lg font-medium text-slate-500 max-w-xl"
+                                >
+                                    Join our successful network of educational entrepreneurs who are transforming lives in their local communities.
+                                </motion.p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col lg:flex-row gap-8 items-start relative">
+                            {/* Centres Grid */}
+                            <div className="w-full lg:w-[65%] order-2 lg:order-1">
+                                <div className="grid sm:grid-cols-2 gap-6 relative">
+                                    {centres.map((centre, idx) => (
+                                        <motion.div
+                                            key={centre.id}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: idx * 0.1 }}
+                                            onMouseEnter={() => handleCentreHover(centre)}
+                                        >
+                                            <CentreCard centre={centre} />
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Interactive Map Visualizer */}
+                            <div className="w-full lg:w-[35%] lg:sticky lg:top-40 order-1 lg:order-2 self-start">
+                                <motion.div
+                                    layoutId="map-container"
+                                    className="bg-slate-900 rounded-[32px] overflow-hidden border-[6px] border-slate-100 shadow-xl relative group"
+                                >
+                                    <div className="absolute inset-0 bg-orange-500/5 pointer-events-none z-10" />
+
+                                    <div className="aspect-square w-full relative">
+                                        {activeCentre?.location ? (
+                                            <iframe
+                                                key={activeCentre.id}
+                                                src={activeCentre.location.includes('iframe') ? activeCentre.location.match(/src="([^"]+)"/)?.[1] : activeCentre.location}
+                                                width="100%"
+                                                height="100%"
+                                                style={{ border: 0, filter: 'grayscale(0.2) contrast(1.1)' }}
+                                                allowFullScreen
+                                                loading="lazy"
+                                                title="Centre Location"
+                                                className="group-hover:grayscale-0 transition-all duration-700"
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-slate-800">
+                                                <MapPinIcon className="w-20 h-20 text-slate-600 mb-6 animate-bounce" />
+                                                <h3 className="text-2xl font-black text-white mb-2">Location Ready</h3>
+                                                <p className="text-slate-400 font-medium">Hover over a centre to see its location.</p>
+                                            </div>
+                                        )}
+
+                                        {/* Overlay Details */}
+                                        <div className="absolute bottom-6 left-6 right-6">
+                                            <div className="bg-white/90 backdrop-blur-xl p-5 rounded-3xl border border-white/20 shadow-2xl transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                                                        <MapPinIcon className="w-6 h-6 text-white" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="font-black text-slate-900 leading-none mb-1">{activeCentre?.centre}</h4>
+                                                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{activeCentre?.district}, {activeCentre?.state}</p>
+                                                    </div>
+                                                    <a
+                                                        href={activeCentre?.location}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-3 bg-slate-100 rounded-xl hover:bg-orange-100 hover:text-orange-600 transition-colors"
+                                                    >
+                                                        <ChevronRightIcon className="w-5 h-5" />
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+
+                                {/* Quick Stats Grid */}
+                                <div className="grid grid-cols-2 gap-4 mt-8">
+                                    <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
+                                        <div className="text-3xl font-black text-slate-900 mb-1">{centres.length}</div>
+                                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Franchise Centres</div>
+                                    </div>
+                                    <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
+                                        <div className="text-3xl font-black text-slate-900 mb-1">
+                                            {new Set(centres.map(c => c.state)).size}
+                                        </div>
+                                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">States Active</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Franchise Inquiry Form */}
             <section className="py-20 bg-white" id="inquiry-form">
