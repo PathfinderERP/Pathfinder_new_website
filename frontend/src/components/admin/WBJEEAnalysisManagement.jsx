@@ -70,6 +70,24 @@ const WBJEEAnalysisManagement = () => {
         fetchData();
     }, [fetchData]);
 
+    useEffect(() => {
+        const originalTitle = document.title;
+        const metaDesc = document.querySelector('meta[name="description"]');
+        const originalDescription = metaDesc ? metaDesc.getAttribute('content') : '';
+
+        document.title = "WBJEE Hub Configuration & Cloud Resource Manager | Pathfinder Admin";
+        if (metaDesc) {
+            metaDesc.setAttribute('content', "Manage the WBJEE 2026 answer key, subject-wise analysis, and expert video solutions.");
+        }
+
+        return () => {
+            document.title = originalTitle;
+            if (metaDesc) {
+                metaDesc.setAttribute('content', originalDescription);
+            }
+        };
+    }, []);
+
     const handleInputChange = (field, value) => {
         setConfig(prev => ({ ...prev, [field]: value }));
     };
