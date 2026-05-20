@@ -144,6 +144,7 @@ INSTALLED_APPS = [
     'neet',
     'jee',
     'site_config',
+    'custom_pages',
 ]
 
 

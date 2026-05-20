@@ -58,4 +58,6 @@ urlpatterns = [
     path('api/jee/', include('jee.urls')), # JEE Hub API
     path('api/business/admin/jee/', include('jee.urls')), # Admin JEE
     path('api/site-config/', include('site_config.urls')),
+    path('api/custom-pages/', include('custom_pages.urls')),
+    path('api/business/admin/custom-pages/', include('custom_pages.urls')),
 ]

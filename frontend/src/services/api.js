@@ -718,3 +718,16 @@ export const siteConfigAPI = {
   createPopup: (data) => api.post("/api/site-config/admin/popup-config/", data),
   deletePopup: (id) => api.delete(`/api/site-config/admin/popup-config/${id}/`),
 };
+
+// Custom Pages CMS API
+export const customPagesAPI = {
+  getAll: () => api.get("/api/custom-pages/pages/"),
+  getById: (id) => api.get(`/api/custom-pages/pages/${id}/`),
+  getBySlug: (slug) => api.get(`/api/custom-pages/pages/by-slug/?slug=${slug}`),
+  create: (data) => api.post("/api/business/admin/custom-pages/pages/", data),
+  update: (id, data) => api.patch(`/api/business/admin/custom-pages/pages/${id}/`, data),
+  delete: (id) => api.delete(`/api/business/admin/custom-pages/pages/${id}/`),
+  uploadImage: (id, formData) => api.post(`/api/business/admin/custom-pages/pages/${id}/upload-image/`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  })
+};

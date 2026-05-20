@@ -62,7 +62,8 @@ class AdminInviteSerializer(serializers.Serializer):
 
 class AdminPermissionUpdateSerializer(serializers.Serializer):
     permissions = serializers.ListField(
-        child=serializers.ChoiceField(choices=Admin.AVAILABLE_PERMISSIONS)
+        child=serializers.ChoiceField(choices=Admin.AVAILABLE_PERMISSIONS),
+        required=False
     )
     is_active = serializers.BooleanField(required=False)
 

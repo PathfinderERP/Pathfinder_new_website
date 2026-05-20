@@ -43,7 +43,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         { name: "NEET Analysis", path: "/business/admin/neet-analysis", icon: PresentationChartLineIcon, permission: "manage_blogs" },
         { name: "JEE Analysis", path: "/business/admin/jee-analysis", icon: PresentationChartLineIcon, permission: "manage_blogs" },
         { name: "Prediction Popup", path: "/business/admin/popups", icon: RocketLaunchIcon, permission: "manage_blogs" },
-
+        { name: "Custom Pages", path: "/business/admin/custom-pages", icon: DocumentTextIcon, permission: "manage_blogs" },
     ];
 
     // Filter items based on permissions

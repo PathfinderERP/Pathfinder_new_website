@@ -18,6 +18,7 @@ import Schedule from "../pages/DigitalPart/Schedule";
 import Chats from "../pages/DigitalPart/Chats";
 import ProtectedRoute from "../components/ProtectedRoute";
 import NotFound from "../pages/Notfound/NotFound";
+import CustomPageRenderer from "../pages/CustomPageRenderer";
 import Foundation from "../pages/Courses/Foundation";
 import AllIndia from "../pages/Courses/AllIndia";
 import Boards from "../pages/Courses/Boards";
@@ -68,6 +69,7 @@ import AnnouncementManagement from "../components/admin/AnnouncementManagement";
 import WBJEEAnalysisManagement from "../components/admin/WBJEEAnalysisManagement.jsx";
 import NEETAnalysisManagement from "../components/admin/NEETAnalysisManagement.jsx";
 import JEEAnalysisManagement from "../components/admin/JEEAnalysisManagement.jsx";
+import CustomPagesManagement from "../components/admin/CustomPagesManagement.jsx";
 import AdsLeadsList from "../components/admin/AdsLeadsList";
 import FranchiseInquiryList from "../components/admin/FranchiseInquiryList";
 import PopupManagement from "../components/admin/PopupManagement";
@@ -607,6 +609,17 @@ const AppRoutes = () => {
         }
       />
 
+      <Route
+        path="/business/admin/custom-pages"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_blogs">
+            <AdminLayout>
+              <CustomPagesManagement />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
+
       {/* Users Management */}
       <Route
         path="/business/admin/users"
@@ -746,6 +759,16 @@ const AppRoutes = () => {
         element={
           <MainLayout>
             <PrivacyPolicy />
+          </MainLayout>
+        }
+      />
+
+      {/* Dynamic CMS Custom Pages */}
+      <Route
+        path="/:slug"
+        element={
+          <MainLayout>
+            <CustomPageRenderer />
           </MainLayout>
         }
       />
