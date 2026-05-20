@@ -58,17 +58,43 @@ const WBJEEAnswerKey = () => {
             const metaDesc = document.querySelector('meta[name="description"]');
             const originalDescription = metaDesc ? metaDesc.getAttribute('content') : '';
 
-            let metaTitle = dynamicConfig.meta_title;
-            if (!metaTitle || metaTitle.trim().toLowerCase() === "wbjee answer key 2026") {
-                metaTitle = "WBJEE 2026 Answer Key, Analysis & Solutions | Pathfinder";
-            }
+            const capitalizeTitle = (title) => {
+                if (!title) return "WBJEE 2026 Answer Key By Pathfinder";
+                const trimmed = title.trim();
+                const lower = trimmed.toLowerCase();
+                if (lower === "wbjee answer key 2026" || lower === "wbjee 2026 answer key by pathfinder" || lower === "wbjee 2026") {
+                    return "WBJEE 2026 Answer Key By Pathfinder";
+                }
+                if (trimmed === lower) {
+                    return trimmed.split(' ').map(word => {
+                        const w = word.toLowerCase();
+                        if (w === 'wbjee') return 'WBJEE';
+                        return w.charAt(0).toUpperCase() + w.slice(1);
+                    }).join(' ');
+                }
+                return trimmed;
+            };
+
+            const formatDescription = (desc) => {
+                if (!desc) return "Get the latest WBJEE 2026 Answer Key by Pathfinder with accurate solutions, score analysis, and quick result prediction updates.";
+                const trimmed = desc.trim();
+                const lower = trimmed.toLowerCase();
+                if (lower === "wbjee answer key 2026" || lower === "wbjee 2026 answer key by pathfinder" || lower === "wbjee 2026") {
+                    return "Get the latest WBJEE 2026 Answer Key by Pathfinder with accurate solutions, score analysis, and quick result prediction updates.";
+                }
+                if (trimmed === lower) {
+                    let formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+                    formatted = formatted.replace(/\bwbjee\b/gi, 'WBJEE');
+                    return formatted;
+                }
+                return trimmed;
+            };
+
+            const metaTitle = capitalizeTitle(dynamicConfig.meta_title);
             document.title = metaTitle;
 
             if (metaDesc) {
-                let metaDescription = dynamicConfig.meta_description;
-                if (!metaDescription || metaDescription.trim().toLowerCase() === "wbjee answer key 2026") {
-                    metaDescription = "Get the latest WBJEE 2026 Answer Key by Pathfinder with accurate solutions, score analysis, and quick result prediction updates.";
-                }
+                const metaDescription = formatDescription(dynamicConfig.meta_description);
                 metaDesc.setAttribute('content', metaDescription);
             }
 
@@ -508,8 +534,8 @@ const WBJEEAnswerKey = () => {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        {videos.map((video) => (
-                            <div key={video.id} className="group">
+                        {videos.map((video, idx) => (
+                            <div key={video._id || video.id || `video-${idx}`} className="group">
                                 <h4 className="oswald text-xl uppercase mb-1 text-slate-900 group-hover:text-orange-600 transition-colors tracking-tight">
                                     {video.label}
                                 </h4>
