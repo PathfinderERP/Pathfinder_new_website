@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { neetAPI } from "../../services/api";
+import { jeeAPI } from "../../services/api";
 import LoadingSpinner from "../common/LoadingSpinner";
 import {
     CloudArrowUpIcon,
@@ -19,7 +19,7 @@ import {
     TableCellsIcon
 } from "@heroicons/react/24/outline";
 
-const NEETAnalysisManagement = () => {
+const JEEAnalysisManagement = () => {
     const [config, setConfig] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -30,33 +30,33 @@ const NEETAnalysisManagement = () => {
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await neetAPI.getLatest();
+            const response = await jeeAPI.getLatest();
             setConfig(response.data);
             setError("");
         } catch (err) {
-            console.error("Error fetching NEET config:", err);
+            console.error("Error fetching JEE config:", err);
             if (err.response?.status === 404) {
                 // Initialize empty config if none exists
                 setConfig({
-                    title: "NEET 2026: Answer Key & Analysis",
+                    title: "JEE 2026: Answer Key & Analysis",
                     description: "",
                     sub_description: "",
                     hero_image_url: "",
-                    meta_title: "NEET 2026: Answer Key & Analysis | Pathfinder",
-                    meta_description: "Download the NEET 2026 Answer Key, subject-wise analysis, and video solutions prepared by Pathfinder experts.",
+                    meta_title: "JEE 2026: Answer Key & Analysis | Pathfinder",
+                    meta_description: "Download the JEE 2026 Answer Key, subject-wise analysis, and video solutions prepared by Pathfinder experts.",
                     custom_meta_tags: [
-                        { name: "keywords", content: "NEET 2026, Answer Key, Pathfinder, Medical Entrance", property: false },
+                        { name: "keywords", content: "JEE 2026, Answer Key, Pathfinder, Engineering Entrance", property: false },
                         { name: "og:type", content: "website", property: true }
                     ],
                     resources: [
-                        { subject: "Biology", icon: "🌱", weightage_url: "", pdf_url: "", video_url: "", bg_color: "bg-green-50" },
+                        { subject: "Mathematics", icon: "📐", weightage_url: "", pdf_url: "", video_url: "", bg_color: "bg-blue-50" },
                         { subject: "Physics", icon: "⚛️", weightage_url: "", pdf_url: "", video_url: "", bg_color: "bg-orange-50" },
                         { subject: "Chemistry", icon: "🧪", weightage_url: "", pdf_url: "", video_url: "", bg_color: "bg-emerald-50" }
                     ],
                     marks_division: [
-                        { subject: "Biology (Botany + Zoology)", questions: "100 (Attempt 90)", marks: "360", weightage: "50%" },
-                        { subject: "Physics", questions: "50 (Attempt 45)", marks: "180", weightage: "25%" },
-                        { subject: "Chemistry", questions: "50 (Attempt 45)", marks: "180", weightage: "25%" },
+                        { subject: "Mathematics", questions: "30 (Attempt 25)", marks: "100", weightage: "33.33%" },
+                        { subject: "Physics", questions: "30 (Attempt 25)", marks: "100", weightage: "33.33%" },
+                        { subject: "Chemistry", questions: "30 (Attempt 25)", marks: "100", weightage: "33.33%" },
                     ],
                     videos: [],
                     custom_html: ""
@@ -78,9 +78,9 @@ const NEETAnalysisManagement = () => {
         const metaDesc = document.querySelector('meta[name="description"]');
         const originalDescription = metaDesc ? metaDesc.getAttribute('content') : '';
 
-        document.title = "NEET Hub Configuration & Cloud Resource Manager | Pathfinder Admin";
+        document.title = "JEE Hub Configuration & Cloud Resource Manager | Pathfinder Admin";
         if (metaDesc) {
-            metaDesc.setAttribute('content', "Manage the NEET 2026 answer key, subject-wise analysis, and expert video solutions.");
+            metaDesc.setAttribute('content', "Manage the JEE 2026 answer key, subject-wise analysis, and expert video solutions.");
         }
 
         return () => {
@@ -125,7 +125,7 @@ const NEETAnalysisManagement = () => {
 
         try {
             setSaving(true);
-            const response = await neetAPI.uploadFile(config.id, formData);
+            const response = await jeeAPI.uploadFile(config.id, formData);
             
             if (subjectIndex !== null) {
                 handleResourceChange(subjectIndex, type === 'weightage' ? 'weightage_url' : 'pdf_url', response.data.url);
@@ -150,7 +150,7 @@ const NEETAnalysisManagement = () => {
 
             // 1. Initial save/create if no ID (needed for file upload)
             if (!currentConfigId) {
-                const response = await neetAPI.create(config);
+                const response = await jeeAPI.create(config);
                 currentConfigId = response.data.id;
                 finalConfig = response.data;
                 setConfig(response.data);
@@ -162,13 +162,13 @@ const NEETAnalysisManagement = () => {
                 formData.append("file", pendingHeroImage);
                 formData.append("type", "hero_image");
                 
-                const uploadRes = await neetAPI.uploadFile(currentConfigId, formData);
+                const uploadRes = await jeeAPI.uploadFile(currentConfigId, formData);
                 finalConfig.hero_image_url = uploadRes.data.url;
                 setPendingHeroImage(null);
             }
 
             // 3. Final update with all changes
-            const updateRes = await neetAPI.update(currentConfigId, finalConfig);
+            const updateRes = await jeeAPI.update(currentConfigId, finalConfig);
             setConfig(updateRes.data);
 
             setSuccess("Configuration synced and Cloudflare assets updated!");
@@ -202,7 +202,7 @@ const NEETAnalysisManagement = () => {
                 <div className="text-center md:text-left">
                     <h1 className="text-xl md:text-3xl font-black text-slate-900 dark:text-white flex items-center justify-center md:justify-start gap-2 md:gap-3">
                         <PresentationChartLineIcon className="w-6 h-6 md:w-10 md:h-10 text-orange-600" />
-                        NEET Hub
+                        JEE Hub
                     </h1>
                     <p className="text-slate-500 font-medium mt-1 uppercase tracking-widest text-[8px] md:text-xs">Page Configuration & Cloud Resource Manager</p>
                 </div>
@@ -336,7 +336,7 @@ const NEETAnalysisManagement = () => {
                                     value={config.meta_title || ""}
                                     onChange={(e) => handleInputChange('meta_title', e.target.value)}
                                     className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-orange-500 rounded-2xl outline-none transition font-bold text-blue-600 resize-none min-h-[58px]"
-                                    placeholder="e.g. NEET 2026 Answer Key & Solutions | Pathfinder"
+                                    placeholder="e.g. JEE 2026 Answer Key & Solutions | Pathfinder"
                                 />
                                 <p className="text-[10px] text-slate-400 mt-1 font-medium italic">Recommended: 50-60 characters</p>
                             </div>
@@ -685,7 +685,7 @@ const NEETAnalysisManagement = () => {
                                                 newVids[idx].download_url = e.target.value;
                                                 handleInputChange('videos', newVids);
                                             }}
-                                            placeholder="Download URL (Optional)"
+                                            placeholder="R2 Material Link (Optional)"
                                             rows="2"
                                             className="w-full bg-slate-100 dark:bg-slate-700/50 rounded-xl px-3 py-2 text-[10px] text-slate-600 dark:text-slate-400 outline-none border border-transparent focus:border-orange-500 transition font-medium"
                                         />
@@ -693,52 +693,34 @@ const NEETAnalysisManagement = () => {
                                 </div>
                             ))}
                             <button 
-                                onClick={() => handleInputChange('videos', [...config.videos, { label: "New Video", url: "", description: "" }])}
-                                className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl text-slate-400 hover:text-orange-600 hover:border-orange-500 transition flex items-center justify-center gap-2 text-xs font-bold uppercase"
+                                onClick={() => handleInputChange('videos', [...(config.videos || []), { label: "", url: "", description: "", download_url: "" }])}
+                                className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl hover:border-orange-500 hover:text-orange-500 transition text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center justify-center gap-2"
                             >
-                                <PlusIcon className="w-5 h-5" />
-                                Add Video Card
+                                <PlusIcon className="w-4 h-4" /> Add Video
                             </button>
                         </div>
                     </section>
 
+                    {/* Custom HTML & JS Section */}
                     <section className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
                         <div className="flex items-center gap-2 mb-4">
                             <CodeBracketIcon className="w-6 h-6 text-orange-500" />
-                            <h2 className="text-xl font-black uppercase tracking-tight">Custom HTML Section</h2>
+                            <h2 className="text-xl font-black uppercase tracking-tight">Custom HTML Injection</h2>
                         </div>
                         
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-[0.2em]">Raw HTML Content</label>
-                            <textarea 
-                                rows="10"
-                                value={config.custom_html || ""}
-                                onChange={(e) => handleInputChange('custom_html', e.target.value)}
-                                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-orange-500 rounded-2xl outline-none transition font-mono text-[11px] text-slate-600 dark:text-slate-400"
-                                placeholder="<div>Your custom HTML here...</div>"
-                            />
-                            <p className="text-[10px] text-slate-400 mt-2 font-medium italic">
-                                Use this section to add custom tables, announcements, or specialized tracking scripts.
-                            </p>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-[0.2em]">HTML/JS Code</label>
+                                <textarea 
+                                    rows="12"
+                                    value={config.custom_html || ""}
+                                    onChange={(e) => handleInputChange('custom_html', e.target.value)}
+                                    className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-orange-500 rounded-2xl outline-none transition font-mono text-[10px] font-bold text-slate-600 dark:text-slate-300"
+                                    placeholder="<div class='custom-banner'>...</div>"
+                                />
+                                <p className="text-[10px] text-slate-400 mt-1 font-medium italic">Warning: Do not inject unverified script tags as it can break frontend client pages.</p>
+                            </div>
                         </div>
-                    </section>
-
-                    <section className="bg-slate-900 p-8 rounded-[2.5rem] text-white space-y-4">
-                        <h3 className="text-sm font-black uppercase text-orange-500 tracking-[0.2em]">Quick Help</h3>
-                        <ul className="text-xs text-slate-400 space-y-3 font-medium">
-                            <li className="flex gap-2">
-                                <span className="text-orange-500">•</span>
-                                Always click "Sync Changes" after uploading PDFs or updating links.
-                            </li>
-                            <li className="flex gap-2">
-                                <span className="text-orange-500">•</span>
-                                Use "Embed" URLs for YouTube videos (e.g. youtube.com/embed/...) for best player performance.
-                            </li>
-                            <li className="flex gap-2">
-                                <span className="text-orange-500">•</span>
-                                The Hero Image is gated behind R2 storage for ultra-fast loading.
-                            </li>
-                        </ul>
                     </section>
                 </div>
             </div>
@@ -746,4 +728,4 @@ const NEETAnalysisManagement = () => {
     );
 };
 
-export default NEETAnalysisManagement;
+export default JEEAnalysisManagement;

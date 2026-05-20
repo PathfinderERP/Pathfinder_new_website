@@ -142,6 +142,7 @@ INSTALLED_APPS = [
     'announcements',
     'wbjee',
     'neet',
+    'jee',
     'site_config',
 ]
 

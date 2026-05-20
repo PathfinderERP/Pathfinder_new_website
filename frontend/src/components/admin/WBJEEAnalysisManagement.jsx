@@ -172,7 +172,20 @@ const WBJEEAnalysisManagement = () => {
             setTimeout(() => setSuccess(""), 3000);
         } catch (err) {
             console.error("Save error:", err);
-            setError("Failed to save configuration.");
+            const serverError = err.response?.data;
+            let errorMsg = "Failed to save configuration.";
+            if (serverError) {
+                if (typeof serverError === 'object') {
+                    errorMsg += " Details: " + Object.entries(serverError)
+                        .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : JSON.stringify(val)}`)
+                        .join(' | ');
+                } else if (typeof serverError === 'string') {
+                    errorMsg += " Details: " + serverError;
+                }
+            } else if (err.message) {
+                errorMsg += " Error: " + err.message;
+            }
+            setError(errorMsg);
         } finally {
             setSaving(false);
         }

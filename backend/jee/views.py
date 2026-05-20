@@ -3,17 +3,17 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_mongoengine import viewsets as mongo_viewsets
 from rest_framework.decorators import action
-from .models import NEETHub
-from .serializers import NEETHubSerializer
+from .models import JEEHub
+from .serializers import JEEHubSerializer
 from contact_backend.utils.r2_storage import upload_to_r2
 
-class NEETHubViewSet(mongo_viewsets.ModelViewSet):
+class JEEHubViewSet(mongo_viewsets.ModelViewSet):
     """
-    ViewSet for managing NEET Hub content and resources
+    ViewSet for managing JEE Hub content and resources
     """
-    serializer_class = NEETHubSerializer
+    serializer_class = JEEHubSerializer
     lookup_field = 'id'
-    queryset = NEETHub.objects.all()
+    queryset = JEEHub.objects.all()
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'latest']:
@@ -27,16 +27,15 @@ class NEETHubViewSet(mongo_viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         if not serializer.is_valid():
             with open("api_error.log", "a", encoding="utf-8") as f:
-                f.write(f"--- UPDATE VALIDATION FAILED ---\n")
+                f.write(f"--- JEE UPDATE VALIDATION FAILED ---\n")
                 f.write(f"Payload: {json.dumps(request.data, default=str)}\n")
                 f.write(f"Errors: {json.dumps(serializer.errors, default=str)}\n\n")
         return super().update(request, *args, **kwargs)
 
-
     @action(detail=False, methods=['get'])
     def latest(self, request):
         """Get the most recent active configuration"""
-        instance = NEETHub.objects(is_active=True).first()
+        instance = JEEHub.objects(is_active=True).first()
         if not instance:
             return Response({"error": "No active configuration found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(instance)
@@ -58,7 +57,7 @@ class NEETHubViewSet(mongo_viewsets.ModelViewSet):
 
         try:
             # Determine folder based on type
-            folder = 'neet/images' if file_type == 'hero_image' else 'neet/pdfs'
+            folder = 'jee/images' if file_type == 'hero_image' else 'jee/pdfs'
             
             # Upload to R2
             public_url = upload_to_r2(

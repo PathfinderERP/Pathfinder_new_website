@@ -20,6 +20,18 @@ class WBJEEHubViewSet(mongo_viewsets.ModelViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
 
+    def update(self, request, *args, **kwargs):
+        import json
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if not serializer.is_valid():
+            with open("api_error.log", "a", encoding="utf-8") as f:
+                f.write(f"--- WBJEE UPDATE VALIDATION FAILED ---\n")
+                f.write(f"Payload: {json.dumps(request.data, default=str)}\n")
+                f.write(f"Errors: {json.dumps(serializer.errors, default=str)}\n\n")
+        return super().update(request, *args, **kwargs)
+
     @action(detail=False, methods=['get'])
     def latest(self, request):
         """Get the most recent active configuration"""

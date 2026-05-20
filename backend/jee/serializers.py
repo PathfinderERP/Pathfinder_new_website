@@ -1,9 +1,9 @@
 from rest_framework_mongoengine import serializers
-from .models import WBJEEHub
+from .models import JEEHub
 
-class WBJEEHubSerializer(serializers.DocumentSerializer):
+class JEEHubSerializer(serializers.DocumentSerializer):
     class Meta:
-        model = WBJEEHub
+        model = JEEHub
         fields = '__all__'
         extra_kwargs = {
             'description': {'allow_blank': True, 'required': False},

@@ -699,6 +699,17 @@ export const neetAPI = {
   })
 };
 
+// JEE Hub API
+export const jeeAPI = {
+  getLatest: () => api.get("/api/jee/jee-hub/latest/"),
+  getById: (id) => api.get(`/api/jee/jee-hub/${id}/`),
+  create: (data) => api.post("/api/business/admin/jee/jee-hub/", data),
+  update: (id, data) => api.patch(`/api/business/admin/jee/jee-hub/${id}/`, data),
+  uploadFile: (id, formData) => api.post(`/api/business/admin/jee/jee-hub/${id}/upload_file/`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  })
+};
+
 // Site Config API
 export const siteConfigAPI = {
   getPopupLatest: () => api.get("/api/site-config/public/popup-config/latest/"),

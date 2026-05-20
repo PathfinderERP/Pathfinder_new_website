@@ -55,5 +55,7 @@ urlpatterns = [
     path('api/business/admin/wbjee/', include('wbjee.urls')), # Admin WBJEE
     path('api/neet/', include('neet.urls')), # NEET Hub API
     path('api/business/admin/neet/', include('neet.urls')), # Admin NEET
+    path('api/jee/', include('jee.urls')), # JEE Hub API
+    path('api/business/admin/jee/', include('jee.urls')), # Admin JEE
     path('api/site-config/', include('site_config.urls')),
 ]

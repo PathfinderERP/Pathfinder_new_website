@@ -41,7 +41,9 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         { name: "Jobs", path: "/business/admin/jobs", icon: BriefcaseIcon, permission: "manage_applications" },
         { name: "WBJEE Analysis", path: "/business/admin/wbjee-analysis", icon: PresentationChartLineIcon, permission: "manage_blogs" },
         { name: "NEET Analysis", path: "/business/admin/neet-analysis", icon: PresentationChartLineIcon, permission: "manage_blogs" },
+        { name: "JEE Analysis", path: "/business/admin/jee-analysis", icon: PresentationChartLineIcon, permission: "manage_blogs" },
         { name: "Prediction Popup", path: "/business/admin/popups", icon: RocketLaunchIcon, permission: "manage_blogs" },
+
     ];
 
     // Filter items based on permissions
