@@ -688,6 +688,17 @@ export const wbjeeAPI = {
   })
 };
 
+// NEET Hub API
+export const neetAPI = {
+  getLatest: () => api.get("/api/neet/neet-hub/latest/"),
+  getById: (id) => api.get(`/api/neet/neet-hub/${id}/`),
+  create: (data) => api.post("/api/business/admin/neet/neet-hub/", data),
+  update: (id, data) => api.patch(`/api/business/admin/neet/neet-hub/${id}/`, data),
+  uploadFile: (id, formData) => api.post(`/api/business/admin/neet/neet-hub/${id}/upload_file/`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  })
+};
+
 // Site Config API
 export const siteConfigAPI = {
   getPopupLatest: () => api.get("/api/site-config/public/popup-config/latest/"),

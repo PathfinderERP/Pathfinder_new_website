@@ -40,6 +40,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         { name: "Top Banner", path: "/business/admin/announcements", icon: MegaphoneIcon, permission: "manage_blogs" },
         { name: "Jobs", path: "/business/admin/jobs", icon: BriefcaseIcon, permission: "manage_applications" },
         { name: "WBJEE Analysis", path: "/business/admin/wbjee-analysis", icon: PresentationChartLineIcon, permission: "manage_blogs" },
+        { name: "NEET Analysis", path: "/business/admin/neet-analysis", icon: PresentationChartLineIcon, permission: "manage_blogs" },
         { name: "Prediction Popup", path: "/business/admin/popups", icon: RocketLaunchIcon, permission: "manage_blogs" },
     ];
 

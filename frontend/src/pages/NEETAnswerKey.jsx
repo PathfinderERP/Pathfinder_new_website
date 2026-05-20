@@ -18,10 +18,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { Link, useNavigate } from 'react-router-dom';
 import BlogEnrollmentForm from '../components/blog/BlogEnrollmentForm';
-import { wbjeeAPI } from '../services/api';
+import { neetAPI } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
-const WBJEEAnswerKey = () => {
+const NEETAnswerKey = () => {
     const navigate = useNavigate();
     const [isEnrolled, setIsEnrolled] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -31,14 +31,13 @@ const WBJEEAnswerKey = () => {
     const [dynamicConfig, setDynamicConfig] = useState(null);
     const [loading, setLoading] = useState(true);
 
-
     useEffect(() => {
         const fetchConfig = async () => {
             try {
-                const response = await wbjeeAPI.getLatest();
+                const response = await neetAPI.getLatest();
                 setDynamicConfig(response.data);
             } catch (err) {
-                console.error("Error fetching WBJEE config:", err);
+                console.error("Error fetching NEET config:", err);
             } finally {
                 setLoading(false);
             }
@@ -59,16 +58,16 @@ const WBJEEAnswerKey = () => {
             const originalDescription = metaDesc ? metaDesc.getAttribute('content') : '';
 
             const capitalizeTitle = (title) => {
-                if (!title) return "WBJEE 2026 Answer Key By Pathfinder";
+                if (!title) return "NEET 2026 Answer Key By Pathfinder";
                 const trimmed = title.trim();
                 const lower = trimmed.toLowerCase();
-                if (lower === "wbjee answer key 2026" || lower === "wbjee 2026 answer key by pathfinder" || lower === "wbjee 2026") {
-                    return "WBJEE 2026 Answer Key By Pathfinder";
+                if (lower === "neet answer key 2026" || lower === "neet 2026 answer key by pathfinder" || lower === "neet 2026") {
+                    return "NEET 2026 Answer Key By Pathfinder";
                 }
                 if (trimmed === lower) {
                     return trimmed.split(' ').map(word => {
                         const w = word.toLowerCase();
-                        if (w === 'wbjee') return 'WBJEE';
+                        if (w === 'neet') return 'NEET';
                         return w.charAt(0).toUpperCase() + w.slice(1);
                     }).join(' ');
                 }
@@ -76,15 +75,15 @@ const WBJEEAnswerKey = () => {
             };
 
             const formatDescription = (desc) => {
-                if (!desc) return "Get the latest WBJEE 2026 Answer Key by Pathfinder with accurate solutions, score analysis, and quick result prediction updates.";
+                if (!desc) return "Get the latest NEET 2026 Answer Key by Pathfinder with accurate solutions, score analysis, and quick result prediction updates.";
                 const trimmed = desc.trim();
                 const lower = trimmed.toLowerCase();
-                if (lower === "wbjee answer key 2026" || lower === "wbjee 2026 answer key by pathfinder" || lower === "wbjee 2026") {
-                    return "Get the latest WBJEE 2026 Answer Key by Pathfinder with accurate solutions, score analysis, and quick result prediction updates.";
+                if (lower === "neet answer key 2026" || lower === "neet 2026 answer key by pathfinder" || lower === "neet 2026") {
+                    return "Get the latest NEET 2026 Answer Key by Pathfinder with accurate solutions, score analysis, and quick result prediction updates.";
                 }
                 if (trimmed === lower) {
                     let formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
-                    formatted = formatted.replace(/\bwbjee\b/gi, 'WBJEE');
+                    formatted = formatted.replace(/\bneet\b/gi, 'NEET');
                     return formatted;
                 }
                 return trimmed;
@@ -141,7 +140,6 @@ const WBJEEAnswerKey = () => {
         }
     }, [dynamicConfig]);
 
-
     const handleDownload = (url) => {
         if (isEnrolled) {
             window.open(url, '_blank');
@@ -182,37 +180,35 @@ const WBJEEAnswerKey = () => {
 
     const handleShare = () => {
         const shareData = {
-            title: dynamicConfig?.meta_title || "WBJEE 2026 Answer Key & Analysis",
-            text: dynamicConfig?.meta_description || "Check out the official WBJEE 2026 answer key and expert analysis by Pathfinder.",
+            title: dynamicConfig?.meta_title || "NEET 2026 Answer Key & Analysis",
+            text: dynamicConfig?.meta_description || "Check out the official NEET 2026 answer key and expert analysis by Pathfinder.",
             url: window.location.href
         };
 
         if (navigator.share) {
             navigator.share(shareData).catch(console.error);
         } else {
-            // Fallback: Copy to clipboard or open social links
             navigator.clipboard.writeText(window.location.href);
             alert("Link copied to clipboard!");
         }
     };
 
     const shareOnWhatsApp = () => {
-        const text = encodeURIComponent(`${dynamicConfig?.meta_title || "WBJEE 2026 Answer Key & Analysis"}\n${window.location.href}`);
+        const text = encodeURIComponent(`${dynamicConfig?.meta_title || "NEET 2026 Answer Key & Analysis"}\n${window.location.href}`);
         window.open(`https://wa.me/?text=${text}`, '_blank');
     };
 
-
     const marksData = dynamicConfig?.marks_division?.length > 0 ? dynamicConfig.marks_division : [
-        { subject: "Mathematics", questions: "75 (Cat 1: 50, Cat 2: 15, Cat 3: 10)", marks: "100", weightage: "50%" },
-        { subject: "Physics", questions: "40 (Cat 1: 30, Cat 2: 5, Cat 3: 5)", marks: "50", weightage: "25%" },
-        { subject: "Chemistry", questions: "40 (Cat 1: 30, Cat 2: 5, Cat 3: 5)", marks: "50", weightage: "25%" },
+        { subject: "Biology (Botany + Zoology)", questions: "100 (Attempt 90)", marks: "360", weightage: "50%" },
+        { subject: "Physics", questions: "50 (Attempt 45)", marks: "180", weightage: "25%" },
+        { subject: "Chemistry", questions: "50 (Attempt 45)", marks: "180", weightage: "25%" },
     ];
 
     const resources = dynamicConfig?.resources?.length > 0 ? dynamicConfig.resources : [
         {
-            subject: "Mathematics",
-            icon: "📐",
-            bg_color: "bg-yellow-50",
+            subject: "Biology",
+            icon: "🌱",
+            bg_color: "bg-green-50",
             weightage_url: "https://drive.google.com/file/d/1sC7QCiztc-_7_ilkKpeJpy1roCP_m5CN/view?usp=sharing",
             pdf_url: "https://drive.google.com/file/d/1r7LxJgvyEPatmZr07l2eSvKsGS-dHQrL/view?usp=sharing",
             video_url: "https://www.youtube.com/live/uUZqQD_1_ow?si=_zWeo8y8Hqx53yOL"
@@ -257,9 +253,7 @@ const WBJEEAnswerKey = () => {
         return videoId ? `https://www.youtube.com/embed/${videoId}?vq=hd1080` : url;
     };
 
-
     if (loading) return <div className="min-h-screen flex items-center justify-center"><LoadingSpinner /></div>;
-
 
     return (
         <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-orange-100 selection:text-orange-900 relative">
@@ -277,7 +271,7 @@ const WBJEEAnswerKey = () => {
             <div className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden bg-slate-900">
                 <img
                     src={dynamicConfig?.hero_image_url || "/images/Header Banner.webp"}
-                    alt="WBJEE 2026 Analysis"
+                    alt="NEET 2026 Analysis"
                     className="w-full h-full object-cover object-center opacity-100"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-slate-900/20" />
@@ -293,7 +287,7 @@ const WBJEEAnswerKey = () => {
                                 Analysis Hub 2026
                             </div>
                             <h1 className="oswald text-4xl md:text-6xl lg:text-7xl uppercase text-white mb-6 leading-tight">
-                                {dynamicConfig?.title || "WBJEE 2026"}{" "}
+                                {dynamicConfig?.title || "NEET 2026"}{" "}
                                 <span className="text-orange-600 block md:inline">{dynamicConfig?.title_highlight || "Answer Key & Analysis"}</span>
                             </h1>
                             <p className="text-sm md:text-lg text-slate-300 max-w-xl font-medium leading-relaxed">
@@ -304,7 +298,6 @@ const WBJEEAnswerKey = () => {
                                     {dynamicConfig.sub_description}
                                 </div>
                             )}
-
                         </motion.div>
                     </div>
                 </div>
@@ -445,9 +438,9 @@ const WBJEEAnswerKey = () => {
                         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 gap-6 relative z-10">
                             <div>
                                 <h3 className="oswald text-3xl md:text-5xl uppercase mb-2 tracking-tight leading-none">
-                                    JEE Main & Advanced | <span className="text-orange-500">WBJEE</span>
+                                    NEET UG | <span className="text-orange-500">Medical</span> Entrance
                                 </h3>
-                                <p className="text-orange-400 font-bold uppercase tracking-[0.2em] text-[10px]">Targeting WBJEE 2026 & Beyond</p>
+                                <p className="text-orange-400 font-bold uppercase tracking-[0.2em] text-[10px]">Targeting NEET 2026 & Beyond</p>
                             </div>
                             <button
                                 onClick={handleKnowMore}
@@ -466,8 +459,8 @@ const WBJEEAnswerKey = () => {
                                 <div>
                                     <h4 className="text-xl font-bold text-white mb-2 oswald uppercase tracking-wider">Frequency</h4>
                                     <p className="text-slate-400 text-base leading-relaxed">
-                                        <span className="text-white font-bold">Instation:</span> 2 Days a Week <br />
-                                        <span className="text-white font-bold">Outstation:</span> 2 Days a Week
+                                        <span className="text-white font-bold">Instation:</span> 3-4 Days a Week <br />
+                                        <span className="text-white font-bold">Outstation:</span> 3-4 Days a Week
                                     </p>
                                 </div>
                             </div>
@@ -478,8 +471,8 @@ const WBJEEAnswerKey = () => {
                                 <div>
                                     <h4 className="text-xl font-bold text-white mb-2 oswald uppercase tracking-wider">Timings</h4>
                                     <p className="text-slate-400 text-base leading-relaxed">
-                                        <span className="text-white font-bold">Instation:</span> 12hrs / Subject / Month <br />
-                                        <span className="text-white font-bold">Outstation:</span> 12 hrs / Subject / Month
+                                        <span className="text-white font-bold">Instation:</span> 16hrs / Subject / Month <br />
+                                        <span className="text-white font-bold">Outstation:</span> 16 hrs / Subject / Month
                                     </p>
                                 </div>
                             </div>
@@ -496,12 +489,12 @@ const WBJEEAnswerKey = () => {
                                 </thead>
                                 <tbody className="text-slate-900 text-base font-bold">
                                     <tr className="border-b-2 border-black">
-                                        <td className="p-4 border-r-2 border-black italic">WBJEE Phase Test (Part Syllabus) - 5 Test</td>
-                                        <td className="p-4 italic">WBJEE Phase Test (Part Syllabus) - 5 Test</td>
+                                        <td className="p-4 border-r-2 border-black italic">NEET Phase Test (Part Syllabus) - 6 Test</td>
+                                        <td className="p-4 italic">NEET Phase Test (Part Syllabus) - 6 Test</td>
                                     </tr>
                                     <tr>
-                                        <td className="p-4 border-r-2 border-black italic">WBJEE Full Syllabus Test - 2 Test</td>
-                                        <td className="p-4 italic">WBJEE Mock Test (Full Syllabus) - 8 Test</td>
+                                        <td className="p-4 border-r-2 border-black italic">NEET Full Syllabus Test - 3 Test</td>
+                                        <td className="p-4 italic">NEET Mock Test (Full Syllabus) - 10 Test</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -563,7 +556,6 @@ const WBJEEAnswerKey = () => {
                                         Download Video Material
                                     </button>
                                 )}
-
                             </div>
                         ))}
                     </div>
@@ -599,7 +591,7 @@ const WBJEEAnswerKey = () => {
                             Help Your <span className="text-orange-500">Friends</span> Succeed!
                         </h2>
                         <p className="text-slate-400 text-lg mb-10 max-w-2xl mx-auto font-medium">
-                            Don't keep the official solutions to yourself. Share this resource hub with your peers and help them prepare better for WBJEE 2026.
+                            Don't keep the official solutions to yourself. Share this resource hub with your peers and help them prepare better for NEET 2026.
                         </p>
 
                         <div className="flex flex-wrap justify-center gap-6">
@@ -620,7 +612,6 @@ const WBJEEAnswerKey = () => {
                         </div>
                     </div>
                 </motion.section>
-
             </div>
 
             {/* Enrollment Modal */}
@@ -658,4 +649,4 @@ const WBJEEAnswerKey = () => {
     );
 };
 
-export default WBJEEAnswerKey;
+export default NEETAnswerKey;

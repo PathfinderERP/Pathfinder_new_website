@@ -66,6 +66,7 @@ import StudentCornerManagement from "../components/admin/StudentCornerManagement
 import BlogManagement from "../components/admin/BlogManagement";
 import AnnouncementManagement from "../components/admin/AnnouncementManagement";
 import WBJEEAnalysisManagement from "../components/admin/WBJEEAnalysisManagement.jsx";
+import NEETAnalysisManagement from "../components/admin/NEETAnalysisManagement.jsx";
 import AdsLeadsList from "../components/admin/AdsLeadsList";
 import FranchiseInquiryList from "../components/admin/FranchiseInquiryList";
 import PopupManagement from "../components/admin/PopupManagement";
@@ -74,6 +75,7 @@ import ContactUs from "../pages/ContactUs";
 import Blog from "../pages/Blog";
 import BlogPostDetail from "../pages/BlogPostDetail";
 import WBJEEAnswerKey from "../pages/WBJEEAnswerKey";
+import NEETAnswerKey from "../pages/NEETAnswerKey";
 import AboutUs from "../pages/About/AboutUs";
 import CEOMessage from "../pages/About/CEOMessage";
 import ChairmanMessage from "../pages/About/ChairmanMessage";
@@ -284,6 +286,14 @@ const AppRoutes = () => {
         element={
           <MainLayout>
             <WBJEEAnswerKey />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/neet-answer-key"
+        element={
+          <MainLayout>
+            <NEETAnswerKey />
           </MainLayout>
         }
       />
@@ -551,6 +561,16 @@ const AppRoutes = () => {
           <AdminProtectedRoute requiredPermission="manage_blogs">
             <AdminLayout>
               <WBJEEAnalysisManagement />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/business/admin/neet-analysis"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_blogs">
+            <AdminLayout>
+              <NEETAnalysisManagement />
             </AdminLayout>
           </AdminProtectedRoute>
         }
