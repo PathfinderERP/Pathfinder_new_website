@@ -32,6 +32,7 @@ const JEEAnswerKey = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        document.title = "JEE 2026 Answer Key By Pathfinder";
         const fetchConfig = async () => {
             try {
                 const response = await jeeAPI.getLatest();

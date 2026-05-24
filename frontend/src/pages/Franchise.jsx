@@ -372,7 +372,7 @@ const Franchise = () => {
                             </div>
 
                             {/* Interactive Map Visualizer */}
-                            <div className="w-full lg:w-[35%] lg:sticky lg:top-40 order-1 lg:order-2 self-start">
+                            <div className="relative w-full lg:w-[35%] lg:sticky lg:top-40 order-1 lg:order-2 self-start">
                                 <motion.div
                                     layoutId="map-container"
                                     className="bg-slate-900 rounded-[32px] overflow-hidden border-[6px] border-slate-100 shadow-xl relative group"
