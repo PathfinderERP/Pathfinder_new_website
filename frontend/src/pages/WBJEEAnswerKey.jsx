@@ -33,6 +33,7 @@ const WBJEEAnswerKey = () => {
 
 
     useEffect(() => {
+        document.title = "WBJEE 2026 Answer Key By Pathfinder";
         const fetchConfig = async () => {
             try {
                 const response = await wbjeeAPI.getLatest();

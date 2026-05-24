@@ -32,6 +32,7 @@ const NEETAnswerKey = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        document.title = "NEET 2026 Answer Key By Pathfinder";
         const fetchConfig = async () => {
             try {
                 const response = await neetAPI.getLatest();

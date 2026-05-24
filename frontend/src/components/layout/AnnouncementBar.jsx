@@ -150,7 +150,7 @@ const AnnouncementBar = () => {
                 <div className="flex items-center gap-3 sm:gap-4 z-20 flex-shrink-0">
                     {current.button_text && (
                         <motion.a
-                            href={current.button_link || '#'}
+                            href={current.link || '#'}
                             className="flex-shrink-0 flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-1 sm:py-1.5 bg-white/10 backdrop-blur-sm rounded-full shadow-[0_0_15px_rgba(255,255,255,0.15)] group hover:shadow-xl transition-all border sm:border-2 border-white relative overflow-hidden"
                             initial={{ scale: 1 }}
                             animate={{ 
