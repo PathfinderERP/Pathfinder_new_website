@@ -367,10 +367,11 @@ const NEETAnswerKey = () => {
                                         📄 Answer PDF Download
                                     </button>
                                     <button
-                                        onClick={() => handleDownload(res.video_url)}
+                                        // onClick={() => handleDownload(res.video_url)}
+                                        onClick={() => res.video_url && window.open(res.video_url, '_blank')}
                                         className="w-full md:w-auto px-4 py-3 md:px-5 md:py-3 bg-black border-2 border-[#FF8C00] text-white rounded-lg oswald font-bold uppercase text-xs md:text-base neo-shadow hover:bg-orange-500 hover:text-black transition-all flex items-center justify-center gap-2 whitespace-nowrap"
                                     >
-                                        {!isEnrolled && <LockClosedIcon className="w-4 h-4" />}
+                                        {/* {!isEnrolled && <LockClosedIcon className="w-4 h-4" />} */}
                                         🎥 Show Live Video Solution
                                     </button>
                                 </div>
