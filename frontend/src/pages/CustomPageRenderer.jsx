@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { customPagesAPI, coursesAPI } from "../services/api";
-import { 
-  Calendar, Users, Target, TrendingUp, Trophy, Award, 
-  Star, GraduationCap, BookOpen, Laptop, MapPin, Clock, 
-  Check, Phone, Navigation, HelpCircle, Send, CheckCircle, ArrowRight
+import { customPagesAPI, coursesAPI, centresAPI } from "../services/api";
+import {
+  Calendar, Users, Target, TrendingUp, Trophy, Award,
+  Star, GraduationCap, BookOpen, Laptop, MapPin, Clock,
+  Check, Phone, Navigation, HelpCircle, Send, CheckCircle, ArrowRight, Map, Mail
 } from "lucide-react";
 import { toast } from "react-toastify";
 import NotFound from "./Notfound/NotFound";
@@ -18,8 +18,8 @@ import { getImageUrl } from "../utils/imageUtils";
 // Simple mapping for dynamic icons used in Legacy & Features sections
 const IconComponent = ({ name, className = "w-6 h-6" }) => {
   const iconMap = {
-    Calendar, Users, Target, TrendingUp, Trophy, Award, 
-    Star, GraduationCap, BookOpen, Laptop, MapPin, Clock, 
+    Calendar, Users, Target, TrendingUp, Trophy, Award,
+    Star, GraduationCap, BookOpen, Laptop, MapPin, Clock,
     Check, Phone, Navigation, HelpCircle, Send, CheckCircle
   };
   const SelectedIcon = iconMap[name] || HelpCircle;
@@ -61,17 +61,25 @@ export default function CustomPageRenderer() {
   };
 
   const [pageData, setPageData] = useState(null);
+  const [allCentres, setAllCentres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorStatus, setErrorStatus] = useState(null);
   const sliderRef = useRef(null);
+  const centresSliderRef = useRef(null);
 
   useEffect(() => {
     async function fetchPage() {
       setLoading(true);
       setErrorStatus(null);
       try {
-        const response = await customPagesAPI.getBySlug(slug);
-        setPageData(response.data);
+        const [pageResponse, centresResponse] = await Promise.all([
+          customPagesAPI.getBySlug(slug),
+          centresAPI.getAll().catch(() => ({ data: [] }))
+        ]);
+        setPageData(pageResponse.data);
+        if (centresResponse && centresResponse.data) {
+          setAllCentres(centresResponse.data);
+        }
       } catch (err) {
         console.error("Error fetching custom page:", err);
         const status = err.response?.status || 500;
@@ -89,7 +97,7 @@ export default function CustomPageRenderer() {
   useEffect(() => {
     if (pageData) {
       document.title = pageData.meta_title || `${pageData.title} | Pathfinder Institute`;
-      
+
       // Update meta tags if they exist
       const updateMetaTag = (name, content) => {
         let meta = document.querySelector(`meta[name="${name}"]`);
@@ -139,12 +147,12 @@ export default function CustomPageRenderer() {
 
   return (
     <div className="bg-white text-gray-900 overflow-x-hidden font-sans">
-      
+
       {/* 1. HERO SECTION */}
       {hero && (
         <section className="relative min-h-[60vh] flex items-center overflow-hidden">
           <div className="absolute inset-0 z-0">
-            <img 
+            <img
               src={hero.bg_image_url || "https://images.pexels.com/photos/3985154/pexels-photo-3985154.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"}
               alt={hero.title_highlight || "Pathfinder Prep"}
               className="w-full h-full object-cover"
@@ -159,29 +167,29 @@ export default function CustomPageRenderer() {
                 <div className="w-2.5 h-2.5 rounded-full bg-[#f43f5e] mr-2"></div>
                 {hero.badge_text || "Admissions Open 2026 - 27"}
               </div>
-              
+
               {/* Dynamic Title & Highlight */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-none text-white">
-                {hero.title || "Born in Bengal."} <br/>
+                {hero.title || "Born in Bengal."} <br />
                 {hero.title_highlight && (
                   <span className="text-orange-500">
                     {hero.title_highlight}
                   </span>
                 )}
               </h1>
-              
+
               <p className="text-lg text-gray-300 max-w-xl">
                 {hero.description || "Top-tier mentorship, comprehensive test patterns, and premium doubt-solving setups for outstanding competitive results."}
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button 
+                <button
                   onClick={scrollToContact}
                   className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-900/30 text-base"
                 >
                   {hero.primary_btn_text || "Apply Now"} <ArrowRight className="w-5 h-5" />
                 </button>
-                <button 
+                <button
                   onClick={scrollToContact}
                   className="bg-transparent hover:bg-white/10 border border-gray-400 text-white px-8 py-4 rounded-xl font-bold transition-all text-base"
                 >
@@ -255,7 +263,7 @@ export default function CustomPageRenderer() {
           <section className="py-12 bg-gradient-to-b from-[#fbf8f3] via-[#f7f0e4] to-[#fbf8f3] text-slate-900 relative overflow-hidden border-y border-[#eddcc4]">
             {/* Subtle light radial gradient glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-100/50 rounded-full blur-[130px] pointer-events-none" />
-            
+
             <div className="absolute inset-0 opacity-10">
               <div className="absolute inset-0" style={{
                 backgroundImage: 'radial-gradient(circle at 2px 2px, #cbd5e1 1.5px, transparent 0)',
@@ -264,7 +272,7 @@ export default function CustomPageRenderer() {
             </div>
 
             <div className="container mx-auto px-6 max-w-6xl relative z-10">
-              
+
               {/* Header with Custom Manual Slider Navigation Buttons */}
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-10">
                 <div className="text-left">
@@ -272,17 +280,17 @@ export default function CustomPageRenderer() {
                   <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">{toppers.title || "Pathfinder Achievers"}</h2>
                   <div className="h-1.5 w-20 bg-orange-500 mt-3 rounded-full"></div>
                 </div>
-                
+
                 {toppers.toppers_list.length > 3 && (
                   <div className="flex gap-3 mt-6 md:mt-0">
-                    <button 
+                    <button
                       onClick={() => sliderRef.current?.slickPrev()}
                       className="w-11 h-11 rounded-full border border-[#f5e6d3] bg-white text-orange-600 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all shadow-sm hover:shadow-md hover:border-orange-500 active:scale-95 duration-200"
                       aria-label="Previous Slide"
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
                     </button>
-                    <button 
+                    <button
                       onClick={() => sliderRef.current?.slickNext()}
                       className="w-11 h-11 rounded-full border border-[#f5e6d3] bg-white text-orange-600 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all shadow-sm hover:shadow-md hover:border-orange-500 active:scale-95 duration-200"
                       aria-label="Next Slide"
@@ -300,8 +308,8 @@ export default function CustomPageRenderer() {
                       <div key={index} className="px-3 h-full pb-4 pt-2">
                         <div className="bg-white border border-[#f5e6d3] rounded-[2rem] overflow-hidden hover:border-orange-500/40 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-500 flex flex-col group h-full shadow-sm shadow-[#f7ebd9]/40">
                           <div className="aspect-[4/5] bg-gradient-to-b from-[#fdfcfb] to-[#f7eedc] relative overflow-hidden flex items-end justify-center border-b border-[#f5e6d3]/60">
-                            <img 
-                              src={getImageUrl(topper.image_url)} 
+                            <img
+                              src={getImageUrl(topper.image_url)}
                               alt={topper.name}
                               onError={(e) => {
                                 e.target.onerror = null;
@@ -332,8 +340,8 @@ export default function CustomPageRenderer() {
                     <div key={index}>
                       <div className="bg-white border border-[#f5e6d3] rounded-[2rem] overflow-hidden hover:border-orange-500/40 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-500 flex flex-col group h-full shadow-sm shadow-[#f7ebd9]/40">
                         <div className="aspect-[4/5] bg-gradient-to-b from-[#fdfcfb] to-[#f7eedc] relative overflow-hidden flex items-end justify-center border-b border-[#f5e6d3]/60">
-                          <img 
-                            src={getImageUrl(topper.image_url)} 
+                          <img
+                            src={getImageUrl(topper.image_url)}
                             alt={topper.name}
                             onError={(e) => {
                               e.target.onerror = null;
@@ -447,42 +455,221 @@ export default function CustomPageRenderer() {
       )}
 
       {/* 6. CENTERS SECTION */}
-      {centers && centers.centers_list && centers.centers_list.length > 0 && (
-        <section className="py-24 bg-white relative">
-          <div className="container mx-auto px-6 max-w-6xl">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Visit Centers</span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{centers.title || "Coaching Locations"}</h2>
-              <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-full"></div>
-            </div>
+      {centers && centers.centers_list && centers.centers_list.length > 0 && (() => {
+        // Enrich stored center list with fresh live data from the DB (email, mobile, map_url etc.)
+        const centresList = centers.centers_list.map(savedCenter => {
+          const live = allCentres.find(
+            c => c.id === savedCenter.id || c.centre === savedCenter.name
+          );
+          return live
+            ? {
+                ...savedCenter,
+                email: live.email || savedCenter.email || "",
+                mobile: live.mobile || savedCenter.mobile || savedCenter.phone || "",
+                phone: live.mobile || live.phone || savedCenter.phone || "",
+                map_url: live.map_url || savedCenter.map_url || "",
+                location: savedCenter.location || live.location || "",
+              }
+            : savedCenter;
+        });
+        const useCarousel = centresList.length > 3;
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {centers.centers_list.map((center, index) => (
-                <div key={index} className="bg-gray-50 border border-gray-100 rounded-3xl p-8 hover:shadow-md transition-all flex flex-col justify-between">
-                  <div className="space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
-                      <MapPin className="w-6 h-6" />
+        // Reusable card renderer
+        const renderCentreCard = (center, index) => {
+          const isFranchise = center.is_franchise || false;
+          const centreType = center.centre_type || "General";
+          const toppersCount = center.toppers?.length || 0;
+          const logoUrl = center.logo_url || "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=200&auto=format&fit=crop";
+          const districtStr = center.district || "Kolkata";
+          const stateStr = center.state || "West Bengal";
+          const addressStr = center.address || "Address details currently being updated for this location.";
+          
+          const handleExplore = () => {
+            if (center.id) navigate(`/centres/${center.id}`);
+            else scrollToContact();
+          };
+
+          // Robust map link extractor helper (handles direct links and converts embed iframe URLs to clickable search links)
+          const getMapLink = (locationVal, mapUrlVal) => {
+            let val = locationVal || mapUrlVal || "";
+            if (!val) return "";
+            
+            // Extract src from iframe if present
+            if (val.includes("<iframe") || val.includes("iframe")) {
+              const match = val.match(/src="([^"]+)"/);
+              if (match && match[1]) {
+                val = match[1];
+              }
+            }
+
+            // If it is a Google Maps embed URL, convert it to a standard clickable link
+            if (val.includes("/maps/embed") || val.includes("google.com/maps/embed")) {
+              // 1. Try to extract lat/lng from pb parameter protobuf: !2d[lng]!3d[lat]
+              const latMatch = val.match(/!3d(-?\d+\.\d+)/);
+              const lngMatch = val.match(/!2d(-?\d+\.\d+)/);
+              if (latMatch && lngMatch) {
+                return `https://www.google.com/maps?q=${latMatch[1]},${lngMatch[1]}`;
+              }
+
+              // 2. Try to extract standard query parameter q
+              try {
+                const urlObj = new URL(val);
+                const q = urlObj.searchParams.get("q");
+                if (q) {
+                  return `https://www.google.com/maps?q=${encodeURIComponent(q)}`;
+                }
+              } catch (e) {
+                // Ignore parse errors and keep moving
+              }
+            }
+
+            return val;
+          };
+          
+          const mapLink = getMapLink(center.location, center.map_url);
+
+          return (
+            <div key={index} className="group relative bg-white rounded-3xl border border-slate-100 p-5 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 hover:-translate-y-2 overflow-hidden flex flex-col justify-between min-h-[340px] w-full">
+              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-orange-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-3xl" />
+              <div className="relative z-10 flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="h-14 w-14 rounded-2xl bg-neutral-100 border border-slate-100 flex items-center justify-center overflow-hidden group-hover:border-orange-200 transition-colors duration-300 shadow-sm shrink-0">
+                      <img src={logoUrl} alt={center.name} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500" onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=200&auto=format&fit=crop"; }} />
                     </div>
-                    <h3 className="font-extrabold text-xl text-gray-900">{center.name}</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">{center.address}</p>
-                    <div className="flex items-center gap-2 text-orange-600 font-bold text-sm">
-                      <Phone className="w-4 h-4" /> {center.phone}
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${centreType === 'Instation' ? 'bg-orange-100 text-orange-700' : 'bg-amber-100 text-amber-700'}`}>{centreType}</span>
+                      {isFranchise && <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">Franchise</span>}
+                      <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                        <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                        <span className="text-[10px] font-bold text-amber-700">4.9</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="pt-6">
-                    <button 
-                      onClick={scrollToContact}
-                      className="text-orange-600 hover:text-orange-700 font-extrabold flex items-center gap-2 transition-colors"
+                  <div className="mb-4">
+                    <h3 className="text-lg font-black text-slate-900 mb-1 group-hover:text-orange-600 transition-colors duration-300">{center.name}</h3>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                      <Map className="w-3.5 h-3.5" />{districtStr}, {stateStr}
+                    </p>
+                  </div>
+                  
+                  {/* Stats & Info Row */}
+                  <div className="space-y-3 mb-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-slate-50 rounded-2xl p-2.5 border border-slate-100 group-hover:bg-white group-hover:border-orange-100 transition-all duration-300">
+                        <div className="text-xs font-bold text-slate-500 mb-1">Toppers</div>
+                        <div className="flex items-center gap-2"><GraduationCap className="w-4 h-4 text-orange-500" /><span className="text-sm font-black text-slate-900">{toppersCount}+</span></div>
+                      </div>
+                      <div className="bg-slate-50 rounded-2xl p-2.5 border border-slate-100 group-hover:bg-white group-hover:border-orange-100 transition-all duration-300">
+                        <div className="text-xs font-bold text-slate-500 mb-1">Contact</div>
+                        <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-orange-400" /><span className="text-sm font-black text-slate-900 truncate">{center.mobile || center.phone || "Local"}</span></div>
+                      </div>
+                    </div>
+                    
+                    {center.email && (
+                      <div className="bg-slate-50 rounded-2xl p-2.5 border border-slate-100 group-hover:bg-white group-hover:border-orange-100 transition-all duration-300 flex items-center gap-2">
+                        <Mail className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span className="text-xs font-bold text-slate-700 truncate" title={center.email}>{center.email}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <p className="text-sm text-slate-600 font-medium mb-6 line-clamp-2 min-h-[36px]">{addressStr}</p>
+                </div>
+                <div className="flex items-center gap-3 mt-auto">
+                  <button onClick={handleExplore} className="flex-1 bg-orange-600 text-white py-3 rounded-2xl font-bold text-sm hover:bg-orange-700 transition-all duration-300 flex items-center justify-center gap-2 group/btn">
+                    Explore Centre <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </button>
+                  {mapLink ? (
+                    <a href={mapLink} target="_blank" rel="noopener noreferrer" className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center hover:bg-white hover:border-orange-200 group/map transition-all duration-300" title="Open in Maps">
+                      <Map className="w-5 h-5 text-slate-400 group-hover/map:text-orange-500 transition-colors" />
+                    </a>
+                  ) : (
+                    <button onClick={scrollToContact} className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center hover:bg-white hover:border-orange-200 group/map transition-all duration-300" title="Get Directions">
+                      <Map className="w-5 h-5 text-slate-400 group-hover/map:text-orange-500 transition-colors" />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-orange-500 transition-all duration-500 group-hover:w-full" />
+            </div>
+          );
+        };
+
+        return (
+          <section className="pt-10 pb-2 bg-white relative">
+            <div className="container mx-auto px-6 max-w-6xl">
+              {/* Section Header */}
+              <div className="flex items-end justify-between max-w-3xl mx-auto mb-16 flex-col text-center gap-4">
+                <div className="w-full text-center">
+                  <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Visit Centers</span>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{centers.title || "Coaching Locations"}</h2>
+                  <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-full"></div>
+                </div>
+                {/* Carousel nav buttons — only shown when carousel mode */}
+                {useCarousel && (
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => centresSliderRef.current?.slickPrev()}
+                      className="w-11 h-11 rounded-2xl bg-white border-2 border-orange-200 flex items-center justify-center hover:bg-orange-600 hover:border-orange-600 text-orange-600 hover:text-white transition-all duration-300 shadow-sm group/arrow"
+                      aria-label="Previous centres"
                     >
-                      Get Directions <Navigation className="w-4 h-4" />
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{centresList.length} Centres</span>
+                    <button
+                      onClick={() => centresSliderRef.current?.slickNext()}
+                      className="w-11 h-11 rounded-2xl bg-white border-2 border-orange-200 flex items-center justify-center hover:bg-orange-600 hover:border-orange-600 text-orange-600 hover:text-white transition-all duration-300 shadow-sm group/arrow"
+                      aria-label="Next centres"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
                     </button>
                   </div>
+                )}
+              </div>
+
+              {/* ≤ 3 → 3-column grid */}
+              {!useCarousel && (
+                <div className={`grid grid-cols-1 gap-8 ${centresList.length === 1 ? 'md:grid-cols-1 max-w-sm mx-auto'
+                  : centresList.length === 2 ? 'md:grid-cols-2 max-w-3xl mx-auto'
+                    : 'md:grid-cols-3'
+                  }`}>
+                  {centresList.map((center, index) => renderCentreCard(center, index))}
                 </div>
-              ))}
+              )}
+
+              {/* > 3 → react-slick carousel */}
+              {useCarousel && (
+                <div className="-mx-3">
+                  <Slider
+                    ref={centresSliderRef}
+                    dots={true}
+                    infinite={true}
+                    speed={500}
+                    autoplay={false}
+                    slidesToShow={3}
+                    slidesToScroll={1}
+                    arrows={false}
+                    dotsClass="slick-dots !bottom-[-36px]"
+                    responsive={[
+                      { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+                      { breakpoint: 640, settings: { slidesToShow: 1, slidesToScroll: 1 } }
+                    ]}
+                  >
+                    {centresList.map((center, index) => (
+                      <div key={index} className="px-3 py-4">
+                        {renderCentreCard(center, index)}
+                      </div>
+                    ))}
+                  </Slider>
+                  {/* Extra bottom padding to make room for dots */}
+                  <div className="pb-12" />
+                </div>
+              )}
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        );
+      })()}
 
       {/* 7. FAQ SECTION */}
       {faq && faq.faqs_list && faq.faqs_list.length > 0 && (
@@ -584,10 +771,10 @@ function CoursesDisplaySection({ courseIds, title, onEnquire }) {
   const [selectedMode, setSelectedMode] = useState("All");
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
-  
+
   // Grid layout vs slider layout toggle
   const [showAll, setShowAll] = useState(false);
-  
+
   const navigate = useNavigate();
 
   // Fetch all courses and filter to the selected IDs
@@ -780,11 +967,10 @@ function CoursesDisplaySection({ courseIds, title, onEnquire }) {
                       <button
                         key={mode}
                         onClick={() => setSelectedMode(mode)}
-                        className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap uppercase tracking-wider ${
-                          selectedMode === mode
-                            ? "bg-white text-orange-600 shadow-lg scale-105"
-                            : "bg-orange-400/30 text-white border border-white/20 hover:bg-white/10"
-                        }`}
+                        className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap uppercase tracking-wider ${selectedMode === mode
+                          ? "bg-white text-orange-600 shadow-lg scale-105"
+                          : "bg-orange-400/30 text-white border border-white/20 hover:bg-white/10"
+                          }`}
                       >
                         {mode}
                       </button>
@@ -983,7 +1169,7 @@ function CourseCard({ course, onExplore, onEnquire }) {
             {course.course_title}
           </div>
         )}
-        
+
         {/* Title Row */}
         <div className="flex items-start justify-between gap-2 mb-3 text-left">
           <h3 className="font-bold text-lg text-slate-900 leading-tight group-hover:text-[#66090D] transition-colors line-clamp-2">

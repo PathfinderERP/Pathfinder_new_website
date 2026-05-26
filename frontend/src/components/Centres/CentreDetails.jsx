@@ -17,6 +17,43 @@ const CentreDetails = ({ centre }) => {
     const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=400&auto=format&fit=crop";
     if (!centre) return null;
 
+    const getMapLink = (locationVal, mapUrlVal) => {
+        let val = locationVal || mapUrlVal || "";
+        if (!val) return "";
+        
+        // Extract src from iframe if present
+        if (val.includes("<iframe") || val.includes("iframe")) {
+            const match = val.match(/src="([^"]+)"/);
+            if (match && match[1]) {
+                val = match[1];
+            }
+        }
+
+        // If it is a Google Maps embed URL, convert it to a standard clickable link
+        if (val.includes("/maps/embed") || val.includes("google.com/maps/embed")) {
+            // 1. Try to extract lat/lng from pb parameter protobuf: !2d[lng]!3d[lat]
+            const latMatch = val.match(/!3d(-?\d+\.\d+)/);
+            const lngMatch = val.match(/!2d(-?\d+\.\d+)/);
+            if (latMatch && lngMatch) {
+                return `https://www.google.com/maps?q=${latMatch[1]},${lngMatch[1]}`;
+            }
+
+            // 2. Try to extract standard query parameter q
+            try {
+                const urlObj = new URL(val);
+                const q = urlObj.searchParams.get("q");
+                if (q) {
+                    return `https://www.google.com/maps?q=${encodeURIComponent(q)}`;
+                }
+            } catch (e) {
+                // Ignore parse errors and keep moving
+            }
+        }
+
+        return val;
+    };
+    const mapLink = getMapLink(centre.location, centre.map_url);
+
     return (
         <div className="bg-white min-h-screen">
             {/* Hero Header */}
@@ -192,16 +229,18 @@ const CentreDetails = ({ centre }) => {
                                     </div>
                                 )}
                             </div>
-                            <div className="p-4 text-center">
-                                <a
-                                    href={centre.location}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-xs font-black text-orange-600 uppercase tracking-widest flex items-center justify-center gap-2"
-                                >
-                                    Open in Google Maps <MapIcon className="w-4 h-4" />
-                                </a>
-                            </div>
+                            {mapLink && (
+                                <div className="p-4 text-center">
+                                    <a
+                                        href={mapLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs font-black text-orange-600 uppercase tracking-widest flex items-center justify-center gap-2"
+                                    >
+                                        Open in Google Maps <MapIcon className="w-4 h-4" />
+                                    </a>
+                                </div>
+                            )}
                         </div>
                     </div>
 

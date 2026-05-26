@@ -5,7 +5,8 @@ import {
     PhoneIcon,
     AcademicCapIcon,
     ArrowRightIcon,
-    StarIcon
+    StarIcon,
+    EnvelopeIcon
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 
@@ -20,6 +21,43 @@ const CentreCard = ({ centre, onExplore }) => {
             navigate(`/centres/${centre.id}`);
         }
     };
+
+    const getMapLink = (locationVal, mapUrlVal) => {
+        let val = locationVal || mapUrlVal || "";
+        if (!val) return "";
+        
+        // Extract src from iframe if present
+        if (val.includes("<iframe") || val.includes("iframe")) {
+            const match = val.match(/src="([^"]+)"/);
+            if (match && match[1]) {
+                val = match[1];
+            }
+        }
+
+        // If it is a Google Maps embed URL, convert it to a standard clickable link
+        if (val.includes("/maps/embed") || val.includes("google.com/maps/embed")) {
+            // 1. Try to extract lat/lng from pb parameter protobuf: !2d[lng]!3d[lat]
+            const latMatch = val.match(/!3d(-?\d+\.\d+)/);
+            const lngMatch = val.match(/!2d(-?\d+\.\d+)/);
+            if (latMatch && lngMatch) {
+                return `https://www.google.com/maps?q=${latMatch[1]},${lngMatch[1]}`;
+            }
+
+            // 2. Try to extract standard query parameter q
+            try {
+                const urlObj = new URL(val);
+                const q = urlObj.searchParams.get("q");
+                if (q) {
+                    return `https://www.google.com/maps?q=${encodeURIComponent(q)}`;
+                }
+            } catch (e) {
+                // Ignore parse errors and keep moving
+            }
+        }
+
+        return val;
+    };
+    const mapLink = getMapLink(centre.location, centre.map_url);
 
     return (
         <div className="group relative bg-white rounded-3xl border border-slate-100 p-4 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
@@ -71,25 +109,36 @@ const CentreCard = ({ centre, onExplore }) => {
                 </div>
 
                 {/* Stats Row */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-slate-50 rounded-2xl p-2.5 border border-slate-100 group-hover:bg-white group-hover:border-orange-100 transition-all duration-300">
-                        <div className="text-xs font-bold text-slate-500 mb-1">Toppers</div>
-                        <div className="flex items-center gap-2">
-                            <AcademicCapIcon className="w-4 h-4 text-orange-500" />
-                            <span className="text-sm font-black text-slate-900">
-                                {centre.toppers?.length || 0}+
-                            </span>
+                <div className="space-y-3 mb-4">
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-slate-50 rounded-2xl p-2.5 border border-slate-100 group-hover:bg-white group-hover:border-orange-100 transition-all duration-300">
+                            <div className="text-xs font-bold text-slate-500 mb-1">Toppers</div>
+                            <div className="flex items-center gap-2">
+                                <AcademicCapIcon className="w-4 h-4 text-orange-500" />
+                                <span className="text-sm font-black text-slate-900">
+                                    {centre.toppers?.length || 0}+
+                                </span>
+                            </div>
+                        </div>
+                        <div className="bg-slate-50 rounded-2xl p-2.5 border border-slate-100 group-hover:bg-white group-hover:border-orange-100 transition-all duration-300">
+                            <div className="text-xs font-bold text-slate-500 mb-1">Distance</div>
+                            <div className="flex items-center gap-2">
+                                <MapPinIcon className="w-4 h-4 text-orange-400" />
+                                <span className="text-sm font-black text-slate-900">
+                                    {centre.distance ? `${centre.distance.toFixed(1)} km` : 'Local'}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <div className="bg-slate-50 rounded-2xl p-2.5 border border-slate-100 group-hover:bg-white group-hover:border-orange-100 transition-all duration-300">
-                        <div className="text-xs font-bold text-slate-500 mb-1">Distance</div>
-                        <div className="flex items-center gap-2">
-                            <MapPinIcon className="w-4 h-4 text-orange-400" />
-                            <span className="text-sm font-black text-slate-900">
-                                {centre.distance ? `${centre.distance.toFixed(1)} km` : 'Local'}
+
+                    {centre.email && (
+                        <div className="bg-slate-50 rounded-2xl p-2.5 border border-slate-100 group-hover:bg-white group-hover:border-orange-100 transition-all duration-300 flex items-center gap-2">
+                            <EnvelopeIcon className="w-4 h-4 text-amber-500 shrink-0" />
+                            <span className="text-xs font-bold text-slate-700 truncate" title={centre.email}>
+                                {centre.email}
                             </span>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Address Preview */}
@@ -107,15 +156,30 @@ const CentreCard = ({ centre, onExplore }) => {
                         <ArrowRightIcon className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                     </button>
 
-                    <a
-                        href={centre.location}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center hover:bg-white hover:border-orange-200 group/map transition-all duration-300"
-                        title="Open in Maps"
-                    >
-                        <MapIcon className="w-5 h-5 text-slate-400 group-hover/map:text-orange-500 transition-colors" />
-                    </a>
+                    {mapLink ? (
+                        <a
+                            href={mapLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center hover:bg-white hover:border-orange-200 group/map transition-all duration-300"
+                            title="Open in Maps"
+                        >
+                            <MapIcon className="w-5 h-5 text-slate-400 group-hover/map:text-orange-500 transition-colors" />
+                        </a>
+                    ) : (
+                        <button
+                            onClick={() => {
+                                const contactEl = document.querySelector("#contact-section");
+                                if (contactEl) {
+                                    contactEl.scrollIntoView({ behavior: "smooth" });
+                                }
+                            }}
+                            className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center hover:bg-white hover:border-orange-200 group/map transition-all duration-300"
+                            title="Get Directions"
+                        >
+                            <MapIcon className="w-5 h-5 text-slate-400 group-hover/map:text-orange-500 transition-colors" />
+                        </button>
+                    )}
                 </div>
             </div>
 

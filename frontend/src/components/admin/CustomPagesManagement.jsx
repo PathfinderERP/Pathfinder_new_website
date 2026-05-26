@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { customPagesAPI, coursesAPI } from "../../services/api";
+import { customPagesAPI, coursesAPI, centresAPI } from "../../services/api";
 import { 
   PlusIcon, PencilIcon, TrashIcon, LinkIcon, EyeIcon, 
   CheckIcon, XMarkIcon, SparklesIcon, PhotoIcon
@@ -47,6 +47,37 @@ export default function CustomPagesManagement() {
   const [allCourses, setAllCourses] = useState([]);
   const [coursesLoadingAdmin, setCoursesLoadingAdmin] = useState(false);
   const [courseSearchQuery, setCourseSearchQuery] = useState("");
+
+  // Centres Picker States (for Centres Tab)
+  const [allCentres, setAllCentres] = useState([]);
+  const [centresLoadingAdmin, setCentresLoadingAdmin] = useState(false);
+  const [centreSearchQuery, setCentreSearchQuery] = useState("");
+  const [filterCentreState, setFilterCentreState] = useState("All");
+  const [filterCentreDistrict, setFilterCentreDistrict] = useState("All");
+
+  // Helper memo to get actual selected centre objects
+  const selectedCentresObjects = useMemo(() => {
+    return allCentres.filter(dbCentre => {
+      return (editSections.centers.centers_list || []).some(
+        selected => selected.name === dbCentre.centre
+      );
+    });
+  }, [allCentres, editSections.centers.centers_list]);
+
+  // Unique lists for the centre dropdown filters
+  const uniqueCentreStatesAdmin = useMemo(() => {
+    const s = new Set(allCentres.map(c => c.state).filter(Boolean));
+    return ["All", ...[...s].sort()];
+  }, [allCentres]);
+
+  const uniqueCentreDistrictsAdmin = useMemo(() => {
+    let filtered = allCentres;
+    if (filterCentreState !== "All") {
+      filtered = filtered.filter(c => c.state === filterCentreState);
+    }
+    const s = new Set(filtered.map(c => c.district).filter(Boolean));
+    return ["All", ...[...s].sort()];
+  }, [allCentres, filterCentreState]);
 
   // Detailed dropdown filter states
   const [filterCentre, setFilterCentre] = useState("All");
@@ -116,7 +147,25 @@ export default function CustomPagesManagement() {
           setCoursesLoadingAdmin(false);
         }
       };
+
+      const fetchAllCentres = async () => {
+        setCentresLoadingAdmin(true);
+        try {
+          const response = await centresAPI.getAll();
+          const centresData = Array.isArray(response.data)
+            ? response.data
+            : (response.data?.results || []);
+          setAllCentres(centresData);
+        } catch (err) {
+          console.error("Failed to fetch centres for picker:", err);
+          setAllCentres([]);
+        } finally {
+          setCentresLoadingAdmin(false);
+        }
+      };
+
       fetchAllCourses();
+      fetchAllCentres();
     } else {
       setCourseSearchQuery("");
       setFilterCentre("All");
@@ -124,6 +173,9 @@ export default function CustomPagesManagement() {
       setFilterMode("All");
       setFilterDuration("All");
       setFilterYear("All");
+      setCentreSearchQuery("");
+      setFilterCentreState("All");
+      setFilterCentreDistrict("All");
     }
   }, [isModalOpen, modalMode]);
 
@@ -1249,48 +1301,341 @@ export default function CustomPagesManagement() {
                           type="text"
                           value={editSections.centers.title || ""}
                           onChange={(e) => setEditSections({ ...editSections, centers: { ...editSections.centers, title: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750 outline-none"
                         />
                       </div>
+
                       <div className="space-y-3">
-                        <h4 className="font-bold text-sm">Center Locations</h4>
-                        {editSections.centers.centers_list && editSections.centers.centers_list.map((center, idx) => (
-                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-850 border border-gray-200 dark:border-slate-750 rounded-xl grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                            <input
-                              type="text"
-                              placeholder="Center Name"
-                              value={center.name}
-                              onChange={(e) => {
-                                const list = [...editSections.centers.centers_list];
-                                list[idx].name = e.target.value;
-                                setEditSections({ ...editSections, centers: { ...editSections.centers, centers_list: list } });
-                              }}
-                              className="bg-white border rounded-lg p-2 text-sm dark:bg-slate-900"
-                            />
-                            <input
-                              type="text"
-                              placeholder="Phone"
-                              value={center.phone}
-                              onChange={(e) => {
-                                const list = [...editSections.centers.centers_list];
-                                list[idx].phone = e.target.value;
-                                setEditSections({ ...editSections, centers: { ...editSections.centers, centers_list: list } });
-                              }}
-                              className="bg-white border rounded-lg p-2 text-sm dark:bg-slate-900"
-                            />
-                            <input
-                              type="text"
-                              placeholder="Address"
-                              value={center.address}
-                              onChange={(e) => {
-                                const list = [...editSections.centers.centers_list];
-                                list[idx].address = e.target.value;
-                                setEditSections({ ...editSections, centers: { ...editSections.centers, centers_list: list } });
-                              }}
-                              className="bg-white border rounded-lg p-2 text-sm dark:bg-slate-900"
-                            />
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900 dark:text-white">Select Centers to Display</h4>
+                            <p className="text-xs text-gray-500 mt-0.5">Checked centers appear on this page with coordinates/address details</p>
                           </div>
-                        ))}
+                          <span className="bg-orange-100 text-orange-700 text-xs font-extrabold px-3 py-1 rounded-full dark:bg-orange-950/20 dark:text-orange-400">
+                            {(editSections.centers.centers_list || []).length} selected
+                          </span>
+                        </div>
+
+                        {/* Selected Centers Display Panel */}
+                        {(editSections.centers.centers_list || []).length > 0 && (
+                          <div className="bg-orange-50/40 dark:bg-orange-950/5 border border-orange-100 dark:border-orange-900/20 rounded-xl p-3 space-y-2">
+                            <span className="text-[10px] font-extrabold text-orange-700 dark:text-orange-400 uppercase tracking-wider block">Selected Centers (Click to remove)</span>
+                            <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto pr-1">
+                              {(editSections.centers.centers_list || []).map(centre => {
+                                return (
+                                  <div
+                                    key={centre.name}
+                                    className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-orange-200 dark:border-slate-700 rounded-full px-2.5 py-1 text-xs text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:border-red-400 hover:text-red-500 dark:hover:border-red-900/60 dark:hover:text-red-400 cursor-pointer group shrink-0"
+                                    onClick={() => {
+                                      const list = [...(editSections.centers.centers_list || [])];
+                                      setEditSections({
+                                        ...editSections,
+                                        centers: {
+                                          ...editSections.centers,
+                                          centers_list: list.filter(item => item.name !== centre.name)
+                                        }
+                                      });
+                                    }}
+                                  >
+                                    <span className="font-semibold truncate max-w-[150px]">{centre.name}</span>
+                                    {centre.district && <span className="text-[10px] text-gray-400 font-medium">({centre.district})</span>}
+                                    <XMarkIcon className="w-3 h-3 text-gray-400 group-hover:text-red-500 transition-colors" />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Search Bar */}
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Search by name, state, district..."
+                            value={centreSearchQuery}
+                            onChange={(e) => setCentreSearchQuery(e.target.value)}
+                            className="w-full border border-gray-200 dark:border-slate-750 rounded-xl px-4 py-2.5 pl-9 text-sm dark:bg-slate-850 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                          />
+                          <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
+
+                        {/* Dropdown Filters */}
+                        <div className="grid grid-cols-2 gap-2.5 bg-gray-50 dark:bg-slate-850 p-3 rounded-xl border border-gray-150 dark:border-slate-800">
+                          {/* State Filter */}
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">State Jurisdiction</label>
+                            <select
+                              value={filterCentreState}
+                              onChange={(e) => {
+                                setFilterCentreState(e.target.value);
+                                setFilterCentreDistrict("All");
+                              }}
+                              className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-1.5 text-xs outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:text-gray-200"
+                            >
+                              {uniqueCentreStatesAdmin.map(opt => (
+                                <option key={opt} value={opt}>{opt === "All" ? "All States" : opt}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* District Filter */}
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">District Sector</label>
+                            <select
+                              value={filterCentreDistrict}
+                              onChange={(e) => setFilterCentreDistrict(e.target.value)}
+                              className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-1.5 text-xs outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:text-gray-200"
+                            >
+                              {uniqueCentreDistrictsAdmin.map(opt => (
+                                <option key={opt} value={opt}>{opt === "All" ? "All Districts" : opt}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Quick Actions */}
+                        {allCentres.length > 0 && (
+                          <div className="flex gap-2 justify-between items-center">
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const visible = allCentres.filter(c => {
+                                    const matchSearch = !centreSearchQuery ||
+                                      c.centre?.toLowerCase().includes(centreSearchQuery.toLowerCase()) ||
+                                      c.district?.toLowerCase().includes(centreSearchQuery.toLowerCase()) ||
+                                      c.state?.toLowerCase().includes(centreSearchQuery.toLowerCase());
+
+                                    const matchState = filterCentreState === "All" || c.state === filterCentreState;
+                                    const matchDistrict = filterCentreDistrict === "All" || c.district === filterCentreDistrict;
+
+                                    return matchSearch && matchState && matchDistrict;
+                                  });
+
+                                  const list = [...(editSections.centers.centers_list || [])];
+                                  visible.forEach(dbCentre => {
+                                    if (!list.some(item => item.name === dbCentre.centre)) {
+                                      list.push({
+                                        name: dbCentre.centre,
+                                        phone: dbCentre.mobile || dbCentre.phone || "",
+                                        address: dbCentre.address,
+                                        location: dbCentre.location || "",
+                                        id: dbCentre.id || dbCentre._id?.$oid || dbCentre._id,
+                                        logo_url: dbCentre.logo_url || "",
+                                        centre_type: dbCentre.centre_type || "",
+                                        is_franchise: dbCentre.is_franchise || false,
+                                        district: dbCentre.district || "",
+                                        state: dbCentre.state || "",
+                                        toppers: dbCentre.toppers || [],
+                                        centre_code: dbCentre.centre_code || "",
+                                        email: dbCentre.email || ""
+                                      });
+                                    }
+                                  });
+                                  setEditSections({
+                                    ...editSections,
+                                    centers: { ...editSections.centers, centers_list: list }
+                                  });
+                                }}
+                                className="text-xs font-bold text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/20 px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                ✓ Select all filtered
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditSections({ ...editSections, centers: { ...editSections.centers, centers_list: [] } })}
+                                className="text-xs font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                Clear all
+                              </button>
+                            </div>
+                            {(filterCentreState !== "All" || filterCentreDistrict !== "All" || centreSearchQuery) && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCentreSearchQuery("");
+                                  setFilterCentreState("All");
+                                  setFilterCentreDistrict("All");
+                                }}
+                                className="text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 px-2 py-1 rounded transition-all animate-pulse"
+                              >
+                                Reset Filters
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Centre Checklist */}
+                        {centresLoadingAdmin ? (
+                          <div className="flex items-center justify-center py-12 bg-gray-50 dark:bg-slate-850 border border-gray-200 dark:border-slate-750 rounded-xl">
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                              <p className="text-xs text-gray-500">Loading network centres...</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="max-h-[640px] overflow-y-auto border border-gray-200 dark:border-slate-750 rounded-xl bg-gray-50 dark:bg-slate-900 p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {(() => {
+                              const filtered = allCentres.filter(c => {
+                                const matchSearch = !centreSearchQuery ||
+                                  c.centre?.toLowerCase().includes(centreSearchQuery.toLowerCase()) ||
+                                  c.district?.toLowerCase().includes(centreSearchQuery.toLowerCase()) ||
+                                  c.state?.toLowerCase().includes(centreSearchQuery.toLowerCase());
+
+                                const matchState = filterCentreState === "All" || c.state === filterCentreState;
+                                const matchDistrict = filterCentreDistrict === "All" || c.district === filterCentreDistrict;
+
+                                return matchSearch && matchState && matchDistrict;
+                              });
+
+                              if (allCentres.length === 0) {
+                                return (
+                                  <div className="text-center py-10">
+                                    <div className="text-3xl mb-2">📍</div>
+                                    <p className="text-sm text-gray-400">No centres found in the system</p>
+                                    <p className="text-xs text-gray-400 mt-1">Add centres via the Network management section first</p>
+                                  </div>
+                                );
+                              }
+                              if (filtered.length === 0) {
+                                return (
+                                  <div className="text-center py-10 text-sm text-gray-400">No centres match your search</div>
+                                );
+                              }
+
+                              return filtered.map((centre) => {
+                                const centreId = centre.id || centre._id?.$oid || centre._id;
+                                const isSelected = (editSections.centers.centers_list || []).some(
+                                  item => item.name === centre.centre
+                                );
+
+                                return (
+                                  <div
+                                    key={centreId}
+                                    onClick={() => {
+                                      const list = [...(editSections.centers.centers_list || [])];
+                                      if (isSelected) {
+                                        setEditSections({
+                                          ...editSections,
+                                          centers: {
+                                            ...editSections.centers,
+                                            centers_list: list.filter(item => item.name !== centre.centre)
+                                          }
+                                        });
+                                      } else {
+                                        setEditSections({
+                                          ...editSections,
+                                          centers: {
+                                            ...editSections.centers,
+                                            centers_list: [
+                                              ...list,
+                                              {
+                                                name: centre.centre,
+                                                phone: centre.mobile || centre.phone || "",
+                                                address: centre.address,
+                                                location: centre.location || "",
+                                                id: centreId,
+                                                logo_url: centre.logo_url || "",
+                                                centre_type: centre.centre_type || "",
+                                                is_franchise: centre.is_franchise || false,
+                                                district: centre.district || "",
+                                                state: centre.state || "",
+                                                toppers: centre.toppers || [],
+                                                centre_code: centre.centre_code || "",
+                                                email: centre.email || ""
+                                              }
+                                            ]
+                                          }
+                                        });
+                                      }
+                                    }}
+                                    className={`group relative bg-white rounded-2xl border-2 p-3.5 cursor-pointer transition-all duration-300 overflow-hidden select-none
+                                      ${ isSelected
+                                        ? 'border-orange-500 shadow-lg shadow-orange-500/20 -translate-y-0.5'
+                                        : 'border-slate-100 hover:shadow-xl hover:shadow-orange-500/10 hover:-translate-y-0.5 hover:border-orange-200'
+                                      }`}
+                                  >
+                                    {/* Selected glow overlay */}
+                                    {isSelected && (
+                                      <div className="absolute inset-0 bg-orange-500/5 pointer-events-none rounded-2xl" />
+                                    )}
+
+                                    {/* Top Row: Logo + Badges + Checkbox */}
+                                    <div className="flex justify-between items-start mb-3 relative z-10">
+                                      {/* Logo */}
+                                      <div className={`h-11 w-11 rounded-xl border flex items-center justify-center overflow-hidden transition-colors duration-300 shadow-sm ${ isSelected ? 'border-orange-300' : 'bg-neutral-100 border-slate-100 group-hover:border-orange-200' }`}>
+                                        <img
+                                          src={centre.logo_url || "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=200&auto=format&fit=crop"}
+                                          alt={centre.centre}
+                                          className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                          onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=200&auto=format&fit=crop"; }}
+                                        />
+                                      </div>
+
+                                      {/* Right side: badges + checkbox */}
+                                      <div className="flex flex-col items-end gap-1.5">
+                                        {/* Checkbox */}
+                                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 shadow-sm ${ isSelected ? 'bg-orange-500 border-orange-500' : 'border-gray-300 bg-white dark:border-slate-600 dark:bg-slate-800' }`}>
+                                          {isSelected && <CheckIcon className="w-3 h-3 text-white" />}
+                                        </div>
+                                        {/* Type badge */}
+                                        {centre.centre_type && (
+                                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${ centre.centre_type === 'Instation' ? 'bg-orange-100 text-orange-700' : 'bg-amber-100 text-amber-700' }`}>
+                                            {centre.centre_type}
+                                          </span>
+                                        )}
+                                        {centre.is_franchise && (
+                                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">
+                                            Franchise
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* Centre Name & Location */}
+                                    <div className="mb-2.5 relative z-10">
+                                      <h3 className={`text-sm font-black truncate transition-colors duration-300 ${ isSelected ? 'text-orange-600' : 'text-slate-900 group-hover:text-orange-600' }`}>
+                                        {centre.centre}
+                                      </h3>
+                                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 mt-0.5">
+                                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                        {[centre.district, centre.state].filter(Boolean).join(", ")}
+                                      </p>
+                                    </div>
+
+                                    {/* Stats Row */}
+                                    <div className="grid grid-cols-2 gap-2 mb-2.5 relative z-10">
+                                      <div className={`rounded-xl p-2 border transition-all duration-300 ${ isSelected ? 'bg-orange-50 border-orange-100' : 'bg-slate-50 border-slate-100 group-hover:bg-white group-hover:border-orange-100' }`}>
+                                        <div className="text-[9px] font-bold text-slate-500 mb-0.5">Toppers</div>
+                                        <div className="flex items-center gap-1">
+                                          <svg className="w-3 h-3 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /></svg>
+                                          <span className="text-xs font-black text-slate-900">{centre.toppers?.length || 0}+</span>
+                                        </div>
+                                      </div>
+                                      <div className={`rounded-xl p-2 border transition-all duration-300 ${ isSelected ? 'bg-orange-50 border-orange-100' : 'bg-slate-50 border-slate-100 group-hover:bg-white group-hover:border-orange-100' }`}>
+                                        <div className="text-[9px] font-bold text-slate-500 mb-0.5">Code</div>
+                                        <div className="flex items-center gap-1">
+                                          <svg className="w-3 h-3 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" /></svg>
+                                          <span className="text-xs font-black text-slate-900 truncate">{centre.centre_code || "—"}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Address */}
+                                    <p className="text-[11px] text-slate-500 font-medium line-clamp-1 min-h-[16px] relative z-10">
+                                      {centre.address || "Address details being updated."}
+                                    </p>
+
+                                    {/* Bottom selection indicator */}
+                                    <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-orange-500 transition-all duration-500 ${ isSelected ? 'w-full' : 'w-0 group-hover:w-full' }`} />
+                                  </div>
+                                );
+                              });
+                            })()}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
