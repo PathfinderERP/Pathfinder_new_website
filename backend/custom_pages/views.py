@@ -21,19 +21,76 @@ class CustomPageViewSet(mongo_viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'by_slug']:
             return [AllowAny()]
+        # All other actions (create, update, delete) require authentication
+        # The admin_token or user authToken must be sent in Authorization header
         return [IsAuthenticated()]
+
+    def get_object(self):
+        """Override to provide better error messages"""
+        try:
+            return super().get_object()
+        except Exception as e:
+            return Response(
+                {"error": f"Page not found: {str(e)}"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Delete a custom page.
+        Regenerates sitemap automatically when page is deleted.
+        """
+        import json
+        try:
+            instance = self.get_object()
+            page_slug = instance.slug
+            page_title = instance.title
+            
+            # Delete the instance (signals will regenerate sitemap)
+            instance.delete()
+            
+            return Response(
+                {
+                    "message": f"Page '{page_title}' deleted successfully",
+                    "slug": page_slug,
+                    "detail": "Sitemap updated automatically"
+                },
+                status=status.HTTP_200_OK
+            )
+        except PermissionError as e:
+            with open("api_error.log", "a", encoding="utf-8") as f:
+                f.write(f"--- CUSTOM PAGE DELETE PERMISSION ERROR ---\n")
+                f.write(f"User: {request.user}\n")
+                f.write(f"Error: {str(e)}\n\n")
+            return Response(
+                {"error": "You don't have permission to delete this page"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        except Exception as e:
+            with open("api_error.log", "a", encoding="utf-8") as f:
+                f.write(f"--- CUSTOM PAGE DELETE ERROR ---\n")
+                f.write(f"Error: {str(e)}\n")
+                f.write(f"Type: {type(e).__name__}\n\n")
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     def update(self, request, *args, **kwargs):
         import json
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(instance, data=request.data, partial=True)  # Always partial for flexibility
         if not serializer.is_valid():
             with open("api_error.log", "a", encoding="utf-8") as f:
                 f.write(f"--- CUSTOM PAGE UPDATE VALIDATION FAILED ---\n")
                 f.write(f"Payload: {json.dumps(request.data, default=str)}\n")
                 f.write(f"Errors: {json.dumps(serializer.errors, default=str)}\n\n")
-        return super().update(request, *args, **kwargs)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Save and trigger signals (which will regenerate sitemap)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_path='by-slug')
     def by_slug(self, request):
