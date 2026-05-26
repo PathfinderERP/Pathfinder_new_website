@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { customPagesAPI } from "../../services/api";
+import React, { useState, useEffect, useMemo } from "react";
+import { customPagesAPI, coursesAPI } from "../../services/api";
 import { 
   PlusIcon, PencilIcon, TrashIcon, LinkIcon, EyeIcon, 
   CheckIcon, XMarkIcon, SparklesIcon, PhotoIcon
 } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
+import CourseDetailModal from "../CourseDetailModal";
 
 export default function CustomPagesManagement() {
   const [pages, setPages] = useState([]);
@@ -12,6 +13,11 @@ export default function CustomPagesManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create"); // "create", "edit-sections"
   const [currentPage, setCurrentPage] = useState(null);
+
+  // Course details & modal states for checklist
+  const [expandedCourseId, setExpandedCourseId] = useState(null);
+  const [selectedCourseForModal, setSelectedCourseForModal] = useState(null);
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
 
   // Form states for Create Page
   const [newPageData, setNewPageData] = useState({
@@ -29,7 +35,7 @@ export default function CustomPagesManagement() {
     legacy: { milestones: [] },
     toppers: { toppers_list: [] },
     features: { features_list: [] },
-    courses: { courses_list: [] },
+    courses: { courses_list: [], course_ids: [] },
     centers: { centers_list: [] },
     faq: { faqs_list: [] },
     contact: {}
@@ -37,9 +43,89 @@ export default function CustomPagesManagement() {
 
   const [activeTab, setActiveTab] = useState("hero");
 
+  // Course Picker States (for Courses Tab)
+  const [allCourses, setAllCourses] = useState([]);
+  const [coursesLoadingAdmin, setCoursesLoadingAdmin] = useState(false);
+  const [courseSearchQuery, setCourseSearchQuery] = useState("");
+
+  // Detailed dropdown filter states
+  const [filterCentre, setFilterCentre] = useState("All");
+  const [filterProgramme, setFilterProgramme] = useState("All");
+  const [filterMode, setFilterMode] = useState("All");
+  const [filterDuration, setFilterDuration] = useState("All");
+  const [filterYear, setFilterYear] = useState("All");
+
+  // Helper memo to get actual selected course objects
+  const selectedCoursesObjects = useMemo(() => {
+    return allCourses.filter(c => {
+      const cId = c.id || c._id?.$oid || c._id;
+      return (editSections.courses.course_ids || []).map(String).includes(String(cId));
+    });
+  }, [allCourses, editSections.courses.course_ids]);
+
+  // Unique lists for the dropdown filters
+  const uniqueCentresAdmin = useMemo(() => {
+    const s = new Set(allCourses.map(c => c.centre).filter(Boolean));
+    return ["All", ...[...s].sort()];
+  }, [allCourses]);
+
+  const uniqueProgrammesAdmin = useMemo(() => {
+    const s = new Set(allCourses.map(c => c.programme).filter(Boolean));
+    return ["All", ...[...s].sort()];
+  }, [allCourses]);
+
+  const uniqueModesAdmin = useMemo(() => {
+    const s = new Set(allCourses.map(c => c.mode).filter(Boolean));
+    return ["All", ...[...s].sort()];
+  }, [allCourses]);
+
+  const uniqueDurationsAdmin = useMemo(() => {
+    const s = new Set(allCourses.map(c => c.duration).filter(Boolean));
+    return ["All", ...[...s].sort()];
+  }, [allCourses]);
+
+  const uniqueYearsAdmin = useMemo(() => {
+    const s = new Set(allCourses.map(c => {
+      const date = c.start_date || c.starting_date;
+      if (!date) return null;
+      try {
+        return new Date(date).getFullYear().toString();
+      } catch(e) {
+        return null;
+      }
+    }).filter(Boolean));
+    return ["All", ...[...s].sort()];
+  }, [allCourses]);
+
   useEffect(() => {
     fetchPages();
   }, []);
+
+  // Fetch all available courses when the edit modal opens
+  useEffect(() => {
+    if (isModalOpen && modalMode === "edit-sections") {
+      const fetchAllCourses = async () => {
+        setCoursesLoadingAdmin(true);
+        try {
+          const response = await coursesAPI.getAll();
+          setAllCourses(Array.isArray(response.data) ? response.data : []);
+        } catch (err) {
+          console.error("Failed to fetch courses for picker:", err);
+          setAllCourses([]);
+        } finally {
+          setCoursesLoadingAdmin(false);
+        }
+      };
+      fetchAllCourses();
+    } else {
+      setCourseSearchQuery("");
+      setFilterCentre("All");
+      setFilterProgramme("All");
+      setFilterMode("All");
+      setFilterDuration("All");
+      setFilterYear("All");
+    }
+  }, [isModalOpen, modalMode]);
 
   const fetchPages = async () => {
     setLoading(true);
@@ -117,7 +203,7 @@ export default function CustomPagesManagement() {
       legacy: page.legacy || { milestones: [] },
       toppers: page.toppers || { toppers_list: [] },
       features: page.features || { features_list: [] },
-      courses: page.courses || { courses_list: [] },
+      courses: page.courses || { courses_list: [], course_ids: [] },
       centers: page.centers || { centers_list: [] },
       faq: page.faq || { faqs_list: [] },
       contact: page.contact || {}
@@ -738,52 +824,418 @@ export default function CustomPagesManagement() {
                         <label className="text-xs font-bold text-gray-700">Section Title</label>
                         <input
                           type="text"
+                          placeholder="e.g. Our Programs"
                           value={editSections.courses.title || ""}
                           onChange={(e) => setEditSections({ ...editSections, courses: { ...editSections.courses, title: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750 outline-none"
                         />
                       </div>
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-sm">Course Programs</h4>
-                        {editSections.courses.courses_list && editSections.courses.courses_list.map((course, idx) => (
-                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-850 border border-gray-250 dark:border-slate-750 rounded-xl space-y-3">
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                              <input
-                                type="text"
-                                placeholder="Course Name"
-                                value={course.name}
-                                onChange={(e) => {
-                                  const list = [...editSections.courses.courses_list];
-                                  list[idx].name = e.target.value;
-                                  setEditSections({ ...editSections, courses: { ...editSections.courses, courses_list: list } });
-                                }}
-                                className="bg-white border rounded-lg p-2 text-sm dark:bg-slate-900"
-                              />
-                              <input
-                                type="text"
-                                placeholder="Duration"
-                                value={course.duration}
-                                onChange={(e) => {
-                                  const list = [...editSections.courses.courses_list];
-                                  list[idx].duration = e.target.value;
-                                  setEditSections({ ...editSections, courses: { ...editSections.courses, courses_list: list } });
-                                }}
-                                className="bg-white border rounded-lg p-2 text-sm dark:bg-slate-900"
-                              />
-                              <input
-                                type="text"
-                                placeholder="Target"
-                                value={course.target}
-                                onChange={(e) => {
-                                  const list = [...editSections.courses.courses_list];
-                                  list[idx].target = e.target.value;
-                                  setEditSections({ ...editSections, courses: { ...editSections.courses, courses_list: list } });
-                                }}
-                                className="bg-white border rounded-lg p-2 text-sm dark:bg-slate-900"
-                              />
+
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900 dark:text-white">Select Courses to Display</h4>
+                            <p className="text-xs text-gray-500 mt-0.5">Checked courses appear on this page with live filter UI</p>
+                          </div>
+                          <span className="bg-orange-100 text-orange-700 text-xs font-extrabold px-3 py-1 rounded-full dark:bg-orange-950/20 dark:text-orange-400">
+                            {(editSections.courses.course_ids || []).length} selected
+                          </span>
+                        </div>
+
+                        {/* Selected Courses Display Panel */}
+                        {selectedCoursesObjects.length > 0 && (
+                          <div className="bg-orange-50/40 dark:bg-orange-950/5 border border-orange-100 dark:border-orange-900/20 rounded-xl p-3 space-y-2">
+                            <span className="text-[10px] font-extrabold text-orange-700 dark:text-orange-400 uppercase tracking-wider block">Selected Courses (Click to remove)</span>
+                            <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto pr-1">
+                              {selectedCoursesObjects.map(course => {
+                                const courseId = course.id || course._id?.$oid || course._id;
+                                return (
+                                  <div
+                                    key={courseId}
+                                    className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-orange-200 dark:border-slate-700 rounded-full px-2.5 py-1 text-xs text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:border-red-400 hover:text-red-500 dark:hover:border-red-900/60 dark:hover:text-red-400 cursor-pointer group shrink-0"
+                                    onClick={() => {
+                                      const ids = [...(editSections.courses.course_ids || [])];
+                                      setEditSections({
+                                        ...editSections,
+                                        courses: {
+                                          ...editSections.courses,
+                                          course_ids: ids.filter(id => String(id) !== String(courseId))
+                                        }
+                                      });
+                                    }}
+                                  >
+                                    <span className="font-semibold truncate max-w-[150px]">{course.name}</span>
+                                    {course.centre && <span className="text-[10px] text-gray-400 font-medium">({course.centre})</span>}
+                                    <XMarkIcon className="w-3 h-3 text-gray-400 group-hover:text-red-500 transition-colors" />
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
-                        ))}
+                        )}
+
+                        {/* Search Bar */}
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Search by name, centre, programme..."
+                            value={courseSearchQuery}
+                            onChange={(e) => setCourseSearchQuery(e.target.value)}
+                            className="w-full border border-gray-200 dark:border-slate-750 rounded-xl px-4 py-2.5 pl-9 text-sm dark:bg-slate-850 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                          />
+                          <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
+
+                        {/* Dropdown Filters */}
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 bg-gray-50 dark:bg-slate-850 p-3 rounded-xl border border-gray-150 dark:border-slate-800">
+                          {/* Centre Filter */}
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">Centre</label>
+                            <select
+                              value={filterCentre}
+                              onChange={(e) => setFilterCentre(e.target.value)}
+                              className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-1.5 text-xs outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:text-gray-200"
+                            >
+                              {uniqueCentresAdmin.map(opt => (
+                                <option key={opt} value={opt}>{opt === "All" ? "All Centres" : opt}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Programme Filter */}
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">Programme</label>
+                            <select
+                              value={filterProgramme}
+                              onChange={(e) => setFilterProgramme(e.target.value)}
+                              className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-1.5 text-xs outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:text-gray-200"
+                            >
+                              {uniqueProgrammesAdmin.map(opt => (
+                                <option key={opt} value={opt}>{opt === "All" ? "All Programmes" : opt}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Mode Filter */}
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">Mode</label>
+                            <select
+                              value={filterMode}
+                              onChange={(e) => setFilterMode(e.target.value)}
+                              className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-1.5 text-xs outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:text-gray-200"
+                            >
+                              {uniqueModesAdmin.map(opt => (
+                                <option key={opt} value={opt}>{opt === "All" ? "All Modes" : opt}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Duration Filter */}
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">Duration</label>
+                            <select
+                              value={filterDuration}
+                              onChange={(e) => setFilterDuration(e.target.value)}
+                              className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-1.5 text-xs outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:text-gray-200"
+                            >
+                              {uniqueDurationsAdmin.map(opt => (
+                                <option key={opt} value={opt}>{opt === "All" ? "All Durations" : opt}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Year Filter */}
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">Year</label>
+                            <select
+                              value={filterYear}
+                              onChange={(e) => setFilterYear(e.target.value)}
+                              className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-1.5 text-xs outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:text-gray-200"
+                            >
+                              {uniqueYearsAdmin.map(opt => (
+                                <option key={opt} value={opt}>{opt === "All" ? "All Years" : opt}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Quick Actions */}
+                        {allCourses.length > 0 && (
+                          <div className="flex gap-2 justify-between items-center">
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const visible = allCourses.filter(c => {
+                                    const matchSearch = !courseSearchQuery ||
+                                      c.name?.toLowerCase().includes(courseSearchQuery.toLowerCase()) ||
+                                      c.centre?.toLowerCase().includes(courseSearchQuery.toLowerCase()) ||
+                                      c.programme?.toLowerCase().includes(courseSearchQuery.toLowerCase()) ||
+                                      c.target_exam?.toLowerCase().includes(courseSearchQuery.toLowerCase());
+
+                                    const matchCentre = filterCentre === "All" || c.centre === filterCentre;
+                                    const matchProgramme = filterProgramme === "All" || c.programme === filterProgramme;
+                                    const matchMode = filterMode === "All" || c.mode === filterMode;
+                                    const matchDuration = filterDuration === "All" || c.duration === filterDuration;
+
+                                    let matchYear = true;
+                                    if (filterYear !== "All") {
+                                      const date = c.start_date || c.starting_date;
+                                      if (date) {
+                                        try {
+                                          matchYear = new Date(date).getFullYear().toString() === filterYear;
+                                        } catch (e) {
+                                          matchYear = false;
+                                        }
+                                      } else {
+                                        matchYear = false;
+                                      }
+                                    }
+
+                                    return matchSearch && matchCentre && matchProgramme && matchMode && matchDuration && matchYear;
+                                  });
+
+                                  const visibleIds = visible.map(c => c.id || c._id?.$oid || c._id).filter(Boolean);
+                                  const newIds = [...new Set([...(editSections.courses.course_ids || []), ...visibleIds])];
+                                  setEditSections({
+                                    ...editSections,
+                                    courses: { ...editSections.courses, course_ids: newIds }
+                                  });
+                                }}
+                                className="text-xs font-bold text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/20 px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                ✓ Select all filtered
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditSections({ ...editSections, courses: { ...editSections.courses, course_ids: [] } })}
+                                className="text-xs font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                Clear all
+                              </button>
+                            </div>
+                            {(filterCentre !== "All" || filterProgramme !== "All" || filterMode !== "All" || filterDuration !== "All" || filterYear !== "All" || courseSearchQuery) && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCourseSearchQuery("");
+                                  setFilterCentre("All");
+                                  setFilterProgramme("All");
+                                  setFilterMode("All");
+                                  setFilterDuration("All");
+                                  setFilterYear("All");
+                                }}
+                                className="text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 px-2 py-1 rounded transition-all animate-pulse"
+                              >
+                                Reset Filters
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Course Checklist */}
+                        {coursesLoadingAdmin ? (
+                          <div className="flex items-center justify-center py-12 bg-gray-50 dark:bg-slate-850 border border-gray-200 dark:border-slate-750 rounded-xl">
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                              <p className="text-xs text-gray-500">Loading courses...</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="max-h-80 overflow-y-auto border border-gray-200 dark:border-slate-750 rounded-xl bg-white dark:bg-slate-900 divide-y divide-gray-100 dark:divide-slate-800">
+                            {(() => {
+                              const filtered = allCourses.filter(c => {
+                                const matchSearch = !courseSearchQuery ||
+                                  c.name?.toLowerCase().includes(courseSearchQuery.toLowerCase()) ||
+                                  c.centre?.toLowerCase().includes(courseSearchQuery.toLowerCase()) ||
+                                  c.programme?.toLowerCase().includes(courseSearchQuery.toLowerCase()) ||
+                                  c.target_exam?.toLowerCase().includes(courseSearchQuery.toLowerCase());
+
+                                const matchCentre = filterCentre === "All" || c.centre === filterCentre;
+                                const matchProgramme = filterProgramme === "All" || c.programme === filterProgramme;
+                                const matchMode = filterMode === "All" || c.mode === filterMode;
+                                const matchDuration = filterDuration === "All" || c.duration === filterDuration;
+
+                                let matchYear = true;
+                                if (filterYear !== "All") {
+                                  const date = c.start_date || c.starting_date;
+                                  if (date) {
+                                    try {
+                                      matchYear = new Date(date).getFullYear().toString() === filterYear;
+                                    } catch (e) {
+                                      matchYear = false;
+                                    }
+                                  } else {
+                                    matchYear = false;
+                                  }
+                                }
+
+                                return matchSearch && matchCentre && matchProgramme && matchMode && matchDuration && matchYear;
+                              });
+
+                              if (allCourses.length === 0) {
+                                return (
+                                  <div className="text-center py-10">
+                                    <div className="text-3xl mb-2">📚</div>
+                                    <p className="text-sm text-gray-400">No courses found in the system</p>
+                                    <p className="text-xs text-gray-400 mt-1">Add courses via the Courses management section first</p>
+                                  </div>
+                                );
+                              }
+                                if (filtered.length === 0) {
+                                return (
+                                  <div className="text-center py-10 text-sm text-gray-400">No courses match your search</div>
+                                );
+                              }
+
+                              return filtered.map((course) => {
+                                const courseId = course.id || course._id?.$oid || course._id;
+                                const isSelected = (editSections.courses.course_ids || []).map(String).includes(String(courseId));
+                                const isExpanded = expandedCourseId === courseId;
+
+                                return (
+                                  <div key={courseId} className="border-b border-gray-100 dark:border-slate-800 last:border-b-0">
+                                    <div
+                                      className={`flex items-center justify-between gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-orange-50/60 dark:hover:bg-slate-800 ${isSelected ? 'bg-orange-50/40 dark:bg-orange-950/10' : ''}`}
+                                      onClick={() => {
+                                        const ids = [...(editSections.courses.course_ids || [])];
+                                        setEditSections({
+                                          ...editSections,
+                                          courses: {
+                                            ...editSections.courses,
+                                            course_ids: isSelected
+                                              ? ids.filter(id => String(id) !== String(courseId))
+                                              : [...ids, courseId]
+                                          }
+                                        });
+                                      }}
+                                    >
+                                      {/* Checkbox */}
+                                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${isSelected ? 'bg-orange-500 border-orange-500' : 'border-gray-300 dark:border-slate-600'}`}>
+                                        {isSelected && <CheckIcon className="w-3.5 h-3.5 text-white" />}
+                                      </div>
+                                      {/* Info */}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="font-semibold text-sm text-gray-900 dark:text-white truncate">{course.name}</div>
+                                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                          {course.centre && <span>📍 {course.centre}</span>}
+                                          {course.duration && <span>⏳ {course.duration}{parseInt(course.duration) > 1 ? ' yrs' : parseInt(course.duration) === 1 ? ' yr' : ''}</span>}
+                                          {course.mode && <span>🎥 {course.mode}</span>}
+                                          {course.programme && <span>📖 {course.programme}</span>}
+                                        </div>
+                                      </div>
+                                      {/* Actions */}
+                                      <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                        {course.target_exam && (
+                                          <span className="text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/20 dark:text-orange-400 px-2 py-0.5 rounded-full shrink-0">
+                                            {course.target_exam}
+                                          </span>
+                                        )}
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedCourseForModal(course);
+                                            setIsCourseModalOpen(true);
+                                          }}
+                                          className="text-[10px] bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold px-2 py-1 rounded transition-all dark:bg-slate-800 dark:border-slate-700 dark:text-gray-300"
+                                        >
+                                          View Details
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => setExpandedCourseId(isExpanded ? null : courseId)}
+                                          className="p-1 text-gray-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 rounded transition-all"
+                                        >
+                                          <svg
+                                            className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    {/* Inline Details Dropdown */}
+                                    {isExpanded && (
+                                      <div className="px-12 py-4 bg-slate-50 dark:bg-slate-900/60 border-t border-gray-100 dark:border-slate-800/85 text-xs text-gray-600 dark:text-gray-300 space-y-3">
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div>
+                                            <span className="font-bold text-gray-400 block mb-0.5 uppercase tracking-wider text-[9px]">Course Title</span>
+                                            <span className="font-medium text-slate-800 dark:text-slate-200">{course.course_title || "N/A"}</span>
+                                          </div>
+                                          <div>
+                                            <span className="font-bold text-gray-400 block mb-0.5 uppercase tracking-wider text-[9px]">Language</span>
+                                            <span className="font-medium text-slate-800 dark:text-slate-200">{course.language || "English"}</span>
+                                          </div>
+                                          <div>
+                                            <span className="font-bold text-gray-400 block mb-0.5 uppercase tracking-wider text-[9px]">Base Price</span>
+                                            <span className="font-semibold text-slate-800 dark:text-slate-200">₹{parseFloat(course.course_price || 0).toLocaleString()}</span>
+                                          </div>
+                                          <div>
+                                            <span className="font-bold text-gray-400 block mb-0.5 uppercase tracking-wider text-[9px]">Discounted Price</span>
+                                            <span className="font-semibold text-red-600 dark:text-red-400">
+                                              {course.discounted_price ? `₹${parseFloat(course.discounted_price).toLocaleString()}` : "N/A"}
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <span className="font-bold text-gray-400 block mb-0.5 uppercase tracking-wider text-[9px]">Start Date</span>
+                                            <span className="font-medium text-slate-800 dark:text-slate-200">
+                                              {course.start_date || course.starting_date ? new Date(course.start_date || course.starting_date).toLocaleDateString() : "Coming Soon"}
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <span className="font-bold text-gray-400 block mb-0.5 uppercase tracking-wider text-[9px]">Validity</span>
+                                            <span className="font-medium text-slate-800 dark:text-slate-200">
+                                              {course.validity_date ? new Date(course.validity_date).toLocaleDateString() : "N/A"}
+                                            </span>
+                                          </div>
+                                        </div>
+                                        {course.description && (
+                                          <div>
+                                            <span className="font-bold text-gray-400 block mb-0.5 uppercase tracking-wider text-[9px]">Description</span>
+                                            <p className="leading-relaxed text-slate-700 dark:text-slate-300">{course.description}</p>
+                                          </div>
+                                        )}
+                                        {course.plans && course.plans.length > 0 && (
+                                          <div>
+                                            <span className="font-bold text-gray-400 block mb-1 uppercase tracking-wider text-[9px]">Infinity Plans ({course.plans.length})</span>
+                                            <div className="space-y-1 bg-white dark:bg-slate-950 p-2 rounded-lg border border-gray-150 dark:border-slate-850">
+                                              {course.plans.map((p, pIdx) => (
+                                                <div key={pIdx} className="flex justify-between items-center py-0.5 border-b border-gray-50 dark:border-slate-900 last:border-b-0">
+                                                  <span className="font-bold text-slate-800 dark:text-slate-200">{p.name || `Plan ${pIdx+1}`}</span>
+                                                  <span className="text-slate-650 dark:text-slate-350">
+                                                    ₹{parseFloat(p.discounted_price || p.base_price).toLocaleString()} 
+                                                    {parseFloat(p.base_price) > parseFloat(p.discounted_price) && (
+                                                      <span className="text-[10px] text-gray-450 line-through ml-1.5">₹{parseFloat(p.base_price).toLocaleString()}</span>
+                                                    )}
+                                                  </span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              });
+                            })()}
+                          </div>
+                        )}
+
+                        {/* Selected Summary */}
+                        {(editSections.courses.course_ids || []).length > 0 && (
+                          <div className="bg-green-50 dark:bg-green-950/10 border border-green-100 dark:border-green-900/20 rounded-xl p-3 flex items-center gap-2 text-xs text-green-700 dark:text-green-400">
+                            <CheckIcon className="w-4 h-4 shrink-0" />
+                            <span className="font-bold">{editSections.courses.course_ids.length} course{editSections.courses.course_ids.length !== 1 ? 's' : ''} selected</span>
+                            <span className="text-green-600/70 dark:text-green-500/60">— Shown with live Centre, Programme &amp; Mode filters on the page</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -937,6 +1389,15 @@ export default function CustomPagesManagement() {
         </div>
       )}
 
+      {/* CourseDetailModal for previewing course details inside Admin Panel */}
+      <CourseDetailModal
+        course={selectedCourseForModal}
+        isOpen={isCourseModalOpen}
+        onClose={() => {
+          setIsCourseModalOpen(false);
+          setSelectedCourseForModal(null);
+        }}
+      />
     </div>
   );
 }

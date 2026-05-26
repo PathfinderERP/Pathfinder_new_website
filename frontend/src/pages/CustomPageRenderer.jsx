@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { customPagesAPI, landingAPI } from "../services/api";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { customPagesAPI, coursesAPI } from "../services/api";
 import { 
   Calendar, Users, Target, TrendingUp, Trophy, Award, 
   Star, GraduationCap, BookOpen, Laptop, MapPin, Clock, 
@@ -11,6 +11,9 @@ import NotFound from "./Notfound/NotFound";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import ContactFormCard from "../components/common/ContactFormCard";
+import CourseDetailModal from "../components/CourseDetailModal";
+import { getImageUrl } from "../utils/imageUtils";
 
 // Simple mapping for dynamic icons used in Legacy & Features sections
 const IconComponent = ({ name, className = "w-6 h-6" }) => {
@@ -50,6 +53,7 @@ export default function CustomPageRenderer() {
     pauseOnHover: true,
     slidesToShow: 3,
     slidesToScroll: 1,
+    arrows: false,
     responsive: [
       { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1 } },
       { breakpoint: 640, settings: { slidesToShow: 1, slidesToScroll: 1 } }
@@ -58,19 +62,8 @@ export default function CustomPageRenderer() {
 
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [errorStatus, setErrorStatus] = useState(null); // null, 404, 403, 500
-
-  // Contact Form State
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    course: "",
-    center: "",
-    message: ""
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [errorStatus, setErrorStatus] = useState(null);
+  const sliderRef = useRef(null);
 
   useEffect(() => {
     async function fetchPage() {
@@ -138,32 +131,7 @@ export default function CustomPageRenderer() {
   };
 
   const handleFormChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.phone) {
-      toast.error("Name and Phone Number are required!");
-      return;
-    }
-    
-    setIsSubmitting(true);
-    try {
-      // Register lead using the standard landing page lead API
-      await landingAPI.register({
-        ...formData,
-        campaign: `Landing Page: ${pageData.title} (${pageData.slug})`,
-        source: window.location.href
-      });
-      setSubmitSuccess(true);
-      toast.success("Counselling session booked successfully!");
-    } catch (err) {
-      console.error("Lead submission error:", err);
-      toast.error("Failed to submit request. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // kept for potential future use
   };
 
   // Section configs
@@ -273,78 +241,127 @@ export default function CustomPageRenderer() {
       )}
 
       {/* 3. TOPPERS SPOTLIGHT SECTION */}
-      {toppers && toppers.toppers_list && toppers.toppers_list.length > 0 && (
-        <section className="py-24 bg-gray-950 text-white relative">
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-              backgroundSize: '40px 40px'
-            }}></div>
-          </div>
+      {toppers && toppers.toppers_list && toppers.toppers_list.length > 0 && (() => {
+        const fallbackImages = [
+          "/images/homepagecarousal_images/rupayan pal.webp",
+          "/images/homepagecarousal_images/devdutta majhi.webp",
+          "/images/homepagecarousal_images/Adrita Mahata.webp",
+          "/images/homepagecarousal_images/Adrita Sarkar.webp",
+          "/images/homepagecarousal_images/Chandrachur Sen.webp",
+          "/images/homepagecarousal_images/Pranami halder.webp"
+        ];
 
-          <div className="container mx-auto px-6 max-w-6xl relative z-10">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-orange-400 font-bold text-sm uppercase tracking-wider block mb-2">Top Performers</span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white">{toppers.title || "Pathfinder Achievers"}</h2>
-              <div className="h-1.5 w-20 bg-orange-500 mx-auto mt-4 rounded-full"></div>
+        return (
+          <section className="py-12 bg-gradient-to-b from-[#fbf8f3] via-[#f7f0e4] to-[#fbf8f3] text-slate-900 relative overflow-hidden border-y border-[#eddcc4]">
+            {/* Subtle light radial gradient glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-100/50 rounded-full blur-[130px] pointer-events-none" />
+            
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0" style={{
+                backgroundImage: 'radial-gradient(circle at 2px 2px, #cbd5e1 1.5px, transparent 0)',
+                backgroundSize: '40px 40px'
+              }}></div>
             </div>
 
-            {toppers.toppers_list.length > 3 ? (
-              <div className="toppers-carousel -mx-4 px-4 pb-12">
-                <Slider {...topperSliderSettings}>
-                  {toppers.toppers_list.map((topper, index) => (
-                    <div key={index} className="px-3 h-full pb-4 pt-2">
-                      <div className="bg-gray-900/50 border border-gray-800 rounded-3xl overflow-hidden hover:border-orange-500/50 transition-all flex flex-col group h-full">
-                        <div className="aspect-[4/5] bg-gray-800 relative overflow-hidden flex items-end justify-center">
-                          <img 
-                            src={topper.image_url || "/images/spotlight/1.png"} 
-                            alt={topper.name}
-                            className="object-cover h-[85%] w-auto group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute top-4 left-4 bg-orange-600 text-white text-xs px-3 py-1 rounded-full font-bold">
-                            {topper.exam || "NEET"}
+            <div className="container mx-auto px-6 max-w-6xl relative z-10">
+              
+              {/* Header with Custom Manual Slider Navigation Buttons */}
+              <div className="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                <div className="text-left">
+                  <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Top Performers</span>
+                  <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">{toppers.title || "Pathfinder Achievers"}</h2>
+                  <div className="h-1.5 w-20 bg-orange-500 mt-3 rounded-full"></div>
+                </div>
+                
+                {toppers.toppers_list.length > 3 && (
+                  <div className="flex gap-3 mt-6 md:mt-0">
+                    <button 
+                      onClick={() => sliderRef.current?.slickPrev()}
+                      className="w-11 h-11 rounded-full border border-[#f5e6d3] bg-white text-orange-600 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all shadow-sm hover:shadow-md hover:border-orange-500 active:scale-95 duration-200"
+                      aria-label="Previous Slide"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                    </button>
+                    <button 
+                      onClick={() => sliderRef.current?.slickNext()}
+                      className="w-11 h-11 rounded-full border border-[#f5e6d3] bg-white text-orange-600 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all shadow-sm hover:shadow-md hover:border-orange-500 active:scale-95 duration-200"
+                      aria-label="Next Slide"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {toppers.toppers_list.length > 3 ? (
+                <div className="toppers-carousel -mx-4 px-4 pb-4">
+                  <Slider ref={sliderRef} {...topperSliderSettings}>
+                    {toppers.toppers_list.map((topper, index) => (
+                      <div key={index} className="px-3 h-full pb-4 pt-2">
+                        <div className="bg-white border border-[#f5e6d3] rounded-[2rem] overflow-hidden hover:border-orange-500/40 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-500 flex flex-col group h-full shadow-sm shadow-[#f7ebd9]/40">
+                          <div className="aspect-[4/5] bg-gradient-to-b from-[#fdfcfb] to-[#f7eedc] relative overflow-hidden flex items-end justify-center border-b border-[#f5e6d3]/60">
+                            <img 
+                              src={getImageUrl(topper.image_url)} 
+                              alt={topper.name}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = getImageUrl(fallbackImages[index % fallbackImages.length]);
+                              }}
+                              className="object-contain h-[92%] w-auto max-w-[92%] group-hover:scale-105 transition-transform duration-700 ease-out z-10"
+                            />
+                            <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] sm:text-xs px-3.5 py-1.5 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-20">
+                              {topper.exam || "NEET"}
+                            </div>
+                            <div className="absolute w-44 h-44 rounded-full bg-white/40 blur-xl -bottom-10 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
+                          </div>
+                          <div className="p-6 text-center space-y-3 bg-white flex flex-col items-center justify-between flex-grow">
+                            <h3 className="font-extrabold text-xl text-slate-900 group-hover:text-orange-600 transition-colors duration-300">{topper.name}</h3>
+                            <p className="text-slate-500 text-sm font-semibold">{topper.score}</p>
+                            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 text-sm font-extrabold transition-all group-hover:shadow-lg group-hover:shadow-orange-500/30">
+                              <Trophy className="w-4 h-4 text-white animate-pulse" /> {topper.rank}
+                            </div>
                           </div>
                         </div>
-                        <div className="p-6 text-center space-y-2">
-                          <h3 className="font-extrabold text-xl">{topper.name}</h3>
-                          <p className="text-gray-400 text-sm">{topper.score}</p>
-                          <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-orange-950 text-orange-400 border border-orange-500/30 text-sm font-bold">
-                            <Trophy className="w-4 h-4" /> {topper.rank}
+                      </div>
+                    ))}
+                  </Slider>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {toppers.toppers_list.map((topper, index) => (
+                    <div key={index}>
+                      <div className="bg-white border border-[#f5e6d3] rounded-[2rem] overflow-hidden hover:border-orange-500/40 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-500 flex flex-col group h-full shadow-sm shadow-[#f7ebd9]/40">
+                        <div className="aspect-[4/5] bg-gradient-to-b from-[#fdfcfb] to-[#f7eedc] relative overflow-hidden flex items-end justify-center border-b border-[#f5e6d3]/60">
+                          <img 
+                            src={getImageUrl(topper.image_url)} 
+                            alt={topper.name}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = getImageUrl(fallbackImages[index % fallbackImages.length]);
+                            }}
+                            className="object-contain h-[92%] w-auto max-w-[92%] group-hover:scale-105 transition-transform duration-700 ease-out z-10"
+                          />
+                          <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] sm:text-xs px-3.5 py-1.5 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-20">
+                            {topper.exam || "NEET"}
+                          </div>
+                          <div className="absolute w-44 h-44 rounded-full bg-white/40 blur-xl -bottom-10 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
+                        </div>
+                        <div className="p-6 text-center space-y-3 bg-white flex flex-col items-center justify-between flex-grow">
+                          <h3 className="font-extrabold text-xl text-slate-900 group-hover:text-orange-600 transition-colors duration-300">{topper.name}</h3>
+                          <p className="text-slate-500 text-sm font-semibold">{topper.score}</p>
+                          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 text-sm font-extrabold transition-all group-hover:shadow-lg group-hover:shadow-orange-500/30">
+                            <Trophy className="w-4 h-4 text-white animate-pulse" /> {topper.rank}
                           </div>
                         </div>
                       </div>
                     </div>
                   ))}
-                </Slider>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {toppers.toppers_list.map((topper, index) => (
-                  <div key={index} className="bg-gray-900/50 border border-gray-800 rounded-3xl overflow-hidden hover:border-orange-500/50 transition-all flex flex-col group h-full">
-                    <div className="aspect-[4/5] bg-gray-800 relative overflow-hidden flex items-end justify-center">
-                      <img 
-                        src={topper.image_url || "/images/spotlight/1.png"} 
-                        alt={topper.name}
-                        className="object-cover h-[85%] w-auto group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute top-4 left-4 bg-orange-600 text-white text-xs px-3 py-1 rounded-full font-bold">
-                        {topper.exam || "NEET"}
-                      </div>
-                    </div>
-                    <div className="p-6 text-center space-y-2">
-                      <h3 className="font-extrabold text-xl">{topper.name}</h3>
-                      <p className="text-gray-400 text-sm">{topper.score}</p>
-                      <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-orange-950 text-orange-400 border border-orange-500/30 text-sm font-bold">
-                        <Trophy className="w-4 h-4" /> {topper.rank}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* 4. FEATURES / WHY CHOOSE US SECTION */}
       {features && features.features_list && features.features_list.length > 0 && (
@@ -374,55 +391,59 @@ export default function CustomPageRenderer() {
       )}
 
       {/* 5. COURSES PROGRAMS SECTION */}
-      {courses && courses.courses_list && courses.courses_list.length > 0 && (
-        <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
-          <div className="container mx-auto px-6 max-w-6xl">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Target Programs</span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{courses.title || "Choose Your Program"}</h2>
-              <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-full"></div>
-            </div>
+      {courses && (
+        <>
+          {/* Dynamic courses from real catalog — shown when admin selected course IDs */}
+          {courses.course_ids && courses.course_ids.length > 0 && (
+            <CoursesDisplaySection
+              courseIds={courses.course_ids}
+              title={courses.title}
+              onEnquire={scrollToContact}
+            />
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {courses.courses_list.map((course, index) => (
-                <div key={index} className="bg-white border border-gray-200 rounded-3xl p-8 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-300 hover:border-orange-600">
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-start gap-4">
-                      <div>
-                        <h3 className="font-bold text-gray-900 text-2xl leading-tight mb-2">{course.name}</h3>
-                        <div className="inline-block bg-orange-50 text-orange-700 text-xs px-3 py-1 rounded-full font-semibold">
-                          Target: {course.target}
+          {/* Fallback: manually entered courses (backward compatibility) */}
+          {(!courses.course_ids || courses.course_ids.length === 0) && courses.courses_list && courses.courses_list.length > 0 && (
+            <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
+              <div className="container mx-auto px-6 max-w-6xl">
+                <div className="text-center max-w-3xl mx-auto mb-16">
+                  <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Target Programs</span>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{courses.title || "Choose Your Program"}</h2>
+                  <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-full"></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {courses.courses_list.map((course, index) => (
+                    <div key={index} className="bg-white border border-gray-200 rounded-3xl p-8 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-300 hover:border-orange-600">
+                      <div className="space-y-6">
+                        <div className="flex justify-between items-start gap-4">
+                          <div>
+                            <h3 className="font-bold text-gray-900 text-2xl leading-tight mb-2">{course.name}</h3>
+                            <div className="inline-block bg-orange-50 text-orange-700 text-xs px-3 py-1 rounded-full font-semibold">Target: {course.target}</div>
+                          </div>
+                          <div className="bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg shrink-0">{course.duration}</div>
+                        </div>
+                        <div className="border-t border-gray-100 pt-6 space-y-3.5">
+                          <h4 className="font-bold text-gray-800 text-sm uppercase tracking-wider">Key Highlights</h4>
+                          <ul className="space-y-3">
+                            {course.features && course.features.map((feat, idx) => (
+                              <li key={idx} className="flex items-start gap-2.5 text-gray-600 text-sm">
+                                <Check className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
+                                <span>{feat}</span>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
                       </div>
-                      <div className="bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg shrink-0">
-                        {course.duration}
-                      </div>
+                      <button onClick={scrollToContact} className="mt-8 w-full bg-gray-900 hover:bg-orange-600 text-white font-bold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-center gap-2">
+                        Enquire Now <ArrowRight className="w-4 h-4" />
+                      </button>
                     </div>
-
-                    <div className="border-t border-gray-100 pt-6 space-y-3.5">
-                      <h4 className="font-bold text-gray-800 text-sm uppercase tracking-wider">Key Highlights</h4>
-                      <ul className="space-y-3">
-                        {course.features && course.features.map((feat, idx) => (
-                          <li key={idx} className="flex items-start gap-2.5 text-gray-600 text-sm">
-                            <Check className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={scrollToContact}
-                    className="mt-8 w-full bg-gray-900 hover:bg-orange-600 text-white font-bold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-center gap-2"
-                  >
-                    Enquire Now <ArrowRight className="w-4 h-4" />
-                  </button>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+              </div>
+            </section>
+          )}
+        </>
       )}
 
       {/* 6. CENTERS SECTION */}
@@ -494,171 +515,50 @@ export default function CustomPageRenderer() {
         </section>
       )}
 
-      {/* 8. CONTACT FORM & COUNSELLING BOOKING */}
+      {/* 8. CONTACT FORM — uses the exact same form as the /contact page */}
       {contact && (
-        <section id="contact-section" className="py-24 bg-orange-950 text-white relative">
-          <div className="container mx-auto px-6 max-w-4xl relative z-10">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
-              
-              <div className="md:col-span-5 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-900 text-orange-400 text-xs font-bold border border-orange-800">
-                  ⚡ Personalized Counselling
+        <section id="contact-section" className="py-20 bg-slate-50 border-t border-slate-100">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+
+              {/* Left: Info */}
+              <div className="space-y-6">
+                <div className="mb-4">
+                  <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">
+                    {contact.title || "Get in "}<span className="text-orange-600">Touch</span>
+                  </h2>
+                  <p className="text-slate-500 font-medium">
+                    Fill in the form and our expert counsellors will reach out to you within 24 hours.
+                  </p>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-                  {contact.title || "Book Your Free Career Counselling Session"}
-                </h2>
-                <p className="text-orange-100 leading-relaxed text-sm">
-                  Connect with our senior expert counsellors to map out your perfect medical prep journey and target score plans.
-                </p>
-                <div className="space-y-4 pt-4 border-t border-orange-900">
-                  <div className="flex gap-4 items-center">
-                    <div className="w-10 h-10 rounded-full bg-orange-900/50 flex items-center justify-center border border-orange-800">
-                      <Users className="w-5 h-5 text-orange-400" />
+
+                {[
+                  { icon: Users, title: "1-on-1 Guidance", desc: "Personal session with our senior expert advisors" },
+                  { icon: TrendingUp, title: "Preparation Blueprint", desc: "Customised study plan targeting your weak areas" },
+                  { icon: Target, title: "Score Prediction", desc: "AI-backed rank & score estimate before the exam" },
+                  { icon: BookOpen, title: "Free Study Material", desc: "Complimentary chapter notes sent after counselling" },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 items-start bg-white rounded-2xl p-5 shadow-sm border border-orange-100 hover:shadow-md transition-all">
+                    <div className="w-11 h-11 shrink-0 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
+                      <item.icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm">1-on-1 Guidance</h4>
-                      <p className="text-xs text-orange-200">Personal session with expert advisors</p>
+                      <h4 className="font-bold text-gray-900 text-sm">{item.title}</h4>
+                      <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
-                  <div className="flex gap-4 items-center">
-                    <div className="w-10 h-10 rounded-full bg-orange-900/50 flex items-center justify-center border border-orange-800">
-                      <TrendingUp className="w-5 h-5 text-orange-400" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm">Target Preparation Blueprint</h4>
-                      <p className="text-xs text-orange-200">NCERT mapping and weak area strategies</p>
-                    </div>
-                  </div>
+                ))}
+
+                <div className="bg-orange-600 text-white rounded-2xl p-5 text-center">
+                  <div className="text-3xl font-black">35+</div>
+                  <div className="text-sm font-semibold opacity-90">Years of Trusted Excellence</div>
+                  <div className="mt-2 text-xs opacity-75">Serving Eastern India since 1991</div>
                 </div>
               </div>
 
-              <div className="md:col-span-7 bg-white text-gray-900 rounded-3xl p-8 shadow-2xl relative overflow-hidden border border-orange-850">
-                {submitSuccess ? (
-                  <div className="text-center py-12 space-y-6">
-                    <div className="w-20 h-20 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center mx-auto border border-orange-100 animate-bounce">
-                      <CheckCircle className="w-10 h-10" />
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="font-extrabold text-2xl text-orange-950">Session Request Received!</h3>
-                      <p className="text-gray-600 text-sm max-w-sm mx-auto">
-                        Our student relations team will reach out to you within 24 hours to confirm your scheduled slot.
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => setSubmitSuccess(false)}
-                      className="bg-orange-600 text-white font-bold py-2.5 px-6 rounded-xl hover:bg-orange-500 transition-colors text-sm"
-                    >
-                      Submit Another Query
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleFormSubmit} className="space-y-5">
-                    <h3 className="font-bold text-gray-900 text-2xl mb-4">Request Callback</h3>
-                    
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Full Name *</label>
-                      <input 
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleFormChange}
-                        placeholder="Enter student name"
-                        required
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 transition-all outline-none"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Phone Number *</label>
-                        <input 
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleFormChange}
-                          placeholder="10-digit mobile number"
-                          required
-                          className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 transition-all outline-none"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Email Address</label>
-                        <input 
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleFormChange}
-                          placeholder="yourname@gmail.com"
-                          className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 transition-all outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {courses && courses.courses_list && (
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Target Program</label>
-                          <select 
-                            name="course"
-                            value={formData.course}
-                            onChange={handleFormChange}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 transition-all outline-none"
-                          >
-                            <option value="">Select program</option>
-                            {courses.courses_list.map((c, idx) => (
-                              <option key={idx} value={c.name}>{c.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                      {centers && centers.centers_list && (
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Preferred Center</label>
-                          <select 
-                            name="center"
-                            value={formData.center}
-                            onChange={handleFormChange}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 transition-all outline-none"
-                          >
-                            <option value="">Select center</option>
-                            {centers.centers_list.map((c, idx) => (
-                              <option key={idx} value={c.name}>{c.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Your Question / Message</label>
-                      <textarea 
-                        name="message"
-                        value={formData.message}
-                        onChange={handleFormChange}
-                        rows="3"
-                        placeholder="Any specific doubts or query..."
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 transition-all outline-none resize-none"
-                      />
-                    </div>
-
-                    <button 
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-orange-600 hover:bg-orange-500 text-white font-extrabold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-2 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 text-base"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          Submitting Booking...
-                        </>
-                      ) : (
-                        <>
-                          Book Counselling <Send className="w-5 h-5" />
-                        </>
-                      )}
-                    </button>
-                  </form>
-                )}
+              {/* Right: Exact same form card as /contact page */}
+              <div className="w-full">
+                <ContactFormCard />
               </div>
 
             </div>
@@ -666,6 +566,500 @@ export default function CustomPageRenderer() {
         </section>
       )}
 
+    </div>
+  );
+}
+
+/* ============================================================
+ * CoursesDisplaySection
+ * Fetches courses by their IDs and renders them with the same
+ * live filter bar (Centre / Programme / Mode) and CourseDetailModal
+ * as the main Courses pages.
+ * ============================================================ */
+function CoursesDisplaySection({ courseIds, title, onEnquire }) {
+  const [allCourses, setAllCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedCentre, setSelectedCentre] = useState("All");
+  const [selectedProgramme, setSelectedProgramme] = useState("All");
+  const [selectedMode, setSelectedMode] = useState("All");
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
+  
+  // Grid layout vs slider layout toggle
+  const [showAll, setShowAll] = useState(false);
+  
+  const navigate = useNavigate();
+
+  // Fetch all courses and filter to the selected IDs
+  useEffect(() => {
+    if (!courseIds || courseIds.length === 0) return;
+    const fetchCourses = async () => {
+      setLoading(true);
+      try {
+        const res = await coursesAPI.getAll();
+        const data = Array.isArray(res.data) ? res.data : [];
+        // Keep only admin-selected courses robustly
+        setAllCourses(data.filter(c => {
+          const cId = c.id || c._id?.$oid || c._id;
+          return courseIds.map(String).includes(String(cId));
+        }));
+      } catch (err) {
+        console.error("CoursesDisplaySection: failed to load courses", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, [courseIds]);
+
+  // Cascading filter computations (identical logic to AllIndia.jsx)
+  const uniqueCentres = useMemo(() => {
+    const s = new Set(allCourses.map(c => c.centre).filter(Boolean));
+    return ["All", ...[...s].sort()];
+  }, [allCourses]);
+
+  const centreFiltered = useMemo(() =>
+    selectedCentre === "All" ? allCourses : allCourses.filter(c => c.centre === selectedCentre),
+    [allCourses, selectedCentre]
+  );
+
+  const uniqueProgrammes = useMemo(() => {
+    const s = new Set(centreFiltered.map(c => c.programme).filter(Boolean));
+    return ["All", ...[...s].sort()];
+  }, [centreFiltered]);
+
+  const progFiltered = useMemo(() =>
+    selectedProgramme === "All" ? centreFiltered : centreFiltered.filter(c => c.programme === selectedProgramme),
+    [centreFiltered, selectedProgramme]
+  );
+
+  const uniqueModes = useMemo(() => {
+    const s = new Set(progFiltered.map(c => c.mode).filter(Boolean));
+    return ["All", ...[...s].sort()];
+  }, [progFiltered]);
+
+  const displayCourses = useMemo(() =>
+    selectedMode === "All" ? progFiltered : progFiltered.filter(c => c.mode === selectedMode),
+    [progFiltered, selectedMode]
+  );
+
+  // Reset dependent filter when parent changes
+  useEffect(() => {
+    if (!uniqueProgrammes.includes(selectedProgramme)) setSelectedProgramme("All");
+  }, [uniqueProgrammes, selectedProgramme]);
+  useEffect(() => {
+    if (!uniqueModes.includes(selectedMode)) setSelectedMode("All");
+  }, [uniqueModes, selectedMode]);
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-gradient-to-b from-orange-50/40 to-white">
+        <div className="container mx-auto px-6 max-w-6xl text-center py-16">
+          <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-gray-500 mt-4 text-sm font-medium animate-pulse">Loading courses...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (allCourses.length === 0) return null;
+
+  const hasFilters = uniqueCentres.length > 1 || uniqueProgrammes.length > 1 || uniqueModes.length > 1;
+
+  // React Slick slider settings
+  const sliderSettings = {
+    dots: true,
+    infinite: displayCourses.length > 3,
+    speed: 500,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    arrows: true,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+          infinite: displayCourses.length > 2,
+        }
+      },
+      {
+        breakpoint: 640,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          infinite: displayCourses.length > 1,
+        }
+      }
+    ]
+  };
+
+  const handleExplore = (course) => {
+    setSelectedCourse(course);
+    setIsCourseModalOpen(true);
+  };
+
+  const handleBuy = (course) => {
+    navigate("/buynow", { state: { courseData: course } });
+  };
+
+  return (
+    <section className="py-16 bg-gradient-to-b from-orange-50/30 to-white relative overflow-hidden">
+      {/* Subtle background blobs */}
+      <div className="absolute -top-24 -right-24 w-72 h-72 bg-orange-100/40 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-amber-100/30 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl relative z-10">
+
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 max-w-7xl mx-auto px-4 gap-4">
+          <div className="text-left">
+            <span className="text-orange-600 font-bold text-sm uppercase tracking-widest block mb-2">Target Programs</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{title || "Choose Your Program"}</h2>
+            <div className="h-1.5 w-20 bg-gradient-to-r from-orange-500 to-amber-500 mt-4 rounded-full" />
+          </div>
+          {displayCourses.length > 3 && (
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-1.5 whitespace-nowrap self-start md:self-center"
+            >
+              {showAll ? "Show Slider" : `View All (${displayCourses.length})`}
+            </button>
+          )}
+        </div>
+
+        {/* Filter Bar — same style as AllIndia/Boards/Foundation pages */}
+        {hasFilters && (
+          <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl sm:rounded-3xl p-4 sm:p-6 mb-8 shadow-xl border border-orange-400/50">
+            <div className="flex flex-wrap gap-4 sm:gap-6">
+
+              {/* Centre filter */}
+              {uniqueCentres.length > 1 && (
+                <div className="flex-1 min-w-[130px] space-y-1.5">
+                  <label className="block text-[10px] sm:text-[11px] font-bold text-orange-50 uppercase tracking-widest">Centre</label>
+                  <div className="relative">
+                    <select
+                      value={selectedCentre}
+                      onChange={e => setSelectedCentre(e.target.value)}
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-none bg-white/95 text-slate-800 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-white/20 outline-none appearance-none shadow-sm"
+                    >
+                      {uniqueCentres.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Programme filter */}
+              {uniqueProgrammes.length > 1 && (
+                <div className="flex-1 min-w-[130px] space-y-1.5">
+                  <label className="block text-[10px] sm:text-[11px] font-bold text-orange-50 uppercase tracking-widest">Programme</label>
+                  <div className="relative">
+                    <select
+                      value={selectedProgramme}
+                      onChange={e => setSelectedProgramme(e.target.value)}
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border-none bg-white/95 text-slate-800 text-xs sm:text-sm font-semibold focus:ring-4 focus:ring-white/20 outline-none appearance-none shadow-sm"
+                    >
+                      {uniqueProgrammes.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Mode filter (pill buttons) */}
+              {uniqueModes.length > 1 && (
+                <div className="flex-1 min-w-[200px] space-y-1.5">
+                  <label className="block text-[10px] sm:text-[11px] font-bold text-orange-50 uppercase tracking-widest">Mode</label>
+                  <div className="flex flex-wrap gap-2">
+                    {uniqueModes.map(mode => (
+                      <button
+                        key={mode}
+                        onClick={() => setSelectedMode(mode)}
+                        className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap uppercase tracking-wider ${
+                          selectedMode === mode
+                            ? "bg-white text-orange-600 shadow-lg scale-105"
+                            : "bg-orange-400/30 text-white border border-white/20 hover:bg-white/10"
+                        }`}
+                      >
+                        {mode}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Active filter pills + count */}
+            <div className="mt-4 flex items-center justify-between flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
+                {selectedCentre !== "All" && (
+                  <span className="px-3 py-1.5 bg-white/90 border border-white rounded-lg flex items-center gap-1 text-orange-700 text-xs font-medium">
+                    Centre: {selectedCentre}
+                    <button onClick={() => setSelectedCentre("All")} className="ml-1 hover:text-red-600 text-base leading-none">×</button>
+                  </span>
+                )}
+                {selectedProgramme !== "All" && (
+                  <span className="px-3 py-1.5 bg-white/90 border border-white rounded-lg flex items-center gap-1 text-orange-700 text-xs font-medium">
+                    {selectedProgramme}
+                    <button onClick={() => setSelectedProgramme("All")} className="ml-1 hover:text-red-600 text-base leading-none">×</button>
+                  </span>
+                )}
+                {selectedMode !== "All" && (
+                  <span className="px-3 py-1.5 bg-white/90 border border-white rounded-lg flex items-center gap-1 text-orange-700 text-xs font-medium">
+                    {selectedMode}
+                    <button onClick={() => setSelectedMode("All")} className="ml-1 hover:text-red-600 text-base leading-none">×</button>
+                  </span>
+                )}
+              </div>
+              <span className="text-orange-100/80 text-xs font-medium">
+                Showing {displayCourses.length} of {allCourses.length} course{allCourses.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Custom Slick Carousel styles */}
+        <style>
+          {`
+            .courses-slider-container .slick-slide {
+              padding: 0 12px;
+            }
+            .courses-slider-container .slick-list {
+              margin: 0 -12px;
+            }
+            .courses-slider-container .slick-dots li button:before {
+              font-size: 8px;
+              color: #cbd5e1;
+              opacity: 0.5;
+            }
+            .courses-slider-container .slick-dots li.slick-active button:before {
+              color: #f97316;
+              opacity: 1;
+            }
+          `}
+        </style>
+
+        {/* Course Cards Grid/Slider */}
+        {displayCourses.length > 0 ? (
+          (!showAll && displayCourses.length > 3) ? (
+            <div className="courses-slider-container pb-6">
+              <Slider {...sliderSettings}>
+                {displayCourses.map((course) => (
+                  <div key={course.id || course._id?.$oid || course._id} className="h-full py-2">
+                    <CourseCard course={course} onExplore={handleExplore} onEnquire={onEnquire} />
+                  </div>
+                ))}
+              </Slider>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayCourses.map((course) => (
+                <CourseCard
+                  key={course.id || course._id?.$oid || course._id}
+                  course={course}
+                  onExplore={handleExplore}
+                  onEnquire={onEnquire}
+                />
+              ))}
+            </div>
+          )
+        ) : (
+          <div className="text-center py-14 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <div className="text-4xl mb-3">📚</div>
+            <p className="text-gray-600 font-semibold">No courses match the selected filters.</p>
+            <button
+              onClick={() => { setSelectedCentre("All"); setSelectedProgramme("All"); setSelectedMode("All"); }}
+              className="mt-3 text-sm text-orange-600 font-semibold hover:underline"
+            >
+              Clear all filters
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* CourseDetailModal — identical to the one used on Courses pages */}
+      <CourseDetailModal
+        course={selectedCourse}
+        isOpen={isCourseModalOpen}
+        onClose={() => { setIsCourseModalOpen(false); setSelectedCourse(null); }}
+      />
+    </section>
+  );
+}
+
+/* ============================================================
+ * CourseCard Sub-component
+ * Premium course card styled identically to the home page card.
+ * ============================================================ */
+function CourseCard({ course, onExplore, onEnquire }) {
+  // Format class level to add "Class" prefix if it's only digits
+  const formatClassLevel = (level) => {
+    if (!level) return "Not specified";
+    if (/^\d+$/.test(level.toString().trim())) {
+      return `Class ${level}`;
+    }
+    return level;
+  };
+
+  // Pricing calculations
+  const price = parseFloat(course.course_price || 0);
+  const discounted = parseFloat(course.discounted_price || 0);
+  const offer = parseFloat(course.offers || 0);
+
+  let displayPrice = price;
+  let originalPrice = 0;
+  let discountLabel = 0;
+
+  // Priority 1: Plans - Find lowest price
+  if (course.plans && course.plans.length > 0) {
+    const planPrices = course.plans.map(p => parseFloat(p.discounted_price || p.base_price || 0)).filter(p => p > 0);
+    if (planPrices.length > 0) displayPrice = Math.min(...planPrices);
+
+    const matchingPlan = course.plans.find(p => parseFloat(p.discounted_price || p.base_price) === displayPrice);
+    if (matchingPlan && parseFloat(matchingPlan.base_price) > displayPrice) {
+      originalPrice = parseFloat(matchingPlan.base_price);
+      discountLabel = Math.round(((originalPrice - displayPrice) / originalPrice) * 100);
+    }
+  }
+  // Priority 2: Direct Discount
+  else if (discounted > 0 && discounted < price) {
+    displayPrice = discounted;
+    originalPrice = price;
+    discountLabel = Math.round(((price - discounted) / price) * 100);
+  }
+  // Priority 3: Offers Percentage
+  else if (offer > 0) {
+    originalPrice = price;
+    displayPrice = price - (price * (offer / 100));
+    discountLabel = Math.round(offer);
+  }
+
+  const startDateValue = course.start_date || course.starting_date;
+  const formattedDate = startDateValue
+    ? new Date(startDateValue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : "Coming Soon";
+
+  return (
+    <div className="w-full rounded-2xl border border-slate-200 bg-white overflow-hidden hover:shadow-xl transition-all duration-300 relative flex flex-col group h-full">
+      {/* Mode Ribbon */}
+      <div className="absolute top-0 left-0 z-10">
+        <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-xs font-bold px-4 py-1.5 rounded-br-xl shadow-md uppercase tracking-wide">
+          {course.mode || "Online"}
+        </div>
+      </div>
+
+      {/* Banner Image */}
+      <div className="h-40 bg-slate-105 relative overflow-hidden">
+        {course.thumbnail_url ? (
+          <img
+            src={getImageUrl(course.thumbnail_url)}
+            alt={course.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-100 flex items-center justify-center">
+            <div className="text-center p-4">
+              <h4 className="text-orange-900/20 font-black text-3xl uppercase leading-none">
+                {course.name?.split(" ")[0] || "COURSE"}
+              </h4>
+              <p className="text-orange-900/10 font-bold text-sm mt-1">
+                PATHFINDER
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Content Container */}
+      <div className="p-5 flex flex-col flex-grow">
+        {/* Course Title if available */}
+        {course.course_title && (
+          <div className="text-orange-600 text-[10px] font-black uppercase tracking-widest mb-2 border-b border-orange-100 pb-1.5 text-left">
+            {course.course_title}
+          </div>
+        )}
+        
+        {/* Title Row */}
+        <div className="flex items-start justify-between gap-2 mb-3 text-left">
+          <h3 className="font-bold text-lg text-slate-900 leading-tight group-hover:text-[#66090D] transition-colors line-clamp-2">
+            {course.name}
+          </h3>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="px-2 py-0.5 bg-slate-100 text-slate-650 text-[10px] font-bold uppercase rounded border border-slate-200">
+              {course.language || "English"}
+            </span>
+          </div>
+        </div>
+
+        {/* Details */}
+        <div className="space-y-2 mb-4 text-left">
+          <div className="flex items-center gap-2 text-slate-600 text-sm">
+            <Users className="w-4 h-4 text-slate-400" />
+            <span>For {formatClassLevel(course.class_level)} Aspirants</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-600 text-sm">
+            <Calendar className="w-4 h-4 text-slate-400" />
+            <span>Starts on {formattedDate}</span>
+          </div>
+        </div>
+
+        {/* Plans Strip */}
+        <div className="mt-auto mb-4 bg-amber-50 rounded-lg border border-amber-100 p-2 flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-700">More plans inside</span>
+          <div className="flex gap-1">
+            <span className="text-[10px] font-bold text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded border border-orange-200">
+              Infinity Pro
+            </span>
+            <span className="text-[10px] font-bold text-red-700 bg-red-100 px-1.5 py-0.5 rounded border border-red-200">
+              Infinity
+            </span>
+          </div>
+        </div>
+
+        {/* Price Section */}
+        <div className="flex items-end gap-2 mb-4 text-left">
+          <div className="text-2xl font-bold text-[#66090D] leading-none">
+            ₹{Math.round(displayPrice).toLocaleString()}
+          </div>
+          {originalPrice > displayPrice && (
+            <div className="text-sm text-slate-400 line-through mb-0.5">
+              ₹{Math.round(originalPrice).toLocaleString()}
+            </div>
+          )}
+          {discountLabel > 0 && (
+            <div className="ml-auto bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+              </svg>
+              {discountLabel}% OFF
+            </div>
+          )}
+        </div>
+        <div className="text-[10px] text-slate-500 font-medium -mt-3 mb-4 uppercase tracking-wide text-left">
+          (FOR FULL BATCH)
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => onExplore(course)}
+            className="py-2.5 rounded-xl border-2 border-[#66090D] text-[#66090D] font-bold text-sm hover:bg-orange-50 transition-all duration-200 uppercase tracking-wide"
+          >
+            Explore
+          </button>
+          <button
+            onClick={onEnquire}
+            className="py-2.5 rounded-xl bg-[#66090D] text-white font-bold text-sm hover:bg-[#55080b] transition-all duration-200 shadow-md hover:shadow-lg uppercase tracking-wide font-sans text-[13px] tracking-tight whitespace-nowrap"
+          >
+            Enquire Now
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
