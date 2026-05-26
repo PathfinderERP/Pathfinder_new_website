@@ -3,9 +3,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_mongoengine import viewsets as mongo_viewsets
 from rest_framework.decorators import action
+from django.http import HttpResponse
 from .models import CustomPage
 from .serializers import CustomPageSerializer
 from contact_backend.utils.r2_storage import upload_to_r2
+from .sitemap_utils import get_sitemap_xml, get_custom_pages_only_xml
 
 class CustomPageViewSet(mongo_viewsets.ModelViewSet):
     """
@@ -80,3 +82,35 @@ class CustomPageViewSet(mongo_viewsets.ModelViewSet):
             })
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'], url_path='sitemap', permission_classes=[AllowAny])
+    def sitemap(self, request):
+        """
+        Generate and serve dynamic sitemap.xml
+        This endpoint regenerates the sitemap every time it's called,
+        ensuring custom pages are always included if they're live (is_live=True)
+        and excluded if they're deactivated (is_live=False)
+        """
+        # Get domain from request
+        domain = f"{request.scheme}://{request.get_host()}"
+        
+        # Generate sitemap XML
+        sitemap_content = get_sitemap_xml(domain=domain)
+        
+        # Return as XML response
+        return HttpResponse(sitemap_content, content_type='application/xml')
+
+    @action(detail=False, methods=['get'], url_path='sitemap-custom-only', permission_classes=[AllowAny])
+    def sitemap_custom_only(self, request):
+        """
+        Generate and serve dynamic sitemap.xml with ONLY custom pages
+        (excludes static pages like /about-us, /contact, etc.)
+        """
+        # Get domain from request
+        domain = f"{request.scheme}://{request.get_host()}"
+        
+        # Generate sitemap XML with only custom pages
+        sitemap_content = get_custom_pages_only_xml(domain=domain)
+        
+        # Return as XML response
+        return HttpResponse(sitemap_content, content_type='application/xml')
