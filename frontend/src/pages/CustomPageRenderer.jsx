@@ -29,6 +29,26 @@ const IconComponent = ({ name, className = "w-6 h-6" }) => {
 export default function CustomPageRenderer() {
   const { slug } = useParams();
 
+  
+
+  const [pageData, setPageData] = useState(null);
+  const [allCentres, setAllCentres] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorStatus, setErrorStatus] = useState(null);
+  const sliderRef = useRef(null);
+  const centresSliderRef = useRef(null);
+  const courseSliderRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Slider settings that respect current viewport (isMobile)
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -36,10 +56,10 @@ export default function CustomPageRenderer() {
     autoplay: true,
     autoplaySpeed: 3000,
     pauseOnHover: true,
-    slidesToShow: 4,
+    slidesToShow: isMobile ? 1 : 4,
     slidesToScroll: 1,
     responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+      { breakpoint: 1024, settings: { slidesToShow: 1, slidesToScroll: 1 } },
       { breakpoint: 640, settings: { slidesToShow: 1, slidesToScroll: 1 } }
     ]
   };
@@ -51,21 +71,14 @@ export default function CustomPageRenderer() {
     autoplay: true,
     autoplaySpeed: 3000,
     pauseOnHover: true,
-    slidesToShow: 3,
+    slidesToShow: isMobile ? 1 : 3,
     slidesToScroll: 1,
     arrows: false,
     responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+      { breakpoint: 1024, settings: { slidesToShow: 1, slidesToScroll: 1 } },
       { breakpoint: 640, settings: { slidesToShow: 1, slidesToScroll: 1 } }
     ]
   };
-
-  const [pageData, setPageData] = useState(null);
-  const [allCentres, setAllCentres] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorStatus, setErrorStatus] = useState(null);
-  const sliderRef = useRef(null);
-  const centresSliderRef = useRef(null);
 
   useEffect(() => {
     async function fetchPage() {
@@ -114,6 +127,21 @@ export default function CustomPageRenderer() {
     }
   }, [pageData]);
 
+  // Scroll handler to go to Contact section smoothly
+  const scrollToContact = () => {
+    try {
+      const el = document.getElementById('contact-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // fallback: navigate to hash so server-side routing can handle it
+        window.location.hash = '#contact-section';
+      }
+    } catch (e) {
+      console.warn('scrollToContact failed', e);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -124,19 +152,6 @@ export default function CustomPageRenderer() {
       </div>
     );
   }
-
-  // If page not found, render standard premium 404
-  if (errorStatus === 404 || errorStatus === 403 || !pageData) {
-    return <NotFound />;
-  }
-
-  // Scroll handler to go to Contact section smoothly
-  const scrollToContact = () => {
-    const element = document.querySelector("#contact-section");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   const handleFormChange = (e) => {
     // kept for potential future use
@@ -272,100 +287,116 @@ export default function CustomPageRenderer() {
             </div>
 
             <div className="container mx-auto px-6 max-w-6xl relative z-10">
+              {(() => {
+                const useTopperCarousel = toppers.toppers_list.length > 3 || (isMobile && toppers.toppers_list.length > 1);
+                const dynamicTopperSliderSettings = {
+                  ...topperSliderSettings,
+                  infinite: toppers.toppers_list.length > 1,
+                  slidesToShow: isMobile ? 1 : Math.min(3, toppers.toppers_list.length),
+                  responsive: [
+                    { breakpoint: 1024, settings: { slidesToShow: 1, slidesToScroll: 1 } },
+                    { breakpoint: 640, settings: { slidesToShow: 1, slidesToScroll: 1 } }
+                  ]
+                };
 
-              {/* Header with Custom Manual Slider Navigation Buttons */}
-              <div className="flex flex-col md:flex-row md:items-end justify-between mb-10">
-                <div className="text-left">
-                  <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Top Performers</span>
-                  <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">{toppers.title || "Pathfinder Achievers"}</h2>
-                  <div className="h-1.5 w-20 bg-orange-500 mt-3 rounded-full"></div>
-                </div>
-
-                {toppers.toppers_list.length > 3 && (
-                  <div className="flex gap-3 mt-6 md:mt-0">
-                    <button
-                      onClick={() => sliderRef.current?.slickPrev()}
-                      className="w-11 h-11 rounded-full border border-[#f5e6d3] bg-white text-orange-600 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all shadow-sm hover:shadow-md hover:border-orange-500 active:scale-95 duration-200"
-                      aria-label="Previous Slide"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-                    </button>
-                    <button
-                      onClick={() => sliderRef.current?.slickNext()}
-                      className="w-11 h-11 rounded-full border border-[#f5e6d3] bg-white text-orange-600 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all shadow-sm hover:shadow-md hover:border-orange-500 active:scale-95 duration-200"
-                      aria-label="Next Slide"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {toppers.toppers_list.length > 3 ? (
-                <div className="toppers-carousel -mx-4 px-4 pb-4">
-                  <Slider ref={sliderRef} {...topperSliderSettings}>
-                    {toppers.toppers_list.map((topper, index) => (
-                      <div key={index} className="px-3 h-full pb-4 pt-2">
-                        <div className="bg-white border border-[#f5e6d3] rounded-[2rem] overflow-hidden hover:border-orange-500/40 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-500 flex flex-col group h-full shadow-sm shadow-[#f7ebd9]/40">
-                          <div className="aspect-[4/5] bg-gradient-to-b from-[#fdfcfb] to-[#f7eedc] relative overflow-hidden flex items-end justify-center border-b border-[#f5e6d3]/60">
-                            <img
-                              src={getImageUrl(topper.image_url)}
-                              alt={topper.name}
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = getImageUrl(fallbackImages[index % fallbackImages.length]);
-                              }}
-                              className="object-contain h-[92%] w-auto max-w-[92%] group-hover:scale-105 transition-transform duration-700 ease-out z-10"
-                            />
-                            <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] sm:text-xs px-3.5 py-1.5 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-20">
-                              {topper.exam || "NEET"}
-                            </div>
-                            <div className="absolute w-44 h-44 rounded-full bg-white/40 blur-xl -bottom-10 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
-                          </div>
-                          <div className="p-6 text-center space-y-3 bg-white flex flex-col items-center justify-between flex-grow">
-                            <h3 className="font-extrabold text-xl text-slate-900 group-hover:text-orange-600 transition-colors duration-300">{topper.name}</h3>
-                            <p className="text-slate-500 text-sm font-semibold">{topper.score}</p>
-                            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 text-sm font-extrabold transition-all group-hover:shadow-lg group-hover:shadow-orange-500/30">
-                              <Trophy className="w-4 h-4 text-white animate-pulse" /> {topper.rank}
-                            </div>
-                          </div>
-                        </div>
+                return (
+                  <>
+                    {/* Header with Custom Manual Slider Navigation Buttons */}
+                    <div className="flex flex-row items-center justify-between mb-10">
+                      <div className="text-left">
+                        <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Top Performers</span>
+                        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">{toppers.title || "Pathfinder Achievers"}</h2>
+                        <div className="h-1.5 w-20 bg-orange-500 mt-3 rounded-full"></div>
                       </div>
-                    ))}
-                  </Slider>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {toppers.toppers_list.map((topper, index) => (
-                    <div key={index}>
-                      <div className="bg-white border border-[#f5e6d3] rounded-[2rem] overflow-hidden hover:border-orange-500/40 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-500 flex flex-col group h-full shadow-sm shadow-[#f7ebd9]/40">
-                        <div className="aspect-[4/5] bg-gradient-to-b from-[#fdfcfb] to-[#f7eedc] relative overflow-hidden flex items-end justify-center border-b border-[#f5e6d3]/60">
-                          <img
-                            src={getImageUrl(topper.image_url)}
-                            alt={topper.name}
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = getImageUrl(fallbackImages[index % fallbackImages.length]);
-                            }}
-                            className="object-contain h-[92%] w-auto max-w-[92%] group-hover:scale-105 transition-transform duration-700 ease-out z-10"
-                          />
-                          <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] sm:text-xs px-3.5 py-1.5 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-20">
-                            {topper.exam || "NEET"}
-                          </div>
-                          <div className="absolute w-44 h-44 rounded-full bg-white/40 blur-xl -bottom-10 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
+
+                      {useTopperCarousel && (
+                        <div className="flex gap-3 items-center mt-0">
+                          <button
+                            onClick={() => sliderRef.current?.slickPrev()}
+                            className="w-11 h-11 rounded-full border border-[#f5e6d3] bg-white text-orange-600 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all shadow-sm hover:shadow-md hover:border-orange-500 active:scale-95 duration-200"
+                            aria-label="Previous Slide"
+                          >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                          </button>
+                          <button
+                            onClick={() => sliderRef.current?.slickNext()}
+                            className="w-11 h-11 rounded-full border border-[#f5e6d3] bg-white text-orange-600 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all shadow-sm hover:shadow-md hover:border-orange-500 active:scale-95 duration-200"
+                            aria-label="Next Slide"
+                          >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                          </button>
                         </div>
-                        <div className="p-6 text-center space-y-3 bg-white flex flex-col items-center justify-between flex-grow">
-                          <h3 className="font-extrabold text-xl text-slate-900 group-hover:text-orange-600 transition-colors duration-300">{topper.name}</h3>
-                          <p className="text-slate-500 text-sm font-semibold">{topper.score}</p>
-                          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 text-sm font-extrabold transition-all group-hover:shadow-lg group-hover:shadow-orange-500/30">
-                            <Trophy className="w-4 h-4 text-white animate-pulse" /> {topper.rank}
-                          </div>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
+
+                    {useTopperCarousel ? (
+                      <div className="toppers-carousel -mx-4 px-4 pb-4">
+                        <Slider ref={sliderRef} {...dynamicTopperSliderSettings}>
+                          {toppers.toppers_list.map((topper, index) => (
+                            <div key={index} className="px-3 h-full pb-4 pt-2">
+                              <div className="bg-white border border-[#f5e6d3] rounded-[2rem] overflow-hidden hover:border-orange-500/40 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-500 flex flex-col group h-full shadow-sm shadow-[#f7ebd9]/40">
+                                <div className="aspect-[4/5] bg-gradient-to-b from-[#fdfcfb] to-[#f7eedc] relative overflow-hidden flex items-end justify-center border-b border-[#f5e6d3]/60">
+                                  <img
+                                    src={getImageUrl(topper.image_url)}
+                                    alt={topper.name}
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = getImageUrl(fallbackImages[index % fallbackImages.length]);
+                                    }}
+                                    className="object-contain h-[92%] w-auto max-w-[92%] group-hover:scale-105 transition-transform duration-700 ease-out z-10"
+                                  />
+                                  <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] sm:text-xs px-3.5 py-1.5 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-20">
+                                    {topper.exam || "NEET"}
+                                  </div>
+                                  <div className="absolute w-44 h-44 rounded-full bg-white/40 blur-xl -bottom-10 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
+                                </div>
+                                <div className="p-6 text-center space-y-3 bg-white flex flex-col items-center justify-between flex-grow">
+                                  <h3 className="font-extrabold text-xl text-slate-900 group-hover:text-orange-600 transition-colors duration-300">{topper.name}</h3>
+                                  <p className="text-slate-500 text-sm font-semibold">{topper.score}</p>
+                                  <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 text-sm font-extrabold transition-all group-hover:shadow-lg group-hover:shadow-orange-500/30">
+                                    <Trophy className="w-4 h-4 text-white animate-pulse" /> {topper.rank}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </Slider>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {toppers.toppers_list.map((topper, index) => (
+                          <div key={index}>
+                            <div className="bg-white border border-[#f5e6d3] rounded-[2rem] overflow-hidden hover:border-orange-500/40 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-1.5 hover:scale-[1.01] transition-all duration-500 flex flex-col group h-full shadow-sm shadow-[#f7ebd9]/40">
+                              <div className="aspect-[4/5] bg-gradient-to-b from-[#fdfcfb] to-[#f7eedc] relative overflow-hidden flex items-end justify-center border-b border-[#f5e6d3]/60">
+                                <img
+                                  src={getImageUrl(topper.image_url)}
+                                  alt={topper.name}
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = getImageUrl(fallbackImages[index % fallbackImages.length]);
+                                  }}
+                                  className="object-contain h-[92%] w-auto max-w-[92%] group-hover:scale-105 transition-transform duration-700 ease-out z-10"
+                                />
+                                <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] sm:text-xs px-3.5 py-1.5 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-20">
+                                  {topper.exam || "NEET"}
+                                </div>
+                                <div className="absolute w-44 h-44 rounded-full bg-white/40 blur-xl -bottom-10 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
+                              </div>
+                              <div className="p-6 text-center space-y-3 bg-white flex flex-col items-center justify-between flex-grow">
+                                <h3 className="font-extrabold text-xl text-slate-900 group-hover:text-orange-600 transition-colors duration-300">{topper.name}</h3>
+                                <p className="text-slate-500 text-sm font-semibold">{topper.score}</p>
+                                <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 text-sm font-extrabold transition-all group-hover:shadow-lg group-hover:shadow-orange-500/30">
+                                  <Trophy className="w-4 h-4 text-white animate-pulse" /> {topper.rank}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </section>
         );
@@ -472,7 +503,7 @@ export default function CustomPageRenderer() {
               }
             : savedCenter;
         });
-        const useCarousel = centresList.length > 3;
+        const useCarousel = centresList.length > 3 || (isMobile && centresList.length > 1);
 
         // Reusable card renderer
         const renderCentreCard = (center, index) => {
@@ -641,18 +672,29 @@ export default function CustomPageRenderer() {
               {/* > 3 → react-slick carousel */}
               {useCarousel && (
                 <div className="-mx-3">
+                  {/* Mobile manual controls for centres */}
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 md:hidden">
+                    <button onClick={() => centresSliderRef.current?.slickPrev()} aria-label="Previous centre" className="w-10 h-10 rounded-full bg-white border border-orange-100 text-orange-600 flex items-center justify-center shadow-sm">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                  </div>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 md:hidden">
+                    <button onClick={() => centresSliderRef.current?.slickNext()} aria-label="Next centre" className="w-10 h-10 rounded-full bg-white border border-orange-100 text-orange-600 flex items-center justify-center shadow-sm">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                  </div>
                   <Slider
-                    ref={centresSliderRef}
+                        ref={centresSliderRef}
                     dots={true}
-                    infinite={true}
+                    infinite={centresList.length > 1}
                     speed={500}
                     autoplay={false}
-                    slidesToShow={3}
+                    slidesToShow={isMobile ? 1 : Math.min(3, centresList.length)}
                     slidesToScroll={1}
                     arrows={false}
                     dotsClass="slick-dots !bottom-[-36px]"
                     responsive={[
-                      { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+                      { breakpoint: 1024, settings: { slidesToShow: 1, slidesToScroll: 1 } },
                       { breakpoint: 640, settings: { slidesToShow: 1, slidesToScroll: 1 } }
                     ]}
                   >
@@ -776,6 +818,16 @@ function CoursesDisplaySection({ courseIds, title, onEnquire }) {
   const [showAll, setShowAll] = useState(false);
 
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 1024);
+  const courseSliderRef = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Fetch all courses and filter to the selected IDs
   useEffect(() => {
@@ -856,18 +908,18 @@ function CoursesDisplaySection({ courseIds, title, onEnquire }) {
   // React Slick slider settings
   const sliderSettings = {
     dots: true,
-    infinite: displayCourses.length > 3,
+    infinite: displayCourses.length > 1,
     speed: 500,
-    slidesToShow: 3,
+    slidesToShow: Math.min(3, displayCourses.length),
     slidesToScroll: 1,
     arrows: true,
     responsive: [
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: 2,
+          slidesToShow: 1,
           slidesToScroll: 1,
-          infinite: displayCourses.length > 2,
+          infinite: displayCourses.length > 1,
         }
       },
       {
@@ -1032,9 +1084,28 @@ function CoursesDisplaySection({ courseIds, title, onEnquire }) {
 
         {/* Course Cards Grid/Slider */}
         {displayCourses.length > 0 ? (
-          (!showAll && displayCourses.length > 3) ? (
-            <div className="courses-slider-container pb-6">
-              <Slider {...sliderSettings}>
+          (!showAll && (displayCourses.length > 3 || (isMobile && displayCourses.length > 1))) ? (
+            <div className="courses-slider-container pb-6 relative">
+              {/* Mobile manual controls */}
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 md:hidden">
+                <button onClick={() => courseSliderRef.current?.slickPrev()} aria-label="Previous course" className="w-10 h-10 rounded-full bg-white border border-orange-100 text-orange-600 flex items-center justify-center shadow-sm">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+              </div>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 md:hidden">
+                <button onClick={() => courseSliderRef.current?.slickNext()} aria-label="Next course" className="w-10 h-10 rounded-full bg-white border border-orange-100 text-orange-600 flex items-center justify-center shadow-sm">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+              <Slider
+                ref={courseSliderRef}
+                key={`courses-slider-${isMobile ? 'm' : 'd'}-${displayCourses.length}`}
+                {...sliderSettings}
+                slidesToShow={isMobile ? 1 : Math.min(4, displayCourses.length)}
+                variableWidth={false}
+                centerMode={false}
+                adaptiveHeight={true}
+              >
                 {displayCourses.map((course) => (
                   <div key={course.id || course._id?.$oid || course._id} className="h-full py-2">
                     <CourseCard course={course} onExplore={handleExplore} onEnquire={onEnquire} />

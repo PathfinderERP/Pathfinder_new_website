@@ -4,6 +4,10 @@
   "outputDirectory": "dist",
   "routes": [
     {
+      "src": "/sitemap.xml",
+      "dest": "https://api.pathfinder.edu.in/api/custom-pages/pages/sitemap/"
+    },
+    {
       "handle": "filesystem"
     },
     {

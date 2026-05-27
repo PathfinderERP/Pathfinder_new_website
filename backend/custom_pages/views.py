@@ -35,6 +35,15 @@ class CustomPageViewSet(mongo_viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+    def perform_create(self, serializer):
+        serializer.save()
+        try:
+            from .signals import _regenerate_sitemap_file
+            _regenerate_sitemap_file()
+        except Exception as e:
+            pass
+
+
     def destroy(self, request, *args, **kwargs):
         """
         Delete a custom page.
@@ -48,6 +57,11 @@ class CustomPageViewSet(mongo_viewsets.ModelViewSet):
             
             # Delete the instance (signals will regenerate sitemap)
             instance.delete()
+            try:
+                from .signals import _regenerate_sitemap_file
+                _regenerate_sitemap_file()
+            except Exception as e:
+                pass
             
             return Response(
                 {
@@ -90,6 +104,11 @@ class CustomPageViewSet(mongo_viewsets.ModelViewSet):
         
         # Save and trigger signals (which will regenerate sitemap)
         serializer.save()
+        try:
+            from .signals import _regenerate_sitemap_file
+            _regenerate_sitemap_file()
+        except Exception as e:
+            pass
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_path='by-slug')
