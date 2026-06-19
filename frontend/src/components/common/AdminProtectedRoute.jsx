@@ -16,11 +16,23 @@ const AdminProtectedRoute = ({ children, requiredPermission }) => {
 
     // Mapping of permissions to routes in priority order
     const permissionRoutes = [
-      { perm: "view_dashboard", route: "/business/admin/dashboard" },
-      { perm: "manage_courses", route: "/business/admin/courses" },
-      { perm: "manage_blogs", route: "/business/admin/blog" },
-      { perm: "manage_applications", route: "/business/admin/course-applications" },
-      { perm: "manage_users", route: "/business/admin/users" },
+      { perm: "view_dashboard",        route: "/business/admin/dashboard" },
+      { perm: "manage_courses",        route: "/business/admin/courses" },
+      { perm: "manage_applications",   route: "/business/admin/course-applications" },
+      { perm: "manage_ads_leads",      route: "/business/admin/ads-leads" },
+      { perm: "manage_franchise",      route: "/business/admin/franchise-inquiries" },
+      { perm: "manage_centres",        route: "/business/admin/centres" },
+      { perm: "manage_alumni",         route: "/business/admin/alumni" },
+      { perm: "manage_users",          route: "/business/admin/users" },
+      { perm: "manage_student_corner", route: "/business/admin/student-corner" },
+      { perm: "manage_blogs",          route: "/business/admin/blog" },
+      { perm: "manage_announcements",  route: "/business/admin/announcements" },
+      { perm: "manage_jobs",           route: "/business/admin/jobs" },
+      { perm: "manage_wbjee_analysis", route: "/business/admin/wbjee-analysis" },
+      { perm: "manage_neet_analysis",  route: "/business/admin/neet-analysis" },
+      { perm: "manage_jee_analysis",   route: "/business/admin/jee-analysis" },
+      { perm: "manage_popups",         route: "/business/admin/popups" },
+      { perm: "manage_custom_pages",   route: "/business/admin/custom-pages" },
     ];
 
     const firstAvailable = permissionRoutes.find(pr => permissions.includes(pr.perm));

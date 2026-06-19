@@ -29,15 +29,26 @@ const AdminManagement = () => {
 
   const { admins, pagination } = fetchedData;
 
-  // Match EXACTLY with your backend AVAILABLE_PERMISSIONS
+  // Page-specific permissions — one per sidebar page
   const availablePermissions = [
-    { key: "view_dashboard", label: "View Dashboard" },
-    { key: "manage_courses", label: "Manage Courses" },
-    { key: "manage_users", label: "Manage Users" },
-    { key: "manage_admins", label: "Manage Admins" },
-    { key: "manage_applications", label: "Manage Applications" },
-    { key: "manage_blogs", label: "Manage Blogs" },
-    { key: "system_settings", label: "System Settings" },
+    { key: "view_dashboard",        label: "Dashboard",          description: "View admin dashboard" },
+    { key: "manage_courses",        label: "Courses",            description: "Create, edit, delete courses" },
+    { key: "manage_applications",   label: "Applicants",         description: "View course applicants" },
+    { key: "manage_ads_leads",      label: "Ads Leads",          description: "View ads & lead data" },
+    { key: "manage_franchise",      label: "Franchise",          description: "View franchise inquiries" },
+    { key: "manage_centres",        label: "Centres",            description: "Manage study centres" },
+    { key: "manage_alumni",         label: "Alumni",             description: "Manage alumni profiles" },
+    { key: "manage_users",          label: "Users",              description: "Manage student users" },
+    { key: "manage_student_corner", label: "Student Corner",     description: "Manage student corner items" },
+    { key: "manage_blogs",          label: "Blog",               description: "Create & manage blog posts" },
+    { key: "manage_announcements",  label: "Top Banner",         description: "Manage site announcements" },
+    { key: "manage_jobs",           label: "Jobs",               description: "Manage job postings" },
+    { key: "manage_wbjee_analysis", label: "WBJEE Analysis",     description: "Manage WBJEE analysis content" },
+    { key: "manage_neet_analysis",  label: "NEET Analysis",      description: "Manage NEET analysis content" },
+    { key: "manage_jee_analysis",   label: "JEE Analysis",       description: "Manage JEE analysis content" },
+    { key: "manage_popups",         label: "Prediction Popup",   description: "Manage prediction popups" },
+    { key: "manage_custom_pages",   label: "Custom Pages",       description: "Create & edit custom CMS pages" },
+    { key: "system_settings",       label: "System Settings",    description: "Access system settings" },
   ];
 
   const [adminData, setAdminData] = useState({
@@ -437,7 +448,7 @@ const AdminManagement = () => {
                 {availablePermissions.map((perm) => (
                   <label
                     key={perm.key}
-                    className="flex items-start p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
+                    className="flex items-start p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer transition-colors duration-150"
                   >
                     <input
                       type="checkbox"
@@ -453,12 +464,17 @@ const AdminManagement = () => {
                             })
                         )
                       }
-                      className="mt-1 mr-3"
+                      className="mt-1 mr-3 accent-orange-500"
                     />
                     <div>
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {perm.label}
                       </div>
+                      {perm.description && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {perm.description}
+                        </div>
+                      )}
                     </div>
                   </label>
                 ))}
@@ -573,7 +589,7 @@ const AdminManagement = () => {
                 {availablePermissions.map((perm) => (
                   <label
                     key={perm.key}
-                    className="flex items-start p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer"
+                    className="flex items-start p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer transition-colors duration-150"
                   >
                     <input
                       type="checkbox"
@@ -589,12 +605,17 @@ const AdminManagement = () => {
                             })
                         )
                       }
-                      className="mt-1 mr-3"
+                      className="mt-1 mr-3 accent-orange-500"
                     />
                     <div>
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {perm.label}
                       </div>
+                      {perm.description && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {perm.description}
+                        </div>
+                      )}
                     </div>
                   </label>
                 ))}
@@ -783,21 +804,6 @@ const AdminManagement = () => {
                         <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                           Permissions:
                         </div>
-                        <button
-                          onClick={() => {
-                            const newPermissions = admin.permissions.includes(
-                              "manage_courses"
-                            )
-                              ? admin.permissions.filter(
-                                (p) => p !== "manage_courses"
-                              )
-                              : [...admin.permissions, "manage_courses"];
-                            handleUpdatePermissions(admin.id, newPermissions);
-                          }}
-                          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                        >
-                          Quick Toggle Courses
-                        </button>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {availablePermissions.map((perm) => (

@@ -41,15 +41,26 @@ class Admin(Document):
         'indexes': ['email', 'is_superuser', 'is_active']
     }
 
-    # Available permissions
+    # Available permissions - one per admin page
     AVAILABLE_PERMISSIONS = [
         'view_dashboard',
         'manage_courses',
-        'manage_users',
-        'manage_admins',
         'manage_applications',
+        'manage_ads_leads',
+        'manage_franchise',
+        'manage_centres',
+        'manage_alumni',
+        'manage_users',
+        'manage_student_corner',
         'manage_blogs',
-        'system_settings'
+        'manage_announcements',
+        'manage_jobs',
+        'manage_wbjee_analysis',
+        'manage_neet_analysis',
+        'manage_jee_analysis',
+        'manage_popups',
+        'manage_custom_pages',
+        'system_settings',
     ]
 
     def __str__(self):

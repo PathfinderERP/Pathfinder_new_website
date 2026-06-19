@@ -420,7 +420,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/centres"
         element={
-          <AdminProtectedRoute requiredPermission="manage_courses">
+          <AdminProtectedRoute requiredPermission="manage_centres">
             <AdminLayout>
               <CentreList />
             </AdminLayout>
@@ -430,7 +430,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/centres/create"
         element={
-          <AdminProtectedRoute requiredPermission="manage_courses">
+          <AdminProtectedRoute requiredPermission="manage_centres">
             <AdminLayout>
               <CentreCreate />
             </AdminLayout>
@@ -440,7 +440,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/centres/:id/edit"
         element={
-          <AdminProtectedRoute requiredPermission="manage_courses">
+          <AdminProtectedRoute requiredPermission="manage_centres">
             <AdminLayout>
               <CentreEdit />
             </AdminLayout>
@@ -452,7 +452,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/jobs"
         element={
-          <AdminProtectedRoute requiredPermission="manage_applications">
+          <AdminProtectedRoute requiredPermission="manage_jobs">
             <AdminLayout>
               <JobManagement />
             </AdminLayout>
@@ -462,7 +462,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/jobs/create"
         element={
-          <AdminProtectedRoute requiredPermission="manage_applications">
+          <AdminProtectedRoute requiredPermission="manage_jobs">
             <AdminLayout>
               <JobPostForm />
             </AdminLayout>
@@ -472,7 +472,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/jobs/edit/:id"
         element={
-          <AdminProtectedRoute requiredPermission="manage_applications">
+          <AdminProtectedRoute requiredPermission="manage_jobs">
             <AdminLayout>
               <JobPostForm />
             </AdminLayout>
@@ -482,7 +482,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/applications"
         element={
-          <AdminProtectedRoute requiredPermission="manage_applications">
+          <AdminProtectedRoute requiredPermission="manage_jobs">
             <AdminLayout>
               <JobApplicationList />
             </AdminLayout>
@@ -502,7 +502,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/ads-leads"
         element={
-          <AdminProtectedRoute requiredPermission="manage_applications">
+          <AdminProtectedRoute requiredPermission="manage_ads_leads">
             <AdminLayout>
               <AdsLeadsList />
             </AdminLayout>
@@ -513,7 +513,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/franchise-inquiries"
         element={
-          <AdminProtectedRoute requiredPermission="manage_applications">
+          <AdminProtectedRoute requiredPermission="manage_franchise">
             <AdminLayout>
               <FranchiseInquiryList />
             </AdminLayout>
@@ -525,7 +525,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/alumni"
         element={
-          <AdminProtectedRoute requiredPermission="manage_courses">
+          <AdminProtectedRoute requiredPermission="manage_alumni">
             <AdminLayout>
               <AlumniManagement />
             </AdminLayout>
@@ -537,7 +537,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/student-corner"
         element={
-          <AdminProtectedRoute requiredPermission="manage_courses">
+          <AdminProtectedRoute requiredPermission="manage_student_corner">
             <AdminLayout>
               <StudentCornerManagement />
             </AdminLayout>
@@ -559,7 +559,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/announcements"
         element={
-          <AdminProtectedRoute requiredPermission="manage_blogs">
+          <AdminProtectedRoute requiredPermission="manage_announcements">
             <AdminLayout>
               <AnnouncementManagement />
             </AdminLayout>
@@ -570,7 +570,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/wbjee-analysis"
         element={
-          <AdminProtectedRoute requiredPermission="manage_blogs">
+          <AdminProtectedRoute requiredPermission="manage_wbjee_analysis">
             <AdminLayout>
               <WBJEEAnalysisManagement />
             </AdminLayout>
@@ -580,7 +580,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/neet-analysis"
         element={
-          <AdminProtectedRoute requiredPermission="manage_blogs">
+          <AdminProtectedRoute requiredPermission="manage_neet_analysis">
             <AdminLayout>
               <NEETAnalysisManagement />
             </AdminLayout>
@@ -590,7 +590,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/jee-analysis"
         element={
-          <AdminProtectedRoute requiredPermission="manage_blogs">
+          <AdminProtectedRoute requiredPermission="manage_jee_analysis">
             <AdminLayout>
               <JEEAnalysisManagement />
             </AdminLayout>
@@ -601,7 +601,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/popups"
         element={
-          <AdminProtectedRoute requiredPermission="manage_blogs">
+          <AdminProtectedRoute requiredPermission="manage_popups">
             <AdminLayout>
               <PopupManagement />
             </AdminLayout>
@@ -612,7 +612,7 @@ const AppRoutes = () => {
       <Route
         path="/business/admin/custom-pages"
         element={
-          <AdminProtectedRoute requiredPermission="manage_blogs">
+          <AdminProtectedRoute requiredPermission="manage_custom_pages">
             <AdminLayout>
               <CustomPagesManagement />
             </AdminLayout>
