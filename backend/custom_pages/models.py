@@ -158,13 +158,30 @@ class CustomPage(Document):
         "email_recipient": "admissions@pathfinder.edu.in"
     })
     
+    blog = fields.DictField(default={
+        "title": "Latest Insights & Academic Updates",
+        "blogs_list": [
+            {
+                "title": "Mastering the NEET Prep Cycle",
+                "excerpt": "A deep dive into standard strategies for tackling high-weightage medical prep chapters.",
+                "content": "<p>In-depth insights go here...</p>",
+                "category": "NEET",
+                "author": "Academic Director",
+                "read_time": "5 min read",
+                "image_url": "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+                "published_date": "2026-06-19"
+            }
+        ]
+    })
+    
     # Metadata
     created_at = fields.DateTimeField(default=datetime.datetime.utcnow)
     updated_at = fields.DateTimeField(default=datetime.datetime.utcnow)
 
     meta = {
         'collection': 'custom_pages',
-        'ordering': ['-created_at']
+        'ordering': ['-created_at'],
+        'strict': False
     }
 
     def save(self, *args, **kwargs):

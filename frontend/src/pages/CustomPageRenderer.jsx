@@ -26,6 +26,45 @@ const IconComponent = ({ name, className = "w-6 h-6" }) => {
   return <SelectedIcon className={className} />;
 };
 
+// Helper function to safely extract inline styles, stylesheet links, and body content from full HTML string documents
+const parseHTMLContent = (htmlString) => {
+  if (!htmlString) return "";
+  
+  // Check if it is a full HTML page
+  if (htmlString.includes("<html") || htmlString.includes("<body") || htmlString.includes("<!DOCTYPE")) {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlString, "text/html");
+      
+      let processedHTML = "";
+      
+      // 1. Extract all style tags and prepend them
+      const styleTags = doc.querySelectorAll("style");
+      styleTags.forEach(style => {
+        processedHTML += style.outerHTML;
+      });
+      
+      // 2. Extract all stylesheet link tags and prepend them
+      const linkTags = doc.querySelectorAll("link[rel='stylesheet']");
+      linkTags.forEach(link => {
+        processedHTML += link.outerHTML;
+      });
+      
+      // 3. Extract the body inner HTML
+      if (doc.body) {
+        processedHTML += doc.body.innerHTML;
+      } else {
+        processedHTML += htmlString;
+      }
+      
+      return processedHTML;
+    } catch (e) {
+      console.warn("DOMParser failed to clean up HTML string:", e);
+    }
+  }
+  return htmlString;
+};
+
 export default function CustomPageRenderer() {
   const { slug } = useParams();
 
@@ -153,12 +192,16 @@ export default function CustomPageRenderer() {
     );
   }
 
+  if (errorStatus || !pageData) {
+    return <NotFound />;
+  }
+
   const handleFormChange = (e) => {
     // kept for potential future use
   };
 
   // Section configs
-  const { hero, legacy, toppers, features, courses, centers, faq, contact } = pageData;
+  const { hero, legacy, toppers, features, courses, centers, faq, contact, blog } = pageData;
 
   return (
     <div className="bg-white text-gray-900 overflow-x-hidden font-sans">
@@ -218,9 +261,9 @@ export default function CustomPageRenderer() {
 
       {/* 2. LEGACY TIMELINE SECTION */}
       {legacy && legacy.milestones && legacy.milestones.length > 0 && (
-        <section className="py-24 bg-white relative">
+        <section className="py-12 bg-white relative">
           <div className="container mx-auto px-6 max-w-7xl">
-            <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="text-center max-w-3xl mx-auto mb-8">
               <span className="text-orange-500 font-bold text-sm lg:text-base uppercase tracking-wider block mb-2">Our Journey</span>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">{legacy.title || "35 Years of Excellence"}</h2>
               <p className="text-gray-500 text-base lg:text-lg max-w-2xl mx-auto">
@@ -275,7 +318,7 @@ export default function CustomPageRenderer() {
         ];
 
         return (
-          <section className="py-12 bg-gradient-to-b from-[#fbf8f3] via-[#f7f0e4] to-[#fbf8f3] text-slate-900 relative overflow-hidden border-y border-[#eddcc4]">
+          <section className="py-8 bg-gradient-to-b from-[#fbf8f3] via-[#f7f0e4] to-[#fbf8f3] text-slate-900 relative overflow-hidden border-y border-[#eddcc4]">
             {/* Subtle light radial gradient glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-100/50 rounded-full blur-[130px] pointer-events-none" />
 
@@ -302,7 +345,7 @@ export default function CustomPageRenderer() {
                 return (
                   <>
                     {/* Header with Custom Manual Slider Navigation Buttons */}
-                    <div className="flex flex-row items-center justify-between mb-10">
+                    <div className="flex flex-row items-center justify-between mb-6">
                       <div className="text-left">
                         <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Top Performers</span>
                         <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">{toppers.title || "Pathfinder Achievers"}</h2>
@@ -404,9 +447,9 @@ export default function CustomPageRenderer() {
 
       {/* 4. FEATURES / WHY CHOOSE US SECTION */}
       {features && features.features_list && features.features_list.length > 0 && (
-        <section className="py-24 bg-white relative">
+        <section className="py-12 bg-white relative">
           <div className="container mx-auto px-6 max-w-6xl">
-            <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="text-center max-w-3xl mx-auto mb-8">
               <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Our Pillars</span>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{features.title || "Why Choose Pathfinder?"}</h2>
               <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-full"></div>
@@ -443,9 +486,9 @@ export default function CustomPageRenderer() {
 
           {/* Fallback: manually entered courses (backward compatibility) */}
           {(!courses.course_ids || courses.course_ids.length === 0) && courses.courses_list && courses.courses_list.length > 0 && (
-            <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
+            <section className="py-12 bg-gradient-to-b from-gray-50 to-white">
               <div className="container mx-auto px-6 max-w-6xl">
-                <div className="text-center max-w-3xl mx-auto mb-16">
+                <div className="text-center max-w-3xl mx-auto mb-8">
                   <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Target Programs</span>
                   <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{courses.title || "Choose Your Program"}</h2>
                   <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-full"></div>
@@ -628,10 +671,10 @@ export default function CustomPageRenderer() {
         };
 
         return (
-          <section className="pt-10 pb-2 bg-white relative">
+          <section className="pt-6 pb-2 bg-white relative">
             <div className="container mx-auto px-6 max-w-6xl">
               {/* Section Header */}
-              <div className="flex items-end justify-between max-w-3xl mx-auto mb-16 flex-col text-center gap-4">
+              <div className="flex items-end justify-between max-w-3xl mx-auto mb-8 flex-col text-center gap-4">
                 <div className="w-full text-center">
                   <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Visit Centers</span>
                   <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{centers.title || "Coaching Locations"}</h2>
@@ -713,11 +756,100 @@ export default function CustomPageRenderer() {
         );
       })()}
 
+      {/* 6.5. BLOG SECTION */}
+      {blog && blog.blogs_list && blog.blogs_list.length > 0 && (
+        <section className="py-12 bg-slate-50 relative overflow-hidden">
+          <div className="absolute -top-24 -left-24 w-72 h-72 bg-orange-100/40 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-amber-100/30 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="container mx-auto px-6 max-w-7xl relative z-10">
+            <div className="text-center max-w-3xl mx-auto mb-8">
+              <span className="text-orange-600 font-bold text-sm uppercase tracking-widest block mb-2">Latest Insights</span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{blog.title || "Latest News & Blogs"}</h2>
+              <div className="h-1.5 w-20 bg-gradient-to-r from-orange-500 to-amber-500 mx-auto mt-4 rounded-full" />
+            </div>
+
+            <div className="max-w-7xl mx-auto space-y-8">
+              {blog.blogs_list.map((item, index) => (
+                <div 
+                  key={index}
+                  className="flex flex-col gap-6 p-8 bg-white rounded-3xl border border-slate-150 shadow-sm hover:shadow-md transition-all duration-300 text-left"
+                >
+                  {/* Top Header: Image on left, Title/Meta on right */}
+                  <div className="flex flex-col sm:flex-row gap-8">
+                    {/* Left/Top: Image */}
+                    <div className="w-full sm:w-64 h-64 sm:h-48 rounded-2xl overflow-hidden flex-shrink-0 relative bg-slate-100">
+                      <img 
+                        src={item.image_url || "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"} 
+                        alt={item.title} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
+                        }}
+                      />
+                      {item.category && (
+                        <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] px-3 py-1 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-10">
+                          {item.category}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right: Meta, Title, Excerpt */}
+                    <div className="flex-grow flex flex-col justify-center py-1">
+                      <div className="space-y-4">
+                        {/* Meta Info */}
+                        <div className="flex items-center gap-3 text-xs text-slate-400 font-semibold border-b border-slate-100 pb-3">
+                          {item.published_date && (
+                            <span>
+                              {new Date(item.published_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </span>
+                          )}
+                          {item.read_time && (
+                            <>
+                              <span className="w-1 h-1 rounded-full bg-slate-300" />
+                              <span>{item.read_time}</span>
+                            </>
+                          )}
+                          <span className="w-1 h-1 rounded-full bg-slate-300" />
+                          <span>By {item.author || "Admin"}</span>
+                        </div>
+                        
+                        {/* Title */}
+                        <h3 className="font-black text-2xl text-slate-900 leading-tight">
+                          {item.title}
+                        </h3>
+                        
+                        {/* Excerpt if present */}
+                        {item.excerpt && (
+                          <p className="text-slate-500 font-medium italic border-l-4 border-orange-500 pl-4 py-1 bg-slate-50 rounded-r-xl pr-4 text-sm leading-relaxed">
+                            {item.excerpt}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Divider line between header details and blog body content */}
+                  <div className="border-t border-slate-100" />
+
+                  {/* Bottom: Full Body Content (spans full card width) */}
+                  <div 
+                    className="prose prose-orange max-w-none text-slate-700 leading-relaxed text-sm space-y-3 font-normal w-full"
+                    dangerouslySetInnerHTML={{ __html: parseHTMLContent(item.content) }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 7. FAQ SECTION */}
       {faq && faq.faqs_list && faq.faqs_list.length > 0 && (
-        <section className="py-24 bg-gray-50">
+        <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-6 max-w-3xl">
-            <div className="text-center mb-16">
+            <div className="text-center mb-8">
               <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">FAQ</span>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{faq.title || "Got Questions?"}</h2>
               <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-full"></div>
@@ -746,7 +878,7 @@ export default function CustomPageRenderer() {
 
       {/* 8. CONTACT FORM — uses the exact same form as the /contact page */}
       {contact && (
-        <section id="contact-section" className="py-20 bg-slate-50 border-t border-slate-100">
+        <section id="contact-section" className="py-12 bg-slate-50 border-t border-slate-100">
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
@@ -892,8 +1024,8 @@ function CoursesDisplaySection({ courseIds, title, onEnquire }) {
 
   if (loading) {
     return (
-      <section className="py-16 bg-gradient-to-b from-orange-50/40 to-white">
-        <div className="container mx-auto px-6 max-w-6xl text-center py-16">
+      <section className="py-12 bg-gradient-to-b from-orange-50/40 to-white">
+        <div className="container mx-auto px-6 max-w-6xl text-center py-12">
           <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-gray-500 mt-4 text-sm font-medium animate-pulse">Loading courses...</p>
         </div>
@@ -943,7 +1075,7 @@ function CoursesDisplaySection({ courseIds, title, onEnquire }) {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-b from-orange-50/30 to-white relative overflow-hidden">
+    <section className="py-12 bg-gradient-to-b from-orange-50/30 to-white relative overflow-hidden">
       {/* Subtle background blobs */}
       <div className="absolute -top-24 -right-24 w-72 h-72 bg-orange-100/40 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-amber-100/30 rounded-full blur-3xl pointer-events-none" />
@@ -951,7 +1083,7 @@ function CoursesDisplaySection({ courseIds, title, onEnquire }) {
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl relative z-10">
 
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 max-w-7xl mx-auto px-4 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 max-w-7xl mx-auto px-4 gap-4">
           <div className="text-left">
             <span className="text-orange-600 font-bold text-sm uppercase tracking-widest block mb-2">Target Programs</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{title || "Choose Your Program"}</h2>
@@ -1314,6 +1446,102 @@ function CourseCard({ course, onExplore, onEnquire }) {
             className="py-2.5 rounded-xl bg-[#66090D] text-white font-bold text-sm hover:bg-[#55080b] transition-all duration-200 shadow-md hover:shadow-lg uppercase tracking-wide font-sans text-[13px] tracking-tight whitespace-nowrap"
           >
             Enquire Now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+ * BlogDetailModal Sub-component
+ * Premium modal to show manual blog content.
+ * ============================================================ */
+function BlogDetailModal({ blog, isOpen, onClose }) {
+  if (!isOpen || !blog) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl border border-slate-200 flex flex-col max-h-[90vh]">
+        {/* Header Image */}
+        <div className="h-56 bg-slate-100 relative shrink-0">
+          <img 
+            src={blog.image_url || "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"} 
+            alt={blog.title} 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/75 rounded-full text-white transition-all shadow-md"
+            aria-label="Close modal"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l18 18" />
+            </svg>
+          </button>
+          
+          <div className="absolute bottom-4 left-6 right-6 text-white space-y-1.5 text-left">
+            {blog.category && (
+              <span className="inline-block bg-orange-600 text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider animate-fade-in">
+                {blog.category}
+              </span>
+            )}
+            <h2 className="text-xl sm:text-2xl font-black leading-tight drop-shadow-sm">{blog.title}</h2>
+          </div>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="p-6 sm:p-8 overflow-y-auto space-y-6 flex-1 text-slate-800 text-left">
+          {/* Metadata */}
+          <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 font-bold border-b border-slate-100 pb-4">
+            {blog.author && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500">Author:</span>
+                <span className="text-slate-700">{blog.author}</span>
+              </div>
+            )}
+            {blog.published_date && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500">Published:</span>
+                <span className="text-slate-700">
+                  {new Date(blog.published_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+              </div>
+            )}
+            {blog.read_time && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500">Read Time:</span>
+                <span className="text-slate-700">{blog.read_time}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Excerpt */}
+          {blog.excerpt && (
+            <p className="text-slate-500 font-medium italic border-l-4 border-orange-500 pl-4 py-1 text-base leading-relaxed bg-slate-50 rounded-r-xl pr-4">
+              {blog.excerpt}
+            </p>
+          )}
+
+          {/* Main Body Content */}
+          <div 
+            className="prose prose-orange max-w-none text-slate-700 leading-relaxed text-base space-y-4 font-normal"
+            dangerouslySetInnerHTML={{ __html: blog.content }}
+          />
+        </div>
+
+        {/* Footer Action */}
+        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end shrink-0">
+          <button
+            onClick={onClose}
+            className="px-6 py-2.5 bg-gray-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all"
+          >
+            Close
           </button>
         </div>
       </div>

@@ -19,4 +19,5 @@ class CustomPageSerializer(serializers.DocumentSerializer):
             'centers': {'required': False},
             'faq': {'required': False},
             'contact': {'required': False},
+            'blog': {'required': False},
         }

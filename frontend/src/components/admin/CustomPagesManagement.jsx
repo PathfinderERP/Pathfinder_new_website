@@ -37,6 +37,7 @@ export default function CustomPagesManagement() {
     features: { features_list: [] },
     courses: { courses_list: [], course_ids: [] },
     centers: { centers_list: [] },
+    blog: { title: "", blogs_list: [] },
     faq: { faqs_list: [] },
     contact: {}
   });
@@ -257,6 +258,7 @@ export default function CustomPagesManagement() {
       features: page.features || { features_list: [] },
       courses: page.courses || { courses_list: [], course_ids: [] },
       centers: page.centers || { centers_list: [] },
+      blog: page.blog || { title: "Latest Insights & Academic Updates", blogs_list: [] },
       faq: page.faq || { faqs_list: [] },
       contact: page.contact || {}
     });
@@ -290,6 +292,8 @@ export default function CustomPagesManagement() {
             updatedSections.hero.bg_image_url = url;
           } else if (pending.type === "topper" && pending.index !== undefined) {
             updatedSections.toppers.toppers_list[pending.index].image_url = url;
+          } else if (pending.type === "blog" && pending.index !== undefined) {
+            updatedSections.blog.blogs_list[pending.index].image_url = url;
           }
         }
       }
@@ -337,6 +341,16 @@ export default function CustomPagesManagement() {
       });
       setPendingImages(prev => {
         const filtered = prev.filter(img => !(img.type === "topper" && img.index === index));
+        return [...filtered, { type, index, file }];
+      });
+    } else if (type === "blog" && index !== null) {
+      setEditSections(prev => {
+        const list = [...prev.blog.blogs_list];
+        list[index].image_url = previewUrl;
+        return { ...prev, blog: { ...prev.blog, blogs_list: list } };
+      });
+      setPendingImages(prev => {
+        const filtered = prev.filter(img => !(img.type === "blog" && img.index === index));
         return [...filtered, { type, index, file }];
       });
     }
@@ -564,7 +578,7 @@ export default function CustomPagesManagement() {
 
                 {/* TABS BUTTONS BAR */}
                 <div className="flex border-b border-gray-200 dark:border-slate-800 overflow-x-auto gap-2 py-1 scrollbar-hide">
-                  {["hero", "legacy", "toppers", "features", "courses", "centers", "faq", "contact"].map((section) => (
+                  {["hero", "legacy", "toppers", "features", "courses", "centers", "blog", "faq", "contact"].map((section) => (
                     <button
                       key={section}
                       onClick={() => setActiveTab(section)}
@@ -1704,6 +1718,179 @@ export default function CustomPagesManagement() {
                           onChange={(e) => setEditSections({ ...editSections, contact: { ...editSections.contact, email_recipient: e.target.value } })}
                           className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
                         />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* BLOG TAB */}
+                  {activeTab === "blog" && (
+                    <div className="space-y-4">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-700">Section Title</label>
+                        <input
+                          type="text"
+                          value={editSections.blog?.title || ""}
+                          onChange={(e) => setEditSections({ ...editSections, blog: { ...editSections.blog, title: e.target.value } })}
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-bold text-sm">Manually Configured Blogs</h4>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const list = [...(editSections.blog?.blogs_list || [])];
+                              list.push({
+                                title: "",
+                                excerpt: "",
+                                content: "",
+                                category: "General",
+                                author: "Admin",
+                                read_time: "5 min read",
+                                image_url: "",
+                                published_date: new Date().toISOString().split('T')[0]
+                              });
+                              setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                            }}
+                            className="bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-orange-100 transition-colors"
+                          >
+                            <PlusIcon className="w-4 h-4" /> Add Blog Card
+                          </button>
+                        </div>
+                        {editSections.blog?.blogs_list && editSections.blog.blogs_list.map((item, idx) => (
+                          <div key={idx} className="p-5 bg-gray-50 dark:bg-slate-850 border border-gray-250 dark:border-slate-750 rounded-2xl relative space-y-4 shadow-sm text-gray-900 dark:text-white">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = [...editSections.blog.blogs_list];
+                                list.splice(idx, 1);
+                                setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                              }}
+                              className="absolute right-4 top-4 p-1.5 text-red-500 hover:bg-red-55 rounded-md transition-colors"
+                              title="Remove blog card"
+                            >
+                              <TrashIcon className="w-5 h-5" />
+                            </button>
+                            <h5 className="font-extrabold text-xs text-orange-600 uppercase tracking-wider">Blog Card #{idx + 1}</h5>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-bold uppercase text-gray-500">Blog Title</label>
+                                <input
+                                  type="text"
+                                  placeholder="Title"
+                                  value={item.title || ""}
+                                  onChange={(e) => {
+                                    const list = [...editSections.blog.blogs_list];
+                                    list[idx].title = e.target.value;
+                                    setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                                  }}
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-bold uppercase text-gray-500">Category</label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. JEE, NEET, Preparation"
+                                  value={item.category || ""}
+                                  onChange={(e) => {
+                                    const list = [...editSections.blog.blogs_list];
+                                    list[idx].category = e.target.value;
+                                    setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                                  }}
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-bold uppercase text-gray-500">Author</label>
+                                <input
+                                  type="text"
+                                  placeholder="Author Name"
+                                  value={item.author || ""}
+                                  onChange={(e) => {
+                                    const list = [...editSections.blog.blogs_list];
+                                    list[idx].author = e.target.value;
+                                    setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                                  }}
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-bold uppercase text-gray-500">Read Time</label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. 5 min read"
+                                  value={item.read_time || ""}
+                                  onChange={(e) => {
+                                    const list = [...editSections.blog.blogs_list];
+                                    list[idx].read_time = e.target.value;
+                                    setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                                  }}
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-bold uppercase text-gray-500">Published Date</label>
+                                <input
+                                  type="date"
+                                  value={item.published_date || ""}
+                                  onChange={(e) => {
+                                    const list = [...editSections.blog.blogs_list];
+                                    list[idx].published_date = e.target.value;
+                                    setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                                  }}
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-bold uppercase text-gray-500">Featured Image</label>
+                                <div className="flex gap-3 items-center">
+                                  {item.image_url && (
+                                    <img src={item.image_url} alt="Preview" className="h-10 w-10 object-cover rounded-lg border border-gray-200 shadow-sm" />
+                                  )}
+                                  <label className="bg-white border border-gray-250 hover:bg-gray-100 rounded-lg p-2.5 text-[10px] uppercase font-bold text-center cursor-pointer dark:bg-slate-900 dark:hover:bg-slate-800 text-gray-500 whitespace-nowrap flex-grow flex items-center justify-center gap-1.5">
+                                    <PhotoIcon className="w-4 h-4" /> {item.image_url ? "Change Image" : "Upload Image"}
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={(e) => handleImageUpload(e, "blog", null, idx)}
+                                      className="hidden"
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                              <div className="md:col-span-2 space-y-1">
+                                <label className="text-[10px] font-bold uppercase text-gray-500">Excerpt / Short Description</label>
+                                <textarea
+                                  placeholder="Short text describing the article for listing..."
+                                  value={item.excerpt || ""}
+                                  onChange={(e) => {
+                                    const list = [...editSections.blog.blogs_list];
+                                    list[idx].excerpt = e.target.value;
+                                    setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                                  }}
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750 resize-none"
+                                  rows="2"
+                                />
+                              </div>
+                              <div className="md:col-span-2 space-y-1">
+                                <label className="text-[10px] font-bold uppercase text-gray-500">Full Content (HTML/Text)</label>
+                                <textarea
+                                  placeholder="Write full blog post contents here (HTML tags allowed)..."
+                                  value={item.content || ""}
+                                  onChange={(e) => {
+                                    const list = [...editSections.blog.blogs_list];
+                                    list[idx].content = e.target.value;
+                                    setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                                  }}
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none font-mono dark:bg-slate-900 dark:border-slate-750 resize-y"
+                                  rows="6"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
