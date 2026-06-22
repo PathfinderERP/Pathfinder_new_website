@@ -44,7 +44,7 @@ const ApplicantsList = () => {
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [pageInput, setPageInput] = useState(1);
@@ -63,6 +63,8 @@ const ApplicantsList = () => {
     const [availableCentres, setAvailableCentres] = useState([]);
     const [availableClasses, setAvailableClasses] = useState([]);
     const [dateSort, setDateSort] = useState('newest');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     // Modal states
     const [selectedApplicant, setSelectedApplicant] = useState(null);
@@ -83,7 +85,7 @@ const ApplicantsList = () => {
 
     useEffect(() => {
         applyFiltersAndPagination();
-    }, [currentPage, classFilter, courseFilter, centreFilter, searchQuery, dateSort, allApplicants]);
+    }, [currentPage, classFilter, courseFilter, centreFilter, searchQuery, dateSort, startDate, endDate, allApplicants]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -221,6 +223,24 @@ const ApplicantsList = () => {
             );
         }
 
+        if (startDate) {
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            filteredData = filteredData.filter(app => {
+                const appDate = new Date(app.submitted_at);
+                return appDate >= start;
+            });
+        }
+
+        if (endDate) {
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            filteredData = filteredData.filter(app => {
+                const appDate = new Date(app.submitted_at);
+                return appDate <= end;
+            });
+        }
+
         // Sorting
         if (dateSort !== 'none') {
             filteredData.sort((a, b) => {
@@ -320,6 +340,18 @@ const ApplicantsList = () => {
                     app.phone?.includes(searchQuery) ||
                     app.email?.toLowerCase().includes(searchQuery.toLowerCase())
                 );
+            }
+
+            if (startDate) {
+                const start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                dataToExport = dataToExport.filter(app => new Date(app.submitted_at) >= start);
+            }
+
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                dataToExport = dataToExport.filter(app => new Date(app.submitted_at) <= end);
             }
 
             // Create CSV content
@@ -468,9 +500,27 @@ const ApplicantsList = () => {
 
             {/* Filters Section */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 mb-8">
-                <div className="flex items-center gap-2 mb-6">
-                    <FunnelIcon className="w-5 h-5 text-orange-600" />
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Pipeline Optimization</h3>
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                        <FunnelIcon className="w-5 h-5 text-orange-600" />
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Pipeline Optimization</h3>
+                    </div>
+                    {(classFilter !== 'all' || courseFilter !== 'all' || centreFilter !== 'all' || searchQuery || startDate || endDate) && (
+                        <button
+                            onClick={() => {
+                                setClassFilter('all');
+                                setCourseFilter('all');
+                                setCentreFilter('all');
+                                setSearchQuery('');
+                                setStartDate('');
+                                setEndDate('');
+                                setCurrentPage(1);
+                            }}
+                            className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors"
+                        >
+                            Reset Filters
+                        </button>
+                    )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                     {/* Search Field */}
@@ -569,6 +619,38 @@ const ApplicantsList = () => {
                             <option value="oldest">Historical</option>
                         </select>
                     </div>
+
+                    {/* From Date Filter */}
+                    <div className="md:col-span-3">
+                        <label className="block text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+                            From Date
+                        </label>
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => {
+                                setStartDate(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-orange-600/20 dark:text-white transition-all text-gray-500 dark:text-gray-400"
+                        />
+                    </div>
+
+                    {/* To Date Filter */}
+                    <div className="md:col-span-3">
+                        <label className="block text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+                            To Date
+                        </label>
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => {
+                                setEndDate(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-orange-600/20 dark:text-white transition-all text-gray-500 dark:text-gray-400"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -583,8 +665,26 @@ const ApplicantsList = () => {
             {applicants.length > 0 && (
                 <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-sm p-4 mb-6">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest">
-                            Showing <span className="text-gray-900 dark:text-white">{(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, totalItems)}</span> of <span className="text-gray-900 dark:text-white">{totalItems}</span> Inbound Assets
+                        <div className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-4 flex-wrap">
+                            <span>
+                                Showing <span className="text-gray-900 dark:text-white">{(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, totalItems)}</span> of <span className="text-gray-900 dark:text-white">{totalItems}</span> Inbound Assets
+                            </span>
+                            <div className="flex items-center gap-1.5 normal-case">
+                                <span className="text-[10px] text-gray-400 font-bold dark:text-slate-500">per page:</span>
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={(e) => {
+                                        setItemsPerPage(parseInt(e.target.value));
+                                        setCurrentPage(1);
+                                    }}
+                                    className="text-[10px] font-black bg-gray-50 dark:bg-slate-800 border-none rounded-lg py-0.5 pl-2 pr-6 focus:ring-2 focus:ring-orange-600/20 dark:text-white cursor-pointer"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={25}>25</option>
+                                    <option value={50}>50</option>
+                                    <option value={100}>100</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -788,10 +888,28 @@ const ApplicantsList = () => {
             {applicants.length > 0 && (
                 <div className="bg-white px-6 py-4 mt-4 border border-gray-200 rounded-lg shadow-sm">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="text-sm text-gray-500">
-                            Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
-                            <span className="font-medium">{Math.min(currentPage * itemsPerPage, totalItems)}</span> of{' '}
-                            <span className="font-medium">{totalItems}</span> results
+                        <div className="text-sm text-gray-500 flex items-center gap-4 flex-wrap">
+                            <span>
+                                Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
+                                <span className="font-medium">{Math.min(currentPage * itemsPerPage, totalItems)}</span> of{' '}
+                                <span className="font-medium">{totalItems}</span> results
+                            </span>
+                            <div className="flex items-center gap-1.5 normal-case">
+                                <span className="text-xs text-gray-400">per page:</span>
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={(e) => {
+                                        setItemsPerPage(parseInt(e.target.value));
+                                        setCurrentPage(1);
+                                    }}
+                                    className="text-xs font-semibold bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg py-1 px-2 focus:ring-2 focus:ring-orange-600/20 dark:text-white cursor-pointer"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={25}>25</option>
+                                    <option value={50}>50</option>
+                                    <option value={100}>100</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div className="flex flex-col sm:flex-row items-center gap-4">

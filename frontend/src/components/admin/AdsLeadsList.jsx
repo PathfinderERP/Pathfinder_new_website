@@ -25,7 +25,7 @@ const AdsLeadsList = () => {
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
 
@@ -35,6 +35,8 @@ const AdsLeadsList = () => {
     const [classFilter, setClassFilter] = useState('all');
     const [contactedFilter, setContactedFilter] = useState('all');
     const [dateSort, setDateSort] = useState('newest');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     // Modal states
     const [selectedLead, setSelectedLead] = useState(null);
@@ -61,7 +63,7 @@ const AdsLeadsList = () => {
 
     useEffect(() => {
         applyFiltersAndPagination();
-    }, [currentPage, sourceFilter, classFilter, contactedFilter, searchQuery, dateSort, allLeads]);
+    }, [currentPage, sourceFilter, classFilter, contactedFilter, searchQuery, dateSort, startDate, endDate, allLeads]);
 
     const applyFiltersAndPagination = () => {
         let filteredData = [...allLeads];
@@ -86,6 +88,24 @@ const AdsLeadsList = () => {
                 lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 lead.centre?.toLowerCase().includes(searchQuery.toLowerCase())
             );
+        }
+
+        if (startDate) {
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            filteredData = filteredData.filter(lead => {
+                const leadDate = new Date(lead.created_at);
+                return leadDate >= start;
+            });
+        }
+
+        if (endDate) {
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            filteredData = filteredData.filter(lead => {
+                const leadDate = new Date(lead.created_at);
+                return leadDate <= end;
+            });
         }
 
         // Sorting
@@ -153,9 +173,40 @@ const AdsLeadsList = () => {
 
     const exportToCSV = () => {
         const headers = ['Name', 'Phone', 'Email', 'Class', 'Board', 'Course Type', 'Centre', 'Source', 'Contacted', 'Date'];
+        let dataToExport = [...allLeads];
+
+        if (sourceFilter !== 'all') {
+            dataToExport = dataToExport.filter(lead => lead.page_source === sourceFilter);
+        }
+        if (classFilter !== 'all') {
+            dataToExport = dataToExport.filter(lead => lead.student_class === classFilter);
+        }
+        if (contactedFilter !== 'all') {
+            const isContactedStr = contactedFilter === 'contacted';
+            dataToExport = dataToExport.filter(lead => lead.is_contacted === isContactedStr);
+        }
+        if (searchQuery) {
+            dataToExport = dataToExport.filter(lead =>
+                lead.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                lead.phone?.includes(searchQuery) ||
+                lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                lead.centre?.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+        if (startDate) {
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            dataToExport = dataToExport.filter(lead => new Date(lead.created_at) >= start);
+        }
+        if (endDate) {
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            dataToExport = dataToExport.filter(lead => new Date(lead.created_at) <= end);
+        }
+
         const csvContent = [
             headers.join(','),
-            ...allLeads.map(lead => [
+            ...dataToExport.map(lead => [
                 `"${lead.name || ''}"`,
                 `"${lead.phone || ''}"`,
                 `"${lead.email || ''}"`,
@@ -239,9 +290,27 @@ const AdsLeadsList = () => {
 
             {/* Filters */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 mb-8">
-                <div className="flex items-center gap-2 mb-6">
-                    <FunnelIcon className="w-5 h-5 text-orange-600" />
-                    <h3 className="text-lg font-bold">Leads Filtering</h3>
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                        <FunnelIcon className="w-5 h-5 text-orange-600" />
+                        <h3 className="text-lg font-bold">Leads Filtering</h3>
+                    </div>
+                    {(sourceFilter !== 'all' || classFilter !== 'all' || contactedFilter !== 'all' || searchQuery || startDate || endDate) && (
+                        <button
+                            onClick={() => {
+                                setSourceFilter('all');
+                                setClassFilter('all');
+                                setContactedFilter('all');
+                                setSearchQuery('');
+                                setStartDate('');
+                                setEndDate('');
+                                setCurrentPage(1);
+                            }}
+                            className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors"
+                        >
+                            Reset Filters
+                        </button>
+                    )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                     <div className="md:col-span-4">
@@ -291,6 +360,34 @@ const AdsLeadsList = () => {
                             <option value="newest">Newest First</option>
                             <option value="oldest">Oldest First</option>
                         </select>
+                    </div>
+
+                    {/* From Date Filter */}
+                    <div className="md:col-span-2">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 text-slate-500">From Date</label>
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => {
+                                setStartDate(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm border-none text-gray-500 dark:text-gray-400"
+                        />
+                    </div>
+
+                    {/* To Date Filter */}
+                    <div className="md:col-span-2">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 text-slate-500">To Date</label>
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => {
+                                setEndDate(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm border-none text-gray-500 dark:text-gray-400"
+                        />
                     </div>
                 </div>
             </div>
@@ -381,10 +478,28 @@ const AdsLeadsList = () => {
             </div>
 
             {/* Pagination Controls */}
-            {totalPages > 1 && (
+            {leads.length > 0 && (
                 <div className="flex items-center justify-between mt-6 px-4 py-3 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-sm">
-                    <div className="text-xs font-black text-gray-400 uppercase">
-                        Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} leads
+                    <div className="text-xs font-black text-gray-400 uppercase flex items-center gap-4 flex-wrap">
+                        <span>
+                            Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} leads
+                        </span>
+                        <div className="flex items-center gap-1.5 normal-case">
+                            <span className="text-[10px] text-gray-400 font-bold dark:text-slate-500">per page:</span>
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => {
+                                    setItemsPerPage(parseInt(e.target.value));
+                                    setCurrentPage(1);
+                                }}
+                                className="text-[10px] font-black bg-gray-50 dark:bg-slate-800 border-none rounded-lg py-0.5 pl-2 pr-6 focus:ring-2 focus:ring-orange-600/20 dark:text-white cursor-pointer"
+                            >
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
+                            </select>
+                        </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <button
