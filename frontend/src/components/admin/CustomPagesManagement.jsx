@@ -447,7 +447,7 @@ export default function CustomPagesManagement() {
                 </button>
                 <button
                   onClick={() => handleEditSectionsClick(page)}
-                  className="bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-750 dark:text-gray-300"
+                  className="bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-800 dark:text-gray-300"
                 >
                   <PencilIcon className="w-3.5 h-3.5" /> Edit
                 </button>
@@ -455,7 +455,7 @@ export default function CustomPagesManagement() {
                   href={`/${page.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white hover:bg-gray-100 border border-gray-200 text-gray-750 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-750 dark:text-gray-300"
+                  className="bg-white hover:bg-gray-100 border border-gray-200 text-gray-750 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-800 dark:text-gray-300"
                 >
                   <EyeIcon className="w-3.5 h-3.5" /> View
                 </a>
@@ -502,13 +502,13 @@ export default function CustomPagesManagement() {
                     placeholder="e.g. NEET Coaching in Kolkata"
                     value={newPageData.title}
                     onChange={(e) => setNewPageData({ ...newPageData, title: e.target.value, slug: e.target.value.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, "-") })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none dark:bg-slate-850 dark:border-slate-750"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none dark:bg-slate-900 dark:border-slate-800"
                   />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase text-gray-700 dark:text-gray-400">URL path slug *</label>
-                  <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-slate-750">
-                    <span className="bg-gray-100 border-r border-gray-200 px-4 py-3 text-sm text-gray-500 dark:bg-slate-800 dark:border-slate-750 select-none">
+                  <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-slate-800">
+                    <span className="bg-gray-100 border-r border-gray-200 px-4 py-3 text-sm text-gray-500 dark:bg-slate-800 dark:border-slate-800 select-none">
                       /
                     </span>
                     <input
@@ -517,7 +517,7 @@ export default function CustomPagesManagement() {
                       placeholder="e.g. neet-coaching-in-kolkata"
                       value={newPageData.slug}
                       onChange={(e) => setNewPageData({ ...newPageData, slug: e.target.value })}
-                      className="w-full bg-gray-50 px-4 py-3 text-sm focus:bg-white transition-all outline-none dark:bg-slate-850"
+                      className="w-full bg-gray-50 px-4 py-3 text-sm focus:bg-white transition-all outline-none dark:bg-slate-900"
                     />
                   </div>
                   <p className="text-xs text-gray-400 mt-1">This will be the web path route e.g., pathfinder.edu.in/neet-coaching-in-kolkata</p>
@@ -527,7 +527,7 @@ export default function CustomPagesManagement() {
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="w-1/2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-all text-sm dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-755"
+                    className="w-1/2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-all text-sm dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
                   >
                     Cancel
                   </button>
@@ -544,14 +544,14 @@ export default function CustomPagesManagement() {
               <div className="space-y-6">
                 
                 {/* SETTINGS AND SEO TOP FIELDS */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-slate-850 p-6 rounded-2xl border border-gray-100 dark:border-slate-750">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800">
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-gray-650 dark:text-gray-400">Page Settings Title</label>
                     <input 
                       type="text"
                       value={newPageData.title}
                       onChange={(e) => setNewPageData({ ...newPageData, title: e.target.value })}
-                      className="w-full bg-white border border-gray-200 dark:bg-slate-900 dark:border-slate-750 rounded-lg px-3 py-2 text-sm outline-none"
+                      className="w-full bg-white border border-gray-200 dark:bg-slate-900 dark:border-slate-800 rounded-lg px-3 py-2 text-sm outline-none"
                     />
                   </div>
                   <div className="space-y-1">
@@ -561,7 +561,7 @@ export default function CustomPagesManagement() {
                       value={newPageData.meta_title}
                       placeholder="Title inside search engine tabs"
                       onChange={(e) => setNewPageData({ ...newPageData, meta_title: e.target.value })}
-                      className="w-full bg-white border border-gray-200 dark:bg-slate-900 dark:border-slate-750 rounded-lg px-3 py-2 text-sm outline-none"
+                      className="w-full bg-white border border-gray-200 dark:bg-slate-900 dark:border-slate-800 rounded-lg px-3 py-2 text-sm outline-none"
                     />
                   </div>
                   <div className="space-y-1 md:col-span-2">
@@ -570,7 +570,7 @@ export default function CustomPagesManagement() {
                       value={newPageData.meta_description}
                       placeholder="Brief descriptive highlight shown in search engines"
                       onChange={(e) => setNewPageData({ ...newPageData, meta_description: e.target.value })}
-                      className="w-full bg-white border border-gray-200 dark:bg-slate-900 dark:border-slate-750 rounded-lg px-3 py-2 text-sm outline-none resize-none"
+                      className="w-full bg-white border border-gray-200 dark:bg-slate-900 dark:border-slate-800 rounded-lg px-3 py-2 text-sm outline-none resize-none"
                       rows="2"
                     />
                   </div>
@@ -606,7 +606,7 @@ export default function CustomPagesManagement() {
                           placeholder="e.g. Admissions Open 2026 - 27"
                           value={editSections.hero.badge_text || ""}
                           onChange={(e) => setEditSections({ ...editSections, hero: { ...editSections.hero, badge_text: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm dark:bg-slate-900 dark:border-slate-800"
                         />
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -616,7 +616,7 @@ export default function CustomPagesManagement() {
                             type="text"
                             value={editSections.hero.title || ""}
                             onChange={(e) => setEditSections({ ...editSections, hero: { ...editSections.hero, title: e.target.value } })}
-                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm dark:bg-slate-850 dark:border-slate-750"
+                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm dark:bg-slate-900 dark:border-slate-800"
                           />
                         </div>
                         <div className="space-y-1">
@@ -625,7 +625,7 @@ export default function CustomPagesManagement() {
                             type="text"
                             value={editSections.hero.title_highlight || ""}
                             onChange={(e) => setEditSections({ ...editSections, hero: { ...editSections.hero, title_highlight: e.target.value } })}
-                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm dark:bg-slate-850 dark:border-slate-750"
+                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm dark:bg-slate-900 dark:border-slate-800"
                           />
                         </div>
                       </div>
@@ -634,7 +634,7 @@ export default function CustomPagesManagement() {
                         <textarea
                           value={editSections.hero.description || ""}
                           onChange={(e) => setEditSections({ ...editSections, hero: { ...editSections.hero, description: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm resize-none dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm resize-none dark:bg-slate-900 dark:border-slate-800"
                           rows="3"
                         />
                       </div>
@@ -645,9 +645,9 @@ export default function CustomPagesManagement() {
                             type="text"
                             value={editSections.hero.bg_image_url || ""}
                             onChange={(e) => setEditSections({ ...editSections, hero: { ...editSections.hero, bg_image_url: e.target.value } })}
-                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm dark:bg-slate-850 dark:border-slate-750"
+                            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm dark:bg-slate-900 dark:border-slate-800"
                           />
-                          <label className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl border border-gray-200 dark:bg-slate-800 dark:border-slate-750 dark:text-gray-300 cursor-pointer text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                          <label className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl border border-gray-200 dark:bg-slate-800 dark:border-slate-800 dark:text-gray-300 cursor-pointer text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0">
                             <PhotoIcon className="w-4 h-4" /> Upload
                             <input
                               type="file"
@@ -670,7 +670,7 @@ export default function CustomPagesManagement() {
                           type="text"
                           value={editSections.legacy.title || ""}
                           onChange={(e) => setEditSections({ ...editSections, legacy: { ...editSections.legacy, title: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800"
                         />
                       </div>
                       <div className="space-y-3">
@@ -689,7 +689,7 @@ export default function CustomPagesManagement() {
                           </button>
                         </div>
                         {editSections.legacy.milestones && editSections.legacy.milestones.map((item, idx) => (
-                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-850 border border-gray-200 dark:border-slate-750 rounded-xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center relative pr-10">
+                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center relative pr-10">
                             <input
                               type="text"
                               placeholder="Year (e.g. 1991)"
@@ -750,7 +750,7 @@ export default function CustomPagesManagement() {
                           type="text"
                           value={editSections.toppers.title || ""}
                           onChange={(e) => setEditSections({ ...editSections, toppers: { ...editSections.toppers, title: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800"
                         />
                       </div>
                       <div className="space-y-4">
@@ -769,7 +769,7 @@ export default function CustomPagesManagement() {
                           </button>
                         </div>
                         {editSections.toppers.toppers_list && editSections.toppers.toppers_list.map((topper, idx) => (
-                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-850 border border-gray-250 dark:border-slate-750 rounded-xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center relative pr-10">
+                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-900 border border-gray-250 dark:border-slate-800 rounded-xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center relative pr-10">
                             <input
                               type="text"
                               placeholder="Topper Name"
@@ -848,13 +848,13 @@ export default function CustomPagesManagement() {
                           type="text"
                           value={editSections.features.title || ""}
                           onChange={(e) => setEditSections({ ...editSections, features: { ...editSections.features, title: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800"
                         />
                       </div>
                       <div className="space-y-3">
                         <h4 className="font-bold text-sm">Key Features</h4>
                         {editSections.features.features_list && editSections.features.features_list.map((feat, idx) => (
-                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-850 border border-gray-200 dark:border-slate-750 rounded-xl grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
                             <input
                               type="text"
                               placeholder="Feature Title"
@@ -893,7 +893,7 @@ export default function CustomPagesManagement() {
                           placeholder="e.g. Our Programs"
                           value={editSections.courses.title || ""}
                           onChange={(e) => setEditSections({ ...editSections, courses: { ...editSections.courses, title: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750 outline-none"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800 outline-none"
                         />
                       </div>
 
@@ -947,7 +947,7 @@ export default function CustomPagesManagement() {
                             placeholder="Search by name, centre, programme..."
                             value={courseSearchQuery}
                             onChange={(e) => setCourseSearchQuery(e.target.value)}
-                            className="w-full border border-gray-200 dark:border-slate-750 rounded-xl px-4 py-2.5 pl-9 text-sm dark:bg-slate-850 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                            className="w-full border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 pl-9 text-sm dark:bg-slate-900 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
                           />
                           <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -955,7 +955,7 @@ export default function CustomPagesManagement() {
                         </div>
 
                         {/* Dropdown Filters */}
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 bg-gray-50 dark:bg-slate-850 p-3 rounded-xl border border-gray-150 dark:border-slate-800">
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 bg-gray-50 dark:bg-slate-900 p-3 rounded-xl border border-gray-150 dark:border-slate-800">
                           {/* Centre Filter */}
                           <div className="space-y-1">
                             <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">Centre</label>
@@ -1103,14 +1103,14 @@ export default function CustomPagesManagement() {
 
                         {/* Course Checklist */}
                         {coursesLoadingAdmin ? (
-                          <div className="flex items-center justify-center py-12 bg-gray-50 dark:bg-slate-850 border border-gray-200 dark:border-slate-750 rounded-xl">
+                          <div className="flex items-center justify-center py-12 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl">
                             <div className="flex flex-col items-center gap-3">
                               <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                               <p className="text-xs text-gray-500">Loading courses...</p>
                             </div>
                           </div>
                         ) : (
-                          <div className="max-h-80 overflow-y-auto border border-gray-200 dark:border-slate-750 rounded-xl bg-white dark:bg-slate-900 divide-y divide-gray-100 dark:divide-slate-800">
+                          <div className="max-h-80 overflow-y-auto border border-gray-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 divide-y divide-gray-100 dark:divide-slate-800">
                             {(() => {
                               const filtered = allCourses.filter(c => {
                                 const matchSearch = !courseSearchQuery ||
@@ -1270,7 +1270,7 @@ export default function CustomPagesManagement() {
                                         {course.plans && course.plans.length > 0 && (
                                           <div>
                                             <span className="font-bold text-gray-400 block mb-1 uppercase tracking-wider text-[9px]">Infinity Plans ({course.plans.length})</span>
-                                            <div className="space-y-1 bg-white dark:bg-slate-950 p-2 rounded-lg border border-gray-150 dark:border-slate-850">
+                                            <div className="space-y-1 bg-white dark:bg-slate-950 p-2 rounded-lg border border-gray-150 dark:border-slate-900">
                                               {course.plans.map((p, pIdx) => (
                                                 <div key={pIdx} className="flex justify-between items-center py-0.5 border-b border-gray-50 dark:border-slate-900 last:border-b-0">
                                                   <span className="font-bold text-slate-800 dark:text-slate-200">{p.name || `Plan ${pIdx+1}`}</span>
@@ -1315,7 +1315,7 @@ export default function CustomPagesManagement() {
                           type="text"
                           value={editSections.centers.title || ""}
                           onChange={(e) => setEditSections({ ...editSections, centers: { ...editSections.centers, title: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750 outline-none"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800 outline-none"
                         />
                       </div>
 
@@ -1368,7 +1368,7 @@ export default function CustomPagesManagement() {
                             placeholder="Search by name, state, district..."
                             value={centreSearchQuery}
                             onChange={(e) => setCentreSearchQuery(e.target.value)}
-                            className="w-full border border-gray-200 dark:border-slate-750 rounded-xl px-4 py-2.5 pl-9 text-sm dark:bg-slate-850 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                            className="w-full border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 pl-9 text-sm dark:bg-slate-900 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
                           />
                           <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1376,7 +1376,7 @@ export default function CustomPagesManagement() {
                         </div>
 
                         {/* Dropdown Filters */}
-                        <div className="grid grid-cols-2 gap-2.5 bg-gray-50 dark:bg-slate-850 p-3 rounded-xl border border-gray-150 dark:border-slate-800">
+                        <div className="grid grid-cols-2 gap-2.5 bg-gray-50 dark:bg-slate-900 p-3 rounded-xl border border-gray-150 dark:border-slate-800">
                           {/* State Filter */}
                           <div className="space-y-1">
                             <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">State Jurisdiction</label>
@@ -1483,14 +1483,14 @@ export default function CustomPagesManagement() {
 
                         {/* Centre Checklist */}
                         {centresLoadingAdmin ? (
-                          <div className="flex items-center justify-center py-12 bg-gray-50 dark:bg-slate-850 border border-gray-200 dark:border-slate-750 rounded-xl">
+                          <div className="flex items-center justify-center py-12 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl">
                             <div className="flex flex-col items-center gap-3">
                               <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                               <p className="text-xs text-gray-500">Loading network centres...</p>
                             </div>
                           </div>
                         ) : (
-                          <div className="max-h-[640px] overflow-y-auto border border-gray-200 dark:border-slate-750 rounded-xl bg-gray-50 dark:bg-slate-900 p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="max-h-[640px] overflow-y-auto border border-gray-200 dark:border-slate-800 rounded-xl bg-gray-50 dark:bg-slate-900 p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {(() => {
                               const filtered = allCentres.filter(c => {
                                 const matchSearch = !centreSearchQuery ||
@@ -1658,18 +1658,43 @@ export default function CustomPagesManagement() {
                   {activeTab === "faq" && (
                     <div className="space-y-4">
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-700">Section Title</label>
+                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Section Title</label>
                         <input
                           type="text"
                           value={editSections.faq.title || ""}
                           onChange={(e) => setEditSections({ ...editSections, faq: { ...editSections.faq, title: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
                         />
                       </div>
                       <div className="space-y-3">
-                        <h4 className="font-bold text-sm">Frequently Asked Questions</h4>
-                        {editSections.faq.faqs_list && editSections.faq.faqs_list.map((item, idx) => (
-                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-850 border border-gray-200 dark:border-slate-750 rounded-xl space-y-3">
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-bold text-sm text-gray-900 dark:text-white">Frequently Asked Questions</h4>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const list = [...(editSections.faq.faqs_list || [])];
+                              list.push({ question: "", answer: "" });
+                              setEditSections({ ...editSections, faq: { ...editSections.faq, faqs_list: list } });
+                            }}
+                            className="bg-orange-50 text-orange-600 dark:bg-orange-950/20 dark:text-orange-400 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
+                          >
+                            <PlusIcon className="w-4 h-4" /> Add FAQ
+                          </button>
+                        </div>
+                        {(editSections.faq.faqs_list || []).map((item, idx) => (
+                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-900/60 border border-gray-200 dark:border-slate-800 rounded-xl space-y-3 relative group">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = [...editSections.faq.faqs_list];
+                                list.splice(idx, 1);
+                                setEditSections({ ...editSections, faq: { ...editSections.faq, faqs_list: list } });
+                              }}
+                              className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1 hover:bg-red-50 dark:hover:bg-red-950/20 rounded transition-colors"
+                              title="Delete FAQ"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
                             <input
                               type="text"
                               placeholder="Question"
@@ -1679,7 +1704,7 @@ export default function CustomPagesManagement() {
                                 list[idx].question = e.target.value;
                                 setEditSections({ ...editSections, faq: { ...editSections.faq, faqs_list: list } });
                               }}
-                              className="w-full bg-white border rounded-lg p-2 text-sm dark:bg-slate-900 outline-none"
+                              className="w-full bg-white border border-gray-200 dark:border-slate-800 dark:text-white rounded-lg p-2 text-sm dark:bg-slate-900 outline-none pr-8 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
                             />
                             <textarea
                               placeholder="Answer text"
@@ -1689,7 +1714,7 @@ export default function CustomPagesManagement() {
                                 list[idx].answer = e.target.value;
                                 setEditSections({ ...editSections, faq: { ...editSections.faq, faqs_list: list } });
                               }}
-                              className="w-full bg-white border rounded-lg p-2 text-sm dark:bg-slate-900 outline-none resize-none"
+                              className="w-full bg-white border border-gray-200 dark:border-slate-800 dark:text-white rounded-lg p-2 text-sm dark:bg-slate-900 outline-none resize-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
                               rows="2"
                             />
                           </div>
@@ -1707,7 +1732,7 @@ export default function CustomPagesManagement() {
                           type="text"
                           value={editSections.contact.title || ""}
                           onChange={(e) => setEditSections({ ...editSections, contact: { ...editSections.contact, title: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800"
                         />
                       </div>
                       <div className="space-y-1">
@@ -1716,7 +1741,7 @@ export default function CustomPagesManagement() {
                           type="email"
                           value={editSections.contact.email_recipient || ""}
                           onChange={(e) => setEditSections({ ...editSections, contact: { ...editSections.contact, email_recipient: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800"
                         />
                       </div>
                     </div>
@@ -1731,7 +1756,7 @@ export default function CustomPagesManagement() {
                           type="text"
                           value={editSections.blog?.title || ""}
                           onChange={(e) => setEditSections({ ...editSections, blog: { ...editSections.blog, title: e.target.value } })}
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-850 dark:border-slate-750"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800"
                         />
                       </div>
                       <div className="space-y-4">
@@ -1759,7 +1784,7 @@ export default function CustomPagesManagement() {
                           </button>
                         </div>
                         {editSections.blog?.blogs_list && editSections.blog.blogs_list.map((item, idx) => (
-                          <div key={idx} className="p-5 bg-gray-50 dark:bg-slate-850 border border-gray-250 dark:border-slate-750 rounded-2xl relative space-y-4 shadow-sm text-gray-900 dark:text-white">
+                          <div key={idx} className="p-5 bg-gray-50 dark:bg-slate-900 border border-gray-250 dark:border-slate-800 rounded-2xl relative space-y-4 shadow-sm text-gray-900 dark:text-white">
                             <button
                               type="button"
                               onClick={() => {
@@ -1785,7 +1810,7 @@ export default function CustomPagesManagement() {
                                     list[idx].title = e.target.value;
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
-                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750"
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800"
                                 />
                               </div>
                               <div className="space-y-1">
@@ -1799,7 +1824,7 @@ export default function CustomPagesManagement() {
                                     list[idx].category = e.target.value;
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
-                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750"
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800"
                                 />
                               </div>
                               <div className="space-y-1">
@@ -1813,7 +1838,7 @@ export default function CustomPagesManagement() {
                                     list[idx].author = e.target.value;
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
-                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750"
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800"
                                 />
                               </div>
                               <div className="space-y-1">
@@ -1827,7 +1852,7 @@ export default function CustomPagesManagement() {
                                     list[idx].read_time = e.target.value;
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
-                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750"
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800"
                                 />
                               </div>
                               <div className="space-y-1">
@@ -1840,7 +1865,7 @@ export default function CustomPagesManagement() {
                                     list[idx].published_date = e.target.value;
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
-                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750"
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800"
                                 />
                               </div>
                               <div className="space-y-1">
@@ -1870,7 +1895,7 @@ export default function CustomPagesManagement() {
                                     list[idx].excerpt = e.target.value;
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
-                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-750 resize-none"
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800 resize-none"
                                   rows="2"
                                 />
                               </div>
@@ -1884,7 +1909,7 @@ export default function CustomPagesManagement() {
                                     list[idx].content = e.target.value;
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
-                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none font-mono dark:bg-slate-900 dark:border-slate-750 resize-y"
+                                  className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none font-mono dark:bg-slate-900 dark:border-slate-800 resize-y"
                                   rows="6"
                                 />
                               </div>
@@ -1902,7 +1927,7 @@ export default function CustomPagesManagement() {
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-6 py-3 rounded-xl text-sm dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-750"
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-6 py-3 rounded-xl text-sm dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-800"
                   >
                     Cancel
                   </button>
