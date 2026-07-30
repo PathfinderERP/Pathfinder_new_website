@@ -57,3 +57,6 @@ class JWTAuthentication(authentication.BaseAuthentication):
             raise AuthenticationFailed('User not found')
         except Exception as e:
             raise AuthenticationFailed(f'Authentication failed: {str(e)}')
+
+    def authenticate_header(self, request):
+        return 'Bearer'

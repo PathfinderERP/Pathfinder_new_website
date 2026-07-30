@@ -63,3 +63,6 @@ class AdminJWTAuthentication(authentication.BaseAuthentication):
             
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, Admin.DoesNotExist, Exception):
             return None
+
+    def authenticate_header(self, request):
+        return 'Bearer'

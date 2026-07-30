@@ -2,10 +2,15 @@ import React, { useState, useEffect, useMemo } from "react";
 import { customPagesAPI, coursesAPI, centresAPI } from "../../services/api";
 import { 
   PlusIcon, PencilIcon, TrashIcon, LinkIcon, EyeIcon, 
-  CheckIcon, XMarkIcon, SparklesIcon, PhotoIcon
+  CheckIcon, XMarkIcon, SparklesIcon, PhotoIcon, DocumentDuplicateIcon
 } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import CourseDetailModal from "../CourseDetailModal";
+
+const getDefaultPriority = (sectionName) => {
+  const priorities = { hero: 10, legacy: 20, toppers: 30, features: 40, courses: 50, centers: 60, blog: 70, faq: 80, contact: 90 };
+  return priorities[sectionName] || 100;
+};
 
 export default function CustomPagesManagement() {
   const [pages, setPages] = useState([]);
@@ -274,6 +279,27 @@ export default function CustomPagesManagement() {
     setIsModalOpen(true);
   };
 
+  const handleDuplicatePage = (page) => {
+    setNewPageData({
+      title: `${page.title} (Copy)`,
+      slug: "",
+      meta_title: page.meta_title || "",
+      meta_description: page.meta_description || "",
+      meta_keywords: page.meta_keywords || "",
+      hero: page.hero || {},
+      legacy: page.legacy || { milestones: [] },
+      toppers: page.toppers || { toppers_list: [] },
+      features: page.features || { features_list: [] },
+      courses: page.courses || { courses_list: [], course_ids: [] },
+      centers: page.centers || { centers_list: [] },
+      blog: page.blog || { title: "Latest Insights & Academic Updates", blogs_list: [] },
+      faq: page.faq || { faqs_list: [] },
+      contact: page.contact || {}
+    });
+    setModalMode("create");
+    setIsModalOpen(true);
+  };
+
   const handleSaveSections = async () => {
     try {
       const toastId = toast.loading("Saving changes...");
@@ -433,37 +459,44 @@ export default function CustomPagesManagement() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 dark:bg-slate-900/50 border-t border-gray-100 dark:border-slate-800 p-4 grid grid-cols-4 gap-2">
+              <div className="bg-gray-50 dark:bg-slate-900/50 border-t border-gray-100 dark:border-slate-800 p-4 flex flex-wrap gap-2">
                 <button
                   onClick={() => handleToggleLive(page)}
-                  className={`py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+                  className={`flex-1 min-w-[70px] py-2 px-3 rounded-lg text-xs font-bold transition-all border flex items-center justify-center gap-1 ${
                     page.is_live
                       ? "border-amber-200 bg-amber-50 text-amber-600 hover:bg-amber-100 dark:border-amber-800/40 dark:bg-amber-950/10 dark:text-amber-400"
                       : "border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:border-emerald-800/40 dark:bg-emerald-950/10 dark:text-emerald-400"
                   }`}
                   title={page.is_live ? "Change to Draft" : "Make Live"}
                 >
-                  {page.is_live ? "Draft" : "Go Live"}
+                  {page.is_live ? "Draft" : "Live"}
                 </button>
                 <button
                   onClick={() => handleEditSectionsClick(page)}
-                  className="bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-800 dark:text-gray-300"
+                  className="flex-1 min-w-[70px] bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-800 dark:text-gray-300"
                 >
                   <PencilIcon className="w-3.5 h-3.5" /> Edit
+                </button>
+                <button
+                  onClick={() => handleDuplicatePage(page)}
+                  className="flex-1 min-w-[70px] bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-800 dark:text-gray-300"
+                  title="Duplicate Page"
+                >
+                  <DocumentDuplicateIcon className="w-3.5 h-3.5" /> Copy
                 </button>
                 <a
                   href={`/${page.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white hover:bg-gray-100 border border-gray-200 text-gray-750 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-800 dark:text-gray-300"
+                  className="flex-1 min-w-[70px] bg-white hover:bg-gray-100 border border-gray-200 text-gray-750 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-800 dark:text-gray-300"
                 >
                   <EyeIcon className="w-3.5 h-3.5" /> View
                 </a>
                 <button
                   onClick={() => handleDeletePage(page.id)}
-                  className="bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-red-950/10 dark:hover:bg-red-950/20 dark:border-red-900/30 dark:text-red-400"
+                  className="flex-1 min-w-[70px] bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1 dark:bg-red-950/10 dark:hover:bg-red-950/20 dark:border-red-900/30 dark:text-red-400"
                 >
-                  <TrashIcon className="w-3.5 h-3.5" /> Delete
+                  <TrashIcon className="w-3.5 h-3.5" /> Del
                 </button>
               </div>
             </div>
@@ -595,6 +628,46 @@ export default function CustomPagesManagement() {
 
                 {/* TAB LAYOUT AREAS */}
                 <div className="py-4 space-y-4">
+                  
+                  {/* SECTION SETTINGS (VISIBILITY & PRIORITY) */}
+                  <div className="flex items-center justify-between bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700">
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white capitalize">{activeTab} Section Settings</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Configure visibility and display priority.</p>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Display Order:</label>
+                        <input
+                          type="number"
+                          value={editSections[activeTab]?.priority ?? getDefaultPriority(activeTab)}
+                          onChange={(e) => setEditSections({
+                            ...editSections,
+                            [activeTab]: {
+                              ...(editSections[activeTab] || {}),
+                              priority: parseInt(e.target.value) || 0
+                            }
+                          })}
+                          className="w-20 border border-gray-200 rounded-lg px-2 py-1 text-sm dark:bg-slate-900 dark:border-slate-600 outline-none focus:border-orange-500"
+                        />
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer" 
+                          checked={editSections[activeTab]?.is_active !== false}
+                          onChange={(e) => setEditSections({ 
+                            ...editSections, 
+                            [activeTab]: { 
+                              ...(editSections[activeTab] || {}), 
+                              is_active: e.target.checked 
+                            } 
+                          })}
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                      </label>
+                    </div>
+                  </div>
                   
                   {/* HERO TAB */}
                   {activeTab === "hero" && (

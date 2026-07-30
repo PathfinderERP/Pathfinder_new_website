@@ -204,11 +204,11 @@ export default function CustomPageRenderer() {
   const { hero, legacy, toppers, features, courses, centers, faq, contact, blog } = pageData;
 
   return (
-    <div className="bg-white text-gray-900 overflow-x-hidden font-sans">
+    <div className="bg-white text-gray-900 overflow-x-hidden font-sans flex flex-col">
 
       {/* 1. HERO SECTION */}
-      {hero && (
-        <section className="relative min-h-[60vh] flex items-center overflow-hidden">
+      {hero && hero.is_active !== false && (
+        <section style={{ order: hero.priority ?? 10 }} className="relative min-h-[60vh] flex items-center overflow-hidden">
           <div className="absolute inset-0 z-0">
             <img
               src={hero.bg_image_url || "https://images.pexels.com/photos/3985154/pexels-photo-3985154.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"}
@@ -260,8 +260,8 @@ export default function CustomPageRenderer() {
       )}
 
       {/* 2. LEGACY TIMELINE SECTION */}
-      {legacy && legacy.milestones && legacy.milestones.length > 0 && (
-        <section className="py-12 bg-white relative">
+      {legacy && legacy.is_active !== false && legacy.milestones && legacy.milestones.length > 0 && (
+        <section style={{ order: legacy.priority ?? 20 }} className="py-12 bg-white relative">
           <div className="container mx-auto px-6 max-w-7xl">
             <div className="text-center max-w-3xl mx-auto mb-8">
               <span className="text-orange-500 font-bold text-sm lg:text-base uppercase tracking-wider block mb-2">Our Journey</span>
@@ -307,7 +307,7 @@ export default function CustomPageRenderer() {
       )}
 
       {/* 3. TOPPERS SPOTLIGHT SECTION */}
-      {toppers && toppers.toppers_list && toppers.toppers_list.length > 0 && (() => {
+      {toppers && toppers.is_active !== false && toppers.toppers_list && toppers.toppers_list.length > 0 && (() => {
         const fallbackImages = [
           "/images/homepagecarousal_images/rupayan pal.webp",
           "/images/homepagecarousal_images/devdutta majhi.webp",
@@ -318,7 +318,7 @@ export default function CustomPageRenderer() {
         ];
 
         return (
-          <section className="py-8 bg-gradient-to-b from-[#fbf8f3] via-[#f7f0e4] to-[#fbf8f3] text-slate-900 relative overflow-hidden border-y border-[#eddcc4]">
+          <section style={{ order: toppers.priority ?? 30 }} className="py-8 bg-gradient-to-b from-[#fbf8f3] via-[#f7f0e4] to-[#fbf8f3] text-slate-900 relative overflow-hidden border-y border-[#eddcc4]">
             {/* Subtle light radial gradient glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-100/50 rounded-full blur-[130px] pointer-events-none" />
 
@@ -446,8 +446,8 @@ export default function CustomPageRenderer() {
       })()}
 
       {/* 4. FEATURES / WHY CHOOSE US SECTION */}
-      {features && features.features_list && features.features_list.length > 0 && (
-        <section className="py-12 bg-white relative">
+      {features && features.is_active !== false && features.features_list && features.features_list.length > 0 && (
+        <section style={{ order: features.priority ?? 40 }} className="py-12 bg-white relative">
           <div className="container mx-auto px-6 max-w-6xl">
             <div className="text-center max-w-3xl mx-auto mb-8">
               <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">Our Pillars</span>
@@ -473,8 +473,8 @@ export default function CustomPageRenderer() {
       )}
 
       {/* 5. COURSES PROGRAMS SECTION */}
-      {courses && (
-        <>
+      {courses && courses.is_active !== false && (
+        <div style={{ order: courses.priority ?? 50 }} className="w-full">
           {/* Dynamic courses from real catalog — shown when admin selected course IDs */}
           {courses.course_ids && courses.course_ids.length > 0 && (
             <CoursesDisplaySection
@@ -525,11 +525,11 @@ export default function CustomPageRenderer() {
               </div>
             </section>
           )}
-        </>
+        </div>
       )}
 
       {/* 6. CENTERS SECTION */}
-      {centers && centers.centers_list && centers.centers_list.length > 0 && (() => {
+      {centers && centers.is_active !== false && centers.centers_list && centers.centers_list.length > 0 && (() => {
         // Enrich stored center list with fresh live data from the DB (email, mobile, map_url etc.)
         const centresList = centers.centers_list.map(savedCenter => {
           const live = allCentres.find(
@@ -671,7 +671,7 @@ export default function CustomPageRenderer() {
         };
 
         return (
-          <section className="pt-6 pb-2 bg-white relative">
+          <section style={{ order: centers.priority ?? 60 }} className="pt-6 pb-2 bg-white relative">
             <div className="container mx-auto px-6 max-w-6xl">
               {/* Section Header */}
               <div className="flex items-end justify-between max-w-3xl mx-auto mb-8 flex-col text-center gap-4">
@@ -757,8 +757,8 @@ export default function CustomPageRenderer() {
       })()}
 
       {/* 6.5. BLOG SECTION */}
-      {blog && blog.blogs_list && blog.blogs_list.length > 0 && (
-        <section className="py-12 bg-slate-50 relative overflow-hidden">
+      {blog && blog.is_active !== false && blog.blogs_list && blog.blogs_list.length > 0 && (
+        <section style={{ order: blog.priority ?? 70 }} className="py-12 bg-slate-50 relative overflow-hidden">
           <div className="absolute -top-24 -left-24 w-72 h-72 bg-orange-100/40 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-amber-100/30 rounded-full blur-3xl pointer-events-none" />
 
@@ -846,8 +846,8 @@ export default function CustomPageRenderer() {
       )}
 
       {/* 7. FAQ SECTION */}
-      {faq && faq.faqs_list && faq.faqs_list.length > 0 && (
-        <section className="py-12 bg-gray-50">
+      {faq && faq.is_active !== false && faq.faqs_list && faq.faqs_list.length > 0 && (
+        <section style={{ order: faq.priority ?? 80 }} className="py-12 bg-gray-50">
           <div className="container mx-auto px-6 max-w-3xl">
             <div className="text-center mb-8">
               <span className="text-orange-600 font-bold text-sm uppercase tracking-wider block mb-2">FAQ</span>
@@ -877,8 +877,8 @@ export default function CustomPageRenderer() {
       )}
 
       {/* 8. CONTACT FORM — uses the exact same form as the /contact page */}
-      {contact && (
-        <section id="contact-section" className="py-12 bg-slate-50 border-t border-slate-100">
+      {contact && contact.is_active !== false && (
+        <section style={{ order: contact.priority ?? 90 }} id="contact-section" className="py-12 bg-slate-50 border-t border-slate-100">
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
