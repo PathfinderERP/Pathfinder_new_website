@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
     MapPinIcon,
     MapIcon,
@@ -15,6 +15,20 @@ import { getImageUrl } from "../../utils/imageUtils";
 
 const CentreDetails = ({ centre }) => {
     const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=400&auto=format&fit=crop";
+    const scrollRef = useRef(null);
+    const [showAllToppers, setShowAllToppers] = useState(false);
+
+    const scroll = (direction) => {
+        if (scrollRef.current) {
+            const scrollAmount = 300;
+            if (direction === 'left') {
+                scrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+    };
+
     if (!centre) return null;
 
     const getMapLink = (locationVal, mapUrlVal) => {
@@ -63,7 +77,7 @@ const CentreDetails = ({ centre }) => {
                     <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-amber-400 rounded-full blur-[150px] -ml-[10%]" />
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 relative z-20 mb-8 mt-8 md:mt-4">
+                <div className="max-w-7xl mx-auto px-4 relative z-20 mb-8 mt-24 md:mt-12">
                     <Link
                         to="/centres"
                         className="inline-flex items-center gap-2 px-6 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-white font-bold text-sm hover:bg-white/20 transition-all group"
@@ -157,12 +171,24 @@ const CentreDetails = ({ centre }) => {
                             <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl shadow-slate-200/60 border border-slate-100">
                                 <div className="flex items-center justify-between mb-8">
                                     <h3 className="text-2xl font-black text-slate-900">Hall of Fame</h3>
-                                    <button className="text-orange-600 font-bold flex items-center gap-1 hover:gap-2 transition-all">
-                                        View All <ChevronRightIcon className="w-4 h-4" />
-                                    </button>
+                                    <div className="flex items-center gap-4">
+                                        {!showAllToppers && (
+                                            <div className="flex gap-2 hidden md:flex">
+                                                <button onClick={() => scroll('left')} className="p-2 rounded-full bg-slate-100 hover:bg-orange-100 text-slate-600 hover:text-orange-600 transition-colors">
+                                                    <ChevronLeftIcon className="w-5 h-5" />
+                                                </button>
+                                                <button onClick={() => scroll('right')} className="p-2 rounded-full bg-slate-100 hover:bg-orange-100 text-slate-600 hover:text-orange-600 transition-colors">
+                                                    <ChevronRightIcon className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        )}
+                                        <button onClick={() => setShowAllToppers(!showAllToppers)} className="text-orange-600 font-bold flex items-center gap-1 hover:gap-2 transition-all cursor-pointer">
+                                            {showAllToppers ? 'View Less' : 'View All'} <ChevronRightIcon className={`w-4 h-4 transition-transform ${showAllToppers ? '-rotate-90' : ''}`} />
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <div className="flex flex-nowrap overflow-x-auto gap-6 pb-4 scrollbar-hide">
+                                <div ref={scrollRef} className={`flex gap-6 pb-4 ${showAllToppers ? 'flex-wrap justify-center' : 'flex-nowrap overflow-x-auto scrollbar-hide scroll-smooth'}`}>
                                     {centre.toppers.map((topper, idx) => (
                                         <div key={idx} className="flex-shrink-0 w-48 text-center group">
                                             <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-slate-50 group-hover:border-orange-500 transition-all duration-300 mb-4 shadow-lg">
@@ -174,7 +200,11 @@ const CentreDetails = ({ centre }) => {
                                             </div>
                                             <h4 className="font-bold text-slate-900 mb-1">{topper.name}</h4>
                                             <p className="text-xs font-black text-orange-600 uppercase tracking-widest">{topper.exam}</p>
-                                            <div className="text-xs font-bold text-slate-400 mt-1">{topper.rank || topper.percentages + '%'}</div>
+                                            {(topper.rank || (topper.percentages && parseFloat(topper.percentages) > 0)) && (
+                                                <div className="text-xs font-bold text-slate-400 mt-1">
+                                                    {topper.rank || topper.percentages + '%'}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -205,9 +235,9 @@ const CentreDetails = ({ centre }) => {
                                 </div>
                             </div>
 
-                            <button className="w-full py-4 rounded-2xl bg-orange-600 text-white hover:bg-orange-700 transition-all font-black text-sm tracking-widest uppercase mb-4 shadow-xl">
-                                Instant Counselling
-                            </button>
+                            <a href={`tel:${centre.mobile || "9147178886"}`} className="block text-center w-full py-4 rounded-2xl bg-orange-600 text-white hover:bg-orange-700 transition-all font-black text-sm tracking-widest uppercase mb-4 shadow-xl">
+                                Call Now
+                            </a>
                         </div>
 
                         {/* Map Integration */}
