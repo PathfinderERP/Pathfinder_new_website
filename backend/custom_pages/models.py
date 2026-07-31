@@ -24,6 +24,7 @@ class CustomPage(Document):
     
     legacy = fields.DictField(default={
         "title": "Our Legacy",
+        "subtitle": "From humble beginnings in 1991 to becoming Eastern India's most trusted NEET coaching institute",
         "milestones": [
             {
                 "year": "1991",

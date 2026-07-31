@@ -746,6 +746,15 @@ export default function CustomPagesManagement() {
                           className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800"
                         />
                       </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-gray-700">Section Subtitle</label>
+                        <textarea
+                          value={editSections.legacy.subtitle || ""}
+                          onChange={(e) => setEditSections({ ...editSections, legacy: { ...editSections.legacy, subtitle: e.target.value } })}
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm dark:bg-slate-900 dark:border-slate-800 resize-y"
+                          rows="2"
+                        />
+                      </div>
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <h4 className="font-bold text-sm">Legacy Timeline Milestones</h4>
@@ -833,7 +842,7 @@ export default function CustomPagesManagement() {
                             type="button"
                             onClick={() => {
                               const list = [...(editSections.toppers.toppers_list || [])];
-                              list.push({ name: "", score: "", rank: "", image: "" });
+                              list.push({ name: "", score: "", rank: "", exam: "", image: "" });
                               setEditSections({ ...editSections, toppers: { ...editSections.toppers, toppers_list: list } });
                             }}
                             className="bg-orange-50 text-orange-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-orange-100 transition-colors"
@@ -842,7 +851,7 @@ export default function CustomPagesManagement() {
                           </button>
                         </div>
                         {editSections.toppers.toppers_list && editSections.toppers.toppers_list.map((topper, idx) => (
-                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-900 border border-gray-250 dark:border-slate-800 rounded-xl grid grid-cols-1 sm:grid-cols-4 gap-4 items-center relative pr-10">
+                          <div key={idx} className="p-4 bg-gray-50 dark:bg-slate-900 border border-gray-250 dark:border-slate-800 rounded-xl grid grid-cols-1 sm:grid-cols-5 gap-4 items-center relative pr-10">
                             <input
                               type="text"
                               placeholder="Topper Name"
@@ -872,6 +881,17 @@ export default function CustomPagesManagement() {
                               onChange={(e) => {
                                 const list = [...editSections.toppers.toppers_list];
                                 list[idx].rank = e.target.value;
+                                setEditSections({ ...editSections, toppers: { ...editSections.toppers, toppers_list: list } });
+                              }}
+                              className="bg-white border rounded-lg p-2 text-sm dark:bg-slate-900"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Exam (e.g. NEET 2026)"
+                              value={topper.exam || ""}
+                              onChange={(e) => {
+                                const list = [...editSections.toppers.toppers_list];
+                                list[idx].exam = e.target.value;
                                 setEditSections({ ...editSections, toppers: { ...editSections.toppers, toppers_list: list } });
                               }}
                               className="bg-white border rounded-lg p-2 text-sm dark:bg-slate-900"

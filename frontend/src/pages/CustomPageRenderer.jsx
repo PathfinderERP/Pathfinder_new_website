@@ -388,9 +388,11 @@ export default function CustomPageRenderer() {
                                     }}
                                     className="object-contain h-[92%] w-auto max-w-[92%] group-hover:scale-105 transition-transform duration-700 ease-out z-10"
                                   />
-                                  <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] sm:text-xs px-3.5 py-1.5 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-20">
-                                    {topper.exam || "NEET"}
-                                  </div>
+                                  {topper.exam && (
+                                    <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] sm:text-xs px-3.5 py-1.5 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-20">
+                                      {topper.exam}
+                                    </div>
+                                  )}
                                   <div className="absolute w-44 h-44 rounded-full bg-white/40 blur-xl -bottom-10 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
                                 </div>
                                 <div className="p-6 text-center space-y-3 bg-white flex flex-col items-center justify-between flex-grow">
@@ -420,9 +422,11 @@ export default function CustomPageRenderer() {
                                   }}
                                   className="object-contain h-[92%] w-auto max-w-[92%] group-hover:scale-105 transition-transform duration-700 ease-out z-10"
                                 />
-                                <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] sm:text-xs px-3.5 py-1.5 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-20">
-                                  {topper.exam || "NEET"}
-                                </div>
+                                  {topper.exam && (
+                                    <div className="absolute top-4 left-4 bg-orange-600 text-white text-[10px] sm:text-xs px-3.5 py-1.5 rounded-full font-extrabold shadow-sm tracking-wider uppercase z-20">
+                                      {topper.exam}
+                                    </div>
+                                  )}
                                 <div className="absolute w-44 h-44 rounded-full bg-white/40 blur-xl -bottom-10 left-1/2 -translate-x-1/2 pointer-events-none z-0" />
                               </div>
                               <div className="p-6 text-center space-y-3 bg-white flex flex-col items-center justify-between flex-grow">
