@@ -1893,20 +1893,36 @@ export default function CustomPagesManagement() {
                             </button>
                             <div className="flex items-center justify-between pr-10">
                               <h5 className="font-extrabold text-xs text-orange-600 uppercase tracking-wider">Blog Card #{idx + 1}</h5>
-                              <label className="relative inline-flex items-center cursor-pointer">
-                                <span className="text-[10px] font-bold uppercase text-gray-500 mr-2">Visible</span>
-                                <input 
-                                  type="checkbox" 
-                                  className="sr-only peer" 
-                                  checked={item.is_hidden !== true}
-                                  onChange={(e) => {
-                                    const list = [...editSections.blog.blogs_list];
-                                    list[idx] = { ...list[idx], is_hidden: !e.target.checked };
-                                    setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
-                                  }}
-                                />
-                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-[100%] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
-                              </label>
+                              <div className="flex items-center gap-4">
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <span className="text-[10px] font-bold uppercase text-gray-500 mr-2">Show Full Content</span>
+                                  <input 
+                                    type="checkbox" 
+                                    className="sr-only peer" 
+                                    checked={item.show_full_content === true}
+                                    onChange={(e) => {
+                                      const list = [...editSections.blog.blogs_list];
+                                      list[idx] = { ...list[idx], show_full_content: e.target.checked };
+                                      setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                                    }}
+                                  />
+                                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-[100%] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                                </label>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <span className="text-[10px] font-bold uppercase text-gray-500 mr-2">Visible</span>
+                                  <input 
+                                    type="checkbox" 
+                                    className="sr-only peer" 
+                                    checked={item.is_hidden !== true}
+                                    onChange={(e) => {
+                                      const list = [...editSections.blog.blogs_list];
+                                      list[idx] = { ...list[idx], is_hidden: !e.target.checked };
+                                      setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                                    }}
+                                  />
+                                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-[100%] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                                </label>
+                              </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-1">
