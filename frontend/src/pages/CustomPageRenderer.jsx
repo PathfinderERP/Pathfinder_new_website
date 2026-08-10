@@ -835,10 +835,10 @@ export default function CustomPageRenderer() {
                   </div>
 
                   {/* Divider line between header details and blog body content */}
-                  {item.show_full_content && <div className="border-t border-slate-100" />}
+                  {item.show_full_content !== false && <div className="border-t border-slate-100" />}
 
                   {/* Bottom: Full Body Content (spans full card width) */}
-                  {item.show_full_content && (
+                  {item.show_full_content !== false && (
                     <div 
                       className="prose prose-orange max-w-none text-slate-700 leading-relaxed text-sm space-y-3 font-normal w-full"
                       dangerouslySetInnerHTML={{ __html: parseHTMLContent(item.content) }}

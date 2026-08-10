@@ -1899,7 +1899,7 @@ export default function CustomPagesManagement() {
                                   <input 
                                     type="checkbox" 
                                     className="sr-only peer" 
-                                    checked={item.show_full_content === true}
+                                    checked={item.show_full_content !== false}
                                     onChange={(e) => {
                                       const list = [...editSections.blog.blogs_list];
                                       list[idx] = { ...list[idx], show_full_content: e.target.checked };
