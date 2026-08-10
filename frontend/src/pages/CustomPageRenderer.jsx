@@ -774,13 +774,15 @@ export default function CustomPageRenderer() {
             </div>
 
             <div className="max-w-7xl mx-auto space-y-8">
-              {blog.blogs_list.filter(item => item.is_hidden !== true).map((item, index) => (
+              {blog.blogs_list.map((item, index) => (
                 <div 
                   key={index}
                   className="flex flex-col gap-6 p-8 bg-white rounded-3xl border border-slate-150 shadow-sm hover:shadow-md transition-all duration-300 text-left"
                 >
-                  {/* Top Header: Image on left, Title/Meta on right */}
-                  <div className="flex flex-col sm:flex-row gap-8">
+                  {/* Top Header and Divider */}
+                  {item.hide_header !== true && (
+                    <>
+                      <div className="flex flex-col sm:flex-row gap-8">
                     {/* Left/Top: Image */}
                     <div className="w-full sm:w-64 h-64 sm:h-48 rounded-2xl overflow-hidden flex-shrink-0 relative bg-slate-100">
                       <img 
@@ -832,18 +834,18 @@ export default function CustomPageRenderer() {
                         )}
                       </div>
                     </div>
-                  </div>
-
-                  {/* Divider line between header details and blog body content */}
-                  {item.show_full_content !== false && <div className="border-t border-slate-100" />}
+                      </div>
+                      
+                      {/* Divider line between header details and blog body content */}
+                      <div className="border-t border-slate-100" />
+                    </>
+                  )}
 
                   {/* Bottom: Full Body Content (spans full card width) */}
-                  {item.show_full_content !== false && (
-                    <div 
-                      className="prose prose-orange max-w-none text-slate-700 leading-relaxed text-sm space-y-3 font-normal w-full"
-                      dangerouslySetInnerHTML={{ __html: parseHTMLContent(item.content) }}
-                    />
-                  )}
+                  <div 
+                    className="prose prose-orange max-w-none text-slate-700 leading-relaxed text-sm space-y-3 font-normal w-full"
+                    dangerouslySetInnerHTML={{ __html: parseHTMLContent(item.content) }}
+                  />
                 </div>
               ))}
             </div>
