@@ -676,7 +676,7 @@ const Footer = () => {
                 whileHover={{ color: "#f97316" }}
                 transition={{ duration: 0.3 }}
               >
-                2025 © All rights reserved by Pathfinder. Developed by{" "}
+                2026 © All rights reserved by Pathfinder. Developed by{" "}
                 <a
                   href=""
                   target="_blank"
