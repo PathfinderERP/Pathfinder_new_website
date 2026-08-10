@@ -774,7 +774,7 @@ export default function CustomPageRenderer() {
             </div>
 
             <div className="max-w-7xl mx-auto space-y-8">
-              {blog.blogs_list.map((item, index) => (
+              {blog.blogs_list.filter(item => item.is_hidden !== true).map((item, index) => (
                 <div 
                   key={index}
                   className="flex flex-col gap-6 p-8 bg-white rounded-3xl border border-slate-150 shadow-sm hover:shadow-md transition-all duration-300 text-left"

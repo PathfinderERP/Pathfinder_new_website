@@ -1867,7 +1867,8 @@ export default function CustomPagesManagement() {
                                 author: "Admin",
                                 read_time: "5 min read",
                                 image_url: "",
-                                published_date: new Date().toISOString().split('T')[0]
+                                published_date: new Date().toISOString().split('T')[0],
+                                is_hidden: false
                               });
                               setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                             }}
@@ -1890,7 +1891,23 @@ export default function CustomPagesManagement() {
                             >
                               <TrashIcon className="w-5 h-5" />
                             </button>
-                            <h5 className="font-extrabold text-xs text-orange-600 uppercase tracking-wider">Blog Card #{idx + 1}</h5>
+                            <div className="flex items-center justify-between pr-10">
+                              <h5 className="font-extrabold text-xs text-orange-600 uppercase tracking-wider">Blog Card #{idx + 1}</h5>
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <span className="text-[10px] font-bold uppercase text-gray-500 mr-2">Visible</span>
+                                <input 
+                                  type="checkbox" 
+                                  className="sr-only peer" 
+                                  checked={item.is_hidden !== true}
+                                  onChange={(e) => {
+                                    const list = [...editSections.blog.blogs_list];
+                                    list[idx] = { ...list[idx], is_hidden: !e.target.checked };
+                                    setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
+                                  }}
+                                />
+                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-[100%] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                              </label>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-1">
                                 <label className="text-[10px] font-bold uppercase text-gray-500">Blog Title</label>
