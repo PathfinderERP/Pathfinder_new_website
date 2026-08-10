@@ -809,12 +809,12 @@ export default function CustomPageRenderer() {
                               {new Date(item.published_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </span>
                           )}
-                          {item.read_time && (
+                          {item.read_time ? (
                             <>
                               <span className="w-1 h-1 rounded-full bg-slate-300" />
                               <span>{item.read_time}</span>
                             </>
-                          )}
+                          ) : null}
                           <span className="w-1 h-1 rounded-full bg-slate-300" />
                           <span>By {item.author || "Admin"}</span>
                         </div>
@@ -1517,12 +1517,12 @@ function BlogDetailModal({ blog, isOpen, onClose }) {
                 </span>
               </div>
             )}
-            {blog.read_time && (
+            {blog.read_time ? (
               <div className="flex items-center gap-1.5">
                 <span className="text-slate-500">Read Time:</span>
                 <span className="text-slate-700">{blog.read_time}</span>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* Excerpt */}

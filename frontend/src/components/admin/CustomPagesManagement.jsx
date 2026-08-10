@@ -372,7 +372,7 @@ export default function CustomPagesManagement() {
     } else if (type === "blog" && index !== null) {
       setEditSections(prev => {
         const list = [...prev.blog.blogs_list];
-        list[index].image_url = previewUrl;
+        list[index] = { ...list[index], image_url: previewUrl };
         return { ...prev, blog: { ...prev.blog, blogs_list: list } };
       });
       setPendingImages(prev => {
@@ -1900,7 +1900,7 @@ export default function CustomPagesManagement() {
                                   value={item.title || ""}
                                   onChange={(e) => {
                                     const list = [...editSections.blog.blogs_list];
-                                    list[idx].title = e.target.value;
+                                    list[idx] = { ...list[idx], title: e.target.value };
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
                                   className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800"
@@ -1914,7 +1914,7 @@ export default function CustomPagesManagement() {
                                   value={item.category || ""}
                                   onChange={(e) => {
                                     const list = [...editSections.blog.blogs_list];
-                                    list[idx].category = e.target.value;
+                                    list[idx] = { ...list[idx], category: e.target.value };
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
                                   className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800"
@@ -1928,7 +1928,7 @@ export default function CustomPagesManagement() {
                                   value={item.author || ""}
                                   onChange={(e) => {
                                     const list = [...editSections.blog.blogs_list];
-                                    list[idx].author = e.target.value;
+                                    list[idx] = { ...list[idx], author: e.target.value };
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
                                   className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800"
@@ -1942,7 +1942,7 @@ export default function CustomPagesManagement() {
                                   value={item.read_time || ""}
                                   onChange={(e) => {
                                     const list = [...editSections.blog.blogs_list];
-                                    list[idx].read_time = e.target.value;
+                                    list[idx] = { ...list[idx], read_time: e.target.value };
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
                                   className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800"
@@ -1955,7 +1955,7 @@ export default function CustomPagesManagement() {
                                   value={item.published_date || ""}
                                   onChange={(e) => {
                                     const list = [...editSections.blog.blogs_list];
-                                    list[idx].published_date = e.target.value;
+                                    list[idx] = { ...list[idx], published_date: e.target.value };
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
                                   className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800"
@@ -1985,7 +1985,7 @@ export default function CustomPagesManagement() {
                                   value={item.excerpt || ""}
                                   onChange={(e) => {
                                     const list = [...editSections.blog.blogs_list];
-                                    list[idx].excerpt = e.target.value;
+                                    list[idx] = { ...list[idx], excerpt: e.target.value };
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
                                   className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none dark:bg-slate-900 dark:border-slate-800 resize-none"
@@ -1999,7 +1999,7 @@ export default function CustomPagesManagement() {
                                   value={item.content || ""}
                                   onChange={(e) => {
                                     const list = [...editSections.blog.blogs_list];
-                                    list[idx].content = e.target.value;
+                                    list[idx] = { ...list[idx], content: e.target.value };
                                     setEditSections({ ...editSections, blog: { ...editSections.blog, blogs_list: list } });
                                   }}
                                   className="w-full bg-white border border-gray-200 rounded-lg p-2.5 text-xs outline-none font-mono dark:bg-slate-900 dark:border-slate-800 resize-y"
