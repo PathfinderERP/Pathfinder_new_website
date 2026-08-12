@@ -147,6 +147,7 @@ export default function PathVerseOverview() {
  *******************/
 // Usage in Hero component
 function Hero() {
+  const navigate = useNavigate();
   return (
     <section
       id="hero"
@@ -3454,6 +3455,7 @@ function Students() {
  * ADMISSIONS FLOW
  *******************/
 function Admissions() {
+  const navigate = useNavigate();
   const steps = [
     { t: "Explore", s: "Browse courses & centers" },
     { t: "Counselling", s: "Book a free session" },
@@ -3835,6 +3837,7 @@ function FAQ() {
  * FINAL CTA & FOOTER
  *******************/
 function FinalCTA() {
+  const navigate = useNavigate();
   return (
     <section className="py-12 bg-slate-900 text-white w-full 2xl:mx-auto 2xl:max-w-7xl 2xl:rounded-3xl 2xl:mb-8 shadow-2xl relative overflow-hidden">
 
