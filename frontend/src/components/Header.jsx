@@ -194,17 +194,13 @@ const Header = () => {
         };
     }
 
+    setSelectedCourseData(courseData);
+    setSelectedCourseForApply(courseName);
+    setContextType(type); // Set context type
+    setIsApplyNowOpen(true);
     setOpenDropdown(null);
     setOpenSubDropdown(null);
     setIsMobileMenuOpen(false);
-    navigate("/applynow", {
-      state: {
-        courseData: {
-          ...courseData,
-          isFromHeader: true
-        }
-      }
-    });
   };
 
   // Handle form submission
@@ -243,15 +239,11 @@ const Header = () => {
         courseData = { name: courseName, description: "Professional coaching program", centres: centresToUse, price: "Contact for Price", duration: "Varies", badge: null };
     }
 
+    setSelectedCourseData(courseData);
+    setSelectedCourseForApply(courseName);
+    setContextType(type); // Set context type
+    setIsApplyNowOpen(true);
     setIsMobileMenuOpen(false);
-    navigate("/applynow", {
-      state: {
-        courseData: {
-          ...courseData,
-          isFromHeader: true
-        }
-      }
-    });
   };
 
   const menuItems = {

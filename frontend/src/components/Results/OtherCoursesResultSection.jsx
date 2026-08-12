@@ -144,15 +144,9 @@ export default function OtherCoursesResultSection({ category }) {
                 };
         }
 
-        navigate("/applynow", {
-            state: {
-                courseData: {
-                    ...courseData,
-                    isFromHeader: true
-                }
-            }
-        });
-    }, [category, dynamicCentres, navigate]);
+        setSelectedCourseData(courseData);
+        setIsApplyNowOpen(true);
+    }, [category, dynamicCentres]);
 
     const handleApplyNowSubmit = useCallback((applicationData) => {
         const courseSlug = category.toLowerCase().replace(/\s+/g, '-');

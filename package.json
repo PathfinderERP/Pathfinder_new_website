@@ -6,7 +6,7 @@
     "scripts": {
         "install-all": "npm install --prefix frontend && pip install -r backend/requirements.txt",
         "frontend": "npm run dev --prefix frontend",
-        "backend": "cd backend && .\\.venv\\Scripts\\python.exe manage.py runserver",
+        "backend": "cd backend && .venv/bin/python manage.py runserver",
         "dev": "concurrently --names \"frontend,backend\" --prefix-colors \"cyan,green\" \"npm run frontend\" \"npm run backend\""
     },
     "devDependencies": {

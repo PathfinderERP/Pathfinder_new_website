@@ -1666,17 +1666,8 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
   }, [sortedCourses]);
 
   const handleApplyClick = (course) => {
-    navigate("/applynow", {
-      state: {
-        courseData: {
-          ...course,
-          goal: course.name,
-          location: course.centre || course.location,
-          start: course.start_date || "Coming Soon",
-          price: course.course_price || "Contact for Price",
-        }
-      }
-    });
+    setSelectedCourse(course);
+    setIsFormOpen(true);
   };
 
   const handleBuyNowClick = (course) => {
