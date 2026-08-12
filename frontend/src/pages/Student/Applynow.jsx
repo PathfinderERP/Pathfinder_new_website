@@ -1,9 +1,57 @@
 // ApplyNowForm.jsx - Modern Light Theme (Matches Header)
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useFilter } from "../../contexts/FilterContext";
+import { useLocation, useNavigate } from "react-router-dom";
 
-function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres = true, isFromHeader = false, formTitle, formSubtitle }) {
+function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnClose, onSubmit: propOnSubmit, allowMultipleCentres = true, isFromHeader: propIsFromHeader = false, formTitle, formSubtitle }) {
   const { setGlobalSelectedCentre } = useFilter(); // Use global filter context
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isPageMode = propIsOpen === undefined;
+  const isOpen = isPageMode ? true : propIsOpen;
+  
+  const availableCourses = [
+    {
+      id: "all-india",
+      name: "All India Entrance Programs",
+      description: "National entrance preparation for NEET, JEE, and other national exams",
+      centres: ["Online", "Hazra", "Garia", "Salt Lake", "Howrah"],
+      price: "Contact for Price",
+      duration: "1-2 years",
+      badge: "Popular",
+      goal: "NEET/JEE Preparation"
+    },
+    {
+      id: "foundation",
+      name: "Foundation Program",
+      description: "Build strong fundamentals for Class 8-10 students",
+      centres: ["Online", "Hazra", "Garia", "Salt Lake", "Howrah"],
+      price: "Contact for Price",
+      duration: "1 year",
+      badge: "Trending",
+      goal: "Class 8-10 Basics"
+    },
+    {
+      id: "boards",
+      name: "Board Exam Preparation",
+      description: "Comprehensive preparation for CBSE, ICSE, and State Boards",
+      centres: ["Online", "Hazra", "Garia", "Salt Lake", "Howrah"],
+      price: "Contact for Price",
+      duration: "6 months - 1 year",
+      badge: null,
+      goal: "CBSE/ICSE Boards"
+    }
+  ];
+
+  const [selectedCourseFromDropdown, setSelectedCourseFromDropdown] = useState(null);
+  const course = propCourse || location.state?.courseData || selectedCourseFromDropdown;
+  const isFromHeader = propIsFromHeader || location.state?.courseData?.isFromHeader || !propCourse;
+  
+  const onClose = isPageMode ? () => navigate(-1) : propOnClose;
+  const onSubmit = propOnSubmit || (() => {});
+
+  const [isSubmittedSuccessfully, setIsSubmittedSuccessfully] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -338,7 +386,10 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
           selectedCentres: [],
         });
 
-        onClose();
+        setIsSubmittedSuccessfully(true);
+        if (!isPageMode) {
+          onClose();
+        }
       } else {
         // For development without backend
 
@@ -353,7 +404,10 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
           board: "",
           selectedCentres: [],
         });
-        onClose();
+        setIsSubmittedSuccessfully(true);
+        if (!isPageMode) {
+          onClose();
+        }
       }
     } catch (error) {
       console.error("Error submitting application:", error);
@@ -417,48 +471,58 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-[9999] p-4">
-      {/* Animated Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/20"
-        onClick={onClose}
-      />
+  if (isPageMode && isSubmittedSuccessfully) {
+    return (
+      <div className="min-h-[70vh] bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-150 text-center max-w-md w-full mx-auto">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">Application Submitted!</h3>
+          <p className="text-gray-600 mb-6 font-medium text-sm">Thank you for applying. Our admission representative will contact you shortly.</p>
+          <button onClick={() => navigate("/")} className="w-full bg-[#66090D] hover:bg-[#55080b] text-white font-bold py-3.5 rounded-xl shadow-md transition-colors duration-200">
+            Go Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-      {/* Main Form Container with Animation - LIGHT THEME */}
-      <div
-        className={`bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-500 ${formAnimation}
-          [&::-webkit-scrollbar]:hidden
-          [-ms-overflow-style]:none
-          [scrollbar-width]:none
-          border border-white/20 relative z-[9999]
-        `}
-      >
-        {/* Header - Matches Main Website Header Color */}
-        <div className="bg-[#66090D] text-white p-6 rounded-t-2xl sticky top-0 z-10 shadow-md">
-          <div className="flex justify-between items-start relative z-10">
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold mb-1 text-white relative inline-block">
-                {formTitle || "Enroll Now"}
-              </h3>
-              <p className="text-orange-100/90 text-sm">
-                {formSubtitle || (isFromHeader ? "Secure your future with us" : "Reserve your seat in this program")}
-              </p>
+  const formCard = (
+    <div
+      className={isPageMode
+        ? "bg-white rounded-2xl max-w-md w-full shadow-lg border border-gray-150 overflow-hidden relative mx-auto my-8"
+        : `bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-500 ${formAnimation} [&::-webkit-scrollbar]:hidden [-ms-overflow-style]:none [scrollbar-width]:none border border-white/20 relative z-[9999]`
+      }
+    >
+      {/* Header - Matches Main Website Header Color */}
+      <div className="bg-[#66090D] text-white p-6 rounded-t-2xl sticky top-0 z-10 shadow-md">
+        <div className="flex justify-between items-start relative z-10">
+          <div className="flex-1">
+            <h3 className="text-2xl font-bold mb-1 text-white relative inline-block">
+              {formTitle || "Enroll Now"}
+            </h3>
+            <p className="text-orange-100/90 text-sm">
+              {formSubtitle || (isFromHeader ? "Secure your future with us" : "Reserve your seat in this program")}
+            </p>
 
-              {/* Show selected course name with animation */}
-              {isFromHeader && course?.name && (
-                <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/20 animate-slide-in-left">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-                  </span>
-                  <span className="text-orange-200 text-xs font-medium">Selected:</span>
-                  <span className="font-bold text-white text-xs">{course.name}</span>
-                </div>
-              )}
-            </div>
+            {/* Show selected course name with animation */}
+            {isFromHeader && course?.name && (
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full backdrop-blur-sm border border-white/20 animate-slide-in-left">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                </span>
+                <span className="text-orange-200 text-xs font-medium">Selected:</span>
+                <span className="font-bold text-white text-xs">{course.name}</span>
+              </div>
+            )}
+          </div>
 
-            {/* Animated close button */}
+          {/* Animated close button - show only in modal mode */}
+          {!isPageMode && (
             <button
               onClick={onClose}
               disabled={isSubmitting}
@@ -468,10 +532,35 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-          </div>
+          )}
         </div>
+      </div>
 
-        <div className="p-6">
+      <div className="p-6">
+        {/* Dynamic Course Selector Dropdown if no course is selected */}
+        {!propCourse && !location.state?.courseData && (
+          <div className="mb-6 space-y-1">
+            <label className="block text-sm font-semibold text-gray-700">
+              Select Course Program <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={selectedCourseFromDropdown?.id || ""}
+              onChange={(e) => {
+                const selectedId = e.target.value;
+                const selected = availableCourses.find(c => c.id === selectedId);
+                setSelectedCourseFromDropdown(selected || null);
+                setFormData(prev => ({ ...prev, selectedCentres: [] }));
+              }}
+              required
+              className="w-full px-4 py-3 border border-gray-300 font-medium rounded-xl bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 hover:border-orange-500 transition-all duration-200"
+            >
+              <option value="" disabled>-- Choose a Program --</option>
+              {availableCourses.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
           {/* Course Details Card - Light Theme */}
           {course && (
             <div className="bg-orange-50/50 border border-orange-100 rounded-xl p-4 mb-6">
@@ -990,6 +1079,24 @@ function ApplyNowForm({ course, isOpen, onClose, onSubmit, allowMultipleCentres 
           </form>
         </div>
       </div>
+    );
+
+  if (isPageMode) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        {formCard}
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-[9999] p-4">
+      {/* Animated Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/20"
+        onClick={onClose}
+      />
+      {formCard}
     </div>
   );
 }

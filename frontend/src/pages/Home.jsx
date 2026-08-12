@@ -216,7 +216,8 @@ function Hero() {
           >
             <div className="flex flex-col gap-3">
               <a
-                href="#apply"
+                href="/applynow"
+                onClick={(e) => { e.preventDefault(); navigate("/applynow"); }}
                 className="w-full px-6 py-4 rounded-xl bg-[#66090D] text-white hover:bg-[#55080b] transition-all duration-300 text-center font-semibold text-base shadow-lg"
               >
                 Apply Now
@@ -346,7 +347,8 @@ function Hero() {
               className="mt-8 flex flex-col sm:flex-row gap-4 justify-center md:justify-start"
             >
               <a
-                href="#apply"
+                href="/applynow"
+                onClick={(e) => { e.preventDefault(); navigate("/applynow"); }}
                 className="px-8 py-4 rounded-2xl bg-[#66090D] text-white hover:bg-[#55080b] transition-all duration-300 text-center font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105"
               >
                 Apply Now
@@ -1664,8 +1666,17 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
   }, [sortedCourses]);
 
   const handleApplyClick = (course) => {
-    setSelectedCourse(course);
-    setIsFormOpen(true);
+    navigate("/applynow", {
+      state: {
+        courseData: {
+          ...course,
+          goal: course.name,
+          location: course.centre || course.location,
+          start: course.start_date || "Coming Soon",
+          price: course.course_price || "Contact for Price",
+        }
+      }
+    });
   };
 
   const handleBuyNowClick = (course) => {
@@ -3478,7 +3489,8 @@ function Admissions() {
         <div className="mt-4 flex gap-3">
           <a
             id="apply"
-            href="#apply"
+            href="/applynow"
+            onClick={(e) => { e.preventDefault(); navigate("/applynow"); }}
             className="px-4 py-2 rounded-xl bg-[#66090D] text-white hover:bg-[#55080b] transition-colors"
           >
             Apply Now
@@ -3855,7 +3867,7 @@ function FinalCTA() {
           >
             Book Counselling
           </a>
-          <a href="#apply" className="px-4 py-2 rounded-xl bg-[#66090D] text-white hover:bg-[#55080b] transition-colors">
+          <a href="/applynow" onClick={(e) => { e.preventDefault(); navigate("/applynow"); }} className="px-4 py-2 rounded-xl bg-[#66090D] text-white hover:bg-[#55080b] transition-colors">
             Apply Now
           </a>
         </div>

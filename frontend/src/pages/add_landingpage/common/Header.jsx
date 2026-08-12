@@ -180,12 +180,16 @@ const Header = () => {
                 };
         }
 
-        setSelectedCourseData(courseData);
-        setSelectedCourseForApply(courseName);
-        setContextType(type); // Set context type
-        setIsApplyNowOpen(true);
         setOpenDropdown(null);
         setOpenSubDropdown(null);
+        navigate("/applynow", {
+            state: {
+                courseData: {
+                    ...courseData,
+                    isFromHeader: true
+                }
+            }
+        });
     };
 
     // Handle form submission
