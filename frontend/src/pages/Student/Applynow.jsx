@@ -2,6 +2,19 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useFilter } from "../../contexts/FilterContext";
 import { useLocation, useNavigate } from "react-router-dom";
+import { coursesAPI } from "../../services/api";
+import {
+  AcademicCapIcon,
+  BookOpenIcon,
+  ComputerDesktopIcon,
+  BuildingStorefrontIcon,
+  MagnifyingGlassIcon,
+  ClockIcon,
+  TagIcon,
+  BoltIcon,
+  PhoneIcon,
+  IdentificationIcon
+} from "@heroicons/react/24/outline";
 
 function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnClose, onSubmit: propOnSubmit, allowMultipleCentres = true, isFromHeader: propIsFromHeader = false, formTitle, formSubtitle }) {
   const { setGlobalSelectedCentre } = useFilter(); // Use global filter context
@@ -52,6 +65,28 @@ function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnC
   const onSubmit = propOnSubmit || (() => {});
 
   const [isSubmittedSuccessfully, setIsSubmittedSuccessfully] = useState(false);
+
+  const [coursesList, setCoursesList] = useState([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
+  const [selectedModeFilter, setSelectedModeFilter] = useState("all");
+
+  useEffect(() => {
+    if (isPageMode) {
+      setIsLoadingCourses(true);
+      coursesAPI.getAll()
+        .then(res => {
+          const list = Array.isArray(res) ? res : (res?.data || []);
+          setCoursesList(list);
+        })
+        .catch(err => {
+          console.error("Error fetching courses:", err);
+          setCoursesList(availableCourses); // Fallback to static courses
+        })
+        .finally(() => {
+          setIsLoadingCourses(false);
+        });
+    }
+  }, [isPageMode]);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -469,22 +504,235 @@ function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnC
   });
 
 
-  if (!isOpen) return null;
+  if (!isPageMode && !isOpen) return null;
 
-  if (isPageMode && isSubmittedSuccessfully) {
+  if (isPageMode) {
+    const filteredCourses = coursesList.filter(c => {
+      const mode = (c.mode || "").toLowerCase();
+      const name = (c.name || "").toLowerCase();
+      
+      if (selectedModeFilter === "online") {
+        return mode.includes("online") || name.includes("online");
+      }
+      if (selectedModeFilter === "offline") {
+        return mode.includes("offline") || !mode || name.includes("classroom") || name.includes("offline");
+      }
+      return true; // "all"
+    });
+
     return (
-      <div className="min-h-[70vh] bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-150 text-center max-w-md w-full mx-auto">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+      <div className="min-h-screen bg-[#FDFBF7] py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Hero Banner */}
+          <div className="text-center mb-12">
+            <span className="text-[#66090D] text-sm font-bold tracking-widest uppercase bg-red-50 px-4 py-2 rounded-full border border-red-100">
+              Admission Hub
+            </span>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-[#292929] mt-4 tracking-tight">
+              Choose Your Pathway to <span className="text-[#66090D]">Success</span>
+            </h1>
+            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto font-medium">
+              Select a program below to enroll online with instant digital access, or explore offline classroom study options at our premium centres.
+            </p>
           </div>
-          <h3 className="text-2xl font-bold text-gray-800 mb-2">Application Submitted!</h3>
-          <p className="text-gray-600 mb-6 font-medium text-sm">Thank you for applying. Our admission representative will contact you shortly.</p>
-          <button onClick={() => navigate("/")} className="w-full bg-[#66090D] hover:bg-[#55080b] text-white font-bold py-3.5 rounded-xl shadow-md transition-colors duration-200">
-            Go Back to Home
-          </button>
+
+          {/* Mode Tabs / Toggle */}
+          <div className="flex justify-center mb-12">
+            <div className="bg-orange-50/50 border border-orange-100/80 p-1.5 rounded-2xl flex gap-2 shadow-sm">
+              {[
+                { id: "all", label: "All Programs", icon: BookOpenIcon },
+                { id: "online", label: "Online Programs", icon: ComputerDesktopIcon },
+                { id: "offline", label: "Offline Classroom", icon: BuildingStorefrontIcon }
+              ].map(tab => {
+                const IconComponent = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedModeFilter(tab.id)}
+                    className={`px-5 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2
+                      ${selectedModeFilter === tab.id
+                        ? "bg-[#66090D] text-white shadow-md shadow-[#66090D]/10 hover:scale-[1.02]"
+                        : "text-gray-600 hover:text-gray-800 hover:bg-white/60"
+                      }
+                    `}
+                  >
+                    <IconComponent className="w-5 h-5" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Loading State */}
+          {isLoadingCourses ? (
+            <div className="py-20 flex flex-col justify-center items-center gap-4">
+              <svg className="animate-spin h-10 w-10 text-[#66090D]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span className="text-gray-500 font-semibold">Loading available courses...</span>
+            </div>
+          ) : filteredCourses.length === 0 ? (
+            <div className="text-center py-20 bg-white border border-gray-100 rounded-3xl shadow-sm p-8 flex flex-col items-center justify-center">
+              <MagnifyingGlassIcon className="w-12 h-12 text-gray-400 mb-3" />
+              <h3 className="text-lg font-bold text-gray-700">No courses match the selected mode</h3>
+              <p className="text-gray-500 mt-1">Please try choosing another tab or contact support for help.</p>
+              <button onClick={() => setSelectedModeFilter("all")} className="mt-4 px-6 py-2.5 bg-[#66090D] text-white font-bold rounded-xl transition-all hover:bg-[#55080b]">
+                Show All Programs
+              </button>
+            </div>
+          ) : (
+            /* Courses Grid */
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredCourses.map(c => {
+                const name = c.name || "Coaching Program";
+                const desc = c.description || "Comprehensive coaching and test preparation program.";
+                const duration = c.duration || "Varies";
+                const price = c.course_price || c.price || "Contact for Price";
+                const badge = c.badge || null;
+                const centresList = c.centres || ["Online", "Hazra", "Garia", "Salt Lake", "Howrah"];
+                const isOnlineAvailable = (c.mode || "").toLowerCase().includes("online") || name.toLowerCase().includes("online") || (c.mode || "").toLowerCase().includes("hybrid");
+                const isOfflineAvailable = (c.mode || "").toLowerCase().includes("offline") || !c.mode || name.toLowerCase().includes("classroom") || name.toLowerCase().includes("offline");
+
+                return (
+                  <div key={c._id || c.id} className="bg-white rounded-3xl border border-gray-150 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group">
+                    {/* Course Banner Image / Fallback Gradient */}
+                    <div className="h-44 w-full relative bg-gradient-to-br from-[#66090D]/10 to-orange-500/10 flex items-center justify-center border-b border-gray-50 overflow-hidden">
+                      {c.thumbnail_url ? (
+                        <img
+                          src={c.thumbnail_url}
+                          alt={name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="text-center p-4 flex flex-col items-center justify-center">
+                          <AcademicCapIcon className="w-12 h-12 text-[#66090D] mb-1" />
+                          <span className="text-xs font-bold text-[#66090D] tracking-wider uppercase">Pathfinder Program</span>
+                        </div>
+                      )}
+                      
+                      {/* Badge */}
+                      {badge && (
+                        <span className="absolute top-4 left-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold px-3 py-1 rounded-full text-[10px] tracking-wider uppercase shadow-md animate-pulse">
+                          {badge}
+                        </span>
+                      )}
+
+                      {/* Study Mode Tags */}
+                      <div className="absolute bottom-4 right-4 flex gap-1">
+                        {isOnlineAvailable && (
+                          <span className="bg-blue-600 text-white text-[9px] font-bold px-2.5 py-1 rounded-md shadow-sm uppercase">Online</span>
+                        )}
+                        {isOfflineAvailable && (
+                          <span className="bg-orange-600 text-white text-[9px] font-bold px-2.5 py-1 rounded-md shadow-sm uppercase">Classroom</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Course Details */}
+                    <div className="p-6 flex-1 flex flex-col">
+                      <h3 className="font-extrabold text-xl text-gray-800 tracking-tight leading-snug group-hover:text-[#66090D] transition-colors">
+                        {name}
+                      </h3>
+                      
+                      <p className="text-gray-500 text-sm mt-3 line-clamp-3 leading-relaxed flex-1">
+                        {desc}
+                      </p>
+
+                      {/* Info badges */}
+                      <div className="grid grid-cols-2 gap-2 mt-5 py-3 border-y border-gray-50 text-xs font-semibold text-gray-600">
+                        <div className="flex items-center gap-1.5">
+                          <ClockIcon className="w-4 h-4 text-gray-400" />
+                          <span>Duration: <strong>{duration}</strong></span>
+                        </div>
+                        <div className="flex items-center gap-1.5 justify-end">
+                          <TagIcon className="w-4 h-4 text-gray-400 font-bold" />
+                          <span className="text-orange-600 font-extrabold">{price}</span>
+                        </div>
+                      </div>
+
+                      {/* Admission Options Panel */}
+                      <div className="mt-5 space-y-4">
+                        {/* Option 1: Online Admission */}
+                        <div className="p-4 bg-orange-50/40 border border-orange-100/50 rounded-2xl flex flex-col gap-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                              <BoltIcon className="w-4 h-4 text-orange-500" />
+                              Online Admission
+                            </span>
+                            <span className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full">Instant</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 leading-snug">
+                            Pay online to get immediate access to digital portals, test-series, and online batches.
+                          </p>
+                          <button
+                            onClick={() => {
+                              navigate("/buynow", {
+                                state: {
+                                  courseData: {
+                                    ...c,
+                                    name: name,
+                                    course_price: c.course_price || c.price || "Contact for Price",
+                                    mode: isOnlineAvailable ? "Online" : "Offline",
+                                    centre: isOnlineAvailable ? "Online" : centresList[0]
+                                  }
+                                }
+                              });
+                            }}
+                            className="mt-1 w-full bg-[#66090D] hover:bg-[#55080b] text-white font-extrabold py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-xs tracking-wider uppercase"
+                          >
+                            Buy Now
+                          </button>
+                        </div>
+
+                        {/* Option 2: Offline Admission */}
+                        <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                              <BuildingStorefrontIcon className="w-4 h-4 text-[#66090D]" />
+                              Classroom Admission
+                            </span>
+                            <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-full">At Centre</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 leading-snug">
+                            Attend physical classroom lectures, offline mock tests, and print materials at our premium branches.
+                          </p>
+
+                          <div className="mt-1 text-[11px] font-semibold text-gray-600 flex items-center justify-between">
+                            <span>Available centres:</span>
+                            <span className="text-slate-800 font-bold">{centresList.length} locations</span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 mt-1">
+                            <a
+                              href="tel:+91-9147178886"
+                              className="w-full border border-slate-200 hover:border-orange-400 hover:bg-white text-slate-700 font-bold py-2 rounded-xl text-center text-[10.5px] transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <PhoneIcon className="w-3.5 h-3.5 text-gray-500" />
+                              <span>Call Helpline</span>
+                            </a>
+                            <button
+                              onClick={() => {
+                                navigate("/", { replace: true });
+                                setTimeout(() => {
+                                  document.getElementById("admissions")?.scrollIntoView({ behavior: "smooth" });
+                                }, 300);
+                              }}
+                              className="w-full border border-slate-200 hover:border-orange-400 hover:bg-white text-slate-700 font-bold py-2 rounded-xl text-center text-[10.5px] transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <IdentificationIcon className="w-3.5 h-3.5 text-gray-500" />
+                              <span>Book Counselling</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -492,10 +740,7 @@ function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnC
 
   const formCard = (
     <div
-      className={isPageMode
-        ? "bg-white rounded-2xl max-w-md w-full shadow-lg border border-gray-150 overflow-hidden relative mx-auto my-8"
-        : `bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-500 ${formAnimation} [&::-webkit-scrollbar]:hidden [-ms-overflow-style]:none [scrollbar-width]:none border border-white/20 relative z-[9999]`
-      }
+      className={`bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-500 ${formAnimation} [&::-webkit-scrollbar]:hidden [-ms-overflow-style]:none [scrollbar-width]:none border border-white/20 relative z-[9999]`}
     >
       {/* Header - Matches Main Website Header Color */}
       <div className="bg-[#66090D] text-white p-6 rounded-t-2xl sticky top-0 z-10 shadow-md">
@@ -1080,14 +1325,6 @@ function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnC
         </div>
       </div>
     );
-
-  if (isPageMode) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-6 sm:py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        {formCard}
-      </div>
-    );
-  }
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-[9999] p-4">

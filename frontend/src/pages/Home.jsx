@@ -12,6 +12,7 @@ import ApplicationForm from "./Student/Applynow";
 import { useAuth } from "../contexts/AuthContext";
 import { centresAPI, coursesAPI } from "../services/api";
 import PredictionPopup from "../components/common/PredictionPopup";
+import LoginModal from "../components/LoginModal";
 
 // Helper function to normalize strings for comparison
 const normalizeStr = (str) => str ? str.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
@@ -148,6 +149,8 @@ export default function PathVerseOverview() {
 // Usage in Hero component
 function Hero() {
   const navigate = useNavigate();
+  const { token } = useAuth();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   return (
     <section
       id="hero"
@@ -218,7 +221,14 @@ function Hero() {
             <div className="flex flex-col gap-3">
               <a
                 href="/applynow"
-                onClick={(e) => { e.preventDefault(); navigate("/applynow"); }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (token) {
+                    navigate("/applynow");
+                  } else {
+                    setIsLoginOpen(true);
+                  }
+                }}
                 className="w-full px-6 py-4 rounded-xl bg-[#66090D] text-white hover:bg-[#55080b] transition-all duration-300 text-center font-semibold text-base shadow-lg"
               >
                 Apply Now
@@ -349,7 +359,14 @@ function Hero() {
             >
               <a
                 href="/applynow"
-                onClick={(e) => { e.preventDefault(); navigate("/applynow"); }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (token) {
+                    navigate("/applynow");
+                  } else {
+                    setIsLoginOpen(true);
+                  }
+                }}
                 className="px-8 py-4 rounded-2xl bg-[#66090D] text-white hover:bg-[#55080b] transition-all duration-300 text-center font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105"
               >
                 Apply Now
@@ -432,6 +449,7 @@ function Hero() {
           <div className="order-2 md:order-2 mt-4 sm:mt-8 md:mt-0">
             <HeroCarousel />
           </div>
+          <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSuccess={() => navigate("/applynow")} initialTab="register" />
         </div>
       </div>
     </section>
@@ -3456,6 +3474,8 @@ function Students() {
  *******************/
 function Admissions() {
   const navigate = useNavigate();
+  const { token } = useAuth();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const steps = [
     { t: "Explore", s: "Browse courses & centers" },
     { t: "Counselling", s: "Book a free session" },
@@ -3483,7 +3503,14 @@ function Admissions() {
           <a
             id="apply"
             href="/applynow"
-            onClick={(e) => { e.preventDefault(); navigate("/applynow"); }}
+            onClick={(e) => {
+              e.preventDefault();
+              if (token) {
+                navigate("/applynow");
+              } else {
+                setIsLoginOpen(true);
+              }
+            }}
             className="px-4 py-2 rounded-xl bg-[#66090D] text-white hover:bg-[#55080b] transition-colors"
           >
             Apply Now
@@ -3491,6 +3518,7 @@ function Admissions() {
           <a href="#" className="px-4 py-2 rounded-xl border">
             Download Brochure
           </a>
+          <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSuccess={() => navigate("/applynow")} initialTab="register" />
         </div>
       </div>
     </section>
@@ -3838,6 +3866,8 @@ function FAQ() {
  *******************/
 function FinalCTA() {
   const navigate = useNavigate();
+  const { token } = useAuth();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   return (
     <section className="py-12 bg-slate-900 text-white w-full 2xl:mx-auto 2xl:max-w-7xl 2xl:rounded-3xl 2xl:mb-8 shadow-2xl relative overflow-hidden">
 
@@ -3861,9 +3891,21 @@ function FinalCTA() {
           >
             Book Counselling
           </a>
-          <a href="/applynow" onClick={(e) => { e.preventDefault(); navigate("/applynow"); }} className="px-4 py-2 rounded-xl bg-[#66090D] text-white hover:bg-[#55080b] transition-colors">
+          <a
+            href="/applynow"
+            onClick={(e) => {
+              e.preventDefault();
+              if (token) {
+                navigate("/applynow");
+              } else {
+                setIsLoginOpen(true);
+              }
+            }}
+            className="px-4 py-2 rounded-xl bg-[#66090D] text-white hover:bg-[#55080b] transition-colors"
+          >
             Apply Now
           </a>
+          <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSuccess={() => navigate("/applynow")} initialTab="register" />
         </div>
       </div>
     </section>
