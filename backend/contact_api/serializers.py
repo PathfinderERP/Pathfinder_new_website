@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Application, Course
+from .models import Application, Course, CounsellingBooking
 
 class CourseSerializer(serializers.Serializer):
     id = serializers.CharField()
@@ -116,3 +116,22 @@ class ApplicationSerializer(serializers.Serializer):
         instance.status = validated_data.get('status', instance.status)
         instance.save()
         return instance
+
+
+class CounsellingBookingSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
+    full_name = serializers.CharField(max_length=200)
+    phone = serializers.CharField(max_length=17)
+    email = serializers.EmailField(max_length=100)
+    preferred_course = serializers.CharField(max_length=300)
+    preferred_time_slot = serializers.CharField(max_length=100)
+    submitted_at = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data):
+        from django.utils import timezone
+        booking = CounsellingBooking(
+            submitted_at=timezone.now(),
+            **validated_data
+        )
+        booking.save()
+        return booking

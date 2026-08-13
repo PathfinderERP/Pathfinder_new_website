@@ -726,8 +726,13 @@ export const customPagesAPI = {
   getBySlug: (slug) => api.get(`/api/custom-pages/pages/by-slug/?slug=${slug}`),
   create: (data) => api.post("/api/business/admin/custom-pages/pages/", data),
   update: (id, data) => api.patch(`/api/business/admin/custom-pages/pages/${id}/`, data),
-  delete: (id) => api.delete(`/api/business/admin/custom-pages/pages/${id}/`),
+  delete: (id) => api.delete(`/api/custom-pages/pages/${id}/`),
   uploadImage: (id, formData) => api.post(`/api/business/admin/custom-pages/pages/${id}/upload-image/`, formData, {
     headers: { "Content-Type": "multipart/form-data" }
   })
+};
+
+// Counselling Booking API
+export const counsellingAPI = {
+  book: (data) => api.post("/api/contact/book-counselling/", data),
 };

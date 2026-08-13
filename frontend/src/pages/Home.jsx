@@ -13,6 +13,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { centresAPI, coursesAPI } from "../services/api";
 import PredictionPopup from "../components/common/PredictionPopup";
 import LoginModal from "../components/LoginModal";
+import CounsellingModal from "../components/CounsellingModal";
 
 // Helper function to normalize strings for comparison
 const normalizeStr = (str) => str ? str.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
@@ -151,6 +152,7 @@ function Hero() {
   const navigate = useNavigate();
   const { token } = useAuth();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isCounsellingOpen, setIsCounsellingOpen] = useState(false);
   return (
     <section
       id="hero"
@@ -233,12 +235,13 @@ function Hero() {
               >
                 Apply Now
               </a>
-              <a
-                href="#admissions"
+              <button
+                type="button"
+                onClick={() => setIsCounsellingOpen(true)}
                 className="w-full px-6 py-4 rounded-xl border border-slate-300 hover:border-orange-400 hover:bg-slate-50 transition-all duration-300 text-center font-medium"
               >
                 Book Counselling
-              </a>
+              </button>
               <a
                 href="#events"
                 className="w-full px-6 py-4 rounded-xl border border-slate-300 hover:border-orange-400 hover:bg-slate-50 transition-all duration-300 text-center font-medium"
@@ -372,12 +375,13 @@ function Hero() {
                 Apply Now
               </a>
               <div className="flex flex-row gap-3 justify-center md:justify-start">
-                <a
-                  href="#admissions"
+                <button
+                  type="button"
+                  onClick={() => setIsCounsellingOpen(true)}
                   className="flex-1 px-6 py-4 rounded-2xl border-2 border-slate-200 hover:border-orange-400 hover:bg-slate-50 transition-all duration-300 text-center font-medium hover:shadow-lg"
                 >
                   Book Counselling
-                </a>
+                </button>
                 <a
                   href="#events"
                   className="flex-1 px-6 py-4 rounded-2xl border-2 border-slate-200 hover:border-orange-400 hover:bg-slate-50 transition-all duration-300 text-center font-medium hover:shadow-lg"
@@ -450,6 +454,7 @@ function Hero() {
             <HeroCarousel />
           </div>
           <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSuccess={() => navigate("/applynow")} initialTab="register" />
+          <CounsellingModal isOpen={isCounsellingOpen} onClose={() => setIsCounsellingOpen(false)} />
         </div>
       </div>
     </section>
@@ -2251,6 +2256,7 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
 // Updated Centers Component with Location Filter
 function CentersSection({ selectedState, selectedDistrict, selectedLocation, selectedCentre, centres, loadingCentres }) {
   const [selectedCenter, setSelectedCenter] = useState(null);
+  const [isCounsellingOpen, setIsCounsellingOpen] = useState(false);
 
   // Filter centers based on selected location and centre
   const filteredCenters = useMemo(() => {
@@ -2361,7 +2367,10 @@ function CentersSection({ selectedState, selectedDistrict, selectedLocation, sel
                   >
                     Get Directions
                   </a>
-                  <button className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
+                  <button
+                    onClick={() => setIsCounsellingOpen(true)}
+                    className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
+                  >
                     Book Counselling
                   </button>
                 </div>
@@ -2370,6 +2379,7 @@ function CentersSection({ selectedState, selectedDistrict, selectedLocation, sel
           </div>
         </div>
       </div>
+      <CounsellingModal isOpen={isCounsellingOpen} onClose={() => setIsCounsellingOpen(false)} />
     </section>
   );
 }
@@ -3868,6 +3878,7 @@ function FinalCTA() {
   const navigate = useNavigate();
   const { token } = useAuth();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isCounsellingOpen, setIsCounsellingOpen] = useState(false);
   return (
     <section className="py-12 bg-slate-900 text-white w-full 2xl:mx-auto 2xl:max-w-7xl 2xl:rounded-3xl 2xl:mb-8 shadow-2xl relative overflow-hidden">
 
@@ -3885,12 +3896,12 @@ function FinalCTA() {
           </p>
         </div>
         <div className="flex gap-3">
-          <a
-            href="#admissions"
+          <button
+            onClick={() => setIsCounsellingOpen(true)}
             className="px-4 py-2 rounded-xl bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 transition-colors"
           >
             Book Counselling
-          </a>
+          </button>
           <a
             href="/applynow"
             onClick={(e) => {
@@ -3906,6 +3917,7 @@ function FinalCTA() {
             Apply Now
           </a>
           <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSuccess={() => navigate("/applynow")} initialTab="register" />
+          <CounsellingModal isOpen={isCounsellingOpen} onClose={() => setIsCounsellingOpen(false)} />
         </div>
       </div>
     </section>

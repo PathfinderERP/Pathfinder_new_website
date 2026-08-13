@@ -1,8 +1,8 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Application
-from .serializers import ApplicationSerializer
+from .models import Application, CounsellingBooking
+from .serializers import ApplicationSerializer, CounsellingBookingSerializer
 from django.conf import settings
 import requests
 
@@ -100,3 +100,23 @@ class ApplicationDetailView(APIView):
         
         application.delete()
         return Response({'message': 'Application deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
+class CounsellingBookingCreateView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = CounsellingBookingSerializer(data=request.data)
+        if serializer.is_valid():
+            booking = serializer.save()
+            return Response({
+                'success': True,
+                'message': 'Counselling session booked successfully!',
+                'data': CounsellingBookingSerializer(booking).data
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response({
+            'success': False,
+            'errors': serializer.errors,
+            'error': 'Validation failed. Please check your input.'
+        }, status=status.HTTP_400_BAD_REQUEST)

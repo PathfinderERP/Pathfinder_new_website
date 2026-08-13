@@ -78,3 +78,23 @@ class Application(Document):
             self.submitted_at = datetime.now()
         self.clean()
         return super(Application, self).save(*args, **kwargs)
+
+
+class CounsellingBooking(Document):
+    full_name = fields.StringField(required=True, max_length=200)
+    phone = fields.StringField(required=True, max_length=17)
+    email = fields.EmailField(required=True, max_length=100)
+    preferred_course = fields.StringField(required=True, max_length=300)
+    preferred_time_slot = fields.StringField(required=True, max_length=100)
+    submitted_at = fields.DateTimeField(required=True)
+
+    meta = {
+        'collection': 'counselling_bookings',
+        'ordering': ['-submitted_at'],
+        'strict': False
+    }
+
+    def save(self, *args, **kwargs):
+        if not self.submitted_at:
+            self.submitted_at = datetime.now()
+        return super(CounsellingBooking, self).save(*args, **kwargs)
