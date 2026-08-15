@@ -31,10 +31,7 @@ const CounsellingModal = ({ isOpen, onClose }) => {
     "WBJEE + JEE Main Preparation",
     "NEET UG Preparation",
     "Foundation Program (Class 8-10)",
-    "Board Exam Preparation (Class 10 & 12)",
-    "JELET Exam Preparation",
-    "ANM/GNM Preparation",
-    "Other/General Enquiry"
+    "Board Exam Preparation (Class 10 & 12)"
   ];
 
   const timeSlots = [

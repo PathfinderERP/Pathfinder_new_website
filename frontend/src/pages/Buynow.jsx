@@ -128,45 +128,71 @@ const Buynow = () => {
     setLoading(true);
 
     try {
-      // 1. Simulate Payment Gateway
-      // await new Promise(resolve => setTimeout(resolve, 2000));
+      // 1. Create Razorpay Order on Backend
+      const orderRes = await coursesAPI.createRazorpayOrder(courseInfo.id);
+      const orderData = orderRes.data;
 
-      // 2. Prepare Payload
-      const payload = {
-        courseId: courseInfo.id,
-        payment: {
-          amount: totalAmount,
-          method: 'card', // Mock
-          emiOption: selectedEmiOption
+      if (!orderData.success || !orderData.order_id) {
+        throw new Error("Failed to generate order from server.");
+      }
+
+      // 2. Open Razorpay Checkout Dialog
+      const options = {
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Pathfinder Academy",
+        description: courseInfo.name,
+        order_id: orderData.order_id,
+        handler: async function (response) {
+          try {
+            setLoading(true);
+            
+            // 3. Verify Payment on Backend
+            const verifyPayload = {
+              courseId: courseInfo.id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              user: !user ? registrationData : undefined
+            };
+            
+            const verifyRes = await coursesAPI.verifyRazorpayPayment(verifyPayload);
+            
+            if (verifyRes.data.success && verifyRes.data.token && verifyRes.data.user) {
+              setAuthenticatedUser(verifyRes.data.user, verifyRes.data.token);
+              navigate("/my-courses");
+            } else {
+              setError("Payment signature verification failed. Please contact support.");
+            }
+          } catch (err) {
+            console.error("Signature verification failed:", err);
+            setError(err.response?.data?.error || "Payment verification failed.");
+          } finally {
+            setLoading(false);
+          }
         },
-        user: !user ? registrationData : undefined
+        prefill: {
+          name: user ? user.fullName : registrationData.fullName,
+          email: user ? user.email : registrationData.email,
+          contact: user ? user.phone : registrationData.phone,
+        },
+        theme: {
+          color: "#66090D",
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+          }
+        }
       };
 
-      // 3. Call API
-      
-      const response = await coursesAPI.purchase(payload);
-      
-
-      // 4. Handle Success
-      if (response.data.token && response.data.user) {
-        setAuthenticatedUser(response.data.user, response.data.token);
-        navigate("/my-courses");
-      }
-      else {
-        console.warn("No token in purchase response, redirecting anyway", response.data);
-        // If user was already logged in, normal navigation
-        if (user) {
-          navigate("/my-courses");
-        } else {
-          // Fallback for new user without token (should not happen if backend correct)
-          navigate("/login", { state: { message: "Purchase successful! Please login." } });
-        }
-      }
+      const rzp = new window.Razorpay(options);
+      rzp.open();
 
     } catch (err) {
-      console.error("Purchase failed:", err);
-      setError(err.response?.data?.error || "Payment failed. Please try again.");
-    } finally {
+      console.error("Order creation failed:", err);
+      setError(err.response?.data?.error || err.message || "Failed to start payment process. Please try again.");
       setLoading(false);
     }
   };

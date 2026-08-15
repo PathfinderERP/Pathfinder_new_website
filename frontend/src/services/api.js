@@ -217,6 +217,12 @@ export const coursesAPI = {
 
   purchase: (data) => api.post(env.endpoints.PURCHASE, data),
 
+  createRazorpayOrder: (courseId) =>
+    api.post(`${env.endpoints.PURCHASE}create-order/`, { courseId }),
+
+  verifyRazorpayPayment: (paymentData) =>
+    api.post(`${env.endpoints.PURCHASE}verify-payment/`, paymentData),
+
   getMyCourses: () => {
     // Ensure we use the correct token or let interceptor handle it
     return api.get(env.endpoints.MY_COURSES);

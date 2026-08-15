@@ -29,6 +29,11 @@ if os.path.exists(env_path):
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-development-key-change-in-production-123456')
 RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY', '')
 
+# Razorpay Configuration
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
+RAZORPAY_WEBHOOK_SECRET = os.getenv('RAZORPAY_WEBHOOK_SECRET', 'pathfinder_secret_123')
+
 # Debug settings for production - ALWAYS False on Render
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 

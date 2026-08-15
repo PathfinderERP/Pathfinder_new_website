@@ -13,6 +13,7 @@ import jwt
 from django.conf import settings
 import logging
 import datetime
+import razorpay
 
 logger = logging.getLogger(__name__)
 
@@ -611,8 +612,281 @@ class DataViewSet(viewsets.ViewSet):
 class PurchaseViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
     
+    @action(detail=False, methods=['post'], url_path='create-order')
+    def create_order(self, request):
+        """Create a Razorpay order for web checkout"""
+        try:
+            course_id = request.data.get('courseId')
+            user_data = request.data.get('user', {})
+            
+            if not course_id:
+                return Response({"error": "Course ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+                
+            course = Course.objects(id=course_id).first()
+            if not course:
+                return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+                
+            # Razorpay expects price in paise (integer cents)
+            amount_paise = int(float(course.course_price) * 100)
+            
+            # Map user registration/auth details into notes to securely pass to webhook
+            notes = {
+                'courseId': course_id,
+            }
+            if request.user and request.user.is_authenticated:
+                notes['userId'] = str(request.user.id)
+            else:
+                notes['email'] = user_data.get('email', '')
+                notes['phone'] = user_data.get('phone', '')
+                notes['fullName'] = user_data.get('fullName', '')
+                notes['studentClass'] = user_data.get('studentClass', '12')
+                notes['area'] = user_data.get('area', '')
+                notes['school'] = user_data.get('school', '')
+                notes['board'] = user_data.get('board', '')
+                notes['parentName'] = user_data.get('parentName', '')
+                notes['password'] = user_data.get('password', 'Student@123')
+            
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            order_data = {
+                'amount': amount_paise,
+                'currency': 'INR',
+                'payment_capture': 1,
+                'notes': notes
+            }
+            
+            razorpay_order = client.order.create(data=order_data)
+            
+            return Response({
+                "success": True,
+                "order_id": razorpay_order['id'],
+                "amount": razorpay_order['amount'],
+                "currency": razorpay_order['currency'],
+                "key_id": settings.RAZORPAY_KEY_ID
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            logger.error(f"Failed to create Razorpay order: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['post'], url_path='verify-payment')
+    def verify_payment(self, request):
+        """Verify Razorpay payment signature and complete enrollment"""
+        try:
+            data = request.data
+            razorpay_order_id = data.get('razorpay_order_id')
+            razorpay_payment_id = data.get('razorpay_payment_id')
+            razorpay_signature = data.get('razorpay_signature')
+            course_id = data.get('courseId')
+            user_data = data.get('user', {})
+            
+            if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature, course_id]):
+                return Response({"error": "Missing signature verification details"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 1. Verify Payment Signature
+            try:
+                client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+                client.utility.verify_payment_signature({
+                    'razorpay_order_id': razorpay_order_id,
+                    'razorpay_payment_id': razorpay_payment_id,
+                    'razorpay_signature': razorpay_signature
+                })
+            except razorpay.errors.SignatureVerificationError as e:
+                logger.error(f"Signature verification failed: {e}")
+                return Response({"error": "Payment signature verification failed. Unauthorized transaction."}, status=status.HTTP_400_BAD_REQUEST)
+                
+            # 2. Get Course
+            course = Course.objects(id=course_id).first()
+            if not course:
+                return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # 3. Handle User Enrolment/Registration (same logic as purchase)
+            user = None
+            user_created_new = False
+            if request.user and request.user.is_authenticated:
+                user = request.user
+            else:
+                email = user_data.get('email')
+                phone = user_data.get('phone')
+                
+                if not email:
+                    return Response({"error": "Email is required for enrollment"}, status=status.HTTP_400_BAD_REQUEST)
+                
+                user = User.objects(email=email.lower().strip()).first()
+                if not user:
+                    try:
+                        user = User(
+                            full_name=user_data.get('fullName'),
+                            email=email.lower().strip(),
+                            phone=phone,
+                            student_class=user_data.get('studentClass', '12'), 
+                            area=user_data.get('area', ''),
+                            school=user_data.get('school', ''),
+                            board=user_data.get('board', ''),
+                            parent_name=user_data.get('parentName', '')
+                        )
+                        password = user_data.get('password') or "Student@123" 
+                        user.set_password(password)
+                        user.save()
+                        user_created_new = True
+                    except Exception as e:
+                        if "phone" in str(e) and phone:
+                            user = User.objects(phone=phone).first()
+                            if not user:
+                                raise e
+                        else:        
+                            raise e
+            
+            if not user:
+                return Response({"error": "Could not verify or create user"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 4. Create Enrollment
+            try:
+                existing_enrollment = Enrollment.objects(user_id=str(user.id), course_id=str(course.id)).first()
+                if existing_enrollment:
+                    enrollment = existing_enrollment
+                    enrollment.payment_status = 'completed'
+                    enrollment.payment_id = razorpay_payment_id
+                    enrollment.save()
+                else:
+                    enrollment = Enrollment(
+                        user_id=str(user.id),
+                        course_id=str(course.id),
+                        course_name=course.name,
+                        amount_paid=float(course.course_price),
+                        payment_id=razorpay_payment_id,
+                        payment_status='completed'
+                    )
+                    enrollment.save()
+            except Exception as e:
+                if user_created_new:
+                    user.delete()
+                raise e
+            
+            token = user.generate_jwt_token()
+            return Response({
+                "success": True,
+                "message": "Payment verified and enrollment completed!",
+                "token": token,
+                "user": {
+                    "id": str(user.id),
+                    "fullName": user.full_name,
+                    "email": user.email,
+                    "student_class": user.student_class,
+                    "role": "student"
+                }
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Payment verification failed: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['post'], url_path='webhook')
+    def webhook(self, request):
+        """Handle Razorpay Webhook Events"""
+        try:
+            payload = request.body
+            signature = request.META.get('HTTP_X_RAZORPAY_SIGNATURE', '')
+            
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            
+            # Verify signature
+            try:
+                client.utility.verify_webhook_signature(
+                    payload,
+                    signature,
+                    settings.RAZORPAY_WEBHOOK_SECRET
+                )
+            except razorpay.errors.SignatureVerificationError as e:
+                logger.error(f"Webhook signature verification failed: {e}")
+                return Response({"error": "Invalid webhook signature"}, status=status.HTTP_400_BAD_REQUEST)
+                
+            # Parse json body
+            import json
+            event_data = json.loads(payload)
+            event = event_data.get('event')
+            
+            if event in ['order.paid', 'payment.captured']:
+                payment_entity = event_data.get('payload', {}).get('payment', {}).get('entity', {})
+                order_id = payment_entity.get('order_id')
+                payment_id = payment_entity.get('id')
+                amount_paid = float(payment_entity.get('amount', 0)) / 100.0
+                
+                order_entity = event_data.get('payload', {}).get('order', {}).get('entity', {})
+                notes = order_entity.get('notes', {}) or payment_entity.get('notes', {})
+                
+                if not notes:
+                    try:
+                        order_detail = client.order.fetch(order_id)
+                        notes = order_detail.get('notes', {})
+                    except Exception as order_err:
+                        logger.error(f"Failed to fetch order details from Razorpay: {order_err}")
+                
+                course_id = notes.get('courseId')
+                if not course_id:
+                    logger.error("No courseId found in webhook order notes")
+                    return Response({"status": "ignored"}, status=status.HTTP_200_OK)
+                    
+                course = Course.objects(id=course_id).first()
+                if not course:
+                    logger.error(f"Course {course_id} not found in webhook")
+                    return Response({"status": "ignored"}, status=status.HTTP_200_OK)
+                    
+                user = None
+                user_id = notes.get('userId')
+                if user_id:
+                    user = User.objects(id=user_id).first()
+                else:
+                    email = notes.get('email')
+                    if email:
+                        user = User.objects(email=email.lower().strip()).first()
+                        if not user:
+                            try:
+                                user = User(
+                                    full_name=notes.get('fullName'),
+                                    email=email.lower().strip(),
+                                    phone=notes.get('phone'),
+                                    student_class=notes.get('studentClass', '12'), 
+                                    area=notes.get('area', ''),
+                                    school=notes.get('school', ''),
+                                    board=notes.get('board', ''),
+                                    parent_name=notes.get('parentName', '')
+                                )
+                                password = notes.get('password') or "Student@123" 
+                                user.set_password(password)
+                                user.save()
+                            except Exception as u_err:
+                                logger.error(f"Failed to create user in webhook: {u_err}")
+                                
+                if not user:
+                    logger.error("Could not resolve user in webhook")
+                    return Response({"status": "error", "message": "User not resolved"}, status=status.HTTP_200_OK)
+                    
+                existing_enrollment = Enrollment.objects(user_id=str(user.id), course_id=str(course.id)).first()
+                if existing_enrollment:
+                    existing_enrollment.payment_status = 'completed'
+                    existing_enrollment.payment_id = payment_id
+                    existing_enrollment.save()
+                    logger.info(f"Enrollment updated to completed for user {user.email} in webhook")
+                else:
+                    enrollment = Enrollment(
+                        user_id=str(user.id),
+                        course_id=str(course.id),
+                        course_name=course.name,
+                        amount_paid=amount_paid or float(course.course_price),
+                        payment_id=payment_id,
+                        payment_status='completed'
+                    )
+                    enrollment.save()
+                    logger.info(f"New enrollment created for user {user.email} in webhook")
+                    
+            return Response({"status": "success"}, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Webhook processing failed: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def create(self, request):
-        """Handle course purchase and registration"""
+        """Handle legacy course purchase and registration"""
         try:
             data = request.data
             user_data = data.get('user', {})
@@ -622,23 +896,19 @@ class PurchaseViewSet(viewsets.ViewSet):
             if not course_id:
                 return Response({"error": "Course ID is required"}, status=400)
 
-            # 1. Handle User
             user = None
             user_created_new = False
             if request.user and request.user.is_authenticated:
                 user = request.user
             else:
-                # Registration logic
                 email = user_data.get('email')
                 phone = user_data.get('phone')
                 
                 if not email:
                      return Response({"error": "Email is required for new registration"}, status=400)
                 
-                # Check if user exists
                 user = User.objects(email=email).first()
                 if not user:
-                    # Create new user
                     try:
                         user = User(
                             full_name=user_data.get('fullName'),
@@ -650,7 +920,6 @@ class PurchaseViewSet(viewsets.ViewSet):
                             board=user_data.get('board', ''),
                             parent_name=user_data.get('parentName', '')
                         )
-                        # Set password (either provided or default)
                         password = user_data.get('password')
                         if not password:
                             password = "Student@123" 
@@ -659,9 +928,7 @@ class PurchaseViewSet(viewsets.ViewSet):
                         user.save()
                         user_created_new = True
                     except Exception as e:
-                         # Handle unique constraint errors (e.g. phone)
                          if "phone" in str(e):
-                             # Try to find user by phone?
                              user = User.objects(phone=phone).first()
                              if not user:
                                  raise e
@@ -671,19 +938,15 @@ class PurchaseViewSet(viewsets.ViewSet):
             if not user:
                  return Response({"error": "Could not verify or create user"}, status=400)
 
-            # 2. Get Course
             course = Course.objects(id=course_id).first()
             if not course:
                 if user_created_new:
                     user.delete()
                 return Response({"error": "Course not found"}, status=404)
             
-            # 3. Create Enrollment
             try:
-                # Check if already enrolled?
                 existing_enrollment = Enrollment.objects(user_id=str(user.id), course_id=str(course.id)).first()
                 if existing_enrollment:
-                    # Update? Or just return success
                     enrollment = existing_enrollment
                 else:
                     enrollment = Enrollment(
@@ -691,17 +954,15 @@ class PurchaseViewSet(viewsets.ViewSet):
                         course_id=str(course.id),
                         course_name=course.name,
                         amount_paid=payment_details.get('amount', 0),
-                        payment_id=f"PAY-{datetime.datetime.now().timestamp()}", # Mock ID
+                        payment_id=f"PAY-{datetime.datetime.now().timestamp()}",
                         payment_status='completed'
                     )
                     enrollment.save()
             except Exception as e:
-                # Rollback user creation if enrollment failed
                 if user_created_new:
                     user.delete()
                 raise e
             
-            # 4. Generate Token
             token = user.generate_jwt_token()
             
             return Response({
