@@ -25,7 +25,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
             # Decode JWT token
             payload = jwt.decode(
                 token,
-                settings.SECRET_KEY, 
+                settings.JWT_SECRET_KEY, 
                 algorithms=['HS256']
             )
             
