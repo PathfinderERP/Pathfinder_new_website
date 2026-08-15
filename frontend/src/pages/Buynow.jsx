@@ -217,7 +217,7 @@ const Buynow = () => {
   }
 
   return (
-    <section className="bg-white pt-20 mt-14 pb-8 sm:pt-24 sm:pb-12 md:pt-28 md:pb-16">
+    <section className="bg-white py-8 md:py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           onClick={handleBackToHome}
