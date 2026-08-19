@@ -67,6 +67,7 @@ const parseHTMLContent = (htmlString) => {
 
 export default function CustomPageRenderer() {
   const { slug } = useParams();
+  const navigate = useNavigate();
 
   
 
@@ -120,6 +121,10 @@ export default function CustomPageRenderer() {
   };
 
   useEffect(() => {
+    if (slug === "best-jee-coaching-in-tarakeswar-for-engineering-aspirants") {
+      navigate("/best-jee-coaching-in-tarakeswar", { replace: true });
+      return;
+    }
     async function fetchPage() {
       setLoading(true);
       setErrorStatus(null);
