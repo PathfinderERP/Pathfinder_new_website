@@ -243,7 +243,7 @@ function Hero() {
                 Book Counselling
               </button>
               <a
-                href="#events"
+                href="/mocktests"
                 className="w-full px-6 py-4 rounded-xl border border-slate-300 hover:border-orange-400 hover:bg-slate-50 transition-all duration-300 text-center font-medium"
               >
                 Try Free Mock
@@ -383,7 +383,7 @@ function Hero() {
                   Book Counselling
                 </button>
                 <a
-                  href="#events"
+                  href="/mocktests"
                   className="flex-1 px-6 py-4 rounded-2xl border-2 border-slate-200 hover:border-orange-400 hover:bg-slate-50 transition-all duration-300 text-center font-medium hover:shadow-lg"
                 >
                   Try Free Mock

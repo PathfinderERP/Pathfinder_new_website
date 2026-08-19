@@ -640,3 +640,41 @@ class Enrollment(Document):
 
     def __str__(self):
         return f"{self.user_id} - {self.course_name}"
+
+class MockTestQuestion(EmbeddedDocument):
+    id = fields.StringField(required=True)
+    question_text = fields.StringField(required=True)
+    options = fields.ListField(fields.StringField(), required=True)
+    correct_option = fields.IntField(required=True)  # 1-indexed (1, 2, 3, 4)
+    explanation = fields.StringField(null=True, blank=True)
+    image_url = fields.StringField(null=True, blank=True)
+
+class MockTest(Document):
+    title = fields.StringField(max_length=200, required=True)
+    description = fields.StringField(null=True, blank=True)
+    course_type = fields.StringField(max_length=50, choices=['JEE', 'NEET', 'WBJEE', 'Foundation'], required=True)
+    duration_minutes = fields.IntField(default=60, required=True)
+    total_marks = fields.IntField(default=100)
+    questions = fields.ListField(fields.EmbeddedDocumentField(MockTestQuestion), default=list)
+    created_at = fields.DateTimeField(default=datetime.datetime.utcnow)
+    
+    meta = {
+        'collection': 'mock_tests',
+        'indexes': ['course_type', 'title']
+    }
+
+class MockTestAttempt(Document):
+    user_id = fields.StringField(required=True)
+    mock_test_id = fields.StringField(required=True)
+    answers = fields.DictField()  # e.g., {"question_id": 3}
+    score = fields.IntField(default=0)
+    correct_count = fields.IntField(default=0)
+    incorrect_count = fields.IntField(default=0)
+    skipped_count = fields.IntField(default=0)
+    time_taken_seconds = fields.IntField(default=0)
+    submitted_at = fields.DateTimeField(default=datetime.datetime.utcnow)
+    
+    meta = {
+        'collection': 'mock_test_attempts',
+        'indexes': ['user_id', 'mock_test_id']
+    }

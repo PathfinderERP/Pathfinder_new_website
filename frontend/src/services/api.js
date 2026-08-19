@@ -742,3 +742,19 @@ export const customPagesAPI = {
 export const counsellingAPI = {
   book: (data) => api.post("/api/contact/book-counselling/", data),
 };
+
+// Mock Tests API
+export const mockTestsAPI = {
+  getAll: (courseType) => {
+    const url = courseType ? `/api/courses/mocktests/?course_type=${courseType}` : '/api/courses/mocktests/';
+    return api.get(url);
+  },
+  getQuestions: (id) => api.get(`/api/courses/mocktests/${id}/questions/`),
+  submit: (id, payload) => api.post(`/api/courses/mocktests/${id}/submit/`, payload),
+  
+  // Admin endpoints
+  createTest: (data) => api.post('/api/courses/mocktests/', data),
+  getAdminQuestions: (id) => api.get(`/api/courses/mocktests/${id}/admin-questions/`),
+  saveQuestion: (id, data) => api.post(`/api/courses/mocktests/${id}/questions-save/`, data),
+  getAttempts: () => api.get('/api/courses/mocktests/attempts/')
+};

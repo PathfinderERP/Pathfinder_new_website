@@ -15,7 +15,8 @@ import {
     DocumentTextIcon,
     MegaphoneIcon,
     PresentationChartLineIcon,
-    RocketLaunchIcon
+    RocketLaunchIcon,
+    TrophyIcon
 } from "@heroicons/react/24/outline";
 
 const AdminSidebar = ({ isOpen, toggleSidebar }) => {
@@ -29,6 +30,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
     const navItems = [
         { name: "Dashboard",        path: "/business/admin/dashboard",          icon: Squares2X2Icon,          permission: "view_dashboard" },
         { name: "Courses",          path: "/business/admin/courses",             icon: AcademicCapIcon,         permission: "manage_courses" },
+        { name: "Mock Tests",       path: "/business/admin/mocktests",           icon: TrophyIcon,              permission: "manage_mocktests" },
         { name: "Applicants",       path: "/business/admin/course-applications", icon: DocumentTextIcon,        permission: "manage_applications" },
         { name: "Ads Leads",        path: "/business/admin/ads-leads",           icon: UserGroupIcon,           permission: "manage_ads_leads" },
         { name: "Franchise",        path: "/business/admin/franchise-inquiries", icon: BuildingStorefrontIcon,  permission: "manage_franchise" },

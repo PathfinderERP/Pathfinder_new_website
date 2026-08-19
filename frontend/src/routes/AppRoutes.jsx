@@ -6,6 +6,7 @@ import AdminLayout from "../components/layout/AdminLayout";
 import Home from "../pages/Home";
 import Buynow from "../pages/Buynow";
 import Applynow from "../pages/Student/Applynow";
+import MockTests from "../pages/Student/MockTests";
 
 import Dashboard from "../pages/DigitalPart/Dashboard";
 import Profile from "../pages/DigitalPart/Profile";
@@ -45,6 +46,7 @@ import CourseEdit from "../components/admin/CourseEdit";
 import AdminManagement from "../components/admin/AdminManagement";
 import UsersManagement from "../components/admin/UsersManagement";
 import AdminSettings from "../components/admin/AdminSettings";
+import MockTestsManagement from "../components/admin/MockTestsManagement";
 import AdminProtectedRoute from "../components/common/AdminProtectedRoute";
 import SuperAdminProtectedRoute from "../components/common/SuperAdminProtectedRoute";
 
@@ -362,6 +364,14 @@ const AppRoutes = () => {
           </MainLayout>
         }
       />
+      <Route
+        path="/mocktests"
+        element={
+          <MainLayout>
+            <MockTests />
+          </MainLayout>
+        }
+      />
 
       {/* Admin Auth Routes (No Layout - they have their own styling) */}
       <Route path="/business/admin/login" element={<AdminLogin />} />
@@ -379,6 +389,18 @@ const AppRoutes = () => {
           <AdminProtectedRoute requiredPermission="view_dashboard">
             <AdminLayout>
               <AdminDashboard />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
+
+      {/* Mock Tests Management Route */}
+      <Route
+        path="/business/admin/mocktests"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_mocktests">
+            <AdminLayout>
+              <MockTestsManagement />
             </AdminLayout>
           </AdminProtectedRoute>
         }
