@@ -741,6 +741,7 @@ export const customPagesAPI = {
 // Counselling Booking API
 export const counsellingAPI = {
   book: (data) => api.post("/api/contact/book-counselling/", data),
+  getAll: () => api.get("/api/contact/book-counselling/"),
 };
 
 // Mock Tests API
