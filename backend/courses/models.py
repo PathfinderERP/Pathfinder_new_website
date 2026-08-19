@@ -653,6 +653,7 @@ class MockTest(Document):
     title = fields.StringField(max_length=200, required=True)
     description = fields.StringField(null=True, blank=True)
     course_type = fields.StringField(max_length=50, choices=['JEE', 'NEET', 'WBJEE', 'Foundation'], required=True)
+    target_class = fields.StringField(max_length=50, choices=['11', '12', 'All'], default='All')
     duration_minutes = fields.IntField(default=60, required=True)
     total_marks = fields.IntField(default=100)
     questions = fields.ListField(fields.EmbeddedDocumentField(MockTestQuestion), default=list)

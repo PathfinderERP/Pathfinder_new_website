@@ -985,13 +985,27 @@ class MockTestViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
     def list(self, request):
-        """List all available mock tests"""
+        """List all available mock tests, filtered by user's class if logged in"""
         try:
             course_type = request.query_params.get('course_type')
-            if course_type:
-                tests = MockTest.objects(course_type=course_type)
+            
+            # Determine if we should filter by class
+            user_class = None
+            if request.user and request.user.is_authenticated:
+                student_class_val = getattr(request.user, 'student_class', '')
+                if student_class_val:
+                    if '11' in student_class_val or 'XI' in student_class_val:
+                        user_class = '11'
+                    elif '12' in student_class_val or 'XII' in student_class_val or 'Repeater' in student_class_val:
+                        user_class = '12'
+            
+            if user_class:
+                tests = MockTest.objects(Q(target_class=user_class) | Q(target_class='All') | Q(target_class__exists=False))
             else:
                 tests = MockTest.objects()
+                
+            if course_type:
+                tests = tests.filter(course_type=course_type)
             
             data = []
             for t in tests:
@@ -1000,6 +1014,7 @@ class MockTestViewSet(viewsets.ViewSet):
                     "title": t.title,
                     "description": t.description,
                     "course_type": t.course_type,
+                    "target_class": getattr(t, 'target_class', 'All'),
                     "duration_minutes": t.duration_minutes,
                     "total_marks": t.total_marks,
                     "question_count": len(t.questions)
@@ -1169,6 +1184,7 @@ class MockTestViewSet(viewsets.ViewSet):
             title = request.data.get('title')
             description = request.data.get('description', '')
             course_type = request.data.get('course_type')
+            target_class = request.data.get('target_class', 'All')
             duration_minutes = int(request.data.get('duration_minutes', 60))
             total_marks = int(request.data.get('total_marks', 0))
             
@@ -1179,6 +1195,7 @@ class MockTestViewSet(viewsets.ViewSet):
                 title=title,
                 description=description,
                 course_type=course_type,
+                target_class=target_class,
                 duration_minutes=duration_minutes,
                 total_marks=total_marks,
                 questions=[],
