@@ -277,6 +277,7 @@ const Header = () => {
       icon: BookOpenIcon,
       href: "/students-corner"
     },
+    "Mock Test": { icon: TrophyIcon, href: "/mocktests" },
     Alumni: { icon: UserGroupIcon, href: "/alumni" },
     Career: { icon: BriefcaseIcon, href: "/career" },
     Blog: { icon: BookOpenIcon, href: "/blog" },
@@ -442,19 +443,28 @@ const Header = () => {
                   onMouseEnter={() => section.items && handleDropdownEnter(title)}
                   onMouseLeave={handleDropdownLeave}
                 >
-                  <motion.button
-                    className={`flex items-center space-x-2 font-semibold hover:text-orange-300 text-sm xl:text-base transition-colors duration-300 relative group/nav ${isActiveLink(section) ? "text-orange-300" : ""}`}
-                    whileHover={{ y: -2 }}
-                    onClick={() => { if (section.href) { navigate(section.href); } }}
-                  >
-                    {section.icon && <section.icon className={`h-4 w-4 group-hover/nav:scale-110 transition-transform duration-300 ${isActiveLink(section) ? "text-orange-300" : ""}`} />}
-                    <span>{title}</span>
-                    {section.items && section.items.length > 0 && (
-                      <motion.div animate={{ rotate: openDropdown === title ? 180 : 0 }} transition={{ duration: 0.3 }}>
-                        <ChevronDownIcon className="h-3 w-3" />
-                      </motion.div>
-                    )}
-                  </motion.button>
+                  {section.href ? (
+                    <Link
+                      to={section.href}
+                      className={`flex items-center space-x-2 font-semibold hover:text-orange-300 text-sm xl:text-base transition-colors duration-300 relative group/nav ${isActiveLink(section) ? "text-orange-300" : ""}`}
+                    >
+                      {section.icon && <section.icon className={`h-4 w-4 group-hover/nav:scale-110 transition-transform duration-300 ${isActiveLink(section) ? "text-orange-300" : ""}`} />}
+                      <span>{title}</span>
+                    </Link>
+                  ) : (
+                    <motion.button
+                      className={`flex items-center space-x-2 font-semibold hover:text-orange-300 text-sm xl:text-base transition-colors duration-300 relative group/nav ${isActiveLink(section) ? "text-orange-300" : ""}`}
+                      whileHover={{ y: -2 }}
+                    >
+                      {section.icon && <section.icon className={`h-4 w-4 group-hover/nav:scale-110 transition-transform duration-300 ${isActiveLink(section) ? "text-orange-300" : ""}`} />}
+                      <span>{title}</span>
+                      {section.items && section.items.length > 0 && (
+                        <motion.div animate={{ rotate: openDropdown === title ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                          <ChevronDownIcon className="h-3 w-3" />
+                        </motion.div>
+                      )}
+                    </motion.button>
+                  )}
 
                   <AnimatePresence>
                     {openDropdown === title && section.items && section.items.length > 0 && (

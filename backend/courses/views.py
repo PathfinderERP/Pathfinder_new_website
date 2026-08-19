@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_mongoengine import viewsets as mongo_viewsets
 from mongoengine import Q
-from .models import Course, Enrollment
+from .models import Course, Enrollment, MockTest, MockTestQuestion, MockTestAttempt
 from users.models import User
 from .serializers import CourseSerializer, EnrollmentSerializer
 import jwt
@@ -980,6 +980,300 @@ class PurchaseViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f"Purchase failed: {e}")
             return Response({"error": str(e)}, status=500)
+
+class MockTestViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+
+    def list(self, request):
+        """List all available mock tests"""
+        try:
+            course_type = request.query_params.get('course_type')
+            if course_type:
+                tests = MockTest.objects(course_type=course_type)
+            else:
+                tests = MockTest.objects()
+            
+            data = []
+            for t in tests:
+                data.append({
+                    "id": str(t.id),
+                    "title": t.title,
+                    "description": t.description,
+                    "course_type": t.course_type,
+                    "duration_minutes": t.duration_minutes,
+                    "total_marks": t.total_marks,
+                    "question_count": len(t.questions)
+                })
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error listing mock tests: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['get'], url_path='questions')
+    def get_questions(self, request, pk=None):
+        """Fetch questions for a mock test (without correct answer key to prevent cheating)"""
+        try:
+            test = MockTest.objects(id=pk).first()
+            if not test:
+                return Response({"error": "Mock test not found"}, status=status.HTTP_404_NOT_FOUND)
+                
+            questions_data = []
+            for q in test.questions:
+                questions_data.append({
+                    "id": q.id,
+                    "question_text": q.question_text,
+                    "options": q.options,
+                    "image_url": q.image_url
+                })
+                
+            return Response({
+                "id": str(test.id),
+                "title": test.title,
+                "duration_minutes": test.duration_minutes,
+                "total_marks": test.total_marks,
+                "questions": questions_data
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error fetching questions: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'], url_path='submit')
+    def submit_test(self, request, pk=None):
+        """Submit mock test answers, calculate score, and return results"""
+        try:
+            test = MockTest.objects(id=pk).first()
+            if not test:
+                return Response({"error": "Mock test not found"}, status=status.HTTP_404_NOT_FOUND)
+                
+            user_answers = request.data.get('answers', {})
+            time_taken = request.data.get('time_taken_seconds', 0)
+            
+            user_id = "guest"
+            if request.user and request.user.is_authenticated:
+                user_id = str(request.user.id)
+                
+            correct_count = 0
+            incorrect_count = 0
+            skipped_count = 0
+            
+            question_results = []
+            
+            for q in test.questions:
+                selected_opt = user_answers.get(q.id)
+                correct_opt = q.correct_option
+                
+                is_correct = False
+                is_skipped = selected_opt is None or selected_opt == "" or selected_opt == 0
+                
+                if is_skipped:
+                    skipped_count += 1
+                elif int(selected_opt) == int(correct_opt):
+                    correct_count += 1
+                    is_correct = True
+                else:
+                    incorrect_count += 1
+                    
+                question_results.append({
+                    "id": q.id,
+                    "question_text": q.question_text,
+                    "options": q.options,
+                    "image_url": q.image_url,
+                    "selected_option": selected_opt,
+                    "correct_option": correct_opt,
+                    "is_correct": is_correct,
+                    "is_skipped": is_skipped,
+                    "explanation": q.explanation
+                })
+                
+            score = (correct_count * 4) - (incorrect_count * 1)
+            
+            attempt = MockTestAttempt(
+                user_id=user_id,
+                mock_test_id=str(test.id),
+                answers={k: int(v) for k, v in user_answers.items() if v is not None and v != ""},
+                score=score,
+                correct_count=correct_count,
+                incorrect_count=incorrect_count,
+                skipped_count=skipped_count,
+                time_taken_seconds=time_taken,
+                submitted_at=datetime.datetime.utcnow()
+            )
+            attempt.save()
+            
+            return Response({
+                "success": True,
+                "attempt_id": str(attempt.id),
+                "score": score,
+                "total_marks": len(test.questions) * 4,
+                "correct_count": correct_count,
+                "incorrect_count": incorrect_count,
+                "skipped_count": skipped_count,
+                "questions": question_results
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error submitting mock test: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'], url_path='attempts')
+    def get_all_attempts(self, request):
+        """Fetch all test attempts for the admin portal"""
+        try:
+            attempts = MockTestAttempt.objects().order_by('-submitted_at')
+            data = []
+            
+            # Cache tests for fast lookup
+            tests_cache = {str(t.id): t for t in MockTest.objects()}
+            
+            for a in attempts:
+                test_title = "Unknown Test"
+                course_type = "Unknown"
+                if a.mock_test_id in tests_cache:
+                    test_title = tests_cache[a.mock_test_id].title
+                    course_type = tests_cache[a.mock_test_id].course_type
+                
+                # Fetch user details
+                student_name = "Guest User"
+                student_email = ""
+                student_class = ""
+                if a.user_id != "guest":
+                    try:
+                        user_obj = User.objects.get(id=a.user_id)
+                        student_name = getattr(user_obj, 'name', 'Student')
+                        student_email = getattr(user_obj, 'email', '')
+                        student_class = getattr(user_obj, 'student_class', '')
+                    except User.DoesNotExist:
+                        pass
+                
+                data.append({
+                    "id": str(a.id),
+                    "student_name": student_name,
+                    "student_email": student_email,
+                    "student_class": student_class,
+                    "test_title": test_title,
+                    "course_type": course_type,
+                    "score": a.score,
+                    "correct_count": a.correct_count,
+                    "incorrect_count": a.incorrect_count,
+                    "skipped_count": a.skipped_count,
+                    "time_taken_seconds": a.time_taken_seconds,
+                    "submitted_at": a.submitted_at.isoformat() if a.submitted_at else None
+                })
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error fetching attempts list: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def create(self, request):
+        """Create a new mock test"""
+        try:
+            title = request.data.get('title')
+            description = request.data.get('description', '')
+            course_type = request.data.get('course_type')
+            duration_minutes = int(request.data.get('duration_minutes', 60))
+            total_marks = int(request.data.get('total_marks', 0))
+            
+            if not title or not course_type:
+                return Response({"error": "Title and Course Type are required"}, status=status.HTTP_400_BAD_REQUEST)
+                
+            test = MockTest(
+                title=title,
+                description=description,
+                course_type=course_type,
+                duration_minutes=duration_minutes,
+                total_marks=total_marks,
+                questions=[],
+                created_at=datetime.datetime.utcnow()
+            )
+            test.save()
+            return Response({"success": True, "id": str(test.id), "title": test.title}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Error creating mock test: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['get'], url_path='admin-questions')
+    def get_admin_questions(self, request, pk=None):
+        """Fetch questions for a mock test (including correct answer key for admin editing)"""
+        try:
+            test = MockTest.objects(id=pk).first()
+            if not test:
+                return Response({"error": "Mock test not found"}, status=status.HTTP_404_NOT_FOUND)
+                
+            questions_data = []
+            for q in test.questions:
+                questions_data.append({
+                    "id": q.id,
+                    "question_text": q.question_text,
+                    "options": q.options,
+                    "correct_option": q.correct_option,
+                    "explanation": q.explanation,
+                    "image_url": q.image_url
+                })
+                
+            return Response({
+                "id": str(test.id),
+                "title": test.title,
+                "duration_minutes": test.duration_minutes,
+                "total_marks": test.total_marks,
+                "questions": questions_data
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error fetching admin questions: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'], url_path='questions-save')
+    def save_question(self, request, pk=None):
+        """Add a new question or edit an existing one in the mock test"""
+        try:
+            test = MockTest.objects(id=pk).first()
+            if not test:
+                return Response({"error": "Mock test not found"}, status=status.HTTP_404_NOT_FOUND)
+                
+            question_id = request.data.get('id')  # If present, we are editing. If not, we are adding.
+            question_text = request.data.get('question_text')
+            options = request.data.get('options', [])
+            correct_option = int(request.data.get('correct_option', 1))
+            explanation = request.data.get('explanation', '')
+            image_url = request.data.get('image_url', '')
+            
+            if not question_text or len(options) < 2:
+                return Response({"error": "Question text and options are required"}, status=status.HTTP_400_BAD_REQUEST)
+                
+            # If editing
+            if question_id:
+                updated = False
+                for q in test.questions:
+                    if q.id == question_id:
+                        q.question_text = question_text
+                        q.options = options
+                        q.correct_option = correct_option
+                        q.explanation = explanation
+                        q.image_url = image_url
+                        updated = True
+                        break
+                if not updated:
+                    return Response({"error": "Question not found in test"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                # Add new question
+                import uuid
+                new_id = f"q_{str(uuid.uuid4())[:8]}"
+                new_question = MockTestQuestion(
+                    id=new_id,
+                    question_text=question_text,
+                    options=options,
+                    correct_option=correct_option,
+                    explanation=explanation,
+                    image_url=image_url
+                )
+                test.questions.append(new_question)
+                
+            # Recalculate total marks (e.g., count * 4)
+            test.total_marks = len(test.questions) * 4
+            test.save()
+            
+            return Response({"success": True, "message": "Question saved successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error saving question: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def root(request):
     """API root endpoint"""

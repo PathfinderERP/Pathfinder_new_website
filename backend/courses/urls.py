@@ -8,6 +8,7 @@ router.register(r'courses', views.CourseViewSet, basename='course')
 router.register(r'business/admin', views.AdminViewSet, basename='admin')
 router.register(r'data', views.DataViewSet, basename='data')
 router.register(r'purchase', views.PurchaseViewSet, basename='purchase')
+router.register(r'mocktests', views.MockTestViewSet, basename='mocktest')
 
 urlpatterns = [
     path('', views.root, name='courses_root'),
