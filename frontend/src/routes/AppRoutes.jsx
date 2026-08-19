@@ -47,6 +47,7 @@ import AdminManagement from "../components/admin/AdminManagement";
 import UsersManagement from "../components/admin/UsersManagement";
 import AdminSettings from "../components/admin/AdminSettings";
 import MockTestsManagement from "../components/admin/MockTestsManagement";
+import CounsellingBookingsList from "../components/admin/CounsellingBookingsList";
 import AdminProtectedRoute from "../components/common/AdminProtectedRoute";
 import SuperAdminProtectedRoute from "../components/common/SuperAdminProtectedRoute";
 
@@ -401,6 +402,18 @@ const AppRoutes = () => {
           <AdminProtectedRoute requiredPermission="manage_mocktests">
             <AdminLayout>
               <MockTestsManagement />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
+
+      {/* Counselling Bookings Route */}
+      <Route
+        path="/business/admin/counselling-bookings"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_counselling_bookings">
+            <AdminLayout>
+              <CounsellingBookingsList />
             </AdminLayout>
           </AdminProtectedRoute>
         }

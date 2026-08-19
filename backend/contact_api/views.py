@@ -103,8 +103,16 @@ class ApplicationDetailView(APIView):
 
 
 class CounsellingBookingCreateView(APIView):
-    permission_classes = [AllowAny]
-    
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+        
+    def get(self, request):
+        bookings = CounsellingBooking.objects.all().order_by('-submitted_at')
+        serializer = CounsellingBookingSerializer(bookings, many=True)
+        return Response(serializer.data)
+        
     def post(self, request):
         serializer = CounsellingBookingSerializer(data=request.data)
         if serializer.is_valid():
