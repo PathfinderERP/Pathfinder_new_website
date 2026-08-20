@@ -89,6 +89,7 @@ import ChairmanMessage from "../pages/About/ChairmanMessage";
 import Franchise from "../pages/Franchise";
 import { Jeelandingpage } from "../pages/add_landingpage/pages/Jeelandingpage";
 import { Neetlandingpage } from "../pages/add_landingpage/pages/Neetlandingpage";
+import { Clatlandingpage } from "../pages/add_landingpage/pages/Clatlandingpage";
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
@@ -354,6 +355,10 @@ const AppRoutes = () => {
       <Route
         path="/apply_now/allindia/neet"
         element={<Neetlandingpage />}
+      />
+      <Route
+        path="/apply_now/clat"
+        element={<Clatlandingpage />}
       />
 
       {/* Protected Student Routes with Main Layout */}
