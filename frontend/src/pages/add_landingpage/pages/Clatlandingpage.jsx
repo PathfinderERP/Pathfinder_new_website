@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckIcon, PhoneIcon, BookOpenIcon, TrophyIcon, ShieldCheckIcon, AcademicCapIcon, UserGroupIcon, StarIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import Header from '../common/Header';
-import Footer from '../common/Footer';
+import Footer from '../../../components/Footer';
 
 // Seeded Success Carousel (matching the image carousel block)
 const successSlides = [
