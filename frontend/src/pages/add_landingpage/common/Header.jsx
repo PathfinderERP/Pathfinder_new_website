@@ -346,14 +346,14 @@ const Header = () => {
                                         <>
 
                                             <motion.a
-                                                href="tel:9147178886"
+                                                href="tel:8443075751"
                                                 className="hidden lg:flex items-center gap-4 px-8 py-2.5 rounded-xl bg-gray-900 text-white hover:bg-[#EE4600] hover:text-white transition-all duration-300 ml-3 border border-white/10 group h-[52px] shine-effect"
                                                 whileTap={{ scale: 0.95 }}
                                             >
                                                 <PhoneIcon className="h-6 w-6 text-[#EE4600] group-hover:text-white transition-colors duration-300" />
                                                 <div className="flex flex-col -space-y-1 items-start">
                                                     <span className="text-[10px] font-bold text-orange-500/80 uppercase tracking-widest group-hover:text-white transition-colors duration-300">Help Desk</span>
-                                                    <span className="text-xl font-bold italic">9147178886</span>
+                                                    <span className="text-xl font-bold italic">84430 75751</span>
                                                 </div>
                                             </motion.a>
                                         </>
