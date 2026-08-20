@@ -90,29 +90,30 @@ export const Clatlandingpage = () => {
       <Header />
       
       {/* 1. Hero Split Section */}
-      <section className="relative bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-950 pt-28 pb-20 px-4 sm:px-6 lg:px-8 border-b border-white/5">
-        {/* Glow Accents */}
-        <div className="absolute top-1/4 left-10 w-96 h-96 bg-orange-600 opacity-10 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-indigo-600 opacity-10 rounded-full blur-[120px]"></div>
-        
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center relative z-10">
-          
-          {/* Hero Left Content - Banner Image & Success Carousel */}
-          <div className="lg:col-span-7 space-y-6 text-white">
-            <div className="overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
-              <img
-                src="/images/clat-banner.jpg"
-                alt="CLAT Exam 2026 Banner"
-                className="w-full h-auto object-cover transform hover:scale-[1.01] transition duration-500"
-              />
-            </div>
+      <section className="relative bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-950 pt-[72px] pb-20 border-b border-white/5">
+        {/* Full-screen width square banner image */}
+        <div className="w-full overflow-hidden border-b border-white/10 shadow-xl mb-12">
+          <img
+            src="/images/clat-banner.jpg"
+            alt="CLAT Exam 2026 Banner"
+            className="w-full h-auto object-cover rounded-none"
+          />
+        </div>
 
+        {/* Glow Accents */}
+        <div className="absolute top-1/3 left-10 w-96 h-96 bg-orange-600 opacity-5 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-indigo-600 opacity-5 rounded-full blur-[120px]"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-12 items-start relative z-10">
+          
+          {/* Hero Left Content - Countdown & Success Carousel */}
+          <div className="lg:col-span-7 space-y-6 text-white">
             {/* Countdown / Urgency Block */}
-            <div className="space-y-4 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-5 max-w-xl shadow-xl">
+            <div className="space-y-4 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-5 shadow-xl">
               <p className="text-orange-500 text-xs font-black uppercase tracking-wider animate-pulse flex items-center gap-1.5">
                 🚨 CLAT 2026 Exam is coming... Are you ready?
               </p>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex justify-center sm:justify-start">
                 <div className="flex gap-2 sm:gap-3 text-center">
                   <div className="bg-slate-800/80 px-3 py-2 sm:px-4 sm:py-2 rounded-xl min-w-[54px] sm:min-w-[64px] border border-white/5">
                     <span className="block text-lg sm:text-xl font-black text-white">{timeLeft.days}</span>
@@ -131,22 +132,11 @@ export const Clatlandingpage = () => {
                     <span className="text-[8px] sm:text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Secs</span>
                   </div>
                 </div>
-                
-                <div className="flex-1 sm:flex-initial">
-                  <a
-                    href="https://consortiumofnlus.ac.in/clat-2027/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block w-full sm:w-auto text-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-[10px] rounded-xl uppercase tracking-wider transition shadow-lg shadow-orange-600/20"
-                  >
-                    Enroll Now
-                  </a>
-                </div>
               </div>
             </div>
 
             {/* Achievement Card Mock Block (matching design image style) */}
-            <div className="relative bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 max-w-xl shadow-2xl">
+            <div className="relative bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 shadow-2xl">
               
               {/* Profile Image Mock (using initial text badge) */}
               <div className="relative flex-shrink-0 w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-indigo-600 flex items-center justify-center border-2 border-white/20 shadow-xl shadow-black/30">
