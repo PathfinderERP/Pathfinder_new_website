@@ -178,7 +178,7 @@ const Footer = () => {
     {
       name: "WhatsApp",
       icon: FaWhatsapp,
-      href: "https://api.whatsapp.com/send/?phone=918443075751",
+      href: "https://api.whatsapp.com/send/?phone=9147178886",
     },
     {
       name: "Instagram",
@@ -520,11 +520,11 @@ const Footer = () => {
                     <h4 className="text-xl font-semibold mb-3">Contact</h4>
                     <div className="space-y-2">
                       <motion.a
-                        href="tel:+918443075751"
+                        href="tel:+919147178886"
                         className="block text-gray-400 hover:text-orange-500 transition-colors duration-300"
                         whileHover={{ x: 5 }}
                       >
-                        +91 84430 75751
+                        +91 9147178886
                       </motion.a>
                       <motion.a
                         href="mailto:support@pathfinder.edu.in"
@@ -765,7 +765,7 @@ const Footer = () => {
               { name: "Facebook", icon: FaFacebookF, color: "bg-[#1877F2]", href: "https://www.facebook.com/officialPathfinder/" },
               { name: "Youtube", icon: FaYoutube, color: "bg-[#FF0000]", href: "https://www.youtube.com/channel/UCfi5HAZ_rEcnVnXmrB2kcXg" },
               { name: "LinkedIn", icon: FaLinkedinIn, color: "bg-[#0A66C2]", href: "https://www.linkedin.com/company/pathfinder-institutes/" },
-              { name: "Whatsapp", icon: FaWhatsapp, color: "bg-[#25D366]", href: "https://api.whatsapp.com/send/?phone=918443075751" },
+              { name: "Whatsapp", icon: FaWhatsapp, color: "bg-[#25D366]", href: "https://api.whatsapp.com/send/?phone=9147178886" },
               { name: "Instagram", icon: FaInstagram, color: "bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600", href: "https://www.instagram.com/pathfinderinstitutewb/" },
               { name: "X", icon: FaTwitter, color: "bg-black", href: "https://x.com/pathfinder_2016" }
             ].map((social) => (
