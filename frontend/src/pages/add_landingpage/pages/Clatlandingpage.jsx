@@ -97,24 +97,14 @@ export const Clatlandingpage = () => {
         
         <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center relative z-10">
           
-          {/* Hero Left Content - Text & Success Carousel */}
-          <div className="lg:col-span-7 space-y-8 text-white">
-            <div className="space-y-4">
-              <span className="text-orange-500 text-xs font-black tracking-widest uppercase bg-orange-500/10 px-4 py-1.5 rounded-full border border-orange-500/20">
-                ⭐ Admissions Open 2027–2028
-              </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
-                IntelVerse <span className="text-orange-500">Academy</span>
-                <span className="block text-2xl sm:text-3xl font-extrabold text-slate-300 mt-2">
-                  (A Pathfinder Venture)
-                </span>
-              </h1>
-              <p className="text-xl font-bold italic text-slate-300">
-                “The Verdict Begins Before the Exam.”
-              </p>
-              <p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-2xl font-medium">
-                Prepare for CLAT 2027–2028 with expert guidance, structured learning, and regular practice designed to help you secure admission to India's top National Law Universities (NLUs).
-              </p>
+          {/* Hero Left Content - Banner Image & Success Carousel */}
+          <div className="lg:col-span-7 space-y-6 text-white">
+            <div className="overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
+              <img
+                src="/images/clat-banner.jpg"
+                alt="CLAT Exam 2026 Banner"
+                className="w-full h-auto object-cover transform hover:scale-[1.01] transition duration-500"
+              />
             </div>
 
             {/* Countdown / Urgency Block */}
