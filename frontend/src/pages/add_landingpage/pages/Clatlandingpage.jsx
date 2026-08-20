@@ -34,6 +34,33 @@ export const Clatlandingpage = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  // Countdown timer logic
+  useEffect(() => {
+    const targetDate = new Date("2026-12-06T00:00:00").getTime();
+
+    const updateTimer = () => {
+      const now = new Date().getTime();
+      const difference = targetDate - now;
+
+      if (difference <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+      setTimeLeft({ days, hours, minutes, seconds });
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Success slides interval rotation
   useEffect(() => {
@@ -90,6 +117,40 @@ export const Clatlandingpage = () => {
               </p>
             </div>
 
+            {/* Countdown / Urgency Block */}
+            <div className="space-y-4 bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-3xl p-5 max-w-xl shadow-xl">
+              <p className="text-orange-500 text-xs font-black uppercase tracking-wider animate-pulse flex items-center gap-1.5">
+                🚨 CLAT 2026 Exam is coming... Are you ready?
+              </p>
+              <div className="flex gap-3 text-center">
+                <div className="bg-slate-800/80 px-4 py-2 rounded-xl min-w-[64px] border border-white/5">
+                  <span className="block text-xl font-black text-white">{timeLeft.days}</span>
+                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Days</span>
+                </div>
+                <div className="bg-slate-800/80 px-4 py-2 rounded-xl min-w-[64px] border border-white/5">
+                  <span className="block text-xl font-black text-white">{timeLeft.hours}</span>
+                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Hours</span>
+                </div>
+                <div className="bg-slate-800/80 px-4 py-2 rounded-xl min-w-[64px] border border-white/5">
+                  <span className="block text-xl font-black text-white">{timeLeft.minutes}</span>
+                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Mins</span>
+                </div>
+                <div className="bg-slate-800/80 px-4 py-2 rounded-xl min-w-[64px] border border-white/5">
+                  <span className="block text-xl font-black text-white">{timeLeft.seconds}</span>
+                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Secs</span>
+                </div>
+                
+                <div className="flex items-center pl-2">
+                  <button
+                    onClick={() => document.getElementById('landing-registration-form')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="px-5 py-3 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-[10px] rounded-xl uppercase tracking-wider transition shadow-lg shadow-orange-600/20"
+                  >
+                    Enroll Now
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Achievement Card Mock Block (matching design image style) */}
             <div className="relative bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 max-w-xl shadow-2xl">
               
@@ -130,7 +191,7 @@ export const Clatlandingpage = () => {
           </div>
 
           {/* Hero Right Content - Start Application Form Container */}
-          <div className="lg:col-span-5 flex justify-center">
+          <div id="landing-registration-form" className="lg:col-span-5 flex justify-center">
             <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl text-white">
               <h3 className="text-xl font-black text-center tracking-wide uppercase border-b border-white/5 pb-4 mb-6">
                 Start Application
@@ -272,8 +333,38 @@ export const Clatlandingpage = () => {
             <div className="w-16 h-1 bg-[#66090D] mx-auto"></div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Card 1: 2 Year */}
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Card 1: Crash Course */}
+            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition">
+              <div className="space-y-4">
+                <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-extrabold tracking-wider uppercase">Speed Run</span>
+                <h3 className="text-xl font-black text-slate-800">Crash Course</h3>
+                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  Focused sprint program tailored for quick revision, test strategies, and solving mock questions in the final months.
+                </p>
+              </div>
+              <div className="border-t border-slate-200/60 pt-6 mt-8 space-y-2 text-xs font-bold text-slate-700">
+                <p className="flex items-center gap-2">✓ 180+ Hours Core Content</p>
+                <p className="flex items-center gap-2">✓ 24+ Mock Tests & Strategies</p>
+              </div>
+            </div>
+
+            {/* Card 2: Mock Test Series */}
+            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition">
+              <div className="space-y-4">
+                <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-extrabold tracking-wider uppercase">Practice Series</span>
+                <h3 className="text-xl font-black text-slate-800">Mock Test Series</h3>
+                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  Simulate the actual test environment with standard CLAT papers, real exam countdown timers, and detailed performance scorecards.
+                </p>
+              </div>
+              <div className="border-t border-slate-200/60 pt-6 mt-8 space-y-2 text-xs font-bold text-slate-700">
+                <p className="flex items-center gap-2">✓ 52+ Full-Length Mock Tests</p>
+                <p className="flex items-center gap-2">✓ AI-powered performance analysis</p>
+              </div>
+            </div>
+
+            {/* Card 3: 2-Year Programme */}
             <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition">
               <div className="space-y-4">
                 <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-extrabold tracking-wider uppercase">Foundation</span>
@@ -288,7 +379,7 @@ export const Clatlandingpage = () => {
               </div>
             </div>
 
-            {/* Card 2: 1 Year */}
+            {/* Card 4: 1-Year Programme */}
             <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition">
               <div className="space-y-4">
                 <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-[10px] font-extrabold tracking-wider uppercase">Intensive</span>
@@ -300,21 +391,6 @@ export const Clatlandingpage = () => {
               <div className="border-t border-slate-200/60 pt-6 mt-8 space-y-2 text-xs font-bold text-slate-700">
                 <p className="flex items-center gap-2">✓ 200+ Interactive Sessions</p>
                 <p className="flex items-center gap-2">✓ 52 Mock Tests & Analysis</p>
-              </div>
-            </div>
-
-            {/* Card 3: Crash Course */}
-            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition">
-              <div className="space-y-4">
-                <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-extrabold tracking-wider uppercase">Speed Run</span>
-                <h3 className="text-xl font-black text-slate-800">Crash Course</h3>
-                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-                  Focused sprint program tailored for quick revision, test strategies, and solving mock questions in the final months.
-                </p>
-              </div>
-              <div className="border-t border-slate-200/60 pt-6 mt-8 space-y-2 text-xs font-bold text-slate-700">
-                <p className="flex items-center gap-2">✓ 180+ Hours Core Content</p>
-                <p className="flex items-center gap-2">✓ 24+ Mock Tests & Strategies</p>
               </div>
             </div>
           </div>
