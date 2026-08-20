@@ -122,31 +122,35 @@ export const Clatlandingpage = () => {
               <p className="text-orange-500 text-xs font-black uppercase tracking-wider animate-pulse flex items-center gap-1.5">
                 🚨 CLAT 2026 Exam is coming... Are you ready?
               </p>
-              <div className="flex gap-3 text-center">
-                <div className="bg-slate-800/80 px-4 py-2 rounded-xl min-w-[64px] border border-white/5">
-                  <span className="block text-xl font-black text-white">{timeLeft.days}</span>
-                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Days</span>
-                </div>
-                <div className="bg-slate-800/80 px-4 py-2 rounded-xl min-w-[64px] border border-white/5">
-                  <span className="block text-xl font-black text-white">{timeLeft.hours}</span>
-                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Hours</span>
-                </div>
-                <div className="bg-slate-800/80 px-4 py-2 rounded-xl min-w-[64px] border border-white/5">
-                  <span className="block text-xl font-black text-white">{timeLeft.minutes}</span>
-                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Mins</span>
-                </div>
-                <div className="bg-slate-800/80 px-4 py-2 rounded-xl min-w-[64px] border border-white/5">
-                  <span className="block text-xl font-black text-white">{timeLeft.seconds}</span>
-                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Secs</span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex gap-2 sm:gap-3 text-center">
+                  <div className="bg-slate-800/80 px-3 py-2 sm:px-4 sm:py-2 rounded-xl min-w-[54px] sm:min-w-[64px] border border-white/5">
+                    <span className="block text-lg sm:text-xl font-black text-white">{timeLeft.days}</span>
+                    <span className="text-[8px] sm:text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Days</span>
+                  </div>
+                  <div className="bg-slate-800/80 px-3 py-2 sm:px-4 sm:py-2 rounded-xl min-w-[54px] sm:min-w-[64px] border border-white/5">
+                    <span className="block text-lg sm:text-xl font-black text-white">{timeLeft.hours}</span>
+                    <span className="text-[8px] sm:text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Hours</span>
+                  </div>
+                  <div className="bg-slate-800/80 px-3 py-2 sm:px-4 sm:py-2 rounded-xl min-w-[54px] sm:min-w-[64px] border border-white/5">
+                    <span className="block text-lg sm:text-xl font-black text-white">{timeLeft.minutes}</span>
+                    <span className="text-[8px] sm:text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Mins</span>
+                  </div>
+                  <div className="bg-slate-800/80 px-3 py-2 sm:px-4 sm:py-2 rounded-xl min-w-[54px] sm:min-w-[64px] border border-white/5">
+                    <span className="block text-lg sm:text-xl font-black text-white">{timeLeft.seconds}</span>
+                    <span className="text-[8px] sm:text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Secs</span>
+                  </div>
                 </div>
                 
-                <div className="flex items-center pl-2">
-                  <button
-                    onClick={() => document.getElementById('landing-registration-form')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="px-5 py-3 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-[10px] rounded-xl uppercase tracking-wider transition shadow-lg shadow-orange-600/20"
+                <div className="flex-1 sm:flex-initial">
+                  <a
+                    href="https://consortiumofnlus.ac.in/clat-2027/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block w-full sm:w-auto text-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-[10px] rounded-xl uppercase tracking-wider transition shadow-lg shadow-orange-600/20"
                   >
                     Enroll Now
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -335,7 +339,10 @@ export const Clatlandingpage = () => {
 
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* Card 1: Crash Course */}
-            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition">
+            <div className="bg-gradient-to-br from-orange-50/40 to-white border-2 border-orange-500 rounded-3xl p-8 flex flex-col justify-between shadow-md hover:shadow-xl transition relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-orange-600 text-white text-[9px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+                Highly Focussed
+              </div>
               <div className="space-y-4">
                 <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-extrabold tracking-wider uppercase">Speed Run</span>
                 <h3 className="text-xl font-black text-slate-800">Crash Course</h3>
@@ -350,7 +357,10 @@ export const Clatlandingpage = () => {
             </div>
 
             {/* Card 2: Mock Test Series */}
-            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition">
+            <div className="bg-gradient-to-br from-indigo-50/40 to-white border-2 border-indigo-600 rounded-3xl p-8 flex flex-col justify-between shadow-md hover:shadow-xl transition relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[9px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+                Key Resource
+              </div>
               <div className="space-y-4">
                 <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-extrabold tracking-wider uppercase">Practice Series</span>
                 <h3 className="text-xl font-black text-slate-800">Mock Test Series</h3>
