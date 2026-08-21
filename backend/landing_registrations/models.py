@@ -19,7 +19,7 @@ class LandingPageRegistration(Document):
     email = fields.EmailField(required=False, null=True)
     student_class = fields.StringField(max_length=50)
     board = fields.StringField(max_length=100)
-    course_type = fields.StringField(max_length=50, choices=COURSE_TYPE_CHOICES)
+    course_type = fields.StringField(max_length=100)
     centre = fields.StringField(max_length=255)
     last_exam_percentage = fields.StringField(max_length=10, required=False, null=True)
     
