@@ -92,10 +92,10 @@ if mongo_uri:
         pass
 
 elif all([username, password, cluster, db_name]):
-    # Ensure they are strings for the type checker
     encoded_username = quote_plus(str(username))
     encoded_password = quote_plus(str(password))
-    MONGO_URI = f"mongodb+srv://{encoded_username}:{encoded_password}@{cluster}.mongodb.net/{db_name}?retryWrites=true&w=majority"
+    cluster_host = str(cluster) if str(cluster).endswith(".mongodb.net") else f"{cluster}.mongodb.net"
+    MONGO_URI = f"mongodb+srv://{encoded_username}:{encoded_password}@{cluster_host}/{db_name}?retryWrites=true&w=majority"
 
     try:
         disconnect(alias="default")
@@ -106,8 +106,16 @@ elif all([username, password, cluster, db_name]):
             tlsCAFile=certifi.where()
         )
         mongo_connected = True
-    except Exception:
-        pass
+    except Exception as e:
+        try:
+            connect(
+                db=db_name,
+                host=MONGO_URI,
+                alias="default"
+            )
+            mongo_connected = True
+        except Exception as err:
+            print(f"❌ MongoDB connection error: {err}")
 
 else:
     pass
