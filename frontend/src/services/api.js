@@ -666,6 +666,17 @@ export const landingAPI = {
   }
 };
 
+// Shiksha Bandhu API
+export const shikshaBandhuAPI = {
+  login: (credentials) => api.post("/api/shiksha-bandhu/login/", credentials),
+  trackClick: (data) => api.post("/api/shiksha-bandhu/click/", data),
+  getStats: (partnerId) => api.get(`/api/shiksha-bandhu/stats/${partnerId}/`),
+  adminGetPartners: () => api.get("/api/shiksha-bandhu/admin/partners/"),
+  adminCreatePartner: (data) => api.post("/api/shiksha-bandhu/admin/partners/create/", data),
+  adminGetReferrals: () => api.get("/api/shiksha-bandhu/admin/referrals/"),
+  adminUpdateReferral: (id, data) => api.patch(`/api/shiksha-bandhu/admin/referrals/${id}/`, data),
+};
+
 // Franchise Inquiry API
 export const franchiseAPI = {
   submit: (data) => api.post("/api/franchise/register/", data),

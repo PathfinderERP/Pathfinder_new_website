@@ -126,18 +126,13 @@ def create_registration(request):
             except Exception as e:
                 print(f"[ERROR] [EMAIL THREAD] ERROR: {str(e)}")
 
-        # Start the thread AFTER the database transaction is committed
-        from django.db import transaction
-        import time
-
-        def start_email_thread():
-            # Small delay to ensure Render network and DB are ready
-            time.sleep(1)
+        # Start background email thread safely for MongoEngine
+        try:
             email_thread = threading.Thread(target=send_emails_async, args=(registration.id,))
             email_thread.daemon = True
             email_thread.start()
-
-        transaction.on_commit(start_email_thread)
+        except Exception as err:
+            print(f"[ERROR] Launching email thread failed: {err}")
         
         return Response({
             'success': True,

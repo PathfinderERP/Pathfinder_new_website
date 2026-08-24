@@ -1396,6 +1396,156 @@ export default function CustomPagesManagement() {
                           </div>
                         )}
                       </div>
+
+                      {/* Custom Static Course Cards Editor */}
+                      <div className="border-t border-gray-200 dark:border-slate-800 pt-5 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900 dark:text-white">Custom Program Cards (JEE / NEET / Foundation)</h4>
+                            <p className="text-xs text-gray-500 mt-0.5">Manually defined program cards shown when database course filters are not linked</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currentList = editSections.courses.courses_list || [];
+                              setEditSections({
+                                ...editSections,
+                                courses: {
+                                  ...editSections.courses,
+                                  courses_list: [
+                                    ...currentList,
+                                    { name: "JEE 1-Year Classroom Program", duration: "1 Year", target: "Class 12 Passed / XI Students", features: ["Interactive Live Classes", "Daily Practice Problems (DPP)", "All India Test Series (AITS)"] }
+                                  ]
+                                }
+                              });
+                            }}
+                            className="bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950/20 dark:hover:bg-orange-950/40 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition-all"
+                          >
+                            <PlusIcon className="w-3.5 h-3.5" /> Add Program Card
+                          </button>
+                        </div>
+
+                        {(editSections.courses.courses_list || []).length === 0 ? (
+                          <div className="text-center py-6 border border-dashed border-gray-200 dark:border-slate-800 rounded-xl text-xs text-gray-400">
+                            No custom program cards added. Click "Add Program Card" above to add JEE or NEET cards.
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {(editSections.courses.courses_list || []).map((card, cIdx) => (
+                              <div key={cIdx} className="bg-gray-50 dark:bg-slate-900 p-4 rounded-xl border border-gray-200 dark:border-slate-800 space-y-3 relative">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const list = [...editSections.courses.courses_list];
+                                    list.splice(cIdx, 1);
+                                    setEditSections({ ...editSections, courses: { ...editSections.courses, courses_list: list } });
+                                  }}
+                                  className="absolute top-3 right-3 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
+                                  title="Delete Card"
+                                >
+                                  <TrashIcon className="w-4 h-4" />
+                                </button>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pr-8">
+                                  <div className="space-y-1 sm:col-span-2">
+                                    <label className="text-[10px] font-bold uppercase text-gray-500">Program Name</label>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g. JEE 1-Year Classroom Program"
+                                      value={card.name || ""}
+                                      onChange={(e) => {
+                                        const list = [...editSections.courses.courses_list];
+                                        list[cIdx] = { ...list[cIdx], name: e.target.value };
+                                        setEditSections({ ...editSections, courses: { ...editSections.courses, courses_list: list } });
+                                      }}
+                                      className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-900 dark:text-white"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] font-bold uppercase text-gray-500">Duration</label>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g. 1 Year / 2 Years"
+                                      value={card.duration || ""}
+                                      onChange={(e) => {
+                                        const list = [...editSections.courses.courses_list];
+                                        list[cIdx] = { ...list[cIdx], duration: e.target.value };
+                                        setEditSections({ ...editSections, courses: { ...editSections.courses, courses_list: list } });
+                                      }}
+                                      className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-bold uppercase text-gray-500">Target Audience</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. Class 12 Passed / Class 11 Students"
+                                    value={card.target || ""}
+                                    onChange={(e) => {
+                                      const list = [...editSections.courses.courses_list];
+                                      list[cIdx] = { ...list[cIdx], target: e.target.value };
+                                      setEditSections({ ...editSections, courses: { ...editSections.courses, courses_list: list } });
+                                    }}
+                                    className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white"
+                                  />
+                                </div>
+
+                                {/* Feature / Key Highlights List */}
+                                <div className="space-y-2 pt-1">
+                                  <div className="flex justify-between items-center">
+                                    <label className="text-[10px] font-bold uppercase text-gray-500">Key Highlights / Features</label>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const list = [...editSections.courses.courses_list];
+                                        const feats = list[cIdx].features || [];
+                                        list[cIdx] = { ...list[cIdx], features: [...feats, "New Feature Highlight"] };
+                                        setEditSections({ ...editSections, courses: { ...editSections.courses, courses_list: list } });
+                                      }}
+                                      className="text-[10px] font-bold text-orange-600 hover:underline flex items-center gap-1"
+                                    >
+                                      + Add Highlight
+                                    </button>
+                                  </div>
+                                  <div className="space-y-1.5">
+                                    {(card.features || []).map((feat, fIdx) => (
+                                      <div key={fIdx} className="flex items-center gap-2">
+                                        <input
+                                          type="text"
+                                          value={feat}
+                                          onChange={(e) => {
+                                            const list = [...editSections.courses.courses_list];
+                                            const feats = [...(list[cIdx].features || [])];
+                                            feats[fIdx] = e.target.value;
+                                            list[cIdx] = { ...list[cIdx], features: feats };
+                                            setEditSections({ ...editSections, courses: { ...editSections.courses, courses_list: list } });
+                                          }}
+                                          className="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-gray-800 dark:text-gray-200"
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const list = [...editSections.courses.courses_list];
+                                            const feats = [...(list[cIdx].features || [])];
+                                            feats.splice(fIdx, 1);
+                                            list[cIdx] = { ...list[cIdx], features: feats };
+                                            setEditSections({ ...editSections, courses: { ...editSections.courses, courses_list: list } });
+                                          }}
+                                          className="p-1 text-gray-400 hover:text-red-500 rounded"
+                                        >
+                                          <XMarkIcon className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 

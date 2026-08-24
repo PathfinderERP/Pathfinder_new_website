@@ -158,6 +158,7 @@ INSTALLED_APPS = [
     'jee',
     'site_config',
     'custom_pages',
+    'shiksha_bandhu',
 ]
 
 

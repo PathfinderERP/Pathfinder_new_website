@@ -33,6 +33,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         { name: "Mock Tests",       path: "/business/admin/mocktests",           icon: TrophyIcon,              permission: "manage_mocktests" },
         { name: "Applicants",       path: "/business/admin/course-applications", icon: DocumentTextIcon,        permission: "manage_applications" },
         { name: "Ads Leads",        path: "/business/admin/ads-leads",           icon: UserGroupIcon,           permission: "manage_ads_leads" },
+        { name: "Shiksha Hub",       path: "/business/admin/shiksha-hub",        icon: UserGroupIcon,           permission: "manage_ads_leads" },
         { name: "Franchise",        path: "/business/admin/franchise-inquiries", icon: BuildingStorefrontIcon,  permission: "manage_franchise" },
         { name: "Counselling",      path: "/business/admin/counselling-bookings", icon: UserIcon,                permission: "manage_counselling_bookings" },
         { name: "Centres",          path: "/business/admin/centres",             icon: BuildingOfficeIcon,      permission: "manage_centres" },

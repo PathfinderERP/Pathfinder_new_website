@@ -25,13 +25,14 @@ class LandingPageRegistration(Document):
     
     # Metadata
     page_source = fields.StringField(max_length=50)
+    referral_id = fields.StringField(max_length=50, required=False, null=True)
     created_at = fields.DateTimeField(default=datetime.datetime.utcnow)
     is_contacted = fields.BooleanField(default=False)
     
     meta = {
         'collection': 'landing_page_registrations',
         'ordering': ['-created_at'],
-        'indexes': ['email', 'phone', 'course_type', 'page_source']
+        'indexes': ['email', 'phone', 'course_type', 'page_source', 'referral_id']
     }
     
     def __str__(self):

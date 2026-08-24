@@ -74,6 +74,7 @@ import NEETAnalysisManagement from "../components/admin/NEETAnalysisManagement.j
 import JEEAnalysisManagement from "../components/admin/JEEAnalysisManagement.jsx";
 import CustomPagesManagement from "../components/admin/CustomPagesManagement.jsx";
 import AdsLeadsList from "../components/admin/AdsLeadsList";
+import ShikshaHubManagement from "../components/admin/ShikshaHubManagement.jsx";
 import FranchiseInquiryList from "../components/admin/FranchiseInquiryList";
 import PopupManagement from "../components/admin/PopupManagement";
 import Centres from "../pages/Centres/Centres";
@@ -93,6 +94,15 @@ import { Clatlandingpage } from "../pages/add_landingpage/pages/Clatlandingpage"
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
+
+// Shiksha Bandhu Pages
+import { ShikshaBandhuLogin } from "../pages/shiksha_bandhu/ShikshaBandhuLogin";
+import { ShikshaBandhuDashboard } from "../pages/shiksha_bandhu/ShikshaBandhuDashboard";
+import { ShikshaBandhuMockTests } from "../pages/shiksha_bandhu/ShikshaBandhuMockTests";
+import { ShikshaBandhuReferrals } from "../pages/shiksha_bandhu/ShikshaBandhuReferrals";
+import { ShikshaBandhuEarnings } from "../pages/shiksha_bandhu/ShikshaBandhuEarnings";
+import { ShikshaBandhuProfile } from "../pages/shiksha_bandhu/ShikshaBandhuProfile";
+import { PublicReferralLanding } from "../pages/shiksha_bandhu/PublicReferralLanding";
 
 const AppRoutes = () => {
   return (
@@ -361,6 +371,17 @@ const AppRoutes = () => {
         element={<Clatlandingpage />}
       />
 
+      {/* Shiksha Bandhu Referral Partner System Routes */}
+      <Route path="/shiksha-bandhu" element={<ShikshaBandhuLogin />} />
+      <Route path="/shiksha-bandhu/login" element={<ShikshaBandhuLogin />} />
+      <Route path="/shiksha-bandhu/dashboard" element={<ShikshaBandhuDashboard />} />
+      <Route path="/shiksha-bandhu/mock-tests" element={<ShikshaBandhuMockTests />} />
+      <Route path="/shiksha-bandhu/referrals" element={<ShikshaBandhuReferrals />} />
+      <Route path="/shiksha-bandhu/earnings" element={<ShikshaBandhuEarnings />} />
+      <Route path="/shiksha-bandhu/profile" element={<ShikshaBandhuProfile />} />
+      <Route path="/sb/:referralId" element={<PublicReferralLanding />} />
+      <Route path="/sb/:referralId/:programSlug" element={<PublicReferralLanding />} />
+
       {/* Protected Student Routes with Main Layout */}
       <Route
         path="/buynow"
@@ -545,6 +566,16 @@ const AppRoutes = () => {
           <AdminProtectedRoute requiredPermission="manage_ads_leads">
             <AdminLayout>
               <AdsLeadsList />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/business/admin/shiksha-hub"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_ads_leads">
+            <AdminLayout>
+              <ShikshaHubManagement />
             </AdminLayout>
           </AdminProtectedRoute>
         }

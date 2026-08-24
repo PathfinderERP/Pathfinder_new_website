@@ -60,4 +60,6 @@ urlpatterns = [
     path('api/site-config/', include('site_config.urls')),
     path('api/custom-pages/', include('custom_pages.urls')),
     path('api/business/admin/custom-pages/', include('custom_pages.urls')),
+    path('api/shiksha-bandhu/', include('shiksha_bandhu.urls')),
+    path('api/business/admin/shiksha-bandhu/', include('shiksha_bandhu.urls')),
 ]
