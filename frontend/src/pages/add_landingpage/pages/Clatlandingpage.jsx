@@ -104,13 +104,18 @@ export const Clatlandingpage = () => {
       
       {/* 1. Hero Split Section */}
       <section className="relative bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-950 pt-[72px] pb-20 border-b border-white/5">
-        {/* Full-screen width square banner image */}
+        {/* Full-screen width banner image with WebP optimization */}
         <div className="w-full overflow-hidden border-b border-white/10 shadow-xl mb-12">
-          <img
-            src="/images/clat-banner.jpg"
-            alt="CLAT Exam 2026 Banner"
-            className="w-full h-auto object-cover rounded-none"
-          />
+          <picture>
+            <source srcSet="/images/clat-banner.webp" type="image/webp" />
+            <img
+              src="/images/clat-banner.jpg"
+              alt="CLAT Exam 2026 Banner"
+              className="w-full h-auto object-cover rounded-none"
+              loading="eager"
+              fetchPriority="high"
+            />
+          </picture>
         </div>
 
         {/* Glow Accents */}
