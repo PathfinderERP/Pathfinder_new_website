@@ -95,79 +95,24 @@ export function getProgram(slug) {
 
 export const DEMO_BANDHU = {
   id: "SB004",
-  name: "Rahul Das",
-  mobile: "+91 91471 78886",
-  email: "rahul.das@example.com",
-  joinedOn: "12 Feb 2026",
+  name: "Partner",
+  mobile: "",
+  email: "",
+  joinedOn: "Today",
   status: "active",
   stats: {
-    clicks: 128,
-    registrations: 24,
-    successfulReferrals: 12,
-    totalBonus: 3000,
-    pendingBonus: 500,
-    thisMonth: 1500,
+    clicks: 0,
+    registrations: 0,
+    successfulReferrals: 0,
+    totalBonus: 0,
+    pendingBonus: 0,
+    thisMonth: 0,
   },
 };
 
-export const DEMO_REFERRALS = [
-  {
-    id: "L-1024",
-    student: "Student #1024",
-    program: "Madhyamik Mock Test",
-    date: "18 Aug 2026",
-    status: "Successful",
-    bonus: 250,
-  },
-  {
-    id: "L-1031",
-    student: "Student #1031",
-    program: "CBSE Class X",
-    date: "19 Aug 2026",
-    status: "Pending",
-    bonus: null,
-  },
-  {
-    id: "L-1038",
-    student: "Student #1038",
-    program: "CBSE Class XII",
-    date: "20 Aug 2026",
-    status: "Successful",
-    bonus: 250,
-  },
-  {
-    id: "L-1042",
-    student: "Student #1042",
-    program: "ICSE Class X",
-    date: "20 Aug 2026",
-    status: "Cancelled",
-    bonus: null,
-  },
-];
+export const DEMO_REFERRALS = [];
 
-export const DEMO_BONUS_HISTORY = [
-  {
-    date: "18 Aug 2026",
-    program: "Madhyamik Mock Test",
-    referral: "Student #1024",
-    status: "Successful",
-    bonus: 250,
-  },
-  {
-    date: "20 Aug 2026",
-    program: "CBSE Class XII",
-    referral: "Student #1038",
-    status: "Successful",
-    bonus: 250,
-  },
-  {
-    date: "19 Aug 2026",
-    program: "CBSE Class X",
-    referral: "Student #1031",
-    status: "Pending",
-    bonus: 250,
-  },
-];
+export const DEMO_BONUS_HISTORY = [];
 
 export const PATHFINDER_PHONE = "9147178886";
 

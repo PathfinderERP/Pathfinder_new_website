@@ -19,7 +19,7 @@ export const ShikshaBandhuReferrals = () => {
           }
         }, [user?.id]);
 
-        const stats = liveData?.stats || user.stats || { clicks: 128, registrations: 24, successfulReferrals: 12 };
+        const stats = liveData?.stats || user.stats || { clicks: 0, registrations: 0, successfulReferrals: 0 };
         const referralsList = liveData?.referrals || DEMO_REFERRALS;
 
         return (

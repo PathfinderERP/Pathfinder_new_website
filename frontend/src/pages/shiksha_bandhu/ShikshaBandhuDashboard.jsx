@@ -38,10 +38,10 @@ export const ShikshaBandhuDashboard = () => {
         }, [user?.id]);
 
         const stats = liveStats || user.stats || {
-          clicks: 128,
-          registrations: 24,
-          successfulReferrals: 12,
-          totalBonus: 3000
+          clicks: 0,
+          registrations: 0,
+          successfulReferrals: 0,
+          totalBonus: 0
         };
 
         const handleCopyId = () => {

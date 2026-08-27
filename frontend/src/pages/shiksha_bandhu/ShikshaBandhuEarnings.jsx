@@ -20,10 +20,10 @@ export const ShikshaBandhuEarnings = () => {
         }, [user?.id]);
 
         const stats = liveData?.stats || user.stats || {
-          totalBonus: 3000,
-          pendingBonus: 500,
-          thisMonth: 1500,
-          successfulReferrals: 12
+          totalBonus: 0,
+          pendingBonus: 0,
+          thisMonth: 0,
+          successfulReferrals: 0
         };
         const bonusHistory = liveData?.bonusHistory || DEMO_BONUS_HISTORY;
 
