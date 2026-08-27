@@ -13,7 +13,14 @@ export const ShikshaBandhuLogin = () => {
   // Partner Self Registration Modal
   const [regModalOpen, setRegModalOpen] = useState(false);
   const [regSubmitted, setRegSubmitted] = useState(false);
-  const [regForm, setRegForm] = useState({ name: "", mobile: "", email: "" });
+  const [regForm, setRegForm] = useState({
+    name: "",
+    mobile: "",
+    email: "",
+    profession: "Teacher / Educator",
+    qualification: "Graduate",
+    city_address: "",
+  });
   const [regSubmitting, setRegSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -48,7 +55,7 @@ export const ShikshaBandhuLogin = () => {
     try {
       await shikshaBandhuAPI.trackClick({
         partner_id: "SELF_REGISTRATION",
-        program_slug: `Partner Request: ${regForm.name} (${regForm.mobile}, ${regForm.email})`
+        program_slug: `Partner Application: ${regForm.name} | Mobile: ${regForm.mobile} | Email: ${regForm.email} | Profession: ${regForm.profession} | Qualification: ${regForm.qualification} | City: ${regForm.city_address}`
       });
       setRegSubmitted(true);
     } catch (err) {
@@ -208,26 +215,72 @@ export const ShikshaBandhuLogin = () => {
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="uppercase tracking-wider">Mobile Number</label>
-                    <input
-                      type="tel"
-                      required
-                      value={regForm.mobile}
-                      onChange={(e) => setRegForm((prev) => ({ ...prev, mobile: e.target.value }))}
-                      placeholder="Enter 10-digit Phone Number"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="uppercase tracking-wider">Mobile Number</label>
+                      <input
+                        type="tel"
+                        required
+                        value={regForm.mobile}
+                        onChange={(e) => setRegForm((prev) => ({ ...prev, mobile: e.target.value }))}
+                        placeholder="10-digit Phone Number"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="uppercase tracking-wider">Email Address</label>
+                      <input
+                        type="email"
+                        required
+                        value={regForm.email}
+                        onChange={(e) => setRegForm((prev) => ({ ...prev, email: e.target.value }))}
+                        placeholder="email@example.com"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="uppercase tracking-wider">Profession / Role</label>
+                      <select
+                        value={regForm.profession}
+                        onChange={(e) => setRegForm((prev) => ({ ...prev, profession: e.target.value }))}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-semibold"
+                      >
+                        <option value="Teacher / Educator">Teacher / Educator</option>
+                        <option value="Tutor / Private Coach">Tutor / Private Coach</option>
+                        <option value="School Admin / Faculty">School Admin / Faculty</option>
+                        <option value="Student Counsellor">Student Counsellor</option>
+                        <option value="Parent / Guardian">Parent / Guardian</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="uppercase tracking-wider">Highest Qualification</label>
+                      <select
+                        value={regForm.qualification}
+                        onChange={(e) => setRegForm((prev) => ({ ...prev, qualification: e.target.value }))}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-semibold"
+                      >
+                        <option value="Graduate">Graduate (B.Sc / B.A / B.Tech / B.Com)</option>
+                        <option value="Post Graduate">Post Graduate (M.Sc / M.A / M.Tech)</option>
+                        <option value="Diploma / B.Ed">Diploma / B.Ed</option>
+                        <option value="Undergraduate Student">Undergraduate Student</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="uppercase tracking-wider">Email Address</label>
+                    <label className="uppercase tracking-wider">City / Location</label>
                     <input
-                      type="email"
+                      type="text"
                       required
-                      value={regForm.email}
-                      onChange={(e) => setRegForm((prev) => ({ ...prev, email: e.target.value }))}
-                      placeholder="email@example.com"
+                      value={regForm.city_address}
+                      onChange={(e) => setRegForm((prev) => ({ ...prev, city_address: e.target.value }))}
+                      placeholder="e.g. Kolkata, Howrah, Siliguri"
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
                     />
                   </div>
