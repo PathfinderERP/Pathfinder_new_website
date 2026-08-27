@@ -17,8 +17,8 @@ export const ShikshaBandhuLogin = () => {
     name: "",
     mobile: "",
     email: "",
-    profession: "Teacher / Educator",
-    qualification: "Graduate",
+    profession: "Student",
+    qualification: "Class X Student",
     city_address: "",
   });
   const [regSubmitting, setRegSubmitting] = useState(false);
@@ -243,32 +243,36 @@ export const ShikshaBandhuLogin = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <label className="uppercase tracking-wider">Profession / Role</label>
+                      <label className="uppercase tracking-wider">I am a</label>
                       <select
                         value={regForm.profession}
                         onChange={(e) => setRegForm((prev) => ({ ...prev, profession: e.target.value }))}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-semibold"
                       >
+                        <option value="Student">Student</option>
                         <option value="Teacher / Educator">Teacher / Educator</option>
                         <option value="Tutor / Private Coach">Tutor / Private Coach</option>
                         <option value="School Admin / Faculty">School Admin / Faculty</option>
-                        <option value="Student Counsellor">Student Counsellor</option>
                         <option value="Parent / Guardian">Parent / Guardian</option>
                         <option value="Other">Other</option>
                       </select>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="uppercase tracking-wider">Highest Qualification</label>
+                      <label className="uppercase tracking-wider">Class / Qualification</label>
                       <select
                         value={regForm.qualification}
                         onChange={(e) => setRegForm((prev) => ({ ...prev, qualification: e.target.value }))}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-semibold"
                       >
+                        <option value="Class IX Student">Class IX Student</option>
+                        <option value="Class X Student">Class X Student</option>
+                        <option value="Class XI Student">Class XI Student</option>
+                        <option value="Class XII Student">Class XII Student</option>
+                        <option value="12th Passed / Aspirant">12th Passed / Aspirant</option>
                         <option value="Graduate">Graduate (B.Sc / B.A / B.Tech / B.Com)</option>
                         <option value="Post Graduate">Post Graduate (M.Sc / M.A / M.Tech)</option>
                         <option value="Diploma / B.Ed">Diploma / B.Ed</option>
-                        <option value="Undergraduate Student">Undergraduate Student</option>
                       </select>
                     </div>
                   </div>
