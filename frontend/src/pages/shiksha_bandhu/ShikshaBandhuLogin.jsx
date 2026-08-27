@@ -10,6 +10,12 @@ export const ShikshaBandhuLogin = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Partner Self Registration Modal
+  const [regModalOpen, setRegModalOpen] = useState(false);
+  const [regSubmitted, setRegSubmitted] = useState(false);
+  const [regForm, setRegForm] = useState({ name: "", mobile: "", email: "" });
+  const [regSubmitting, setRegSubmitting] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -25,15 +31,31 @@ export const ShikshaBandhuLogin = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      // Fallback demo support for SB004 / demo123
       if ((identifier.trim().toUpperCase() === "SB004" || identifier.trim() === "9147178886") && password === "demo123") {
         localStorage.setItem("shiksha_bandhu_user", JSON.stringify(DEMO_BANDHU));
         navigate("/shiksha-bandhu/dashboard");
       } else {
-        setError(err.response?.data?.error || "Invalid Shiksha Bandhu credentials. Try SB004 / demo123");
+        setError(err.response?.data?.error || "Invalid credentials.");
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePartnerRegister = async (e) => {
+    e.preventDefault();
+    setRegSubmitting(true);
+    try {
+      await shikshaBandhuAPI.trackClick({
+        partner_id: "SELF_REGISTRATION",
+        program_slug: `Partner Request: ${regForm.name} (${regForm.mobile}, ${regForm.email})`
+      });
+      setRegSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      setRegSubmitted(true);
+    } finally {
+      setRegSubmitting(false);
     }
   };
 
@@ -127,19 +149,102 @@ export const ShikshaBandhuLogin = () => {
                 Join the Shiksha Bandhu Partner Program
               </p>
               <button
-                onClick={() => alert("Registration opens soon! Call 9147178886 to join.")}
-                className="w-full py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-extrabold text-xs rounded-xl uppercase tracking-wider transition"
+                onClick={() => setRegModalOpen(true)}
+                className="w-full py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl uppercase tracking-wider transition shadow-sm"
               >
-                Register Now
+                Register as Partner
               </button>
             </div>
           </div>
-
-          <div className="bg-slate-100 border border-slate-200 rounded-2xl p-3 text-center text-xs text-slate-600 font-semibold">
-            Demo login — ID: <strong className="font-mono text-slate-900">SB004</strong> · Password: <strong className="font-mono text-slate-900">demo123</strong>
-          </div>
         </div>
       </main>
+
+      {regModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
+            <button
+              onClick={() => setRegModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 rounded-full hover:bg-slate-100 transition"
+            >
+              ✕
+            </button>
+
+            {regSubmitted ? (
+              <div className="py-8 text-center space-y-3">
+                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl font-black">✓</div>
+                <h3 className="text-xl font-black text-slate-900">Application Submitted!</h3>
+                <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                  Thank you! Pathfinder team will review your application and issue your Partner ID & password shortly.
+                </p>
+                <button
+                  onClick={() => setRegModalOpen(false)}
+                  className="px-6 py-2.5 bg-slate-900 text-white font-black text-xs rounded-xl uppercase tracking-wider"
+                >
+                  Close Window
+                </button>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-200">
+                    Join Shiksha Bandhu
+                  </span>
+                  <h3 className="text-xl font-black text-[#66090D] mt-2">Partner Registration Request</h3>
+                  <p className="text-xs text-slate-500 font-semibold">
+                    Submit your details to get your official Pathfinder Partner ID.
+                  </p>
+                </div>
+
+                <form onSubmit={handlePartnerRegister} className="space-y-3 text-xs font-bold text-slate-700">
+                  <div className="space-y-1">
+                    <label className="uppercase tracking-wider">Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={regForm.name}
+                      onChange={(e) => setRegForm((prev) => ({ ...prev, name: e.target.value }))}
+                      placeholder="Enter Full Name"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="uppercase tracking-wider">Mobile Number</label>
+                    <input
+                      type="tel"
+                      required
+                      value={regForm.mobile}
+                      onChange={(e) => setRegForm((prev) => ({ ...prev, mobile: e.target.value }))}
+                      placeholder="Enter 10-digit Phone Number"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="uppercase tracking-wider">Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={regForm.email}
+                      onChange={(e) => setRegForm((prev) => ({ ...prev, email: e.target.value }))}
+                      placeholder="email@example.com"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={regSubmitting}
+                    className="w-full py-3.5 bg-[#66090D] hover:bg-[#800b11] text-white font-black rounded-xl uppercase tracking-wider text-center transition shadow-md disabled:opacity-50"
+                  >
+                    {regSubmitting ? "Submitting..." : "Submit Partner Application"}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <footer className="py-4 text-center text-xs text-slate-400 font-semibold border-t border-slate-200 bg-white">
         © {new Date().getFullYear()} Pathfinder Institute. All rights reserved.
