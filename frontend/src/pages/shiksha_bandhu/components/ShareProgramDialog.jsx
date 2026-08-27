@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { XMarkIcon, ClipboardDocumentIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { FaWhatsapp, FaTelegramPlane, FaFacebookF, FaTwitter } from "react-icons/fa";
 import { referralLink } from "../ShikshaBandhuData";
 
 export const ShareProgramDialog = ({ program, referralId, onClose }) => {
@@ -19,6 +20,7 @@ export const ShareProgramDialog = ({ program, referralId, onClose }) => {
   const whatsappUrl = `https://wa.me/?text=${encodedText}`;
   const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(program.name)}`;
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fadeIn">
@@ -70,30 +72,46 @@ export const ShareProgramDialog = ({ program, referralId, onClose }) => {
 
         <div className="space-y-2">
           <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Share Directly</label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noreferrer"
-              className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              className="py-2.5 px-2 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              title="Share on WhatsApp"
             >
-              💬 WhatsApp
+              <FaWhatsapp className="w-4 h-4" />
+              <span>WhatsApp</span>
             </a>
             <a
               href={telegramUrl}
               target="_blank"
               rel="noreferrer"
-              className="py-2.5 px-3 bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              className="py-2.5 px-2 bg-[#0088cc] hover:bg-[#0077b3] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              title="Share on Telegram"
             >
-              ✈️ Telegram
+              <FaTelegramPlane className="w-4 h-4" />
+              <span>Telegram</span>
             </a>
             <a
               href={facebookUrl}
               target="_blank"
               rel="noreferrer"
-              className="py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              className="py-2.5 px-2 bg-[#1877F2] hover:bg-[#1565d8] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              title="Share on Facebook"
             >
-              📘 Facebook
+              <FaFacebookF className="w-3.5 h-3.5" />
+              <span>Facebook</span>
+            </a>
+            <a
+              href={twitterUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="py-2.5 px-2 bg-[#1DA1F2] hover:bg-[#0c85d0] text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm"
+              title="Share on Twitter / X"
+            >
+              <FaTwitter className="w-4 h-4" />
+              <span>Twitter</span>
             </a>
           </div>
         </div>
