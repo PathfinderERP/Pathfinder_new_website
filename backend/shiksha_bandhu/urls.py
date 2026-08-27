@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('login/', views.partner_login, name='shiksha-partner-login'),
+    path('register/', views.partner_register, name='shiksha-partner-register'),
     path('click/', views.track_click, name='shiksha-track-click'),
     path('stats/<str:partner_id>/', views.get_partner_stats, name='shiksha-partner-stats'),
     path('admin/partners/', views.admin_list_partners, name='shiksha-admin-partners'),

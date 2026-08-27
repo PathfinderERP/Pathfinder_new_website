@@ -10,13 +10,14 @@ export const ShikshaBandhuLogin = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Partner Self Registration Modal
+  // Partner Direct Self-Registration Modal
   const [regModalOpen, setRegModalOpen] = useState(false);
-  const [regSubmitted, setRegSubmitted] = useState(false);
+  const [regError, setRegError] = useState("");
   const [regForm, setRegForm] = useState({
     name: "",
     mobile: "",
     email: "",
+    password: "",
     profession: "Student",
     qualification: "Class X Student",
     city_address: "",
@@ -51,16 +52,26 @@ export const ShikshaBandhuLogin = () => {
 
   const handlePartnerRegister = async (e) => {
     e.preventDefault();
+    setRegError("");
     setRegSubmitting(true);
+
     try {
-      await shikshaBandhuAPI.trackClick({
-        partner_id: "SELF_REGISTRATION",
-        program_slug: `Partner Application: ${regForm.name} | Mobile: ${regForm.mobile} | Email: ${regForm.email} | Profession: ${regForm.profession} | Qualification: ${regForm.qualification} | City: ${regForm.city_address}`
+      const res = await shikshaBandhuAPI.register({
+        name: regForm.name,
+        mobile: regForm.mobile,
+        email: regForm.email,
+        password: regForm.password,
       });
-      setRegSubmitted(true);
+
+      if (res.data && res.data.success) {
+        localStorage.setItem("shiksha_bandhu_user", JSON.stringify(res.data.user));
+        navigate("/shiksha-bandhu/dashboard");
+      } else {
+        setRegError("Registration failed. Please try again.");
+      }
     } catch (err) {
-      console.error(err);
-      setRegSubmitted(true);
+      console.error("Registration error:", err);
+      setRegError(err.response?.data?.error || "Failed to register partner account.");
     } finally {
       setRegSubmitting(false);
     }
@@ -176,129 +187,128 @@ export const ShikshaBandhuLogin = () => {
               ✕
             </button>
 
-            {regSubmitted ? (
-              <div className="py-8 text-center space-y-3">
-                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl font-black">✓</div>
-                <h3 className="text-xl font-black text-slate-900">Application Submitted!</h3>
-                <p className="text-xs text-slate-600 font-semibold leading-relaxed">
-                  Thank you! Pathfinder team will review your application and issue your Partner ID & password shortly.
-                </p>
-                <button
-                  onClick={() => setRegModalOpen(false)}
-                  className="px-6 py-2.5 bg-slate-900 text-white font-black text-xs rounded-xl uppercase tracking-wider"
-                >
-                  Close Window
-                </button>
+            <div>
+              <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-200">
+                Join Shiksha Bandhu
+              </span>
+              <h3 className="text-xl font-black text-[#66090D] mt-2">Instant Partner Registration</h3>
+              <p className="text-xs text-slate-500 font-semibold">
+                Create your partner account to instantly receive your Partner ID & dashboard access.
+              </p>
+            </div>
+
+            {regError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs font-bold p-3 rounded-xl">
+                ⚠️ {regError}
               </div>
-            ) : (
-              <>
-                <div>
-                  <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-200">
-                    Join Shiksha Bandhu
-                  </span>
-                  <h3 className="text-xl font-black text-[#66090D] mt-2">Partner Registration Request</h3>
-                  <p className="text-xs text-slate-500 font-semibold">
-                    Submit your details to get your official Pathfinder Partner ID.
-                  </p>
+            )}
+
+            <form onSubmit={handlePartnerRegister} className="space-y-3 text-xs font-bold text-slate-700">
+              <div className="space-y-1">
+                <label className="uppercase tracking-wider">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={regForm.name}
+                  onChange={(e) => setRegForm((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter Full Name"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="uppercase tracking-wider">Mobile Number</label>
+                  <input
+                    type="tel"
+                    required
+                    value={regForm.mobile}
+                    onChange={(e) => setRegForm((prev) => ({ ...prev, mobile: e.target.value }))}
+                    placeholder="10-digit Phone Number"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                  />
                 </div>
 
-                <form onSubmit={handlePartnerRegister} className="space-y-3 text-xs font-bold text-slate-700">
-                  <div className="space-y-1">
-                    <label className="uppercase tracking-wider">Full Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={regForm.name}
-                      onChange={(e) => setRegForm((prev) => ({ ...prev, name: e.target.value }))}
-                      placeholder="Enter Full Name"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
-                    />
-                  </div>
+                <div className="space-y-1">
+                  <label className="uppercase tracking-wider">Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={regForm.password}
+                    onChange={(e) => setRegForm((prev) => ({ ...prev, password: e.target.value }))}
+                    placeholder="Create Password"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                  />
+                </div>
+              </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="uppercase tracking-wider">Mobile Number</label>
-                      <input
-                        type="tel"
-                        required
-                        value={regForm.mobile}
-                        onChange={(e) => setRegForm((prev) => ({ ...prev, mobile: e.target.value }))}
-                        placeholder="10-digit Phone Number"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
-                      />
-                    </div>
+              <div className="space-y-1">
+                <label className="uppercase tracking-wider">Email Address</label>
+                <input
+                  type="email"
+                  value={regForm.email}
+                  onChange={(e) => setRegForm((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="email@example.com (Optional)"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                />
+              </div>
 
-                    <div className="space-y-1">
-                      <label className="uppercase tracking-wider">Email Address</label>
-                      <input
-                        type="email"
-                        required
-                        value={regForm.email}
-                        onChange={(e) => setRegForm((prev) => ({ ...prev, email: e.target.value }))}
-                        placeholder="email@example.com"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="uppercase tracking-wider">I am a</label>
-                      <select
-                        value={regForm.profession}
-                        onChange={(e) => setRegForm((prev) => ({ ...prev, profession: e.target.value }))}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-semibold"
-                      >
-                        <option value="Student">Student</option>
-                        <option value="Teacher / Educator">Teacher / Educator</option>
-                        <option value="Tutor / Private Coach">Tutor / Private Coach</option>
-                        <option value="School Admin / Faculty">School Admin / Faculty</option>
-                        <option value="Parent / Guardian">Parent / Guardian</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="uppercase tracking-wider">Class / Qualification</label>
-                      <select
-                        value={regForm.qualification}
-                        onChange={(e) => setRegForm((prev) => ({ ...prev, qualification: e.target.value }))}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-semibold"
-                      >
-                        <option value="Class IX Student">Class IX Student</option>
-                        <option value="Class X Student">Class X Student</option>
-                        <option value="Class XI Student">Class XI Student</option>
-                        <option value="Class XII Student">Class XII Student</option>
-                        <option value="12th Passed / Aspirant">12th Passed / Aspirant</option>
-                        <option value="Graduate">Graduate (B.Sc / B.A / B.Tech / B.Com)</option>
-                        <option value="Post Graduate">Post Graduate (M.Sc / M.A / M.Tech)</option>
-                        <option value="Diploma / B.Ed">Diploma / B.Ed</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="uppercase tracking-wider">City / Location</label>
-                    <input
-                      type="text"
-                      required
-                      value={regForm.city_address}
-                      onChange={(e) => setRegForm((prev) => ({ ...prev, city_address: e.target.value }))}
-                      placeholder="e.g. Kolkata, Howrah, Siliguri"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={regSubmitting}
-                    className="w-full py-3.5 bg-[#66090D] hover:bg-[#800b11] text-white font-black rounded-xl uppercase tracking-wider text-center transition shadow-md disabled:opacity-50"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="uppercase tracking-wider">I am a</label>
+                  <select
+                    value={regForm.profession}
+                    onChange={(e) => setRegForm((prev) => ({ ...prev, profession: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-semibold"
                   >
-                    {regSubmitting ? "Submitting..." : "Submit Partner Application"}
-                  </button>
-                </form>
-              </>
-            )}
+                    <option value="Student">Student</option>
+                    <option value="Teacher / Educator">Teacher / Educator</option>
+                    <option value="Tutor / Private Coach">Tutor / Private Coach</option>
+                    <option value="School Admin / Faculty">School Admin / Faculty</option>
+                    <option value="Parent / Guardian">Parent / Guardian</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="uppercase tracking-wider">Class / Qualification</label>
+                  <select
+                    value={regForm.qualification}
+                    onChange={(e) => setRegForm((prev) => ({ ...prev, qualification: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-semibold"
+                  >
+                    <option value="Class IX Student">Class IX Student</option>
+                    <option value="Class X Student">Class X Student</option>
+                    <option value="Class XI Student">Class XI Student</option>
+                    <option value="Class XII Student">Class XII Student</option>
+                    <option value="12th Passed / Aspirant">12th Passed / Aspirant</option>
+                    <option value="Graduate">Graduate (B.Sc / B.A / B.Tech / B.Com)</option>
+                    <option value="Post Graduate">Post Graduate (M.Sc / M.A / M.Tech)</option>
+                    <option value="Diploma / B.Ed">Diploma / B.Ed</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="uppercase tracking-wider">City / Location</label>
+                <input
+                  type="text"
+                  required
+                  value={regForm.city_address}
+                  onChange={(e) => setRegForm((prev) => ({ ...prev, city_address: e.target.value }))}
+                  placeholder="e.g. Kolkata, Howrah, Siliguri"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={regSubmitting}
+                className="w-full py-3.5 bg-[#66090D] hover:bg-[#800b11] text-white font-black rounded-xl uppercase tracking-wider text-center transition shadow-md disabled:opacity-50 mt-2"
+              >
+                {regSubmitting ? "Creating Account..." : "Create Account & Login"}
+              </button>
+            </form>
           </div>
         </div>
       )}

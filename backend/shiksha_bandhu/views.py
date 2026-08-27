@@ -72,7 +72,52 @@ def partner_login(request):
             }
         })
 
-    return Response({'error': 'Invalid Shiksha Bandhu credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def partner_register(request):
+    """Public self-registration endpoint for new partners."""
+    name = request.data.get('name', '').strip()
+    mobile = request.data.get('mobile', '').strip()
+    email = request.data.get('email', '').strip()
+    password = request.data.get('password', '').strip()
+
+    if not name or not mobile or not password:
+        return Response({'error': 'Name, Mobile Number and Password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check if mobile or email already exists
+    existing = ShikshaBandhuPartner.objects(mobile=mobile).first()
+    if existing:
+        return Response({'error': 'A partner account with this mobile number already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Auto-generate Partner ID (e.g. SB101, SB102...)
+    count = ShikshaBandhuPartner.objects.count()
+    new_id = f"SB{count + 101:03d}"
+
+    while ShikshaBandhuPartner.objects(partner_id=new_id).first():
+        count += 1
+        new_id = f"SB{count + 101:03d}"
+
+    partner = ShikshaBandhuPartner(
+        partner_id=new_id,
+        name=name,
+        mobile=mobile,
+        email=email,
+        password=password,
+        status='active'
+    )
+    partner.save()
+
+    return Response({
+        'success': True,
+        'user': {
+            'id': partner.partner_id,
+            'name': partner.name,
+            'mobile': partner.mobile,
+            'email': partner.email,
+            'joinedOn': partner.joined_on.strftime('%d %b %Y') if partner.joined_on else 'Today',
+            'status': partner.status
+        }
+    })
 
 
 @api_view(['POST'])

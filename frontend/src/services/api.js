@@ -669,6 +669,7 @@ export const landingAPI = {
 // Shiksha Bandhu API
 export const shikshaBandhuAPI = {
   login: (credentials) => api.post("/api/shiksha-bandhu/login/", credentials),
+  register: (data) => api.post("/api/shiksha-bandhu/register/", data),
   trackClick: (data) => api.post("/api/shiksha-bandhu/click/", data),
   getStats: (partnerId) => api.get(`/api/shiksha-bandhu/stats/${partnerId}/`),
   adminGetPartners: () => api.get("/api/shiksha-bandhu/admin/partners/"),
