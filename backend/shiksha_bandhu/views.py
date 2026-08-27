@@ -7,12 +7,7 @@ from .models import ShikshaBandhuPartner, ShikshaBandhuClick, ShikshaBandhuBonus
 from landing_registrations.models import LandingPageRegistration
 
 
-BASE_DEMO_REFERRALS = [
-    {'id': 'demo-1', 'displayId': 'L-1024', 'student': 'Student #1024', 'studentName': 'Rahul Sen', 'mobile': '9830112233', 'program': 'Madhyamik Mock Test 2027', 'date': '18 Aug 2026', 'status': 'Successful', 'bonus': 250},
-    {'id': 'demo-2', 'displayId': 'L-1031', 'student': 'Student #1031', 'studentName': 'Priya Das', 'mobile': '9830445566', 'program': 'CBSE Class X Mock Test', 'date': '19 Aug 2026', 'status': 'Pending', 'bonus': 250},
-    {'id': 'demo-3', 'displayId': 'L-1038', 'student': 'Student #1038', 'studentName': 'Amit Roy', 'mobile': '9830778899', 'program': 'CBSE Class XII Mock Test', 'date': '20 Aug 2026', 'status': 'Successful', 'bonus': 250},
-    {'id': 'demo-4', 'displayId': 'L-1042', 'student': 'Student #1042', 'studentName': 'Suman Ghosh', 'mobile': '9830990011', 'program': 'ICSE Class X Mock Test', 'date': '20 Aug 2026', 'status': 'Cancelled', 'bonus': 0},
-]
+BASE_DEMO_REFERRALS = []
 
 
 def seed_default_partner_if_needed():
@@ -106,35 +101,21 @@ def get_partner_stats(request, partner_id):
     seed_default_partner_if_needed()
     p_id = partner_id.strip().upper()
     
-    # Baseline for SB004
-    base_clicks = 128 if p_id == 'SB004' else 0
-    base_registrations = 24 if p_id == 'SB004' else 0
-    base_successful = 12 if p_id == 'SB004' else 0
-    base_bonus = 3000 if p_id == 'SB004' else 0
-    base_pending = 500 if p_id == 'SB004' else 0
-
     # Real DB Clicks
-    real_clicks = ShikshaBandhuClick.objects(partner_id=p_id).count()
-    total_clicks = base_clicks + real_clicks
+    total_clicks = ShikshaBandhuClick.objects(partner_id=p_id).count()
 
     # Real DB Leads submitted with referral_id = p_id
     db_leads = list(LandingPageRegistration.objects(referral_id__iexact=p_id))
-    total_registrations = base_registrations + len(db_leads)
+    total_registrations = len(db_leads)
 
     # Real DB Bonus records
     bonuses = list(ShikshaBandhuBonus.objects(partner_id=p_id))
     
-    # Calculate extra successful and bonus from DB
-    new_successful = sum(1 for b in bonuses if b.status == 'Successful')
-    total_successful = base_successful + new_successful
-
-    new_earned_bonus = sum(b.bonus_amount for b in bonuses if b.status == 'Successful')
-    total_bonus = base_bonus + new_earned_bonus
-
-    new_pending_bonus = sum(b.bonus_amount for b in bonuses if b.status == 'Pending')
-    total_pending = base_pending + new_pending_bonus
-
-    this_month_bonus = total_bonus // 2 if total_bonus > 0 else 1500
+    # Calculate successful and bonus from DB
+    total_successful = sum(1 for b in bonuses if b.status == 'Successful')
+    total_bonus = sum(b.bonus_amount for b in bonuses if b.status == 'Successful')
+    total_pending = sum(b.bonus_amount for b in bonuses if b.status == 'Pending')
+    this_month_bonus = total_bonus
 
     # Build referrals list (Base demo + real DB leads)
     referrals_list = []
@@ -211,17 +192,12 @@ def admin_list_partners(request):
     partner_data = []
     for p in partners:
         p_id = p.partner_id.upper()
-        base_c = 128 if p_id == 'SB004' else 0
-        base_l = 24 if p_id == 'SB004' else 0
-        base_s = 12 if p_id == 'SB004' else 0
-        base_e = 3000 if p_id == 'SB004' else 0
-
-        p_clicks = base_c + ShikshaBandhuClick.objects(partner_id=p_id).count()
-        p_leads = base_l + sum(1 for l in leads if l.referral_id and l.referral_id.upper() == p_id)
+        p_clicks = ShikshaBandhuClick.objects(partner_id=p_id).count()
+        p_leads = sum(1 for l in leads if l.referral_id and l.referral_id.upper() == p_id)
         
         p_bonuses = list(ShikshaBandhuBonus.objects(partner_id=p_id))
-        p_earned = base_e + sum(b.bonus_amount for b in p_bonuses if b.status == 'Successful')
-        p_successful = base_s + sum(1 for b in p_bonuses if b.status == 'Successful')
+        p_earned = sum(b.bonus_amount for b in p_bonuses if b.status == 'Successful')
+        p_successful = sum(1 for b in p_bonuses if b.status == 'Successful')
 
         partner_data.append({
             'id': p.partner_id,
