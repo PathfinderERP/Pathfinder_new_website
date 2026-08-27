@@ -30,7 +30,10 @@ export const PublicReferralLanding = () => {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    email: "",
     student_class: "Class X",
+    school_name: "",
+    target_exam: "Madhyamik / Board Exam",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -49,7 +52,10 @@ export const PublicReferralLanding = () => {
       await landingAPI.register({
         name: formData.name,
         phone: formData.phone,
+        email: formData.email,
         student_class: formData.student_class,
+        school_name: formData.school_name,
+        target_exam: formData.target_exam,
         course_type: activeEnquiryProgram ? activeEnquiryProgram.name : "Pathfinder Mock Test",
         page_source: `Shiksha Bandhu Referral (${referralId})`,
         referral_id: referralId,
@@ -296,30 +302,73 @@ export const PublicReferralLanding = () => {
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="uppercase tracking-wider">Mobile Number</label>
-                    <input
-                      type="tel"
-                      required
-                      value={formData.phone}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-                      placeholder="Enter 10-digit Phone Number"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="uppercase tracking-wider">Mobile Number</label>
+                      <input
+                        type="tel"
+                        required
+                        value={formData.phone}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                        placeholder="10-digit Phone Number"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="uppercase tracking-wider">Email Address</label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                        placeholder="email@example.com (Optional)"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="uppercase tracking-wider">Current Class</label>
+                      <select
+                        value={formData.student_class}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, student_class: e.target.value }))}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                      >
+                        <option value="Class IX">Class IX</option>
+                        <option value="Class X">Class X</option>
+                        <option value="Class XI">Class XI</option>
+                        <option value="Class XII">Class XII</option>
+                        <option value="12th Passed">12th Passed</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="uppercase tracking-wider">Target Exam</label>
+                      <select
+                        value={formData.target_exam}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, target_exam: e.target.value }))}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
+                      >
+                        <option value="Madhyamik / Board Exam">Madhyamik / Board Exam</option>
+                        <option value="CBSE / ICSE / ISC">CBSE / ICSE / ISC</option>
+                        <option value="NEET (UG)">NEET (UG)</option>
+                        <option value="JEE (Main & Advanced)">JEE (Main & Advanced)</option>
+                        <option value="WBJEE">WBJEE</option>
+                        <option value="Foundation (IX/X)">Foundation (IX/X)</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="uppercase tracking-wider">Current Class</label>
-                    <select
-                      value={formData.student_class}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, student_class: e.target.value }))}
+                    <label className="uppercase tracking-wider">School / Institution Name</label>
+                    <input
+                      type="text"
+                      value={formData.school_name}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, school_name: e.target.value }))}
+                      placeholder="Enter School or Institution Name"
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
-                    >
-                      <option value="Class X">Class X</option>
-                      <option value="Class XI">Class XI</option>
-                      <option value="Class XII">Class XII</option>
-                      <option value="Passed">12th Passed</option>
-                    </select>
+                    />
                   </div>
 
                   <div className="space-y-1">
