@@ -109,15 +109,7 @@ export const PaisLogin = () => {
             </button>
           </form>
 
-          <div className="border-t border-slate-100 pt-4 text-center space-y-3">
-            <button
-              type="button"
-              onClick={useDemoCredentials}
-              className="text-[11px] font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-200 transition"
-            >
-              Fill Demo Login (9830012345 / demo123)
-            </button>
-
+          <div className="border-t border-slate-100 pt-4 text-center">
             <div className="text-xs text-slate-500 font-semibold">
               Don't have an account?{" "}
               <Link to="/apply_now/pais" className="text-[#66090D] font-extrabold hover:underline">
