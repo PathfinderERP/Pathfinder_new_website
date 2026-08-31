@@ -16,7 +16,7 @@ const CentreShowcase = () => {
     const { data: centres, loading, error } = useCachedData("centres", () => centresAPI.getAll(), {
         onSuccess: (data) => {
             const raw = data?.results || data || [];
-            return Array.isArray(raw) ? raw : [];
+            return Array.isArray(raw) ? raw.filter(c => !c.is_franchise) : [];
         }
     });
 
