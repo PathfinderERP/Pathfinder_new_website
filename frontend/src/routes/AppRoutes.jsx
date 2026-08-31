@@ -91,9 +91,16 @@ import Franchise from "../pages/Franchise";
 import { Jeelandingpage } from "../pages/add_landingpage/pages/Jeelandingpage";
 import { Neetlandingpage } from "../pages/add_landingpage/pages/Neetlandingpage";
 import { Clatlandingpage } from "../pages/add_landingpage/pages/Clatlandingpage";
+import { Paislandingpage } from "../pages/add_landingpage/pages/Paislandingpage";
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
+
+// PAIS Portal Pages
+import { PaisLogin } from "../pages/pais/PaisLogin";
+import { PaisDashboard } from "../pages/pais/PaisDashboard";
+import { PaisExamEngine } from "../pages/pais/PaisExamEngine";
+import { PaisAdminManagement } from "../components/admin/PaisAdminManagement";
 
 // Shiksha Bandhu Pages
 import { ShikshaBandhuLogin } from "../pages/shiksha_bandhu/ShikshaBandhuLogin";
@@ -369,6 +376,39 @@ const AppRoutes = () => {
       <Route
         path="/apply_now/clat"
         element={<Clatlandingpage />}
+      />
+      <Route
+        path="/apply_now/pais"
+        element={<Paislandingpage />}
+      />
+      <Route
+        path="/apply_now/scholarship"
+        element={<Paislandingpage />}
+      />
+      <Route
+        path="/apply_now/allindia/pais"
+        element={<Paislandingpage />}
+      />
+      <Route
+        path="/anthe"
+        element={<Paislandingpage />}
+      />
+
+      {/* PAIS Portal & Exam Routes */}
+      <Route path="/pais/login" element={<PaisLogin />} />
+      <Route path="/anthe/login" element={<PaisLogin />} />
+      <Route path="/pais/dashboard" element={<PaisDashboard />} />
+      <Route path="/pais/exam/instructions" element={<PaisExamEngine />} />
+      <Route path="/pais/exam/take" element={<PaisExamEngine />} />
+      <Route
+        path="/business/admin/pais"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_ads_leads">
+            <AdminLayout>
+              <PaisAdminManagement />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
       />
 
       {/* Shiksha Bandhu Referral Partner System Routes */}

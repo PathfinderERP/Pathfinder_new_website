@@ -159,6 +159,7 @@ INSTALLED_APPS = [
     'site_config',
     'custom_pages',
     'shiksha_bandhu',
+    'pais_exam',
 ]
 
 

@@ -678,6 +678,24 @@ export const shikshaBandhuAPI = {
   adminUpdateReferral: (id, data) => api.patch(`/api/shiksha-bandhu/admin/referrals/${id}/`, data),
 };
 
+// PAIS Exam & Portal API
+export const paisAPI = {
+  register: (data) => api.post("/api/pais/register/", data),
+  login: (data) => api.post("/api/pais/login/", data),
+  getProfile: (regId) => api.get(`/api/pais/profile/${regId}/`),
+  updateProfile: (regId, data) => api.patch(`/api/pais/profile/${regId}/`, data),
+  getQuestions: () => api.get("/api/pais/questions/"),
+  submitExam: (data) => api.post("/api/pais/submit/", data),
+  adminGetStudents: () => api.get("/api/pais/admin/students/"),
+  adminUpdateStudent: (regId, data) => api.patch(`/api/pais/admin/students/${regId}/`, data),
+  adminGetCapacities: () => api.get("/api/pais/admin/capacities/"),
+  adminCreateCapacity: (data) => api.post("/api/pais/admin/capacities/", data),
+  adminUpdateCapacity: (data) => api.patch("/api/pais/admin/capacities/", data),
+  adminGetQuestions: (params = {}) => api.get("/api/pais/admin/questions/", { params }),
+  adminCreateQuestion: (data) => api.post("/api/pais/admin/questions/", data),
+  adminDeleteQuestion: (qId) => api.delete(`/api/pais/admin/questions/${qId}/`),
+};
+
 // Franchise Inquiry API
 export const franchiseAPI = {
   submit: (data) => api.post("/api/franchise/register/", data),
