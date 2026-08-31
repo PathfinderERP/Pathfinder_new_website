@@ -57,8 +57,8 @@ export const PaisLogin = () => {
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between font-sans text-slate-800">
       <Header />
 
-      <main className="py-16 px-4 sm:px-6 lg:px-8 max-w-md mx-auto w-full">
-        <div className="bg-white border-2 border-slate-100 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <main className="flex-1 flex items-center justify-center pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-md mx-auto w-full">
+        <div className="bg-white border-2 border-slate-100 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 w-full my-auto">
           <div className="text-center space-y-2">
             <span className="text-[10px] font-black uppercase text-[#66090D] bg-red-50 px-3 py-1 rounded-full border border-red-100">
               PAIS 2026 Student Portal

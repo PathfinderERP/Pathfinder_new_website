@@ -379,6 +379,18 @@ export const Paislandingpage = () => {
                     <p className="text-[10px] text-center text-slate-400 font-semibold">
                       By registering, you agree to receive exam details & admit card notifications via SMS/WhatsApp.
                     </p>
+
+                    <div className="border-t border-slate-200 pt-4 text-center">
+                      <p className="text-xs text-slate-600 font-semibold">
+                        Already registered for PAIS 2026?{" "}
+                        <Link
+                          to="/pais/login"
+                          className="text-[#66090D] font-black hover:underline inline-flex items-center gap-1"
+                        >
+                          Login to PAIS Dashboard →
+                        </Link>
+                      </p>
+                    </div>
                   </form>
                 )}
               </div>
