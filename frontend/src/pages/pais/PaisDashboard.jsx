@@ -132,7 +132,7 @@ export const PaisDashboard = () => {
       <Header />
 
       {/* Top Stepper Bar & Logout Header */}
-      <div className="bg-white border-b border-slate-200 py-4 px-4 sm:px-6 lg:px-8">
+      <div className="pt-24 sm:pt-28 bg-white border-b border-slate-200 pb-4 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <div className="flex-1 max-w-3xl mx-auto flex items-center justify-between relative">
             <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -translate-y-1/2 z-0"></div>
