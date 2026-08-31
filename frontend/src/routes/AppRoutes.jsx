@@ -378,6 +378,10 @@ const AppRoutes = () => {
         element={<Clatlandingpage />}
       />
       <Route
+        path="/apply_now/pntse"
+        element={<Paislandingpage />}
+      />
+      <Route
         path="/apply_now/pais"
         element={<Paislandingpage />}
       />
@@ -386,7 +390,15 @@ const AppRoutes = () => {
         element={<Paislandingpage />}
       />
       <Route
+        path="/apply_now/allindia/pntse"
+        element={<Paislandingpage />}
+      />
+      <Route
         path="/apply_now/allindia/pais"
+        element={<Paislandingpage />}
+      />
+      <Route
+        path="/pntse"
         element={<Paislandingpage />}
       />
       <Route
@@ -394,12 +406,26 @@ const AppRoutes = () => {
         element={<Paislandingpage />}
       />
 
-      {/* PAIS Portal & Exam Routes */}
+      {/* PNTSE / PAIS Portal & Exam Routes */}
+      <Route path="/pntse/login" element={<PaisLogin />} />
       <Route path="/pais/login" element={<PaisLogin />} />
       <Route path="/anthe/login" element={<PaisLogin />} />
+      <Route path="/pntse/dashboard" element={<PaisDashboard />} />
       <Route path="/pais/dashboard" element={<PaisDashboard />} />
+      <Route path="/pntse/exam/instructions" element={<PaisExamEngine />} />
       <Route path="/pais/exam/instructions" element={<PaisExamEngine />} />
+      <Route path="/pntse/exam/take" element={<PaisExamEngine />} />
       <Route path="/pais/exam/take" element={<PaisExamEngine />} />
+      <Route
+        path="/business/admin/pntse"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_ads_leads">
+            <AdminLayout>
+              <PaisAdminManagement />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
       <Route
         path="/business/admin/pais"
         element={

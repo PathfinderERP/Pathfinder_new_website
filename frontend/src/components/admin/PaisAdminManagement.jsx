@@ -350,11 +350,11 @@ export const PaisAdminManagement = () => {
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <span className="text-[10px] font-black uppercase text-[#66090D] bg-red-50 px-3 py-1 rounded-full border border-red-100">
-            PAIS 2026 Admin Portal
+            PNTSE 2026 Admin Portal
           </span>
           <h1 className="text-2xl font-black text-slate-900 mt-2">Offline & Online Exam Center Management</h1>
           <p className="text-xs text-slate-500 font-semibold">
-            Track exact registered student numbers per center, manage Question Sets for Sample & Official PAIS exams, and configure slots.
+            Track exact registered student numbers per center, manage Question Sets for Sample & Official PNTSE exams, and configure slots.
           </p>
         </div>
 
@@ -427,7 +427,7 @@ export const PaisAdminManagement = () => {
                 className="w-full text-left px-4 py-2.5 rounded-xl hover:bg-slate-50 text-slate-800 flex items-center gap-2"
               >
                 <DocumentCheckIcon className="w-4 h-4 text-amber-600" />
-                PAIS Official Exam Question Set
+                PNTSE Official Exam Question Set
               </button>
 
               <hr className="border-slate-100" />
@@ -493,7 +493,7 @@ export const PaisAdminManagement = () => {
           }`}
         >
           <DocumentCheckIcon className="w-4 h-4" />
-          PAIS Question Sets ({paisQuestions.length})
+          PNTSE Question Sets ({paisQuestions.length})
         </button>
 
         <button

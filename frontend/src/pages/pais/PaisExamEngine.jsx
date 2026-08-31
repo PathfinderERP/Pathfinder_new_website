@@ -110,7 +110,7 @@ export const PaisExamEngine = () => {
   const handleFinalSubmit = async () => {
     setSubmitting(true);
     const savedUser = localStorage.getItem("pais_student_user");
-    let studentId = "PAIS20261001";
+    let studentId = "PNTSE20261001";
     let studentName = "Soumojit Saha";
     if (savedUser) {
       try {
@@ -212,7 +212,7 @@ export const PaisExamEngine = () => {
             </div>
             <div>
               <h1 className="font-black text-sm uppercase text-white">PATHFINDER ACADEMY</h1>
-              <p className="text-[10px] text-sky-100 font-semibold">Sample Paper PAIS 2026 Power Step Course for JEE / NEET</p>
+              <p className="text-[10px] text-sky-100 font-semibold">Sample Paper PNTSE 2026 Power Step Course for JEE / NEET</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

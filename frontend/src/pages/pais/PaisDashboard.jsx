@@ -70,7 +70,7 @@ export const PaisDashboard = () => {
     if (!storedUser) {
       // Default demo student matching screenshot
       storedUser = {
-        id: "PAIS20261001",
+        id: "PNTSE20261001",
         name: "Soumojit Saha",
         phone: "9830012345",
         student_class: "Class X",
@@ -127,7 +127,7 @@ export const PaisDashboard = () => {
   };
 
   const handleStartExam = () => {
-    window.open("/pais/exam/instructions", "_blank");
+    window.open("/pntse/exam/instructions", "_blank");
   };
 
   if (!user) return null;
@@ -246,7 +246,7 @@ export const PaisDashboard = () => {
             {/* Admit Card Ticket Banner Card */}
             <div className="bg-white border border-sky-200 rounded-2xl overflow-hidden shadow-md">
               <div className="bg-sky-500 text-white px-6 py-2.5 text-xs font-black uppercase tracking-wider text-center">
-                Pathfinder Academic Talent Hunt Exam (PAIS 2026)
+                Pathfinder National Talent Search Examination (PNTSE 2026)
               </div>
 
               <div className="p-6 sm:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
@@ -305,7 +305,7 @@ export const PaisDashboard = () => {
               {/* Sample Test Launcher (Left Column) */}
               <div className="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 flex flex-col justify-between">
                 <div className="space-y-3">
-                  <span className="text-xs font-black uppercase text-slate-900 block tracking-wider">PAIS Practice</span>
+                  <span className="text-xs font-black uppercase text-slate-900 block tracking-wider">PNTSE Practice</span>
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 border border-sky-200 flex items-center justify-center shrink-0">
                       <BookOpenIcon className="w-6 h-6" />

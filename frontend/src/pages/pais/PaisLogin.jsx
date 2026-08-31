@@ -28,7 +28,7 @@ export const PaisLogin = () => {
       console.error("Login error:", err);
       if ((identifier === "PAIS20261001" || identifier === "9830012345") && password === "demo123") {
         const demoUser = {
-          id: "PAIS20261001",
+          id: "PNTSE20261001",
           name: "Soumojit Saha",
           phone: "9830012345",
           student_class: "Class X",
@@ -39,18 +39,13 @@ export const PaisLogin = () => {
           exam_time: "Morning 10:30 AM to 11:30 AM",
         };
         localStorage.setItem("pais_student_user", JSON.stringify(demoUser));
-        navigate("/pais/dashboard");
+        navigate("/pntse/dashboard");
       } else {
-        setError(err.response?.data?.error || "Invalid credentials. Use demo: 9830012345 / demo123");
+        setError(err.response?.data?.error || "Invalid credentials.");
       }
     } finally {
       setLoading(false);
     }
-  };
-
-  const useDemoCredentials = () => {
-    setIdentifier("9830012345");
-    setPassword("demo123");
   };
 
   return (
@@ -61,11 +56,11 @@ export const PaisLogin = () => {
         <div className="bg-white border-2 border-slate-100 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 w-full my-auto">
           <div className="text-center space-y-2">
             <span className="text-[10px] font-black uppercase text-[#66090D] bg-red-50 px-3 py-1 rounded-full border border-red-100">
-              PAIS 2026 Student Portal
+              PNTSE 2026 Student Portal
             </span>
             <h1 className="text-2xl font-black text-slate-900 uppercase">Student Login</h1>
             <p className="text-xs text-slate-500 font-semibold">
-              Enter your registered mobile number / PAIS ID and password to access your admit card & test dashboard.
+              Enter your registered mobile number / PNTSE ID and password to access your admit card & test dashboard.
             </p>
           </div>
 
@@ -77,13 +72,13 @@ export const PaisLogin = () => {
 
           <form onSubmit={handleLogin} className="space-y-4 text-xs font-bold text-slate-700">
             <div className="space-y-1">
-              <label className="uppercase tracking-wider">Mobile Number / PAIS ID *</label>
+              <label className="uppercase tracking-wider">Mobile Number / PNTSE ID *</label>
               <input
                 type="text"
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="e.g. 9830012345 or PAIS20261001"
+                placeholder="e.g. 9830012345 or PNTSE20261001"
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
               />
             </div>
@@ -105,15 +100,15 @@ export const PaisLogin = () => {
               disabled={loading}
               className="w-full py-3.5 bg-[#66090D] hover:bg-[#800b11] text-white font-black rounded-xl text-xs uppercase tracking-wider transition shadow-md disabled:opacity-50"
             >
-              {loading ? "Logging in..." : "Login to PAIS Dashboard"}
+              {loading ? "Logging in..." : "Login to PNTSE Dashboard"}
             </button>
           </form>
 
           <div className="border-t border-slate-100 pt-4 text-center">
             <div className="text-xs text-slate-500 font-semibold">
               Don't have an account?{" "}
-              <Link to="/apply_now/pais" className="text-[#66090D] font-extrabold hover:underline">
-                Register Free for PAIS 2026
+              <Link to="/apply_now/pntse" className="text-[#66090D] font-extrabold hover:underline">
+                Register Free for PNTSE 2026
               </Link>
             </div>
           </div>

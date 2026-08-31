@@ -145,7 +145,7 @@ export const Paislandingpage = () => {
       {/* Top Highlight Announcement Bar */}
       <div className="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 py-2.5 text-center text-slate-950 font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-sm">
         <SparklesIcon className="w-4 h-4 text-slate-900 animate-pulse" />
-        <span>PAIS 2026 Registration Open • Up to 100% Scholarship + ₹1 Crore Cash Awards for Class VII to XII!</span>
+        <span>PNTSE 2026 Registration Open • Up to 100% Scholarship + ₹1 Crore Cash Awards for Class VII to XII!</span>
       </div>
 
       {/* Hero Banner Section (ANTHE Layout in Pathfinder Crimson Maroon & Gold) */}
@@ -160,12 +160,12 @@ export const Paislandingpage = () => {
             <div className="lg:col-span-7 space-y-6 text-left">
               <div className="inline-flex items-center gap-2 bg-amber-400/20 border border-amber-400/40 px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase text-amber-300">
                 <TrophyIcon className="w-4 h-4 text-amber-300" />
-                <span>Pathfinder Academic Talent Hunt 2026</span>
+                <span>Pathfinder National Talent Search Examination 2026</span>
               </div>
 
               <div className="space-y-2">
                 <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight leading-tight text-white">
-                  PAIS 2026
+                  PNTSE 2026
                 </h1>
                 <p className="text-2xl sm:text-3xl font-black text-amber-300 tracking-tight">
                   Talent Ka <span className="text-white bg-amber-500/30 px-3 py-1 rounded-xl border border-amber-400/30">Sabse Bada Exam</span>
@@ -173,7 +173,7 @@ export const Paislandingpage = () => {
               </div>
 
               <p className="text-xs sm:text-sm text-slate-200 font-medium max-w-xl leading-relaxed">
-                Take the premier Pathfinder Academic Talent Hunt to discover your true potential, win up to 100% scholarship, and secure cash prizes worth ₹1 Crore+!
+                Take the premier Pathfinder National Talent Search Examination (PNTSE) to discover your true potential, win up to 100% scholarship, and secure cash prizes worth ₹1 Crore+!
               </p>
 
               {/* Stats Bar (2x2 Grid on Mobile / 4 Grid Desktop) */}
@@ -206,7 +206,7 @@ export const Paislandingpage = () => {
               <div className="bg-slate-900/60 border border-white/20 p-5 rounded-2xl space-y-3">
                 <div className="flex items-center gap-2 text-xs font-black uppercase text-amber-300 tracking-wider">
                   <CalendarIcon className="w-4 h-4 text-sky-400" />
-                  <span>PAIS 2026 Exam Schedule</span>
+                  <span>PNTSE 2026 Exam Schedule</span>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4 text-xs font-medium">
@@ -241,13 +241,13 @@ export const Paislandingpage = () => {
                       100% Free Registration
                     </span>
                     <Link
-                      to="/pais/login"
+                      to="/pntse/login"
                       className="text-[11px] font-extrabold uppercase text-white hover:text-amber-300 bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full border border-white/20 transition"
                     >
                       Already Registered? Login
                     </Link>
                   </div>
-                  <h3 className="text-xl font-black uppercase text-white">Register for PAIS 2026</h3>
+                  <h3 className="text-xl font-black uppercase text-white">Register for PNTSE 2026</h3>
                   <p className="text-[11px] text-slate-300 font-semibold">
                     Fill in your details below to instantly book your scholarship test slot.
                   </p>
@@ -260,10 +260,10 @@ export const Paislandingpage = () => {
                     </div>
                     <h4 className="text-xl font-black text-slate-900">Registration Successful!</h4>
                     <p className="text-xs text-slate-600 font-semibold leading-relaxed">
-                      Thank you <strong className="text-slate-900">{formData.name}</strong>! Your registration for <strong className="text-[#66090D]">PAIS 2026</strong> has been received. Our academic team will contact you at <strong>{formData.phone}</strong> with your Admit Card and slot confirmation.
+                      Thank you <strong className="text-slate-900">{formData.name}</strong>! Your registration for <strong className="text-[#66090D]">PNTSE 2026</strong> has been received. Our academic team will contact you at <strong>{formData.phone}</strong> with your Admit Card and slot confirmation.
                     </p>
                     <Link
-                      to="/pais/dashboard"
+                      to="/pntse/dashboard"
                       className="inline-block px-6 py-3 bg-[#66090D] text-white font-extrabold text-xs rounded-xl uppercase tracking-wider shadow"
                     >
                       Go to Student Dashboard
@@ -382,12 +382,12 @@ export const Paislandingpage = () => {
 
                     <div className="border-t border-slate-200 pt-4 text-center">
                       <p className="text-xs text-slate-600 font-semibold">
-                        Already registered for PAIS 2026?{" "}
+                        Already registered for PNTSE 2026?{" "}
                         <Link
-                          to="/pais/login"
+                          to="/pntse/login"
                           className="text-[#66090D] font-black hover:underline inline-flex items-center gap-1"
                         >
-                          Login to PAIS Dashboard →
+                          Login to PNTSE Dashboard →
                         </Link>
                       </p>
                     </div>
@@ -404,13 +404,13 @@ export const Paislandingpage = () => {
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
         <div className="text-center space-y-3">
           <span className="text-[#66090D] text-xs font-black uppercase tracking-widest bg-red-50 px-3 py-1 rounded-full border border-red-100">
-            Why Take PAIS 2026?
+            Why Take PNTSE 2026?
           </span>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 uppercase">
             Unlock Unlimited Academic Opportunities
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto font-medium">
-            PAIS 2026 is designed to evaluate your analytical thinking, grant financial rewards, and guide you towards top ranks in JEE, NEET, WBJEE & Boards.
+            PNTSE 2026 is designed to evaluate your analytical thinking, grant financial rewards, and guide you towards top ranks in JEE, NEET, WBJEE & Boards.
           </p>
           <div className="w-16 h-1 bg-[#66090D] mx-auto rounded-full"></div>
         </div>
@@ -558,10 +558,10 @@ export const Paislandingpage = () => {
               Legacy of Rankers
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-white uppercase">
-              Pathfinder PAIS Champions
+              Pathfinder PNTSE Champions
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto font-medium">
-              Join thousands of past PAIS scholars who transformed their career aspirations into top All India & State Ranks.
+              Join thousands of past PNTSE scholars who transformed their career aspirations into top All India & State Ranks.
             </p>
           </div>
 
