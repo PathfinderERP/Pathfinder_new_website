@@ -67,25 +67,14 @@ export const PaisDashboard = () => {
       }
     }
 
-    if (!storedUser) {
-      // Default demo student matching screenshot
-      storedUser = {
-        id: "PNTSE20261001",
-        name: "Soumojit Saha",
-        phone: "9830012345",
-        student_class: "Class X",
-        exam_mode: "Offline Exam (At Centre)",
-        centre: "Tamluk-HUB 3rd Floor, down Town Enclave, Haldia - Tamluk - Mechada, Rd., Tamluk, West Bengal 721636",
-        course_type: "Engineering (JEE / WBJEE)",
-        exam_date: "11/10/2026",
-        exam_time: "Morning 10:30 AM to 11:30 AM",
-      };
-      localStorage.setItem("pais_student_user", JSON.stringify(storedUser));
+    if (!storedUser || !storedUser.id) {
+      navigate("/pntse/login");
+      return;
     }
 
     setUser(storedUser);
     setEditForm({
-      name: storedUser.name,
+      name: storedUser.name || "",
       student_class: storedUser.student_class || "Class X",
       exam_mode: storedUser.exam_mode || "Offline Exam (At Centre)",
       centre: storedUser.centre || "Tamluk Centre",
@@ -98,10 +87,11 @@ export const PaisDashboard = () => {
       paisAPI.getProfile(storedUser.id).then((res) => {
         if (res.data && res.data.user) {
           setUser(res.data.user);
+          localStorage.setItem("pais_student_user", JSON.stringify(res.data.user));
         }
       }).catch((err) => console.error("Profile fetch error:", err));
     }
-  }, []);
+  }, [navigate]);
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
@@ -130,56 +120,70 @@ export const PaisDashboard = () => {
     window.open("/pntse/exam/instructions", "_blank");
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("pais_student_user");
+    navigate("/pntse/login");
+  };
+
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800">
       <Header />
 
-      {/* Top 3-Step Stepper Bar (Matching Screenshots 1 & 2) */}
+      {/* Top Stepper Bar & Logout Header */}
       <div className="bg-white border-b border-slate-200 py-4 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto flex items-center justify-between relative">
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -translate-y-1/2 z-0"></div>
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex-1 max-w-3xl mx-auto flex items-center justify-between relative">
+            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -translate-y-1/2 z-0"></div>
 
-          {/* Step 1: Registration */}
-          <button
-            onClick={() => setActiveStep(1)}
-            className="relative z-10 flex flex-col items-center gap-1 group focus:outline-none"
-          >
-            <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-sm shadow-md">
-              <CheckCircleIcon className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xs font-bold text-slate-700">Registration</span>
-          </button>
+            {/* Step 1: Registration */}
+            <button
+              onClick={() => setActiveStep(1)}
+              className="relative z-10 flex flex-col items-center gap-1 group focus:outline-none"
+            >
+              <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-sm shadow-md">
+                <CheckCircleIcon className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xs font-bold text-slate-700">Registration</span>
+            </button>
 
-          {/* Step 2: Scholarship Test */}
-          <button
-            onClick={() => setActiveStep(2)}
-            className="relative z-10 flex flex-col items-center gap-1 group focus:outline-none"
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shadow-md transition ${
-              activeStep === 2 ? "bg-slate-900 text-white ring-4 ring-sky-100" : "bg-emerald-500 text-white"
-            }`}>
-              2
-            </div>
-            <span className={`text-xs font-black ${activeStep === 2 ? "text-[#66090D]" : "text-slate-700"}`}>
-              Scholarship Test
-            </span>
-          </button>
+            {/* Step 2: Scholarship Test */}
+            <button
+              onClick={() => setActiveStep(2)}
+              className="relative z-10 flex flex-col items-center gap-1 group focus:outline-none"
+            >
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shadow-md transition ${
+                activeStep === 2 ? "bg-slate-900 text-white ring-4 ring-sky-100" : "bg-emerald-500 text-white"
+              }`}>
+                2
+              </div>
+              <span className={`text-xs font-black ${activeStep === 2 ? "text-[#66090D]" : "text-slate-700"}`}>
+                Scholarship Test
+              </span>
+            </button>
 
-          {/* Step 3: Admission (Visit Branch) */}
+            {/* Step 3: Admission (Visit Branch) */}
+            <button
+              onClick={() => setActiveStep(3)}
+              className="relative z-10 flex flex-col items-center gap-1 group focus:outline-none"
+            >
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm transition ${
+                activeStep === 3 ? "bg-[#66090D] text-amber-300 ring-4 ring-red-100 shadow-md" : "bg-slate-200 text-slate-500"
+              }`}>
+                3
+              </div>
+              <span className={`text-xs font-bold ${activeStep === 3 ? "text-[#66090D] font-black" : "text-slate-400"}`}>
+                Admission (Visit Branch)
+              </span>
+            </button>
+          </div>
+
           <button
-            onClick={() => setActiveStep(3)}
-            className="relative z-10 flex flex-col items-center gap-1 group focus:outline-none"
+            onClick={handleLogout}
+            className="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-xl border border-red-200 transition shrink-0"
           >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm transition ${
-              activeStep === 3 ? "bg-[#66090D] text-amber-300 ring-4 ring-red-100 shadow-md" : "bg-slate-200 text-slate-500"
-            }`}>
-              3
-            </div>
-            <span className={`text-xs font-bold ${activeStep === 3 ? "text-[#66090D] font-black" : "text-slate-400"}`}>
-              Admission (Visit Branch)
-            </span>
+            Logout
           </button>
         </div>
       </div>
