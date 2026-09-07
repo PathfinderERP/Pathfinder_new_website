@@ -85,3 +85,60 @@ class ICICIHashGeneratorView(APIView):
         except Exception as e:
             logger.error(f"Error generating hash: {e}")
             return Response({"success": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+import urllib.request
+import urllib.parse
+import ssl
+
+class ICICIProxyView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Proxy requests to ICICI Bank UAT/Prod server to bypass browser CORS rules.
+        """
+        try:
+            target_url = request.data.get('target_url')
+            payload_type = request.data.get('payload_type', 'json') # 'json' or 'form'
+            payload = request.data.get('payload', {})
+
+            if not target_url:
+                return Response({"error": "target_url is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Ignore SSL verification for UAT sandbox if necessary
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+
+            if payload_type == 'json':
+                req_data = json.dumps(payload).encode('utf-8')
+                req = urllib.request.Request(target_url, data=req_data, headers={
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Mozilla/5.0'
+                })
+            else:
+                req_data = urllib.parse.urlencode(payload).encode('utf-8')
+                req = urllib.request.Request(target_url, data=req_data, headers={
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': 'Mozilla/5.0'
+                })
+
+            with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
+                resp_text = resp.read().decode('utf-8')
+                try:
+                    resp_json = json.loads(resp_text)
+                    return Response({"status": resp.status, "data": resp_json}, status=status.HTTP_200_OK)
+                except Exception:
+                    return Response({"status": resp.status, "raw_response": resp_text}, status=status.HTTP_200_OK)
+
+        except urllib.error.HTTPError as e:
+            err_text = e.read().decode('utf-8') if e.fp else str(e)
+            try:
+                err_json = json.loads(err_text)
+                return Response({"status": e.code, "data": err_json, "error": str(e)}, status=status.HTTP_200_OK)
+            except Exception:
+                return Response({"status": e.code, "raw_response": err_text, "error": str(e)}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"ICICI Proxy Error: {e}")
+            return Response({"error": str(e), "message": "Failed to connect to ICICI Bank endpoint"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

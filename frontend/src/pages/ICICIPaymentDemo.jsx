@@ -302,31 +302,32 @@ export const ICICIPaymentDemo = () => {
     }
 
     try {
-      const response = await fetch(credentials.saleUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      const res = await axios.post(`${API_BASE_URL}/api/courses/icici/proxy/`, {
+        target_url: credentials.saleUrl,
+        payload_type: 'json',
+        payload
       });
-      const data = await response.json();
-      setApiResponse({ status: response.status, data, headers: Object.fromEntries(response.headers.entries()) });
+      const resData = res.data;
+      setApiResponse({ status: resData.status || 200, data: resData.data || resData.raw_response || resData });
       
-      if (data.tranCtx) {
+      const responseContent = resData.data || resData;
+      if (responseContent.tranCtx) {
         setSeamlessState(prev => ({
           ...prev,
-          tranCtx: data.tranCtx,
-          redirectURI: data.redirectURI,
-          showOTPCapturePage: data.showOTPCapturePage || 'N',
-          generateOTPURI: data.generateOTPURI,
-          verifyOTPURI: data.verifyOTPURI,
-          authorizeURI: data.authorizeURI,
-          step: data.showOTPCapturePage === 'Y' ? 2 : 1
+          tranCtx: responseContent.tranCtx,
+          redirectURI: responseContent.redirectURI,
+          showOTPCapturePage: responseContent.showOTPCapturePage || 'N',
+          generateOTPURI: responseContent.generateOTPURI,
+          verifyOTPURI: responseContent.verifyOTPURI,
+          authorizeURI: responseContent.authorizeURI,
+          step: responseContent.showOTPCapturePage === 'Y' ? 2 : 1
         }));
         setCommandForm(prev => ({ ...prev, originalTxnNo: saleForm.merchantTxnNo }));
       }
-      toast.success("Initiate Sale API executed!");
+      toast.success("Initiate Sale API executed via backend proxy!");
     } catch (err) {
-      setApiResponse({ error: err.message, note: "Browser CORS Restriction likely triggered if UAT endpoint blocks browser origin. You can copy the generated cURL command below to test via Postman/Terminal or backend!" });
-      toast.error("API Call Error / CORS restriction");
+      setApiResponse({ error: err.message, note: "Error communicating via backend proxy endpoint." });
+      toast.error("API Call Error");
     }
   };
 
@@ -335,28 +336,28 @@ export const ICICIPaymentDemo = () => {
     e.preventDefault();
     setApiResponse({ loading: true });
 
-    const params = new URLSearchParams({
+    const payload = {
       merchantId: credentials.merchantId,
       aggregatorID: credentials.aggregatorID,
       merchantTxnNo: commandForm.merchantTxnNo,
       originalTxnNo: commandForm.originalTxnNo || commandForm.merchantTxnNo,
       transactionType: commandForm.transactionType,
       secureHash: hashCalculation.secureHash
-    });
-    if (commandForm.amount) params.append('amount', commandForm.amount);
-    if (commandForm.addlParam1) params.append('addlParam1', commandForm.addlParam1);
+    };
+    if (commandForm.amount) payload.amount = commandForm.amount;
+    if (commandForm.addlParam1) payload.addlParam1 = commandForm.addlParam1;
 
     try {
-      const response = await fetch(credentials.commandUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString()
+      const res = await axios.post(`${API_BASE_URL}/api/courses/icici/proxy/`, {
+        target_url: credentials.commandUrl,
+        payload_type: 'form',
+        payload
       });
-      const data = await response.json();
-      setApiResponse({ status: response.status, data });
-      toast.success(`${commandForm.transactionType} API executed!`);
+      const resData = res.data;
+      setApiResponse({ status: resData.status || 200, data: resData.data || resData.raw_response || resData });
+      toast.success(`${commandForm.transactionType} API executed via backend proxy!`);
     } catch (err) {
-      setApiResponse({ error: err.message, note: "Browser CORS Restriction likely triggered for ICICI UAT domain." });
+      setApiResponse({ error: err.message, note: "Backend proxy call error." });
       toast.error("Command API Failed");
     }
   };
@@ -366,7 +367,7 @@ export const ICICIPaymentDemo = () => {
     e.preventDefault();
     setApiResponse({ loading: true });
 
-    const params = new URLSearchParams({
+    const payload = {
       merchantId: credentials.merchantId,
       aggregatorID: credentials.aggregatorID,
       merchantRefNo: qrForm.merchantRefNo,
@@ -380,19 +381,19 @@ export const ICICIPaymentDemo = () => {
       secureHash: hashCalculation.secureHash,
       accountNo: qrForm.accountNo,
       accountIFSC: qrForm.accountIFSC
-    });
+    };
 
     try {
-      const response = await fetch(credentials.qrUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString()
+      const res = await axios.post(`${API_BASE_URL}/api/courses/icici/proxy/`, {
+        target_url: credentials.qrUrl,
+        payload_type: 'form',
+        payload
       });
-      const data = await response.json();
-      setApiResponse({ status: response.status, data });
-      toast.success("Generate QR API executed!");
+      const resData = res.data;
+      setApiResponse({ status: resData.status || 200, data: resData.data || resData.raw_response || resData });
+      toast.success("Generate QR API executed via backend proxy!");
     } catch (err) {
-      setApiResponse({ error: err.message, note: "Browser CORS Restriction likely triggered for ICICI UAT domain." });
+      setApiResponse({ error: err.message, note: "Backend proxy call error." });
       toast.error("Generate QR API Failed");
     }
   };
