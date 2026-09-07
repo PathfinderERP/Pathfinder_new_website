@@ -425,9 +425,14 @@ export const ICICIPaymentDemo = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700/60 text-xs">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span className="text-slate-300 font-semibold">UAT Sandbox Testing Mode</span>
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700/60 text-xs">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span className="text-slate-300 font-semibold">UAT Sandbox Testing Mode</span>
+            </div>
+            <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded-md">
+              v1.0.2 (Proxy Active)
+            </span>
           </div>
         </div>
 
