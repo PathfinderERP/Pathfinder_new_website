@@ -171,15 +171,21 @@ export default function CustomPageRenderer() {
     }
   }, [pageData]);
 
-  // Scroll handler to go to Contact section smoothly
+  // Scroll handler to go to Contact form smoothly with header offset for mobile & desktop
   const scrollToContact = () => {
     try {
-      const el = document.getElementById('contact-section');
+      const el = document.getElementById('contact-form') || document.getElementById('contact-section');
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const headerOffset = 90;
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
       } else {
-        // fallback: navigate to hash so server-side routing can handle it
-        window.location.hash = '#contact-section';
+        window.location.hash = '#contact-form';
       }
     } catch (e) {
       console.warn('scrollToContact failed', e);
@@ -932,7 +938,7 @@ export default function CustomPageRenderer() {
 
               {/* Right: Exact same form card as /contact page */}
               <div className="w-full">
-                <ContactFormCard />
+                <ContactFormCard slug={slug} />
               </div>
 
             </div>

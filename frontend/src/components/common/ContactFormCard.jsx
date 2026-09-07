@@ -1,15 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDownIcon, MapPinIcon } from "@heroicons/react/24/outline";
-import ReCAPTCHA from "react-google-recaptcha";
 import { centresAPI } from "../../services/api";
 
 /**
  * Shared Contact Form Card — identical to the form on the /contact page.
  * Can be embedded in any page (e.g. CustomPageRenderer, landing pages).
  */
-export default function ContactFormCard() {
+export default function ContactFormCard({ slug, classOptions }) {
     const [centres, setCentres] = useState([]);
+
+    const SLUG_CLASS_OPTIONS = {
+        "cbse-mock-test-program": ["Class 9", "Class 10", "Class 11", "Class 12"],
+        "icse-isc-mock-test-program": ["Class 9", "Class 10", "Class 11", "Class 12"],
+        "madhyamik-mock-test-program": ["Class 9", "Class 10"],
+        "foundation-programme": ["Class 7", "Class 8", "Class 9", "Class 10"],
+        "jee-wbjee-programme": ["Class 11", "Class 12", "Passout/Dropper"],
+        "mock-test-program": ["Class 10", "Class 11", "Class 12", "Passout/Dropper"],
+        "key-to-success": ["Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12", "Passout/Dropper"],
+    };
+
+    const availableClasses = classOptions || SLUG_CLASS_OPTIONS[slug] || [
+        "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12", "Passout/Dropper"
+    ];
 
     const [formData, setFormData] = useState({
         first_name: "",
@@ -25,7 +38,6 @@ export default function ContactFormCard() {
     const [submitMessage, setSubmitMessage] = useState("");
     const [errors, setErrors] = useState({});
     const [showMessage, setShowMessage] = useState(false);
-    const [captchaToken, setCaptchaToken] = useState(null);
 
     const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -37,8 +49,6 @@ export default function ContactFormCard() {
             })
             .catch(console.error);
     }, []);
-
-    const onCaptchaChange = (token) => setCaptchaToken(token);
 
     const validate = () => {
         const newErrors = {};
@@ -77,11 +87,6 @@ export default function ContactFormCard() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
-        if (!captchaToken) {
-            setSubmitMessage("Please complete the reCAPTCHA.");
-            setShowMessage(true);
-            return;
-        }
         setIsSubmitting(true);
         setSubmitMessage("");
         setErrors({});
@@ -90,15 +95,13 @@ export default function ContactFormCard() {
             const response = await fetch(`${API_BASE_URL}/api/contact/submit/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...formData, captcha_token: captchaToken }),
+                body: JSON.stringify(formData),
             });
             const result = await response.json();
             if (result.success) {
                 setSubmitMessage(result.message);
                 setShowMessage(true);
                 setFormData({ first_name: "", last_name: "", contact_number: "", email: "", student_class: "", course: "", center_name: "", message: "" });
-                setCaptchaToken(null);
-                if (window.grecaptcha) window.grecaptcha.reset();
             } else {
                 if (result.field_errors) {
                     setErrors(result.field_errors);
@@ -135,7 +138,7 @@ export default function ContactFormCard() {
     return (
         <>
             {/* The exact same card UI as /contact page */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-100">
+            <div id="contact-form" className="bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-100">
                 {/* Orange Header */}
                 <div className="bg-gradient-to-r from-orange-600 to-red-600 p-5 md:p-6 text-center relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
@@ -220,13 +223,9 @@ export default function ContactFormCard() {
                                         className={`w-full px-3 py-2.5 rounded-lg border ${errors.student_class ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium appearance-none text-sm`}
                                     >
                                         <option value="">Select your class</option>
-                                        <option value="Class 7">Class 7</option>
-                                        <option value="Class 8">Class 8</option>
-                                        <option value="Class 9">Class 9</option>
-                                        <option value="Class 10">Class 10</option>
-                                        <option value="Class 11">Class 11</option>
-                                        <option value="Class 12">Class 12</option>
-                                        <option value="Passout">Passout/Dropper</option>
+                                        {availableClasses.map((cls) => (
+                                            <option key={cls} value={cls}>{cls}</option>
+                                        ))}
                                     </select>
                                     <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                                 </div>
@@ -294,14 +293,6 @@ export default function ContactFormCard() {
                         <p className="text-[10px] text-slate-500 font-bold mb-1 ml-1 leading-tight italic">
                             I Authorize Pathfinder Educational Centre to send notifications via SMS / RCS / Call / Email / Whatsapp
                         </p>
-
-                        {/* reCAPTCHA */}
-                        <div className="flex justify-center md:justify-start py-2">
-                            <ReCAPTCHA
-                                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LdGdd8sAAAAAGnXDx7IDnHOiOWDtF9yQ4pVvwYD"}
-                                onChange={onCaptchaChange}
-                            />
-                        </div>
 
                         {/* Submit */}
                         <motion.button
