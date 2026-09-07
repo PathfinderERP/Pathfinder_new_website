@@ -95,6 +95,7 @@ import { Paislandingpage } from "../pages/add_landingpage/pages/Paislandingpage"
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
+import { ICICIPaymentDemo } from "../pages/ICICIPaymentDemo";
 
 // PAIS Portal Pages
 import { PaisLogin } from "../pages/pais/PaisLogin";
@@ -404,6 +405,10 @@ const AppRoutes = () => {
       <Route
         path="/anthe"
         element={<Paislandingpage />}
+      />
+      <Route
+        path="/icici-demo"
+        element={<ICICIPaymentDemo />}
       />
 
       {/* PNTSE / PAIS Portal & Exam Routes */}
