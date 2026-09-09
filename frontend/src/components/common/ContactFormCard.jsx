@@ -23,9 +23,14 @@ export default function ContactFormCard({ slug, classOptions }) {
         "neet-programme"
     ];
 
+    const OTHER_CUSTOM_SLUGS = [
+        "foundation-programme"
+    ];
+
     const isMockTestPage = MOCK_TEST_SLUGS.includes(slug);
     const isExamProgrammePage = EXAM_PROGRAMME_SLUGS.includes(slug);
-    const isCustomFormPage = isMockTestPage || isExamProgrammePage;
+    const isFoundationPage = OTHER_CUSTOM_SLUGS.includes(slug);
+    const isCustomFormPage = isMockTestPage || isExamProgrammePage || isFoundationPage;
 
     const SLUG_CLASS_OPTIONS = {
         "cbse-mock-test-program": ["Class 11", "Class 12"],
@@ -145,18 +150,19 @@ export default function ContactFormCard({ slug, classOptions }) {
 
             const hardcodedCourseName = slug === "jee-wbjee-programme" ? "JEE / WBJEE Programme"
                 : slug === "neet-programme" ? "NEET Medical Programme"
+                : slug === "foundation-programme" ? "Foundation Programme"
                 : slug ? slug.replace(/-/g, " ").toUpperCase() : "Special Program";
 
             payload.course = {
                 id: slug || "special_program",
                 name: hardcodedCourseName,
-                goal: isExamProgrammePage ? "Exam Prep Registration" : "Mock Test Application",
+                goal: isExamProgrammePage ? "Exam Prep Registration" : isFoundationPage ? "Foundation Programme Registration" : "Mock Test Application",
                 mode: formData.learning_mode || "Online/Offline",
                 location: payload.center_name || "General",
                 start: "Immediate",
                 price: "N/A"
             };
-            payload.message = `${hardcodedCourseName} Application (${formData.learning_mode || 'Default Mode'})`;
+            payload.message = `${hardcodedCourseName} Application`;
         }
 
         try {
@@ -221,7 +227,9 @@ export default function ContactFormCard({ slug, classOptions }) {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
                     <div className="relative z-10">
                         <h2 className="text-xl md:text-2xl font-black text-white mb-1 tracking-tight">
-                            {isExamProgrammePage ? (
+                            {isFoundationPage ? (
+                                <>Apply for <span className="text-orange-200">Foundation</span></>
+                            ) : isExamProgrammePage ? (
                                 <>Apply for <span className="text-orange-200">{slug === "neet-programme" ? "NEET" : "JEE / WBJEE"}</span></>
                             ) : isMockTestPage ? (
                                 <>Apply for <span className="text-orange-200">Mock Test</span></>
