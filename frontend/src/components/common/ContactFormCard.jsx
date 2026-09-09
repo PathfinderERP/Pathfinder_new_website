@@ -32,8 +32,8 @@ export default function ContactFormCard({ slug, classOptions }) {
         "icse-isc-mock-test-program": ["Class 11", "Class 12"],
         "madhyamik-mock-test-program": ["Class 11", "Class 12"],
         "foundation-programme": ["Class 7", "Class 8", "Class 9", "Class 10"],
-        "jee-wbjee-programme": ["Class 11", "Class 12", "Passout/Dropper"],
-        "neet-programme": ["Class 11", "Class 12", "Passout/Dropper"],
+        "jee-wbjee-programme": ["Class 11", "Class 12"],
+        "neet-programme": ["Class 11", "Class 12"],
         "mock-test-program": ["Class 10", "Class 11", "Class 12", "Passout/Dropper"],
         "key-to-success": ["Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12", "Passout/Dropper"],
     };
