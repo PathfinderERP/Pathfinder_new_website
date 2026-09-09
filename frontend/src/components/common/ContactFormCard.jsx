@@ -18,7 +18,14 @@ export default function ContactFormCard({ slug, classOptions }) {
         "madhyamik-mock-test-program"
     ];
 
+    const EXAM_PROGRAMME_SLUGS = [
+        "jee-wbjee-programme",
+        "neet-programme"
+    ];
+
     const isMockTestPage = MOCK_TEST_SLUGS.includes(slug);
+    const isExamProgrammePage = EXAM_PROGRAMME_SLUGS.includes(slug);
+    const isCustomFormPage = isMockTestPage || isExamProgrammePage;
 
     const SLUG_CLASS_OPTIONS = {
         "cbse-mock-test-program": ["Class 11", "Class 12"],
@@ -43,6 +50,7 @@ export default function ContactFormCard({ slug, classOptions }) {
         email: "",
         student_class: "",
         course: "",
+        learning_mode: "", // "Online (at home)" or "Offline (at centre)"
         center_name: "",
         message: "",
     });
@@ -64,7 +72,7 @@ export default function ContactFormCard({ slug, classOptions }) {
 
     const validate = () => {
         const newErrors = {};
-        if (isMockTestPage) {
+        if (isCustomFormPage) {
             if (!formData.full_name.trim()) newErrors.full_name = "Student full name is required";
         } else {
             if (!formData.first_name.trim()) newErrors.first_name = "First name is required";
@@ -77,7 +85,15 @@ export default function ContactFormCard({ slug, classOptions }) {
         const phoneRegex = /^\d{10}$/;
         if (!formData.contact_number.match(phoneRegex)) newErrors.contact_number = "Please enter a valid 10-digit number";
         if (!formData.student_class) newErrors.student_class = "Please select your class";
-        if (!formData.center_name) newErrors.center_name = "Please select a centre";
+
+        if (isExamProgrammePage) {
+            if (!formData.learning_mode) newErrors.learning_mode = "Please select learning mode";
+            if (formData.learning_mode === "Offline (at centre)" && !formData.center_name) {
+                newErrors.center_name = "Please select a centre";
+            }
+        } else {
+            if (!formData.center_name) newErrors.center_name = "Please select a centre";
+        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -93,13 +109,22 @@ export default function ContactFormCard({ slug, classOptions }) {
             emailid: "email",
             student_class: "student_class",
             course: "course",
+            learning_mode: "learning_mode",
             centername: "center_name",
             floatingTextarea2: "message",
         };
         const backendField = fieldMapping[id] || id;
         if (id === "contactno" && value !== "" && !/^\d*$/.test(value)) return;
         if (id === "contactno" && value.length > 10) return;
-        setFormData((prev) => ({ ...prev, [backendField]: value }));
+        setFormData((prev) => {
+            const updated = { ...prev, [backendField]: value };
+            if (backendField === "learning_mode" && value === "Online (at home)") {
+                updated.center_name = "Online / Home Study";
+            } else if (backendField === "learning_mode" && value === "Offline (at centre)" && prev.center_name === "Online / Home Study") {
+                updated.center_name = "";
+            }
+            return updated;
+        });
         if (errors[backendField]) setErrors((prev) => ({ ...prev, [backendField]: "" }));
     };
 
@@ -112,21 +137,26 @@ export default function ContactFormCard({ slug, classOptions }) {
         setShowMessage(false);
 
         const payload = { ...formData };
-        if (isMockTestPage) {
+        if (isCustomFormPage) {
             const nameParts = formData.full_name.trim().split(" ");
             payload.first_name = nameParts[0] || "";
             payload.last_name = nameParts.slice(1).join(" ") || nameParts[0] || "";
-            payload.email = `${formData.contact_number}@mocktest.pathfinder.edu.in`;
+            payload.email = `${formData.contact_number}@${slug}.pathfinder.edu.in`;
+
+            const hardcodedCourseName = slug === "jee-wbjee-programme" ? "JEE / WBJEE Programme"
+                : slug === "neet-programme" ? "NEET Medical Programme"
+                : slug ? slug.replace(/-/g, " ").toUpperCase() : "Special Program";
+
             payload.course = {
-                id: slug || "mock_test_program",
-                name: slug ? slug.replace(/-/g, " ").toUpperCase() : "Mock Test Program",
-                goal: "Mock Test Application",
-                mode: "Online/Offline",
-                location: formData.center_name || "General",
+                id: slug || "special_program",
+                name: hardcodedCourseName,
+                goal: isExamProgrammePage ? "Exam Prep Registration" : "Mock Test Application",
+                mode: formData.learning_mode || "Online/Offline",
+                location: payload.center_name || "General",
                 start: "Immediate",
                 price: "N/A"
             };
-            payload.message = `Mock Test Application for ${slug || 'program'}`;
+            payload.message = `${hardcodedCourseName} Application (${formData.learning_mode || 'Default Mode'})`;
         }
 
         try {
@@ -139,7 +169,7 @@ export default function ContactFormCard({ slug, classOptions }) {
             if (result.success) {
                 setSubmitMessage(result.message);
                 setShowMessage(true);
-                setFormData({ full_name: "", first_name: "", last_name: "", contact_number: "", email: "", student_class: "", course: "", center_name: "", message: "" });
+                setFormData({ full_name: "", first_name: "", last_name: "", contact_number: "", email: "", student_class: "", course: "", learning_mode: "", center_name: "", message: "" });
             } else {
                 const apiErrors = result.errors || result.field_errors;
                 if (apiErrors) {
@@ -191,14 +221,16 @@ export default function ContactFormCard({ slug, classOptions }) {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
                     <div className="relative z-10">
                         <h2 className="text-xl md:text-2xl font-black text-white mb-1 tracking-tight">
-                            {isMockTestPage ? (
+                            {isExamProgrammePage ? (
+                                <>Apply for <span className="text-orange-200">{slug === "neet-programme" ? "NEET" : "JEE / WBJEE"}</span></>
+                            ) : isMockTestPage ? (
                                 <>Apply for <span className="text-orange-200">Mock Test</span></>
                             ) : (
                                 <>Get in <span className="text-orange-200">Touch</span></>
                             )}
                         </h2>
                         <p className="text-white/80 text-sm font-medium">
-                            {isMockTestPage ? "Fill out the details below to apply." : "Have a question? We're here to help."}
+                            {isCustomFormPage ? "Fill out the details below to apply." : "Have a question? We're here to help."}
                         </p>
                     </div>
                 </div>
@@ -208,8 +240,8 @@ export default function ContactFormCard({ slug, classOptions }) {
                     <form onSubmit={handleSubmit} className="space-y-3">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
-                            {isMockTestPage ? (
-                                /* Student Full Name for Mock Test pages */
+                            {isCustomFormPage ? (
+                                /* Student Full Name */
                                 <div className="space-y-2 md:col-span-2">
                                     <label htmlFor="fullname" className="text-sm font-bold text-slate-700 ml-1">
                                         Student Full Name <span className="text-orange-500">*</span>
@@ -268,8 +300,8 @@ export default function ContactFormCard({ slug, classOptions }) {
                                 {errors.contact_number && <p className="text-red-500 text-xs font-bold ml-1">{errors.contact_number}</p>}
                             </div>
 
-                            {/* Email - hidden for mock test pages */}
-                            {!isMockTestPage && (
+                            {/* Email - hidden for custom form pages */}
+                            {!isCustomFormPage && (
                                 <div className="space-y-2">
                                     <label htmlFor="emailid" className="text-sm font-bold text-slate-700 ml-1">
                                         Email Address <span className="text-orange-500">*</span>
@@ -305,8 +337,30 @@ export default function ContactFormCard({ slug, classOptions }) {
                                 {errors.student_class && <p className="text-red-500 text-xs font-bold ml-1">{errors.student_class}</p>}
                             </div>
 
-                            {/* Course - hidden for mock test pages */}
-                            {!isMockTestPage && (
+                            {/* Learning Mode for JEE/NEET pages */}
+                            {isExamProgrammePage && (
+                                <div className="space-y-2 md:col-span-2">
+                                    <label htmlFor="learning_mode" className="text-sm font-bold text-slate-700 ml-1">
+                                        Learning Mode <span className="text-orange-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            id="learning_mode"
+                                            value={formData.learning_mode} onChange={handleChange} required
+                                            className={`w-full px-3 py-2.5 rounded-lg border ${errors.learning_mode ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium appearance-none text-sm`}
+                                        >
+                                            <option value="">Select mode</option>
+                                            <option value="Online (at home)">Online (at home)</option>
+                                            <option value="Offline (at centre)">Offline (at centre)</option>
+                                        </select>
+                                        <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                    </div>
+                                    {errors.learning_mode && <p className="text-red-500 text-xs font-bold ml-1">{errors.learning_mode}</p>}
+                                </div>
+                            )}
+
+                            {/* Course - hidden for custom form pages */}
+                            {!isCustomFormPage && (
                                 <div className="space-y-2">
                                     <label htmlFor="course" className="text-sm font-bold text-slate-700 ml-1">
                                         Select Course <span className="text-orange-500">*</span>
@@ -329,30 +383,32 @@ export default function ContactFormCard({ slug, classOptions }) {
                                 </div>
                             )}
 
-                            {/* Centre Name — full width */}
-                            <div className="space-y-2 md:col-span-2">
-                                <label htmlFor="centername" className="text-sm font-bold text-slate-700 ml-1">
-                                    {isMockTestPage ? "Choose centre" : "Centre Name"} <span className="text-orange-500">*</span>
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        id="centername"
-                                        value={formData.center_name} onChange={handleChange} required
-                                        className={`w-full px-3 py-2.5 rounded-lg border ${errors.center_name ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium appearance-none text-sm`}
-                                    >
-                                        <option value="">Choose centre</option>
-                                        {centres.map((c) => (
-                                            <option key={c.id || c._id} value={c.centre}>{c.centre}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDownIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                            {/* Centre Name — full width (hidden if online is chosen) */}
+                            {(!isExamProgrammePage || formData.learning_mode === "Offline (at centre)") && (
+                                <div className="space-y-2 md:col-span-2">
+                                    <label htmlFor="centername" className="text-sm font-bold text-slate-700 ml-1">
+                                        {isCustomFormPage ? "Choose centre" : "Centre Name"} <span className="text-orange-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            id="centername"
+                                            value={formData.center_name} onChange={handleChange} required
+                                            className={`w-full px-3 py-2.5 rounded-lg border ${errors.center_name ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium appearance-none text-sm`}
+                                        >
+                                            <option value="">Choose centre</option>
+                                            {centres.map((c) => (
+                                                <option key={c.id || c._id} value={c.centre}>{c.centre}</option>
+                                            ))}
+                                        </select>
+                                        <ChevronDownIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                    </div>
+                                    {errors.center_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.center_name}</p>}
                                 </div>
-                                {errors.center_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.center_name}</p>}
-                            </div>
+                            )}
                         </div>
 
-                        {/* Message - hidden for mock test pages */}
-                        {!isMockTestPage && (
+                        {/* Message - hidden for custom form pages */}
+                        {!isCustomFormPage && (
                             <div className="space-y-2">
                                 <label htmlFor="floatingTextarea2" className="text-sm font-bold text-slate-700 ml-1">
                                     Your Message
@@ -384,7 +440,7 @@ export default function ContactFormCard({ slug, classOptions }) {
                                     <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     <span>Sending...</span>
                                 </div>
-                            ) : isMockTestPage ? "Apply now" : "Send Message"}
+                            ) : isCustomFormPage ? "Apply now" : "Send Message"}
                         </motion.button>
                     </form>
                 </div>
