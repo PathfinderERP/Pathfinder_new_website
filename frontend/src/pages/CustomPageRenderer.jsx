@@ -251,20 +251,43 @@ export default function CustomPageRenderer() {
                 {hero.description || "Top-tier mentorship, comprehensive test patterns, and premium doubt-solving setups for outstanding competitive results."}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button
-                  onClick={scrollToContact}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-900/30 text-base"
-                >
-                  {hero.primary_btn_text || "Apply Now"} <ArrowRight className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={scrollToContact}
-                  className="bg-transparent hover:bg-white/10 border border-gray-400 text-white px-8 py-4 rounded-xl font-bold transition-all text-base"
-                >
-                  {hero.secondary_btn_text || "Book Counselling"}
-                </button>
-              </div>
+              {/* Dynamic Action Navigation Buttons (e.g. Master Page with Board / Exam Buttons) */}
+              {hero.action_buttons && hero.action_buttons.length > 0 ? (
+                <div className="flex flex-wrap gap-4 pt-4">
+                  {hero.action_buttons.map((btn, index) => (
+                    <a
+                      key={index}
+                      href={btn.link}
+                      className={`px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform hover:-translate-y-1 shadow-lg text-base ${
+                        btn.color === "blue"
+                          ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-900/30"
+                          : btn.color === "emerald"
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-900/30"
+                          : btn.color === "red"
+                          ? "bg-red-600 hover:bg-red-700 text-white shadow-red-900/30"
+                          : "bg-orange-500 hover:bg-orange-600 text-white shadow-orange-900/30"
+                      }`}
+                    >
+                      {btn.label} <ArrowRight className="w-5 h-5" />
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <button
+                    onClick={scrollToContact}
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-900/30 text-base"
+                  >
+                    {hero.primary_btn_text || "Apply Now"} <ArrowRight className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={scrollToContact}
+                    className="bg-transparent hover:bg-white/10 border border-gray-400 text-white px-8 py-4 rounded-xl font-bold transition-all text-base"
+                  >
+                    {hero.secondary_btn_text || "Book Counselling"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </section>
