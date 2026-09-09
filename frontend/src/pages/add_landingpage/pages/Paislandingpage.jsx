@@ -172,6 +172,23 @@ export const Paislandingpage = () => {
                 </p>
               </div>
 
+              {/* Mobile-only Apply Now button */}
+              <div className="block lg:hidden pt-2">
+                <a
+                  href="#register-form"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('register-form')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="inline-flex items-center justify-center gap-2 w-full py-3 px-6 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-sm uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/30 active:scale-[0.98] transition-all duration-200 border border-amber-300/50"
+                >
+                  <span>Apply Now</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </a>
+              </div>
+
               <p className="text-xs sm:text-sm text-slate-200 font-medium max-w-xl leading-relaxed">
                 Take the premier Pathfinder National Talent Search Examination (PNTSE) to discover your true potential, win up to 100% scholarship, and secure cash prizes worth ₹1 Crore+!
               </p>
@@ -233,7 +250,7 @@ export const Paislandingpage = () => {
             </div>
 
             {/* Right Registration Form Column */}
-            <div className="lg:col-span-5">
+            <div id="register-form" className="lg:col-span-5 scroll-mt-24">
               <div className="bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border-2 border-amber-400/40 relative">
                 <div className="bg-[#66090D] text-white -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 p-4 sm:p-5 rounded-t-3xl text-center space-y-1 mb-6 flex flex-col items-center justify-between">
                   <div className="flex items-center justify-between w-full mb-1">
