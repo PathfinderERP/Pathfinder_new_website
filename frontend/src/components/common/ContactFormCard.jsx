@@ -125,6 +125,7 @@ export default function ContactFormCard({ slug, classOptions }) {
                 start: "Immediate",
                 price: "N/A"
             };
+            payload.message = `Mock Test Application for ${slug || 'program'}`;
         }
 
         try {

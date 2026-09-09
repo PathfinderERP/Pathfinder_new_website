@@ -30,7 +30,7 @@ class ApplicationSerializer(serializers.Serializer):
     last_name = serializers.CharField(required=False, allow_null=True)
     contact_number = serializers.CharField(required=False, allow_null=True)
     center_name = serializers.CharField(required=False, allow_null=True)
-    message = serializers.CharField(required=False, allow_null=True)
+    message = serializers.CharField(required=False, allow_null=True, allow_blank=True)
 
     # Extra fields
     selected_centres = serializers.ListField(required=False, allow_null=True, child=serializers.CharField())
