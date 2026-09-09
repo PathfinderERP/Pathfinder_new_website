@@ -10,10 +10,18 @@ import { centresAPI } from "../../services/api";
 export default function ContactFormCard({ slug, classOptions }) {
     const [centres, setCentres] = useState([]);
 
+    const MOCK_TEST_SLUGS = [
+        "cbse-mock-test-program",
+        "icse-isc-mock-test-program",
+        "madhyamik-mock-test-program"
+    ];
+
+    const isMockTestPage = MOCK_TEST_SLUGS.includes(slug);
+
     const SLUG_CLASS_OPTIONS = {
-        "cbse-mock-test-program": ["Class 9", "Class 10", "Class 11", "Class 12"],
-        "icse-isc-mock-test-program": ["Class 9", "Class 10", "Class 11", "Class 12"],
-        "madhyamik-mock-test-program": ["Class 9", "Class 10"],
+        "cbse-mock-test-program": ["Class 11", "Class 12"],
+        "icse-isc-mock-test-program": ["Class 11", "Class 12"],
+        "madhyamik-mock-test-program": ["Class 11", "Class 12"],
         "foundation-programme": ["Class 7", "Class 8", "Class 9", "Class 10"],
         "jee-wbjee-programme": ["Class 11", "Class 12", "Passout/Dropper"],
         "mock-test-program": ["Class 10", "Class 11", "Class 12", "Passout/Dropper"],
@@ -25,6 +33,7 @@ export default function ContactFormCard({ slug, classOptions }) {
     ];
 
     const [formData, setFormData] = useState({
+        full_name: "",
         first_name: "",
         last_name: "",
         contact_number: "",
@@ -52,15 +61,21 @@ export default function ContactFormCard({ slug, classOptions }) {
 
     const validate = () => {
         const newErrors = {};
-        if (!formData.first_name.trim()) newErrors.first_name = "First name is required";
-        if (!formData.last_name.trim()) newErrors.last_name = "Last name is required";
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!formData.email.match(emailRegex)) newErrors.email = "Please enter a valid email address";
+        if (isMockTestPage) {
+            if (!formData.full_name.trim()) newErrors.full_name = "Student full name is required";
+        } else {
+            if (!formData.first_name.trim()) newErrors.first_name = "First name is required";
+            if (!formData.last_name.trim()) newErrors.last_name = "Last name is required";
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!formData.email.match(emailRegex)) newErrors.email = "Please enter a valid email address";
+            if (!formData.course) newErrors.course = "Please select a course";
+        }
+
         const phoneRegex = /^\d{10}$/;
         if (!formData.contact_number.match(phoneRegex)) newErrors.contact_number = "Please enter a valid 10-digit number";
-        if (!formData.course) newErrors.course = "Please select a course";
         if (!formData.student_class) newErrors.student_class = "Please select your class";
         if (!formData.center_name) newErrors.center_name = "Please select a centre";
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -68,6 +83,7 @@ export default function ContactFormCard({ slug, classOptions }) {
     const handleChange = (e) => {
         const { id, value } = e.target;
         const fieldMapping = {
+            fullname: "full_name",
             fname: "first_name",
             lname: "last_name",
             contactno: "contact_number",
@@ -91,17 +107,27 @@ export default function ContactFormCard({ slug, classOptions }) {
         setSubmitMessage("");
         setErrors({});
         setShowMessage(false);
+
+        const payload = { ...formData };
+        if (isMockTestPage) {
+            const nameParts = formData.full_name.trim().split(" ");
+            payload.first_name = nameParts[0] || "";
+            payload.last_name = nameParts.slice(1).join(" ") || nameParts[0] || "";
+            payload.course = slug;
+            payload.email = `${formData.contact_number}@mocktest.pathfinder.edu.in`;
+        }
+
         try {
             const response = await fetch(`${API_BASE_URL}/api/contact/submit/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(payload),
             });
             const result = await response.json();
             if (result.success) {
                 setSubmitMessage(result.message);
                 setShowMessage(true);
-                setFormData({ first_name: "", last_name: "", contact_number: "", email: "", student_class: "", course: "", center_name: "", message: "" });
+                setFormData({ full_name: "", first_name: "", last_name: "", contact_number: "", email: "", student_class: "", course: "", center_name: "", message: "" });
             } else {
                 if (result.field_errors) {
                     setErrors(result.field_errors);
@@ -144,9 +170,15 @@ export default function ContactFormCard({ slug, classOptions }) {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
                     <div className="relative z-10">
                         <h2 className="text-xl md:text-2xl font-black text-white mb-1 tracking-tight">
-                            Get in <span className="text-orange-200">Touch</span>
+                            {isMockTestPage ? (
+                                <>Apply for <span className="text-orange-200">Mock Test</span></>
+                            ) : (
+                                <>Get in <span className="text-orange-200">Touch</span></>
+                            )}
                         </h2>
-                        <p className="text-white/80 text-sm font-medium">Have a question? We're here to help.</p>
+                        <p className="text-white/80 text-sm font-medium">
+                            {isMockTestPage ? "Fill out the details below to apply." : "Have a question? We're here to help."}
+                        </p>
                     </div>
                 </div>
 
@@ -155,33 +187,51 @@ export default function ContactFormCard({ slug, classOptions }) {
                     <form onSubmit={handleSubmit} className="space-y-3">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
-                            {/* First Name */}
-                            <div className="space-y-2">
-                                <label htmlFor="fname" className="text-sm font-bold text-slate-700 ml-1">
-                                    First Name <span className="text-orange-500">*</span>
-                                </label>
-                                <input
-                                    type="text" id="fname"
-                                    value={formData.first_name} onChange={handleChange} required
-                                    className={`w-full px-3 py-2.5 rounded-lg border ${errors.first_name ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
-                                    placeholder="Enter your first name"
-                                />
-                                {errors.first_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.first_name}</p>}
-                            </div>
+                            {isMockTestPage ? (
+                                /* Student Full Name for Mock Test pages */
+                                <div className="space-y-2 md:col-span-2">
+                                    <label htmlFor="fullname" className="text-sm font-bold text-slate-700 ml-1">
+                                        Student Full Name <span className="text-orange-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text" id="fullname"
+                                        value={formData.full_name} onChange={handleChange} required
+                                        className={`w-full px-3 py-2.5 rounded-lg border ${errors.full_name ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
+                                        placeholder="Enter student full name"
+                                    />
+                                    {errors.full_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.full_name}</p>}
+                                </div>
+                            ) : (
+                                <>
+                                    {/* First Name */}
+                                    <div className="space-y-2">
+                                        <label htmlFor="fname" className="text-sm font-bold text-slate-700 ml-1">
+                                            First Name <span className="text-orange-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text" id="fname"
+                                            value={formData.first_name} onChange={handleChange} required
+                                            className={`w-full px-3 py-2.5 rounded-lg border ${errors.first_name ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
+                                            placeholder="Enter your first name"
+                                        />
+                                        {errors.first_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.first_name}</p>}
+                                    </div>
 
-                            {/* Last Name */}
-                            <div className="space-y-2">
-                                <label htmlFor="lname" className="text-sm font-bold text-slate-700 ml-1">
-                                    Last Name <span className="text-orange-500">*</span>
-                                </label>
-                                <input
-                                    type="text" id="lname"
-                                    value={formData.last_name} onChange={handleChange} required
-                                    className={`w-full px-3 py-2.5 rounded-lg border ${errors.last_name ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
-                                    placeholder="Enter your last name"
-                                />
-                                {errors.last_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.last_name}</p>}
-                            </div>
+                                    {/* Last Name */}
+                                    <div className="space-y-2">
+                                        <label htmlFor="lname" className="text-sm font-bold text-slate-700 ml-1">
+                                            Last Name <span className="text-orange-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text" id="lname"
+                                            value={formData.last_name} onChange={handleChange} required
+                                            className={`w-full px-3 py-2.5 rounded-lg border ${errors.last_name ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
+                                            placeholder="Enter your last name"
+                                        />
+                                        {errors.last_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.last_name}</p>}
+                                    </div>
+                                </>
+                            )}
 
                             {/* Phone */}
                             <div className="space-y-2">
@@ -197,19 +247,21 @@ export default function ContactFormCard({ slug, classOptions }) {
                                 {errors.contact_number && <p className="text-red-500 text-xs font-bold ml-1">{errors.contact_number}</p>}
                             </div>
 
-                            {/* Email */}
-                            <div className="space-y-2">
-                                <label htmlFor="emailid" className="text-sm font-bold text-slate-700 ml-1">
-                                    Email Address <span className="text-orange-500">*</span>
-                                </label>
-                                <input
-                                    type="email" id="emailid"
-                                    value={formData.email} onChange={handleChange} required
-                                    className={`w-full px-3 py-2.5 rounded-lg border ${errors.email ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
-                                    placeholder="your.email@example.com"
-                                />
-                                {errors.email && <p className="text-red-500 text-xs font-bold ml-1">{errors.email}</p>}
-                            </div>
+                            {/* Email - hidden for mock test pages */}
+                            {!isMockTestPage && (
+                                <div className="space-y-2">
+                                    <label htmlFor="emailid" className="text-sm font-bold text-slate-700 ml-1">
+                                        Email Address <span className="text-orange-500">*</span>
+                                    </label>
+                                    <input
+                                        type="email" id="emailid"
+                                        value={formData.email} onChange={handleChange} required
+                                        className={`w-full px-3 py-2.5 rounded-lg border ${errors.email ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
+                                        placeholder="your.email@example.com"
+                                    />
+                                    {errors.email && <p className="text-red-500 text-xs font-bold ml-1">{errors.email}</p>}
+                                </div>
+                            )}
 
                             {/* Class */}
                             <div className="space-y-2">
@@ -232,32 +284,34 @@ export default function ContactFormCard({ slug, classOptions }) {
                                 {errors.student_class && <p className="text-red-500 text-xs font-bold ml-1">{errors.student_class}</p>}
                             </div>
 
-                            {/* Course */}
-                            <div className="space-y-2">
-                                <label htmlFor="course" className="text-sm font-bold text-slate-700 ml-1">
-                                    Select Course <span className="text-orange-500">*</span>
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        id="course"
-                                        value={formData.course} onChange={handleChange} required
-                                        className={`w-full px-3 py-2.5 rounded-lg border ${errors.course ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium appearance-none text-sm`}
-                                    >
-                                        <option value="">Select a course</option>
-                                        <option value="Engineering">Engineering</option>
-                                        <option value="Foundation">Foundation</option>
-                                        <option value="Medical">Medical</option>
-                                        <option value="NCRP">NCRP</option>
-                                    </select>
-                                    <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                            {/* Course - hidden for mock test pages */}
+                            {!isMockTestPage && (
+                                <div className="space-y-2">
+                                    <label htmlFor="course" className="text-sm font-bold text-slate-700 ml-1">
+                                        Select Course <span className="text-orange-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            id="course"
+                                            value={formData.course} onChange={handleChange} required
+                                            className={`w-full px-3 py-2.5 rounded-lg border ${errors.course ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium appearance-none text-sm`}
+                                        >
+                                            <option value="">Select a course</option>
+                                            <option value="Engineering">Engineering</option>
+                                            <option value="Foundation">Foundation</option>
+                                            <option value="Medical">Medical</option>
+                                            <option value="NCRP">NCRP</option>
+                                        </select>
+                                        <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                    </div>
+                                    {errors.course && <p className="text-red-500 text-xs font-bold ml-1">{errors.course}</p>}
                                 </div>
-                                {errors.course && <p className="text-red-500 text-xs font-bold ml-1">{errors.course}</p>}
-                            </div>
+                            )}
 
                             {/* Centre Name — full width */}
                             <div className="space-y-2 md:col-span-2">
                                 <label htmlFor="centername" className="text-sm font-bold text-slate-700 ml-1">
-                                    Centre Name <span className="text-orange-500">*</span>
+                                    {isMockTestPage ? "Choose centre" : "Centre Name"} <span className="text-orange-500">*</span>
                                 </label>
                                 <div className="relative">
                                     <select
@@ -265,7 +319,7 @@ export default function ContactFormCard({ slug, classOptions }) {
                                         value={formData.center_name} onChange={handleChange} required
                                         className={`w-full px-3 py-2.5 rounded-lg border ${errors.center_name ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium appearance-none text-sm`}
                                     >
-                                        <option value="">Select a centre</option>
+                                        <option value="">Choose centre</option>
                                         {centres.map((c) => (
                                             <option key={c.id || c._id} value={c.centre}>{c.centre}</option>
                                         ))}
@@ -276,18 +330,20 @@ export default function ContactFormCard({ slug, classOptions }) {
                             </div>
                         </div>
 
-                        {/* Message */}
-                        <div className="space-y-2">
-                            <label htmlFor="floatingTextarea2" className="text-sm font-bold text-slate-700 ml-1">
-                                Your Message
-                            </label>
-                            <textarea
-                                id="floatingTextarea2" rows="2"
-                                value={formData.message} onChange={handleChange}
-                                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium resize-none text-sm"
-                                placeholder="Tell us how we can help..."
-                            />
-                        </div>
+                        {/* Message - hidden for mock test pages */}
+                        {!isMockTestPage && (
+                            <div className="space-y-2">
+                                <label htmlFor="floatingTextarea2" className="text-sm font-bold text-slate-700 ml-1">
+                                    Your Message
+                                </label>
+                                <textarea
+                                    id="floatingTextarea2" rows="2"
+                                    value={formData.message} onChange={handleChange}
+                                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium resize-none text-sm"
+                                    placeholder="Tell us how we can help..."
+                                />
+                            </div>
+                        )}
 
                         {/* Consent */}
                         <p className="text-[10px] text-slate-500 font-bold mb-1 ml-1 leading-tight italic">
@@ -307,7 +363,7 @@ export default function ContactFormCard({ slug, classOptions }) {
                                     <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     <span>Sending...</span>
                                 </div>
-                            ) : "Send Message"}
+                            ) : isMockTestPage ? "Apply now" : "Send Message"}
                         </motion.button>
                     </form>
                 </div>
