@@ -115,8 +115,16 @@ export default function ContactFormCard({ slug, classOptions }) {
             const nameParts = formData.full_name.trim().split(" ");
             payload.first_name = nameParts[0] || "";
             payload.last_name = nameParts.slice(1).join(" ") || nameParts[0] || "";
-            payload.course = slug;
             payload.email = `${formData.contact_number}@mocktest.pathfinder.edu.in`;
+            payload.course = {
+                id: slug || "mock_test_program",
+                name: slug ? slug.replace(/-/g, " ").toUpperCase() : "Mock Test Program",
+                goal: "Mock Test Application",
+                mode: "Online/Offline",
+                location: formData.center_name || "General",
+                start: "Immediate",
+                price: "N/A"
+            };
         }
 
         try {
@@ -131,8 +139,14 @@ export default function ContactFormCard({ slug, classOptions }) {
                 setShowMessage(true);
                 setFormData({ full_name: "", first_name: "", last_name: "", contact_number: "", email: "", student_class: "", course: "", center_name: "", message: "" });
             } else {
-                if (result.field_errors) {
-                    setErrors(result.field_errors);
+                const apiErrors = result.errors || result.field_errors;
+                if (apiErrors) {
+                    const formatted = {};
+                    Object.keys(apiErrors).forEach(key => {
+                        const val = apiErrors[key];
+                        formatted[key] = Array.isArray(val) ? val.join(", ") : val;
+                    });
+                    setErrors(formatted);
                     setSubmitMessage("Please correct the errors below.");
                 } else {
                     setSubmitMessage(result.error || "Something went wrong. Please try again.");
