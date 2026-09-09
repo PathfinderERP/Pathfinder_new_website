@@ -142,12 +142,15 @@ export default function ContactFormCard({ slug, classOptions }) {
                 const apiErrors = result.errors || result.field_errors;
                 if (apiErrors) {
                     const formatted = {};
+                    const messagesList = [];
                     Object.keys(apiErrors).forEach(key => {
                         const val = apiErrors[key];
-                        formatted[key] = Array.isArray(val) ? val.join(", ") : val;
+                        const msgText = Array.isArray(val) ? val.join(", ") : String(val);
+                        formatted[key] = msgText;
+                        messagesList.push(`${key}: ${msgText}`);
                     });
                     setErrors(formatted);
-                    setSubmitMessage("Please correct the errors below.");
+                    setSubmitMessage(messagesList.join(" | "));
                 } else {
                     setSubmitMessage(result.error || "Something went wrong. Please try again.");
                 }
