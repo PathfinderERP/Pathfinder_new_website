@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDownIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { centresAPI } from "../../services/api";
+import env from "../../config/env";
 
 /**
  * Shared Contact Form Card — identical to the form on the /contact page.
  * Can be embedded in any page (e.g. CustomPageRenderer, landing pages).
  */
+
 export default function ContactFormCard({ slug, classOptions }) {
     const [centres, setCentres] = useState([]);
 
@@ -48,7 +50,7 @@ export default function ContactFormCard({ slug, classOptions }) {
     const [errors, setErrors] = useState({});
     const [showMessage, setShowMessage] = useState(false);
 
-    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+    const API_BASE_URL = env.API_BASE_URL || import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:8000";
 
     useEffect(() => {
         centresAPI.getAll()
