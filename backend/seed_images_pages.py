@@ -21,6 +21,7 @@ def seed_image_pages():
         "mock-test-program",
         "foundation-programme",
         "jee-wbjee-programme",
+        "neet-programme",
         "key-to-success-referral"
     ]
     CustomPage.objects(slug__in=slugs).delete()
@@ -441,6 +442,68 @@ def seed_image_pages():
             "contact": {
                 "title": "Register for JEE / WBJEE Classroom Coaching",
                 "email_recipient": "jee-wbjee@pathfinder.edu.in"
+            }
+        },
+
+        # 8. NEET Prep Classroom & Repeater (Slug: neet-programme)
+        {
+            "title": "NEET Medical Prep Programme",
+            "slug": "neet-programme",
+            "is_live": True,
+            "meta_title": "Best NEET UG Coaching in Kolkata & West Bengal | Pathfinder",
+            "meta_description": "Crack NEET UG medical entrance exam with top doctor faculty, NCERT-focused modules, 720/720 topper track record, and intensive repeater batches.",
+            "meta_keywords": "NEET coaching Kolkata, NEET UG preparation, medical repeater batch, Pathfinder NEET toppers, AIR 1 NEET",
+            "hero": {
+                "title": "Master NEET (UG) Entrance",
+                "title_highlight": "With Pathfinder Medical Prep",
+                "description": "Achieve your dream of entering top Government Medical Colleges (AIIMS, RG Kar, Medical College Kolkata) with our expert doctor-led coaching, NCERT-centric methodology, and proven 2-Year, 1-Year, and Repeater programs.",
+                "bg_image_url": "https://images.pexels.com/photos/3985154/pexels-photo-3985154.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+                "primary_btn_text": "Apply Now",
+                "secondary_btn_text": "Get Call Back"
+            },
+            "legacy": {
+                "title": "Medical Entrance Excellence Legacy",
+                "subtitle": "Decades of top ranks, 700+ NEET scores, and thousands of doctor alumni across India",
+                "milestones": [
+                    {"year": "2024", "title": "AIR 1 Perfect 720 Score", "description": "Our student Chandrachur Sen scored a perfect 720/720 in NEET UG.", "icon": "Trophy"},
+                    {"year": "2025", "title": "Top Govt Medical Admissions", "description": "Over 850+ Pathfinder students secured MBBS seats in prestigious state and central medical colleges.", "icon": "Award"}
+                ]
+            },
+            "toppers": {
+                "title": "NEET (UG) Medical Spotlights",
+                "toppers_list": [
+                    {"name": "Chandrachur Sen", "score": "720/720 Marks", "rank": "AIR 1", "exam": "NEET UG 2024", "image_url": "/images/spotlight/2.png"},
+                    {"name": "Adrita Mahata", "score": "715/720 Marks", "rank": "AIR 2", "exam": "NEET UG 2025", "image_url": "/images/spotlight/1.png"},
+                    {"name": "Pranami Halder", "score": "705/720 Marks", "rank": "AIR 8", "exam": "NEET UG 2025", "image_url": "/images/spotlight/3.png"}
+                ]
+            },
+            "features": {
+                "title": "Why Choose Pathfinder for NEET UG?",
+                "features_list": [
+                    {"title": "NCERT Line-by-Line Mastery", "description": "Exhaustive Biology, Physics, and Chemistry modules mapped directly to NCERT and NTA guidelines.", "icon": "BookOpen"},
+                    {"title": "Dedicated Medical Doubt Desks", "description": "Daily live & offline doubt clearing desks staffed by senior medical faculty.", "icon": "CheckCircle"},
+                    {"title": "Real-time CBT & OMR Mock Tests", "description": "All India NEET Test Series simulating exact OMR test conditions and time management.", "icon": "Laptop"},
+                    {"title": "Renowned Doctor & Expert Faculty", "description": "Mentorship from experienced medical educators with decades of NEET/AIPMT coaching success.", "icon": "Users"}
+                ]
+            },
+            "courses": {
+                "title": "NEET Prep Programs Offered",
+                "courses_list": [
+                    {"name": "2 Year Integrated Classroom Programme (Class 11)", "duration": "2 Years", "target": "Class 11 Medical Aspirants", "features": ["Class Frequency: 3 Days a week intensive sessions", "Complete Class 11 & 12 NCERT syllabus cover", "Mock Tests: 12 Part Tests, 6 Full Syllabus NTA Mock Tests"]},
+                    {"name": "1 Year Classroom Programme (Class 12)", "duration": "1 Year", "target": "Class 12 Medical Aspirants", "features": ["Fast-track Class 12 completion with 11th revision", "Weekly OMR-based practice tests & analysis", "Includes free doubt clearing calendar support"]},
+                    {"name": "1 Year Medical Repeater Programme (Droppers Batch)", "duration": "1 Year", "target": "Class 12 Passed Students", "features": ["Class Frequency: 5 Days a week (Monday-Friday)", "Class Timings: 5 hours daily subject prep", "Mock Tests: 15 Part Syllabus, 10 Full Syllabus Mock Tests"]}
+                ]
+            },
+            "faq": {
+                "title": "NEET UG Prep FAQs",
+                "faqs_list": [
+                    {"question": "What is the structure of the NEET Repeater / Dropper Batch?", "answer": "The NEET Repeater program is an intensive 1-year program running 5 days a week with 5 hours of daily rigorous coaching focusing on high-weightage topics and NEET strategy."},
+                    {"question": "Does Pathfinder provide OMR practice for NEET?", "answer": "Yes! All NEET unit tests, mock tests, and All India Test Series (AITS) are conducted using standard NTA OMR sheets to build accuracy and speed."}
+                ]
+            },
+            "contact": {
+                "title": "Register for NEET Medical Classroom Coaching",
+                "email_recipient": "neet@pathfinder.edu.in"
             }
         },
 

@@ -26,6 +26,7 @@ export default function ContactFormCard({ slug, classOptions }) {
         "madhyamik-mock-test-program": ["Class 11", "Class 12"],
         "foundation-programme": ["Class 7", "Class 8", "Class 9", "Class 10"],
         "jee-wbjee-programme": ["Class 11", "Class 12", "Passout/Dropper"],
+        "neet-programme": ["Class 11", "Class 12", "Passout/Dropper"],
         "mock-test-program": ["Class 10", "Class 11", "Class 12", "Passout/Dropper"],
         "key-to-success": ["Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12", "Passout/Dropper"],
     };
