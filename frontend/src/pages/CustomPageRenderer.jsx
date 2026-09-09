@@ -214,6 +214,50 @@ export default function CustomPageRenderer() {
   // Section configs
   const { hero, legacy, toppers, features, courses, centers, faq, contact, blog } = pageData;
 
+  // If master page layout with buttons only
+  if (pageData.is_master_page || pageData.hero?.is_master_page) {
+    const masterButtons = pageData.hero?.action_buttons || [];
+    return (
+      <div className="min-h-[80vh] flex flex-col items-center justify-center bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white px-4 py-16 text-center">
+        <div className="max-w-3xl space-y-8">
+          <div className="inline-flex items-center bg-orange-500/20 text-orange-400 border border-orange-500/30 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase">
+            {pageData.hero?.badge_text || "Choose Your Program"}
+          </div>
+          
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight">
+            {pageData.hero?.title || pageData.title} <br />
+            {pageData.hero?.title_highlight && (
+              <span className="text-orange-500">{pageData.hero.title_highlight}</span>
+            )}
+          </h1>
+
+          <p className="text-base sm:text-xl text-slate-300 max-w-xl mx-auto font-medium">
+            {pageData.hero?.description || "Select your program track below to continue."}
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-5 pt-4 max-w-2xl mx-auto">
+            {masterButtons.map((btn, index) => (
+              <a
+                key={index}
+                href={btn.link}
+                className={`w-full sm:w-auto px-8 py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all transform hover:-translate-y-1 shadow-2xl active:scale-95 ${
+                  btn.color === "blue"
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-blue-900/50"
+                    : btn.color === "emerald"
+                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-900/50"
+                    : "bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-orange-900/50"
+                }`}
+              >
+                <span>{btn.label}</span>
+                <ArrowRight className="w-6 h-6" />
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white text-gray-900 overflow-x-hidden font-sans flex flex-col">
 

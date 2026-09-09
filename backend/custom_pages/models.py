@@ -8,6 +8,7 @@ class CustomPage(Document):
     title = fields.StringField(required=True)
     slug = fields.StringField(required=True, unique=True)
     is_live = fields.BooleanField(default=False)
+    is_master_page = fields.BooleanField(default=False)
     
     # Meta / SEO
     meta_title = fields.StringField()

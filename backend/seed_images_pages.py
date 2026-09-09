@@ -268,124 +268,41 @@ def seed_image_pages():
             "title": "Pathfinder Mock Test Program",
             "slug": "mock-test-program",
             "is_live": True,
+            "is_master_page": True,
             "meta_title": "Pathfinder Mock Test Program | Madhyamik, ICSE, CBSE",
-            "meta_description": "Boost your board preparation with Pathfinder's comprehensive Mock Test Program. Choose CBSE, ICSE & ISC, or WB Board.",
+            "meta_description": "Choose your board to explore Pathfinder's Mock Test Program for CBSE, ICSE & ISC, or WB Board.",
             "meta_keywords": "Pathfinder mock test, board exam preparation, Madhyamik mock, ICSE mock, CBSE mock",
             "hero": {
-                "title": "Pathfinder Mock Test Program",
-                "title_highlight": "Select Your Board",
-                "description": "Every rank is possible when you practice with purpose! Select your school board below to explore dedicated mock test series designed by expert board examiners.",
-                "bg_image_url": "https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+                "title": "Select Your Board",
+                "title_highlight": "Mock Test Program",
+                "description": "Please select your school board below to jumpstart your mock test series.",
+                "badge_text": "Select Board",
                 "action_buttons": [
                     {"label": "CBSE Board", "link": "/cbse-mock-test-program", "color": "orange"},
                     {"label": "ICSE & ISC Board", "link": "/icse-isc-mock-test-program", "color": "blue"},
                     {"label": "WB Board (Madhyamik)", "link": "/madhyamik-mock-test-program", "color": "emerald"}
                 ]
-            },
-            "legacy": {
-                "title": "Decades of Board Excellence",
-                "subtitle": "Unlocking ultimate ranks and top scores across WBBSE, CBSE, and ICSE boards",
-                "milestones": [
-                    {"year": "1991", "title": "Foundation", "description": "Launched mock test evaluation panels with WBBSE standard papers.", "icon": "Calendar"},
-                    {"year": "2010", "title": "National Boards", "description": "Expanded to CBSE and ICSE mock evaluation packages.", "icon": "Trophy"}
-                ]
-            },
-            "toppers": {
-                "title": "Pathfinder Board Achievers",
-                "toppers_list": [
-                    {"name": "Devdutta Majhi", "score": "Rank 1 Madhyamik", "rank": "AIR 1", "exam": "Madhyamik 2023", "image_url": "/images/spotlight/1.png"},
-                    {"name": "Sreeja Paul", "score": "99.4% ICSE", "rank": "AIR 2", "exam": "ICSE 2025", "image_url": "/images/spotlight/3.png"}
-                ]
-            },
-            "features": {
-                "title": "Pathfinder Advantage",
-                "features_list": [
-                    {"title": "Comprehensive Test Schedules", "description": "Curated unit, quarterly, and full-length board mocks.", "icon": "Clock"},
-                    {"title": "Analytical Scorecard Dashboard", "description": "Detailed answers keys, marks distribution, and performance stats.", "icon": "Laptop"},
-                    {"title": "24/7 Academic Support", "description": "Doubt clearing support on the Pathfinder app within minutes.", "icon": "Target"},
-                    {"title": "Scholarship Opportunities", "description": "High scores secure direct fee waivers on classroom coaching courses.", "icon": "Award"}
-                ]
-            },
-            "courses": {
-                "title": "Choose Your Board Test Track",
-                "courses_list": [
-                    {"name": "CBSE Class X / XII Mock Test Track", "duration": "Class 10 & 12", "target": "CBSE Board Track", "features": ["Includes Unit and Pre-board mock papers", "Complete answer sheets corrected by experts", "Video solution tutorials access"]},
-                    {"name": "ICSE / ISC Class X / XII Mock Test Track", "duration": "Class 10 & 12", "target": "ICSE Board Track", "features": ["Dedicated mock tests matching ICSE/ISC blueprints", "Personal feedback from board examiners", "Subject-specific scoring workshops"]},
-                    {"name": "Madhyamik WBBSE Mock Test Track", "duration": "Class 10", "target": "West Bengal Board Track", "features": ["Full syllabus mock exam modules", "Grades and correction notes shared", "Bengali and English medium support"]}
-                ]
-            },
-            "faq": {
-                "title": "General Mock Program FAQs",
-                "faqs_list": [
-                    {"question": "Are WBBSE, CBSE, and ICSE mock tests designed separately?", "answer": "Yes, mock tests are engineered by separate expert panels matching each board's latest syllabus blueprints and grading structures."},
-                    {"question": "Who evaluates the mock exam papers?", "answer": "Every mock exam is graded by senior professors with extensive board evaluation experience to replicate official marking patterns."}
-                ]
-            },
-            "contact": {
-                "title": "Apply for Pathfinder Mock Test Program",
-                "email_recipient": "mocktests@pathfinder.edu.in"
             }
         },
 
         # 5b. Competitive Exam Master Hub (Slug: competitive-exam-programme)
         {
-            "title": "Competitive Exam Prep Master Hub",
+            "title": "Competitive Exam Prep Hub",
             "slug": "competitive-exam-programme",
             "is_live": True,
-            "meta_title": "Competitive Exam Prep Master Hub | JEE & NEET | Pathfinder",
-            "meta_description": "Choose your target competitive engineering or medical entrance exam: JEE / WBJEE or NEET Medical Prep.",
-            "meta_keywords": "Pathfinder competitive exams, JEE coaching, NEET coaching, WBJEE prep, medical engineering entrance",
+            "is_master_page": True,
+            "meta_title": "Competitive Exam Prep Hub | JEE & NEET | Pathfinder",
+            "meta_description": "Choose your target competitive exam: JEE / WBJEE or NEET Medical Prep.",
+            "meta_keywords": "Pathfinder competitive exams, JEE coaching, NEET coaching, WBJEE prep",
             "hero": {
-                "title": "Master Competitive Entrances",
-                "title_highlight": "Select JEE or NEET",
-                "description": "Crack India's top engineering and medical entrance examinations under expert guidance. Choose your target preparation track below to view specialized courses.",
-                "bg_image_url": "https://images.pexels.com/photos/1181424/pexels-photo-1181424.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+                "title": "Select Your Exam",
+                "title_highlight": "Competitive Prep",
+                "description": "Please select your target entrance examination track below to continue.",
+                "badge_text": "Select Entrance Exam",
                 "action_buttons": [
                     {"label": "JEE & WBJEE Prep", "link": "/jee-wbjee-programme", "color": "orange"},
                     {"label": "NEET Medical Prep", "link": "/neet-programme", "color": "emerald"}
                 ]
-            },
-            "legacy": {
-                "title": "Competitive Exam Legacy",
-                "subtitle": "Unrivaled records in national and state competitive entrance examinations",
-                "milestones": [
-                    {"year": "2024", "title": "NEET AIR 1 (720/720)", "description": "Chandrachur Sen scored perfect 720 in NEET UG.", "icon": "Trophy"},
-                    {"year": "2025", "title": "JEE Physics 100%ile", "description": "Devdutta Majhi scored 100 percentile in JEE Main Physics.", "icon": "Award"}
-                ]
-            },
-            "toppers": {
-                "title": "Competitive Exam Achievers",
-                "toppers_list": [
-                    {"name": "Chandrachur Sen", "score": "720/720 Marks", "rank": "AIR 1", "exam": "NEET UG 2024", "image_url": "/images/spotlight/2.png"},
-                    {"name": "Devdutta Majhi", "score": "AIR 1 Physics / 99.99%ile", "rank": "AIR 1", "exam": "JEE Main 2025", "image_url": "/images/spotlight/1.png"}
-                ]
-            },
-            "features": {
-                "title": "Why Choose Pathfinder for Competitive Exams?",
-                "features_list": [
-                    {"title": "IIT & Doctor Alumni Faculty", "description": "Learn directly from top subject experts and experienced competitive educators.", "icon": "Users"},
-                    {"title": "Targeted NCERT Study Modules", "description": "Exhaustive theory and practice booklets aligned with NTA / WBJEE patterns.", "icon": "BookOpen"},
-                    {"title": "All India Test Series (AITS)", "description": "CBT & OMR mock tests with full analytics dashboard.", "icon": "Laptop"},
-                    {"title": "Personalized Doubt Clearing", "description": "Daily live and offline doubt clearing desks to ensure zero knowledge gaps.", "icon": "CheckCircle"}
-                ]
-            },
-            "courses": {
-                "title": "Our Target Tracks",
-                "courses_list": [
-                    {"name": "JEE & WBJEE Engineering Track", "duration": "1 Year / 2 Years", "target": "Engineering Aspirants", "features": ["Classes by IIT alumni faculty", "CBT mock test series", "Phase tests & doubt clearing"]},
-                    {"name": "NEET Medical Entrance Track", "duration": "1 Year / 2 Years", "target": "Medical Aspirants", "features": ["Doctor-led faculty team", "NTA OMR mock test series", "Line-by-line NCERT mastery"]}
-                ]
-            },
-            "faq": {
-                "title": "Competitive Exam FAQs",
-                "faqs_list": [
-                    {"question": "Can I switch between Online and Offline learning modes?", "answer": "Yes, Pathfinder supports flexible hybrid options allowing students to attend offline classes at centres or join online live sessions."},
-                    {"question": "Are scholarship tests available for competitive prep?", "answer": "Yes, students can take the PNTSE scholarship test to win up to 100% fee waivers on JEE and NEET classroom programs."}
-                ]
-            },
-            "contact": {
-                "title": "Register for Competitive Exam Coaching",
-                "email_recipient": "competitive@pathfinder.edu.in"
             }
         },
 
@@ -637,16 +554,17 @@ def seed_image_pages():
             title=p["title"],
             slug=p["slug"],
             is_live=p["is_live"],
+            is_master_page=p.get("is_master_page", False),
             meta_title=p["meta_title"],
             meta_description=p["meta_description"],
             meta_keywords=p["meta_keywords"],
             hero=p["hero"],
-            legacy=p["legacy"],
-            toppers=p["toppers"],
-            features=p["features"],
-            courses=p["courses"],
-            faq=p["faq"],
-            contact=p["contact"],
+            legacy=p.get("legacy", {}),
+            toppers=p.get("toppers", {}),
+            features=p.get("features", {}),
+            courses=p.get("courses", {}),
+            faq=p.get("faq", {}),
+            contact=p.get("contact", {}),
             created_at=datetime.datetime.utcnow(),
             updated_at=datetime.datetime.utcnow()
         )
