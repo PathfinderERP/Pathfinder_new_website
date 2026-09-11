@@ -2,8 +2,22 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
-import { coursesAPI } from "../services/api";
+import { coursesAPI, studentAuthAPI } from "../services/api";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  GraduationCap, 
+  MapPin, 
+  School, 
+  ShieldCheck, 
+  ArrowLeft, 
+  Target, 
+  CheckCircle2,
+  Lock,
+  BookOpen
+} from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -116,8 +130,10 @@ const Buynow = () => {
   const handleProceedToPayment = async () => {
     setError(null);
 
-    // Validate Registration if not logged in
-    if (!user) {
+    let activeUser = user;
+
+    // Create user account with registration details before proceeding to payment if not logged in
+    if (!activeUser) {
       if (!registrationData.fullName || !registrationData.email || !registrationData.phone || !registrationData.password || !registrationData.studentClass || !registrationData.area) {
         setError("Please fill all required fields (Name, Email, Phone, Class, Area, Password)");
         return;
@@ -125,6 +141,57 @@ const Buynow = () => {
       if (registrationData.password !== registrationData.confirmPassword) {
         setError("Passwords do not match");
         return;
+      }
+
+      setLoading(true);
+      try {
+        const regRes = await studentAuthAPI.register({
+          full_name: registrationData.fullName,
+          email: registrationData.email,
+          phone: registrationData.phone,
+          student_class: registrationData.studentClass,
+          area: registrationData.area,
+          school: registrationData.school,
+          board: registrationData.board,
+          parent_name: registrationData.parentName,
+          password: registrationData.password
+        });
+
+        if (regRes.data && regRes.data.token && regRes.data.user) {
+          setAuthenticatedUser(regRes.data.user, regRes.data.token);
+          activeUser = regRes.data.user;
+        } else {
+          // If already registered or login returned without direct token, attempt login
+          const loginRes = await studentAuthAPI.login({
+            email: registrationData.email,
+            password: registrationData.password
+          });
+          if (loginRes.data && loginRes.data.token) {
+            setAuthenticatedUser(loginRes.data.user, loginRes.data.token);
+            activeUser = loginRes.data.user;
+          }
+        }
+      } catch (regErr) {
+        console.error("Pre-payment registration/login notice:", regErr);
+        // If user already exists, try logging in with provided credentials
+        try {
+          const loginRes = await studentAuthAPI.login({
+            email: registrationData.email,
+            password: registrationData.password
+          });
+          if (loginRes.data && loginRes.data.token) {
+            setAuthenticatedUser(loginRes.data.user, loginRes.data.token);
+            activeUser = loginRes.data.user;
+          } else {
+            setError(regErr.response?.data?.error || regErr.response?.data?.message || "Account setup failed. Check credentials.");
+            setLoading(false);
+            return;
+          }
+        } catch (loginErr) {
+          setError(regErr.response?.data?.error || regErr.response?.data?.message || "Account exists or creation failed. Please check your details.");
+          setLoading(false);
+          return;
+        }
       }
     }
 
@@ -205,10 +272,10 @@ const Buynow = () => {
 
       const merchantTxnNo = `TXN${Date.now()}`;
       const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
-      const amount = emiAmount ? emiAmount.toFixed(2) : totalAmount.toFixed(2);
-      const customerName = user ? user.fullName : registrationData.fullName;
-      const customerEmailID = user ? user.email : registrationData.email;
-      const customerMobileNo = user ? (user.phone || "9876543210") : registrationData.phone;
+      const amount = totalAmount ? totalAmount.toFixed(2) : "0.00";
+      const customerName = activeUser ? (activeUser.fullName || activeUser.full_name) : registrationData.fullName;
+      const customerEmailID = activeUser ? activeUser.email : registrationData.email;
+      const customerMobileNo = activeUser ? (activeUser.phone || "9876543210") : registrationData.phone;
       const returnURL = `${API_BASE_URL}/api/courses/icici/callback/`;
 
       const params = {
@@ -288,157 +355,193 @@ const Buynow = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg">Loading...</div>
+          <div className="text-lg font-semibold text-slate-700">Loading course details...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <section className="bg-white py-8 md:py-12">
+    <section className="bg-slate-50 py-8 md:py-12 min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           onClick={handleBackToHome}
-          className="text-emerald-600 font-semibold hover:text-emerald-700 transition mb-6"
+          className="inline-flex items-center gap-2 text-emerald-700 font-semibold hover:text-emerald-800 transition mb-6 bg-white px-3.5 py-1.5 rounded-lg border border-slate-200 shadow-sm"
         >
-          ← Back to Home
+          <ArrowLeft className="w-4 h-4" /> Back to Home
         </button>
 
-        <h2 className="text-4xl font-bold text-slate-900 mb-8">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-8 tracking-tight">
           Complete Your Purchase
         </h2>
 
         {error && (
-          <div className="mb-6 bg-red-50 text-red-600 p-4 rounded-lg border border-red-200">
-            {error}
+          <div className="mb-6 bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 text-sm flex items-center gap-3 shadow-sm">
+            <Lock className="w-5 h-5 text-red-500 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
 
-            {/* Registration Form (Only if not logged in) */}
-            {!user && (
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h3 className="font-semibold text-emerald-800 text-lg mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
-                    <span className="text-emerald-600 text-sm">👤</span>
+            {/* Student Registration (If Not Logged In) */}
+            {!user ? (
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+                  <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2.5">
+                    <span className="p-2 bg-emerald-100/70 text-emerald-700 rounded-xl">
+                      <User className="w-5 h-5" />
+                    </span>
+                    Student Registration & Account Setup
+                  </h3>
+                  <span className="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full font-medium">
+                    Account created automatically before checkout
                   </span>
-                  Student Registration
-                </h3>
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={registrationData.fullName}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="Enter student's full name"
-                    />
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name *</label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={registrationData.fullName}
+                        onChange={handleInputChange}
+                        className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        placeholder="Enter student's full name"
+                      />
+                    </div>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Email *</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={registrationData.email}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="Enter email address"
-                    />
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Email *</label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="email"
+                        name="email"
+                        value={registrationData.email}
+                        onChange={handleInputChange}
+                        className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        placeholder="Enter email address"
+                      />
+                    </div>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number *</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={registrationData.phone}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="Enter 10-digit number"
-                    />
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number *</label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={registrationData.phone}
+                        onChange={handleInputChange}
+                        className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        placeholder="Enter 10-digit number"
+                      />
+                    </div>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Class *</label>
-                    <select
-                      name="studentClass"
-                      value={registrationData.studentClass}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    >
-                      <option value="">Select Class</option>
-                      <option value="6">Class 6</option>
-                      <option value="7">Class 7</option>
-                      <option value="8">Class 8</option>
-                      <option value="9">Class 9</option>
-                      <option value="10">Class 10</option>
-                      <option value="11">Class 11</option>
-                      <option value="12">Class 12</option>
-                      <option value="Dropper">Dropper</option>
-                      <option value="College">College</option>
-                      <option value="Working Professional">Working Professional</option>
-                    </select>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Class *</label>
+                    <div className="relative">
+                      <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <select
+                        name="studentClass"
+                        value={registrationData.studentClass}
+                        onChange={handleInputChange}
+                        className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      >
+                        <option value="">Select Class</option>
+                        <option value="6">Class 6</option>
+                        <option value="7">Class 7</option>
+                        <option value="8">Class 8</option>
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                        <option value="11">Class 11</option>
+                        <option value="12">Class 12</option>
+                        <option value="Dropper">Dropper</option>
+                        <option value="College">College</option>
+                        <option value="Working Professional">Working Professional</option>
+                      </select>
+                    </div>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Board</label>
-                    <select
-                      name="board"
-                      value={registrationData.board}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    >
-                      <option value="">Select Board</option>
-                      <option value="CBSE">CBSE</option>
-                      <option value="ICSE">ICSE</option>
-                      <option value="State Board">State Board</option>
-                      <option value="WBCSE">WBCSE</option>
-                      <option value="Other">Other</option>
-                    </select>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Board</label>
+                    <div className="relative">
+                      <BookOpen className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <select
+                        name="board"
+                        value={registrationData.board}
+                        onChange={handleInputChange}
+                        className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      >
+                        <option value="">Select Board</option>
+                        <option value="CBSE">CBSE</option>
+                        <option value="ICSE">ICSE</option>
+                        <option value="State Board">State Board</option>
+                        <option value="WBCSE">WBCSE</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Area/Locality *</label>
-                    <input
-                      type="text"
-                      name="area"
-                      value={registrationData.area}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="Enter area/locality"
-                    />
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Area/Locality *</label>
+                    <div className="relative">
+                      <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        name="area"
+                        value={registrationData.area}
+                        onChange={handleInputChange}
+                        className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        placeholder="Enter area/locality"
+                      />
+                    </div>
                   </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">School Name</label>
+                    <div className="relative">
+                      <School className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        name="school"
+                        value={registrationData.school}
+                        onChange={handleInputChange}
+                        className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        placeholder="Enter school/college name"
+                      />
+                    </div>
+                  </div>
+
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">School Name</label>
-                    <input
-                      type="text"
-                      name="school"
-                      value={registrationData.school}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="Enter school/college name"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Parent's/Guardian's Name</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Parent's/Guardian's Name</label>
                     <input
                       type="text"
                       name="parentName"
                       value={registrationData.parentName}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       placeholder="Enter parent's/guardian's name"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Create Password *</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Create Password *</label>
                     <div className="relative">
                       <input
                         type={showPassword ? "text" : "password"}
                         name="password"
                         value={registrationData.password}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 pr-10"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 pr-10"
                         placeholder="Min. 6 characters"
                       />
                       <button
@@ -454,15 +557,16 @@ const Buynow = () => {
                       </button>
                     </div>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password *</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Confirm Password *</label>
                     <div className="relative">
                       <input
                         type={showConfirmPassword ? "text" : "password"}
                         name="confirmPassword"
                         value={registrationData.confirmPassword}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 pr-10"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 pr-10"
                         placeholder="Re-enter password"
                       />
                       <button
@@ -480,18 +584,58 @@ const Buynow = () => {
                   </div>
                 </div>
               </div>
+            ) : (
+              /* Profile Card (If Already Registered & Logged In) */
+              <div className="bg-white border border-emerald-200 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xl shadow-md">
+                      {(user.fullName || user.full_name || "S").charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+                        {user.fullName || user.full_name || "Student"}
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      </h3>
+                      <p className="text-xs text-slate-500">Logged In Account</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Verified Student
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-2 text-slate-700 bg-slate-50 p-2.5 rounded-xl">
+                    <Mail className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="truncate">{user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-700 bg-slate-50 p-2.5 rounded-xl">
+                    <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{user.phone || user.mobile || "N/A"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-700 bg-slate-50 p-2.5 rounded-xl">
+                    <GraduationCap className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Class: {user.studentClass || user.student_class || "N/A"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-700 bg-slate-50 p-2.5 rounded-xl">
+                    <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="truncate">Area: {user.area || "N/A"}</span>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Course Summary */}
-            <div className="bg-gradient-to-r from-emerald-50 to-blue-50 border border-emerald-200 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm">
               {courseInfo.thumbnail_url && (
-                <div className="mb-6 rounded-xl overflow-hidden h-48 border border-emerald-100 shadow-sm">
+                <div className="mb-6 rounded-xl overflow-hidden h-48 border border-slate-100 shadow-sm">
                   <img src={courseInfo.thumbnail_url} alt={courseInfo.name} className="w-full h-full object-cover" />
                 </div>
               )}
-              <h3 className="font-semibold text-emerald-800 text-lg mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <span className="text-emerald-600 text-sm">🎯</span>
+              <h3 className="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2">
+                <span className="p-2 bg-emerald-100/70 text-emerald-700 rounded-xl">
+                  <Target className="w-5 h-5" />
                 </span>
                 Course Details
               </h3>
@@ -499,26 +643,26 @@ const Buynow = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <div>
-                      <p className="text-emerald-800 font-bold text-xl">{courseInfo.name}</p>
-                      <p className="text-emerald-600 text-sm mt-1">{courseInfo.goal} • {courseInfo.mode}</p>
+                      <p className="text-slate-900 font-bold text-xl">{courseInfo.name}</p>
+                      <p className="text-emerald-700 font-medium text-sm mt-1">{courseInfo.goal} • {courseInfo.mode}</p>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-emerald-700">
-                      <span className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-blue-600 text-xs">📍</span>
-                      </span>
-                      Location: {courseInfo.location}
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Location: {courseInfo.location}</span>
                     </div>
                   </div>
                   <div className="text-right flex flex-col justify-between">
                     <div>
-                      <p className="text-emerald-800 font-bold text-2xl">{courseInfo.price}</p>
+                      <p className="text-emerald-700 font-extrabold text-2xl">{courseInfo.price}</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* EMI Options */}
+            {/* =========================================================
+               FLEXIBLE PAYMENT OPTIONS (COMMENTED OUT AS REQUESTED)
+               =========================================================
             <div className="bg-slate-50 p-6 rounded-2xl">
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Flexible Payment Options</h3>
               <div className="mb-6">
@@ -536,7 +680,6 @@ const Buynow = () => {
                 </select>
               </div>
 
-              {/* EMI Breakdown */}
               <div className="bg-white p-4 rounded-lg border border-slate-200">
                 <h4 className="font-semibold text-slate-900 mb-3">Payment Breakdown</h4>
                 {selectedEmiOption === "full" ? (
@@ -572,32 +715,39 @@ const Buynow = () => {
                 )}
               </div>
             </div>
+            ========================================================= */}
+
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar Payment Summary */}
           <div className="space-y-6">
-            <div className="bg-emerald-600 text-white p-6 rounded-2xl sticky top-24">
-              <h3 className="text-2xl font-bold mb-6">Payment Summary</h3>
-              <div className="space-y-4 mb-6">
+            <div className="bg-slate-900 text-white p-6 rounded-2xl sticky top-24 shadow-xl border border-slate-800">
+              <h3 className="text-xl font-extrabold mb-6 border-b border-slate-800 pb-3 flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" /> Payment Summary
+              </h3>
+              <div className="space-y-4 mb-6 text-sm">
                 <div>
-                  <p className="text-emerald-100 text-sm mb-1">Student Name</p>
-                  <p className="font-semibold">{user ? user.fullName : (registrationData.fullName || "-")}</p>
+                  <p className="text-slate-400 text-xs mb-1">Student Name</p>
+                  <p className="font-semibold text-slate-100">
+                    {user ? (user.fullName || user.full_name) : (registrationData.fullName || "-")}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-emerald-100 text-sm mb-1">Course</p>
-                  <p className="font-semibold">{courseInfo.name}</p>
+                  <p className="text-slate-400 text-xs mb-1">Course</p>
+                  <p className="font-semibold text-slate-100">{courseInfo.name}</p>
                 </div>
-                <div>
-                  <p className="text-emerald-100 text-sm mb-1">Total</p>
-                  <p className="font-bold text-2xl">{formatCurrency(totalAmount)}</p>
+                <div className="pt-2 border-t border-slate-800">
+                  <p className="text-slate-400 text-xs mb-1">Total Amount</p>
+                  <p className="font-extrabold text-3xl text-emerald-400">{formatCurrency(totalAmount)}</p>
                 </div>
               </div>
+
               <button
                 onClick={handleProceedToPayment}
                 disabled={loading}
-                className="w-full py-3 bg-white text-emerald-600 rounded-lg font-bold hover:bg-emerald-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Processing..." : (selectedEmiOption === "full" ? "Pay Now" : "Start EMI Process")}
+                {loading ? "Processing..." : "Pay Now"}
               </button>
             </div>
           </div>
