@@ -255,8 +255,10 @@ const Buynow = () => {
       const resData = proxyRes.data;
       const responseContent = resData.data || resData;
 
-      if (responseContent.redirectURI) {
-        // Direct to payment gateway redirection URL
+      if (responseContent.redirectURI && responseContent.tranCtx) {
+        // Direct to payment gateway redirection URL with tranCtx parameter
+        window.location.href = `${responseContent.redirectURI}?tranCtx=${encodeURIComponent(responseContent.tranCtx)}`;
+      } else if (responseContent.redirectURI) {
         window.location.href = responseContent.redirectURI;
       } else if (responseContent.targetUrl || responseContent.redirectUrl) {
         window.location.href = responseContent.targetUrl || responseContent.redirectUrl;
