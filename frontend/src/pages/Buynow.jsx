@@ -161,8 +161,8 @@ const Buynow = () => {
           setAuthenticatedUser(regRes.data.user, regRes.data.token);
           activeUser = regRes.data.user;
         } else {
-          // If already registered or login returned without direct token, attempt login
-          const loginRes = await studentAuthAPI.login({
+          // If already registered or login returned without direct token, attempt login via axios directly to avoid interceptor 401 redirect
+          const loginRes = await axios.post(`${API_BASE_URL}/api/auth/login/`, {
             email: registrationData.email,
             password: registrationData.password
           });
@@ -172,10 +172,10 @@ const Buynow = () => {
           }
         }
       } catch (regErr) {
-        console.error("Pre-payment registration/login notice:", regErr);
-        // If user already exists, try logging in with provided credentials
+        console.error("Pre-payment registration notice:", regErr);
+        // If user already exists, try logging in via raw axios to avoid interceptor 401 redirect to /login
         try {
-          const loginRes = await studentAuthAPI.login({
+          const loginRes = await axios.post(`${API_BASE_URL}/api/auth/login/`, {
             email: registrationData.email,
             password: registrationData.password
           });
@@ -183,12 +183,14 @@ const Buynow = () => {
             setAuthenticatedUser(loginRes.data.user, loginRes.data.token);
             activeUser = loginRes.data.user;
           } else {
-            setError(regErr.response?.data?.error || regErr.response?.data?.message || "Account setup failed. Check credentials.");
+            setError(regErr.response?.data?.error || regErr.response?.data?.details || "Account setup failed. Check credentials.");
             setLoading(false);
             return;
           }
         } catch (loginErr) {
-          setError(regErr.response?.data?.error || regErr.response?.data?.message || "Account exists or creation failed. Please check your details.");
+          console.error("Pre-payment login error:", loginErr);
+          const errDetail = loginErr.response?.data?.error || regErr.response?.data?.error || "Account exists or password incorrect. Check credentials.";
+          setError(errDetail);
           setLoading(false);
           return;
         }
@@ -749,6 +751,12 @@ const Buynow = () => {
               >
                 {loading ? "Processing..." : "Pay Now"}
               </button>
+
+              <div className="mt-3 text-center">
+                <span className="text-[11px] font-mono text-emerald-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full inline-block">
+                  Build Version: v1.0.4 (Live ICICI Gateway)
+                </span>
+              </div>
             </div>
           </div>
         </div>
