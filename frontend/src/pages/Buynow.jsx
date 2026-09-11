@@ -146,14 +146,14 @@ const Buynow = () => {
       setLoading(true);
       try {
         const regRes = await studentAuthAPI.register({
-          full_name: registrationData.fullName,
+          fullName: registrationData.fullName,
           email: registrationData.email,
           phone: registrationData.phone,
           student_class: registrationData.studentClass,
           area: registrationData.area,
           school: registrationData.school,
           board: registrationData.board,
-          parent_name: registrationData.parentName,
+          parentName: registrationData.parentName,
           password: registrationData.password
         });
 
