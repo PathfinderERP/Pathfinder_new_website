@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 import { coursesAPI } from "../services/api";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 const Buynow = () => {
   const location = useLocation();
@@ -128,6 +131,9 @@ const Buynow = () => {
     setLoading(true);
 
     try {
+      /* =========================================================
+         RAZORPAY INTEGRATION (COMMENTED OUT FOR ICICI SWITCH)
+         =========================================================
       // 1. Create Razorpay Order on Backend
       const orderRes = await coursesAPI.createRazorpayOrder(courseInfo.id);
       const orderData = orderRes.data;
@@ -189,9 +195,79 @@ const Buynow = () => {
 
       const rzp = new window.Razorpay(options);
       rzp.open();
+      ========================================================= */
+
+      // ICICI PAYMENT GATEWAY INTEGRATION
+      const merchantId = "100000000007164";
+      const aggregatorID = "A100000000007164";
+      const secretKey = "db06cca0-838b-4e01-8b20-6ac446ffb6bd";
+      const saleUrl = "https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale";
+
+      const merchantTxnNo = `TXN${Date.now()}`;
+      const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
+      const amount = emiAmount ? emiAmount.toFixed(2) : totalAmount.toFixed(2);
+      const customerName = user ? user.fullName : registrationData.fullName;
+      const customerEmailID = user ? user.email : registrationData.email;
+      const customerMobileNo = user ? (user.phone || "9876543210") : registrationData.phone;
+      const returnURL = window.location.origin + "/my-courses";
+
+      const params = {
+        merchantId,
+        aggregatorID,
+        merchantTxnNo,
+        amount,
+        currencyCode: "356",
+        payType: "0", // Standard 3DS Redirection
+        customerEmailID,
+        transactionType: "SALE",
+        returnURL,
+        txnDate,
+        customerMobileNo,
+        customerName,
+        addlParam1: courseInfo ? courseInfo.id : "",
+        addlParam2: selectedEmiOption
+      };
+
+      // Generate HMAC-SHA256 secure hash from backend proxy service
+      const hashRes = await axios.post(`${API_BASE_URL}/api/courses/icici/generate-hash/`, {
+        mode: "v1",
+        secretKey,
+        params
+      });
+
+      if (!hashRes.data || !hashRes.data.success) {
+        throw new Error("Failed to calculate payment security hash.");
+      }
+
+      const secureHash = hashRes.data.secureHash;
+      const fullPayload = {
+        ...params,
+        secureHash
+      };
+
+      // Call ICICI Initiate Sale API via backend proxy
+      const proxyRes = await axios.post(`${API_BASE_URL}/api/courses/icici/proxy/`, {
+        target_url: saleUrl,
+        payload_type: "json",
+        payload: fullPayload
+      });
+
+      const resData = proxyRes.data;
+      const responseContent = resData.data || resData;
+
+      if (responseContent.redirectURI) {
+        // Direct to payment gateway redirection URL
+        window.location.href = responseContent.redirectURI;
+      } else if (responseContent.targetUrl || responseContent.redirectUrl) {
+        window.location.href = responseContent.targetUrl || responseContent.redirectUrl;
+      } else {
+        // Fallback: If gateway returned response status/message or details
+        console.log("ICICI Response:", responseContent);
+        throw new Error(responseContent.responseMessage || responseContent.message || "Payment initiation processed.");
+      }
 
     } catch (err) {
-      console.error("Order creation failed:", err);
+      console.error("Payment initiation failed:", err);
       setError(err.response?.data?.error || err.message || "Failed to start payment process. Please try again.");
       setLoading(false);
     }
