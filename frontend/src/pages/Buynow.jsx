@@ -209,7 +209,7 @@ const Buynow = () => {
       const customerName = user ? user.fullName : registrationData.fullName;
       const customerEmailID = user ? user.email : registrationData.email;
       const customerMobileNo = user ? (user.phone || "9876543210") : registrationData.phone;
-      const returnURL = window.location.origin + "/my-courses";
+      const returnURL = `${API_BASE_URL}/api/courses/icici/callback/`;
 
       const params = {
         merchantId,

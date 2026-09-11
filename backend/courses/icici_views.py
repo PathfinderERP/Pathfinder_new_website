@@ -142,3 +142,34 @@ class ICICIProxyView(APIView):
             logger.error(f"ICICI Proxy Error: {e}")
             return Response({"error": str(e), "message": "Failed to connect to ICICI Bank endpoint"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+from django.shortcuts import redirect
+
+class ICICICallbackView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Handle POST callback response sent back by ICICI Payment Gateway after payment attempt.
+        Redirects the browser back to frontend /my-courses with transaction status query parameters.
+        """
+        try:
+            data = request.data
+            logger.info(f"ICICI Payment Callback POST received: {data}")
+            
+            txn_status = data.get('responseCode') or data.get('status') or 'UNKNOWN'
+            txn_no = data.get('merchantTxnNo') or data.get('txnRefNo') or ''
+            
+            # Construct frontend redirect URL
+            redirect_url = f"https://pathfinder.edu.in/my-courses?txnNo={txn_no}&status={txn_status}"
+            return redirect(redirect_url)
+        except Exception as e:
+            logger.error(f"Error handling ICICI callback POST: {e}")
+            return redirect("https://pathfinder.edu.in/my-courses")
+
+    def get(self, request):
+        """
+        Handle GET callback if gateway redirects via GET.
+        """
+        return redirect("https://pathfinder.edu.in/my-courses")
+
+
