@@ -695,7 +695,9 @@ const Footer = () => {
               >
                 {[
                   { label: "Privacy Policy", to: "/privacy-policy" },
-                  { label: "Terms and Conditions", to: "/terms-and-conditions" },
+                  { label: "Terms & Conditions", to: "/terms-and-conditions" },
+                  { label: "Cancellation Policy", to: "/cancellation-policy" },
+                  { label: "Refund Policy", to: "/refund-policy" },
                 ].map((item) => (
                   <motion.li key={item.to} variants={itemVariants}>
                     <Link

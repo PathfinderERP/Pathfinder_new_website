@@ -95,6 +95,8 @@ import { Paislandingpage } from "../pages/add_landingpage/pages/Paislandingpage"
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
+import CancellationPolicy from "../pages/CancellationPolicy";
+import RefundPolicy from "../pages/RefundPolicy";
 import { ICICIPaymentDemo } from "../pages/ICICIPaymentDemo";
 
 // PAIS Portal Pages
@@ -901,6 +903,22 @@ const AppRoutes = () => {
         element={
           <MainLayout>
             <PrivacyPolicy />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/cancellation-policy"
+        element={
+          <MainLayout>
+            <CancellationPolicy />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/refund-policy"
+        element={
+          <MainLayout>
+            <RefundPolicy />
           </MainLayout>
         }
       />
