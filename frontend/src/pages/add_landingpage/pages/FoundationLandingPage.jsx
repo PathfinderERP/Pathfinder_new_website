@@ -300,8 +300,8 @@ export const FoundationLandingPage = () => {
 
     const banners = [
         {
-            src: "/WHY PATH IMAGES/NEET BANNER.webp",
-            alt: "Foundation Program Banner"
+            src: "/WHY PATH IMAGES/FOUNDATION BANNER.webp",
+            alt: "Pathfinder Foundation Program Banner"
         }
     ];
 
