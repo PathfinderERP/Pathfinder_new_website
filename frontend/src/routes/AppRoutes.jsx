@@ -94,6 +94,8 @@ import { Clatlandingpage } from "../pages/add_landingpage/pages/Clatlandingpage"
 import { Paislandingpage } from "../pages/add_landingpage/pages/Paislandingpage";
 import { MockTestLandingPage } from "../pages/add_landingpage/pages/MockTestLandingPage";
 import { FoundationLandingPage } from "../pages/add_landingpage/pages/FoundationLandingPage";
+import { PmoLandingPage } from "../pages/add_landingpage/pages/PmoLandingPage";
+import { PmtseLandingPage } from "../pages/add_landingpage/pages/PmtseLandingPage";
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
@@ -419,28 +421,44 @@ const AppRoutes = () => {
         element={<Clatlandingpage />}
       />
       <Route
+        path="/apply_now/allindia/pmo"
+        element={<PmoLandingPage />}
+      />
+      <Route
+        path="/apply_now/allindia/pmtse"
+        element={<PmtseLandingPage />}
+      />
+      <Route
+        path="/pmo"
+        element={<PmoLandingPage />}
+      />
+      <Route
+        path="/pmtse"
+        element={<PmtseLandingPage />}
+      />
+      <Route
         path="/apply_now/pntse"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/apply_now/pais"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/apply_now/scholarship"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/apply_now/allindia/pntse"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/apply_now/allindia/pais"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/pntse"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/anthe"
