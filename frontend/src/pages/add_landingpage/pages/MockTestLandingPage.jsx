@@ -724,16 +724,6 @@ export const MockTestLandingPage = ({ boardType }) => {
                                     Congratulations! We've received your registration for {config.title} Mock Test Program. Our team will contact you shortly.
                                 </p>
 
-                                <div className="bg-orange-50 rounded-xl p-3 flex items-center gap-3 text-left border border-orange-100">
-                                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm flex-shrink-0">
-                                        <Mail className="w-5 h-5 text-orange-500" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-bold text-gray-900">Check Your Inbox</p>
-                                        <p className="text-[10px] text-gray-500 leading-tight">Confirmation email sent.</p>
-                                    </div>
-                                </div>
-
                                 <button
                                     onClick={() => setShowSuccess(false)}
                                     className="w-full py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg"
