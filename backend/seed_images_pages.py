@@ -300,8 +300,8 @@ def seed_image_pages():
                 "description": "Please select your target entrance examination track below to continue.",
                 "badge_text": "Select Entrance Exam",
                 "action_buttons": [
-                    {"label": "JEE & WBJEE Prep", "link": "/jee-wbjee-programme", "color": "orange"},
-                    {"label": "NEET Medical Prep", "link": "/neet-programme", "color": "emerald"}
+                    {"label": "JEE & WBJEE Prep", "link": "/apply_now/allindia/jee", "color": "orange"},
+                    {"label": "NEET Medical Prep", "link": "/apply_now/allindia/neet", "color": "emerald"}
                 ]
             }
         },
