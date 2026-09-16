@@ -15,7 +15,8 @@ export default function ContactFormCard({ slug, classOptions }) {
     const MOCK_TEST_SLUGS = [
         "cbse-mock-test-program",
         "icse-isc-mock-test-program",
-        "madhyamik-mock-test-program"
+        "madhyamik-mock-test-program",
+        "wb-board-mock-test-program"
     ];
 
     const EXAM_PROGRAMME_SLUGS = [
@@ -33,9 +34,10 @@ export default function ContactFormCard({ slug, classOptions }) {
     const isCustomFormPage = isMockTestPage || isExamProgrammePage || isFoundationPage;
 
     const SLUG_CLASS_OPTIONS = {
-        "cbse-mock-test-program": ["Class 11", "Class 12"],
-        "icse-isc-mock-test-program": ["Class 11", "Class 12"],
-        "madhyamik-mock-test-program": ["Class 11", "Class 12"],
+        "cbse-mock-test-program": ["Class 10", "Class 12"],
+        "icse-isc-mock-test-program": ["Class 10", "Class 12"],
+        "madhyamik-mock-test-program": ["Class 10", "Class 12"],
+        "wb-board-mock-test-program": ["Class 10", "Class 12"],
         "foundation-programme": ["Class 7", "Class 8", "Class 9", "Class 10"],
         "jee-wbjee-programme": ["Class 11", "Class 12"],
         "neet-programme": ["Class 11", "Class 12"],

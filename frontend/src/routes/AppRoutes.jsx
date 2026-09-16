@@ -92,6 +92,7 @@ import { Jeelandingpage } from "../pages/add_landingpage/pages/Jeelandingpage";
 import { Neetlandingpage } from "../pages/add_landingpage/pages/Neetlandingpage";
 import { Clatlandingpage } from "../pages/add_landingpage/pages/Clatlandingpage";
 import { Paislandingpage } from "../pages/add_landingpage/pages/Paislandingpage";
+import { MockTestLandingPage } from "../pages/add_landingpage/pages/MockTestLandingPage";
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
@@ -375,6 +376,22 @@ const AppRoutes = () => {
       <Route
         path="/apply_now/allindia/neet"
         element={<Neetlandingpage />}
+      />
+      <Route
+        path="/cbse-mock-test-program"
+        element={<MockTestLandingPage boardType="cbse" />}
+      />
+      <Route
+        path="/icse-isc-mock-test-program"
+        element={<MockTestLandingPage boardType="icse" />}
+      />
+      <Route
+        path="/wb-board-mock-test-program"
+        element={<MockTestLandingPage boardType="wb" />}
+      />
+      <Route
+        path="/madhyamik-mock-test-program"
+        element={<MockTestLandingPage boardType="wb" />}
       />
       <Route
         path="/apply_now/clat"
