@@ -382,7 +382,7 @@ const AppRoutes = () => {
         path="/mock-test-program"
         element={
           <MainLayout showFooter={false}>
-            <CustomPageRenderer />
+            <CustomPageRenderer slug="mock-test-program" />
           </MainLayout>
         }
       />
@@ -390,7 +390,7 @@ const AppRoutes = () => {
         path="/competitive-exam-programme"
         element={
           <MainLayout showFooter={false}>
-            <CustomPageRenderer />
+            <CustomPageRenderer slug="competitive-exam-programme" />
           </MainLayout>
         }
       />

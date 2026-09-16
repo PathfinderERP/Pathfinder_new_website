@@ -65,8 +65,9 @@ const parseHTMLContent = (htmlString) => {
   return htmlString;
 };
 
-export default function CustomPageRenderer() {
-  const { slug } = useParams();
+export default function CustomPageRenderer({ slug: propSlug }) {
+  const params = useParams();
+  const slug = propSlug || params.slug;
   const navigate = useNavigate();
 
   
