@@ -93,6 +93,7 @@ import { Neetlandingpage } from "../pages/add_landingpage/pages/Neetlandingpage"
 import { Clatlandingpage } from "../pages/add_landingpage/pages/Clatlandingpage";
 import { Paislandingpage } from "../pages/add_landingpage/pages/Paislandingpage";
 import { MockTestLandingPage } from "../pages/add_landingpage/pages/MockTestLandingPage";
+import { FoundationLandingPage } from "../pages/add_landingpage/pages/FoundationLandingPage";
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
@@ -392,6 +393,10 @@ const AppRoutes = () => {
       <Route
         path="/madhyamik-mock-test-program"
         element={<MockTestLandingPage boardType="wb" />}
+      />
+      <Route
+        path="/foundation-programme"
+        element={<FoundationLandingPage />}
       />
       <Route
         path="/apply_now/clat"
