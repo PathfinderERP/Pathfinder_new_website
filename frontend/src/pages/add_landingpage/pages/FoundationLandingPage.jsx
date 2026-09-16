@@ -574,12 +574,12 @@ export const FoundationLandingPage = () => {
 
                         {!isLeadCaptured ? (
                             <div className="relative group">
-                                <div className="absolute inset-0 bg-white/40 backdrop-blur-md rounded-[3rem] z-20 flex flex-col items-center justify-center p-8 border-2 border-dashed border-orange-200 shadow-2xl shadow-orange-500/5">
-                                    <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-6 animate-bounce">
-                                        <Lock className="w-10 h-10 text-orange-600" />
+                                <div className="absolute inset-0 bg-white/40 backdrop-blur-md rounded-2xl md:rounded-[3rem] z-20 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 border-2 border-dashed border-orange-200 shadow-2xl shadow-orange-500/5 text-center">
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-orange-100 rounded-full flex items-center justify-center mb-3 sm:mb-4 md:mb-6 animate-bounce">
+                                        <Lock className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-orange-600" />
                                     </div>
-                                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">View All Foundation Programs</h3>
-                                    <p className="text-gray-600 text-center mb-8 max-w-md font-medium">
+                                    <h3 className="text-lg sm:text-xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 md:mb-4">View All Foundation Programs</h3>
+                                    <p className="text-gray-600 text-center mb-4 sm:mb-6 md:mb-8 max-w-md font-medium text-xs sm:text-sm md:text-base">
                                         To view our complete list of Foundation classroom and digital courses, please complete your registration.
                                     </p>
                                     <button
@@ -587,10 +587,10 @@ export const FoundationLandingPage = () => {
                                             setPopupShowPercentage(false);
                                             setIsRegistrationPopupOpen(true);
                                         }}
-                                        className="px-10 py-4 bg-orange-600 text-white rounded-2xl font-black text-lg hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center gap-3"
+                                        className="px-5 py-3 sm:px-8 sm:py-3.5 md:px-10 md:py-4 bg-orange-600 text-white rounded-xl md:rounded-2xl font-black text-xs sm:text-sm md:text-lg hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center gap-2 md:gap-3"
                                     >
                                         Unlock Foundation Programs
-                                        <ShieldCheck className="w-6 h-6" />
+                                        <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
                                     </button>
                                 </div>
 
