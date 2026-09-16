@@ -311,9 +311,12 @@ export const MockTestLandingPage = ({ boardType }) => {
 
         setIsSubmitting(true);
         try {
-            const submitData = { ...formData };
+            const submitData = {
+                ...formData,
+                course_type: formData.course_type || "Mock Test Program"
+            };
             const response = await landingAPI.register(submitData);
-            if (response.data.success) {
+            if (response.data && (response.data.success || response.status === 201)) {
                 setShowSuccess(true);
                 localStorage.setItem(`pathfinder_lead_captured_${boardType}`, 'true');
                 setIsLeadCaptured(true);
@@ -326,11 +329,12 @@ export const MockTestLandingPage = ({ boardType }) => {
                     page_source: config.pageSource
                 });
             } else {
-                alert("Registration failed: " + (response.data.message || "Unknown error"));
+                alert("Registration failed: " + (response.data?.message || "Unknown error"));
             }
         } catch (error) {
             console.error("Submission error:", error);
-            alert("An error occurred. Please try again later.");
+            const errMsg = error.response?.data?.message || error.response?.data?.errors ? JSON.stringify(error.response.data.errors) : "An error occurred. Please try again later.";
+            alert("Registration submission: " + errMsg);
         } finally {
             setIsSubmitting(false);
         }
