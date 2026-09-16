@@ -652,7 +652,7 @@ export const MockTestLandingPage = ({ boardType }) => {
 
                                 <div className="filter blur-md pointer-events-none opacity-40 select-none grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {[1, 2, 3].map((n) => (
-                                        <div key={n} className="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm">
+                                        <div key={n} className={`${n > 1 ? 'hidden md:block' : ''} bg-white rounded-3xl p-6 border border-gray-200 shadow-sm`}>
                                             <div className="w-full h-48 bg-gray-200 rounded-2xl mb-4"></div>
                                             <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
                                             <div className="h-4 bg-gray-200 rounded w-1/2"></div>
