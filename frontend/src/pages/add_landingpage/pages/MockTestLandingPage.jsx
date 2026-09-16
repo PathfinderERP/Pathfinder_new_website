@@ -379,15 +379,15 @@ export const MockTestLandingPage = ({ boardType }) => {
                 {/* Hero Section - Carousel */}
                 <section id="home" className="relative pt-0 overflow-hidden">
                     <div className="relative w-full">
-                        <div className="relative overflow-hidden aspect-[16/7] md:aspect-[16/5.5]">
+                        <div className="relative overflow-hidden w-full">
                             <div className="flex transition-transform duration-700 ease-in-out h-full"
                                 style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
                                 {banners.map((banner, index) => (
-                                    <div key={index} className="min-w-full h-full">
+                                    <div key={index} className="min-w-full">
                                         <img
                                             src={banner.src}
                                             alt={banner.alt}
-                                            className="w-full h-full object-cover object-left block"
+                                            className="w-full h-auto block"
                                         />
                                     </div>
                                 ))}
