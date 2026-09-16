@@ -379,6 +379,22 @@ const AppRoutes = () => {
         element={<Neetlandingpage />}
       />
       <Route
+        path="/mock-test-program"
+        element={
+          <MainLayout showFooter={false}>
+            <CustomPageRenderer />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/competitive-exam-programme"
+        element={
+          <MainLayout showFooter={false}>
+            <CustomPageRenderer />
+          </MainLayout>
+        }
+      />
+      <Route
         path="/cbse-mock-test-program"
         element={<MockTestLandingPage boardType="cbse" />}
       />
