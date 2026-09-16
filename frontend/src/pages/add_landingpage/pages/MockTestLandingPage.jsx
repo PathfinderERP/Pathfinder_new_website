@@ -113,7 +113,8 @@ export const MockTestLandingPage = ({ boardType }) => {
             heading: "India's Top CBSE Class 10 & 12 Mock Test Series",
             subHeading: "Boost your CBSE Board exam preparation with expert-crafted mock tests for Class 10 and Class 12.",
             pageSource: "CBSE Mock Test Program",
-            coursesFilter: "cbse"
+            coursesFilter: "cbse",
+            bannerSrc: "/WHY PATH IMAGES/CBSE BANNER.webp"
         },
         icse: {
             title: "ICSE / ISC Board",
@@ -122,7 +123,8 @@ export const MockTestLandingPage = ({ boardType }) => {
             heading: "India's Top ICSE & ISC Class 10 & 12 Mock Test Series",
             subHeading: "Excel in your ICSE Class 10 & ISC Class 12 Board Exams with comprehensive test papers and detailed evaluations.",
             pageSource: "ICSE/ISC Mock Test Program",
-            coursesFilter: "icse"
+            coursesFilter: "icse",
+            bannerSrc: "/WHY PATH IMAGES/ICSE BANNER.webp"
         },
         wb: {
             title: "WB Board",
@@ -131,7 +133,8 @@ export const MockTestLandingPage = ({ boardType }) => {
             heading: "West Bengal Board Class 10 & 12 Mock Test Series",
             subHeading: "Prepare for Madhyamik (Class 10) & HS (Class 12) with West Bengal's leading test program.",
             pageSource: "WB Board Mock Test Program",
-            coursesFilter: "wb"
+            coursesFilter: "wb",
+            bannerSrc: "/WHY PATH IMAGES/WB BANNER.webp"
         }
     }[boardType] || {
         title: "Board Exam",
@@ -140,7 +143,8 @@ export const MockTestLandingPage = ({ boardType }) => {
         heading: "Top Board Exam Mock Test Series",
         subHeading: "Boost your Board exam preparation with expert-crafted mock tests for Class 10 and Class 12.",
         pageSource: "Mock Test Program",
-        coursesFilter: "board"
+        coursesFilter: "board",
+        bannerSrc: "/WHY PATH IMAGES/CBSE BANNER.webp"
     };
 
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -334,7 +338,7 @@ export const MockTestLandingPage = ({ boardType }) => {
 
     const banners = [
         {
-            src: "/WHY PATH IMAGES/NEET BANNER.webp",
+            src: config.bannerSrc,
             alt: `${config.title} Mock Test Banner`
         }
     ];
