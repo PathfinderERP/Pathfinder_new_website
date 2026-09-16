@@ -377,7 +377,7 @@ export const MockTestLandingPage = ({ boardType }) => {
             <div className="2xl:max-w-7xl mx-auto bg-white shadow-2xl relative">
 
                 {/* Hero Section - Carousel */}
-                <section id="home" className="relative pt-8 md:pt-12 overflow-hidden">
+                <section id="home" className="relative pt-0 overflow-hidden">
                     <div className="relative w-full">
                         <div className="relative overflow-hidden aspect-[16/7] md:aspect-[16/5.5]">
                             <div className="flex transition-transform duration-700 ease-in-out h-full"
