@@ -5,7 +5,7 @@ import { landingAPI, centresAPI } from "../../../services/api";
 import { toast } from 'react-toastify';
 import confetti from 'canvas-confetti';
 
-const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false }) => {
+const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false, classOptions = null, hideCourseType = false }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [isDetecting, setIsDetecting] = useState(false);
@@ -14,7 +14,7 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
         name: "",
         phone: "",
         student_class: "",
-        course_type: "",
+        course_type: hideCourseType ? "Mock Test Program" : "",
         centre: "",
         last_exam_percentage: "",
         page_source: pageSource || "Landing Page"
@@ -228,7 +228,7 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className={`grid grid-cols-1 ${hideCourseType ? 'md:grid-cols-1' : 'md:grid-cols-2'} gap-4`}>
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Your Class</label>
                                         <select
@@ -239,25 +239,29 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
                                             className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none"
                                         >
                                             <option value="" className="bg-black">Select Class</option>
-                                            <option value="11" className="bg-black">11</option>
-                                            <option value="12" className="bg-black">12</option>
-                                            <option value="12 Passout" className="bg-black">12 Passout</option>
+                                            {(classOptions || ["11", "12", "12 Passout"]).map((cls, idx) => (
+                                                <option key={idx} value={cls} className="bg-black">
+                                                    {cls.startsWith("Class") ? cls : `Class ${cls}`}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Course Type</label>
-                                        <select
-                                            name="course_type"
-                                            value={formData.course_type}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none"
-                                        >
-                                            <option value="" className="bg-black">Select Program</option>
-                                            <option value="Online Program" className="bg-black">Online Program</option>
-                                            <option value="Offline Program" className="bg-black">Offline Program</option>
-                                        </select>
-                                    </div>
+                                    {!hideCourseType && (
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Course Type</label>
+                                            <select
+                                                name="course_type"
+                                                value={formData.course_type}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none"
+                                            >
+                                                <option value="" className="bg-black">Select Program</option>
+                                                <option value="Online Program" className="bg-black">Online Program</option>
+                                                <option value="Offline Program" className="bg-black">Offline Program</option>
+                                            </select>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -498,23 +498,6 @@ export const MockTestLandingPage = ({ boardType }) => {
                                                     <option value="12">Class 12</option>
                                                 </select>
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="block text-sm font-bold">Course Type</label>
-                                                <select
-                                                    name="course_type"
-                                                    value={formData.course_type}
-                                                    onChange={handleInputChange}
-                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                                    required
-                                                >
-                                                    <option value="">Course Type</option>
-                                                    <option value="Online Program">Online Program</option>
-                                                    <option value="Offline Program">Offline Program</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                                             <div className="space-y-2 flex-1">
                                                 <label className="block text-sm font-bold">Centre</label>
                                                 <div className="relative group">
@@ -578,7 +561,7 @@ export const MockTestLandingPage = ({ boardType }) => {
                     </div>
                 </section>
 
-                {/* Why Choose Pathfinder Section */}
+                {/* Why Choose Pathfinder Mock Test Section */}
                 <section className="py-20 bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100 relative overflow-hidden">
                     <div className="absolute inset-0 opacity-30">
                         <div className="absolute top-20 left-10 w-72 h-72 bg-orange-300 rounded-full blur-3xl"></div>
@@ -588,19 +571,19 @@ export const MockTestLandingPage = ({ boardType }) => {
                     <div className="max-w-7xl mx-auto px-6 relative z-10">
                         <div className="text-center mb-16">
                             <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
-                                Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">Pathfinder?</span>
+                                Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">Pathfinder Mock Test?</span>
                             </h2>
                             <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-orange-600 mx-auto rounded-full"></div>
                         </div>
 
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 lg:gap-10">
                             {[
-                                { image: "/WHY PATH IMAGES/Top faculty.webp", label: "Top Faculty" },
-                                { image: "/WHY PATH IMAGES/pathtex app.webp", label: "Pathtex App" },
-                                { image: "/WHY PATH IMAGES/Soft skills.webp", label: "Soft Skills" },
-                                { image: "/WHY PATH IMAGES/mental-health.webp", label: "Mental Health" },
-                                { image: "/WHY PATH IMAGES/AI.webp", label: "AI Learning" },
-                                { image: "/WHY PATH IMAGES/Robotics.webp", label: "Robotics" }
+                                { image: "/WHY PATH IMAGES/Top faculty.webp", label: "Board Exam Pattern" },
+                                { image: "/WHY PATH IMAGES/pathtex app.webp", label: "Pathtex Test App" },
+                                { image: "/WHY PATH IMAGES/Soft skills.webp", label: "Detailed Answer Analysis" },
+                                { image: "/WHY PATH IMAGES/mental-health.webp", label: "Exam Time Management" },
+                                { image: "/WHY PATH IMAGES/AI.webp", label: "AI Score Analytics" },
+                                { image: "/WHY PATH IMAGES/Robotics.webp", label: "State & All India Ranking" }
                             ].map((feature, idx) => (
                                 <div
                                     key={idx}
@@ -626,12 +609,12 @@ export const MockTestLandingPage = ({ boardType }) => {
                     </div>
                 </section>
 
-                {/* Related Courses Section */}
+                {/* Related Programs Section */}
                 <section className="py-20 bg-white relative overflow-hidden">
                     <div className="max-w-6xl mx-auto px-6 relative z-10">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">
-                                Related <span className="text-orange-500">{config.title} Programs</span>
+                                Related <span className="text-orange-500">{config.title} Mock Test Programs</span>
                             </h2>
                             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
                                 Specialized mock test programs designed to help Class 10 & Class 12 students score 95%+ in Board Exams.
@@ -644,7 +627,7 @@ export const MockTestLandingPage = ({ boardType }) => {
                                     <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-6 animate-bounce">
                                         <Lock className="w-10 h-10 text-orange-600" />
                                     </div>
-                                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">View All {config.title} Mock Test Courses</h3>
+                                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">View All {config.title} Mock Test Programs</h3>
                                     <p className="text-gray-600 text-center mb-8 max-w-md font-medium">
                                         To view our complete list of Classroom and Digital test series, please complete your registration.
                                     </p>
@@ -655,7 +638,7 @@ export const MockTestLandingPage = ({ boardType }) => {
                                         }}
                                         className="px-10 py-4 bg-orange-600 text-white rounded-2xl font-black text-lg hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20 active:scale-95 flex items-center gap-3"
                                     >
-                                        Unlock Course List
+                                        Unlock Program List
                                         <ShieldCheck className="w-6 h-6" />
                                     </button>
                                 </div>
@@ -706,38 +689,6 @@ export const MockTestLandingPage = ({ boardType }) => {
                                 alt="Pathfinder Toppers"
                                 className="w-full h-auto object-contain -mt-[160px] md:-mt-[504px] scale-[1.4] translate-x-[6%] md:scale-[1.1] md:translate-x-0 pointer-events-none"
                             />
-                        </div>
-                    </div>
-                </section>
-
-                {/* Ranker Testimonials Section */}
-                <section className="pt-10 pb-20 md:py-20 bg-white">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-center text-gray-900 mb-12">
-                            See what our <span className="text-orange-500">Experts & Toppers</span> are saying
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
-                            {[
-                                { id: 1, label: "Topper's Talk", url: "https://www.youtube.com/embed/dl-QLpDplLE" },
-                                { id: 2, label: "Success Story", url: "https://www.youtube.com/embed/Zd_H0PmG6fo" },
-                                { id: 3, label: "Expert Guidance", url: "https://www.youtube.com/embed/HpOlomu5a48" }
-                            ].map((video) => (
-                                <div key={video.id} className="space-y-4">
-                                    <h4 className="text-center text-xl font-bold text-gray-900 mb-2">
-                                        {video.label}
-                                    </h4>
-                                    <div className="relative z-10 aspect-video bg-gray-100 rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-                                        <iframe
-                                            className="w-full h-full"
-                                            src={video.url}
-                                            title={video.label}
-                                            frameBorder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                            allowFullScreen
-                                        ></iframe>
-                                    </div>
-                                </div>
-                            ))}
                         </div>
                     </div>
                 </section>
@@ -801,6 +752,8 @@ export const MockTestLandingPage = ({ boardType }) => {
                 onClose={() => setIsRegistrationPopupOpen(false)} 
                 pageSource={config.pageSource}
                 showPercentage={popupShowPercentage}
+                classOptions={["Class 10", "Class 12"]}
+                hideCourseType={true}
             />
         </div>
     );
