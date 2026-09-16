@@ -19,7 +19,8 @@ import {
   List as ListIcon,
   ExternalLink,
   Trash2,
-  MoreVertical
+  MoreVertical,
+  Download
 } from "lucide-react";
 import {
   BuildingOfficeIcon,
@@ -301,6 +302,85 @@ const CentreList = () => {
     }
   };
 
+  const exportToCSV = () => {
+    if (!filteredAndSortedCentres || filteredAndSortedCentres.length === 0) {
+      alert("No centres found to export.");
+      return;
+    }
+
+    const headers = [
+      "Centre Name",
+      "Centre Code",
+      "Centre Type",
+      "Franchise Status",
+      "State",
+      "District",
+      "Address",
+      "Contact Number",
+      "Email",
+      "Google Map / Location URL",
+      "Logo URL",
+      "Total Toppers",
+      "Toppers Details",
+      "Initialized Date",
+      "Last Updated Date"
+    ];
+
+    const clean = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""').replace(/\r?\n/g, " ");
+      return `"${str}"`;
+    };
+
+    const csvRows = [
+      headers.join(","),
+      ...filteredAndSortedCentres.map((c) => {
+        const toppersSummary = (c.toppers || [])
+          .map((t) => {
+            const parts = [
+              t.name || "Unknown",
+              t.exam ? `Exam: ${t.exam}` : "",
+              t.rank ? `Rank: ${t.rank}` : "",
+              t.percentages ? `Score: ${t.percentages}%` : ""
+            ].filter(Boolean);
+            return parts.join(" | ");
+          })
+          .join("; ");
+
+        return [
+          clean(c.centre),
+          clean(c.centre_code),
+          clean(c.centre_type || "N/A"),
+          clean(c.is_franchise ? "Franchise" : "Company Owned"),
+          clean(c.state),
+          clean(c.district),
+          clean(c.address),
+          clean(c.mobile),
+          clean(c.email),
+          clean(c.location || c.map_url),
+          clean(c.centre_image || c.logo_url || c.logo),
+          clean(c.toppers?.length || 0),
+          clean(toppersSummary),
+          clean(getDisplayDate(c, "created_at")),
+          clean(getDisplayDate(c, "updated_at"))
+        ].join(",");
+      })
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvRows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `pathfinder_centres_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -338,10 +418,18 @@ const CentreList = () => {
               localStorage.removeItem(cacheKey);
               fetchCentres();
             }}
-            className="p-2 text-gray-500 hover:text-orange-600 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl transition-all shadow-sm"
+            className="p-2 text-gray-500 hover:text-orange-600 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl transition-all shadow-sm cursor-pointer"
             title="Reload Network"
           >
             <RefreshCcw className="w-5 h-5" />
+          </button>
+          <button
+            onClick={exportToCSV}
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20 text-sm cursor-pointer"
+            title="Export centre details to CSV"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export Centres</span>
           </button>
           <Link
             to="/business/admin/centres/create"

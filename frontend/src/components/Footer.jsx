@@ -200,7 +200,7 @@ const Footer = () => {
     { icon: FaRocket, number: "15+", text: "Years Experience", delay: 0.3 },
   ];
 
-  const letters = "PATHFINDER".split("");
+  const words = "Pathfinder Education Centre LLP".split(" ");
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -520,11 +520,11 @@ const Footer = () => {
                     <h4 className="text-xl font-semibold mb-3">Contact</h4>
                     <div className="space-y-2">
                       <motion.a
-                        href="tel:+919147178886"
+                        href="tel:+918585070176"
                         className="block text-gray-400 hover:text-orange-500 transition-colors duration-300"
                         whileHover={{ x: 5 }}
                       >
-                        +91 9147178886
+                        +91 8585070176
                       </motion.a>
                       <motion.a
                         href="mailto:support@pathfinder.edu.in"
@@ -610,24 +610,31 @@ const Footer = () => {
               variants={containerVariants}
             >
               <motion.h4
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mt-8 md:mt-12 tracking-widest"
+                className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mt-8 md:mt-12 tracking-normal leading-tight"
                 variants={pulseVariants}
                 animate={isEndInView ? "pulse" : "initial"}
               >
-                {letters.map((letter, index) => (
+                {words.map((word, index) => (
                   <motion.span
                     key={index}
-                    custom={index}
-                    variants={itemVariants}
-                    className="inline-block mx-0.5 md:mx-1"
-                    whileHover={{
-                      y: -8,
-                      scale: 1.2,
-                      color: "#f97316",
-                      transition: { duration: 0.2 },
-                    }}
+                    className="inline-block whitespace-nowrap mx-0.5 md:mx-1"
                   >
-                    {letter}
+                    {word.split("").map((letter, letterIndex) => (
+                      <motion.span
+                        key={`${word}-${letterIndex}`}
+                        custom={letterIndex}
+                        variants={itemVariants}
+                        className="inline-block"
+                        whileHover={{
+                          y: -8,
+                          scale: 1.2,
+                          color: "#f97316",
+                          transition: { duration: 0.2 },
+                        }}
+                      >
+                        {letter}
+                      </motion.span>
+                    ))}
                   </motion.span>
                 ))}
               </motion.h4>
@@ -683,7 +690,7 @@ const Footer = () => {
                   rel="noopener noreferrer"
                   className="text-[#F8E4C2] font-semibold hover:text-orange-500 transition-colors duration-300"
                 >
-                  Pathfinder
+                  Pathfinder Education Centre LLP
                 </a>
               </motion.p>
 
