@@ -365,7 +365,6 @@ export const MockTestLandingPage = ({ boardType }) => {
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 selection:bg-orange-500 selection:text-white font-sans overflow-x-hidden">
-            <Header />
             <FloatingStickyBadge 
                 scrollToForm={scrollToForm} 
                 onScholarshipClick={() => {
