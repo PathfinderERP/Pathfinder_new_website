@@ -280,7 +280,7 @@ def seed_image_pages():
                 "action_buttons": [
                     {"label": "CBSE Board", "link": "/cbse-mock-test-program", "color": "orange"},
                     {"label": "ICSE & ISC Board", "link": "/icse-isc-mock-test-program", "color": "blue"},
-                    {"label": "WB Board (Madhyamik)", "link": "/madhyamik-mock-test-program", "color": "emerald"}
+                    {"label": "WB Board", "link": "/wb-board-mock-test-program", "color": "emerald"}
                 ]
             }
         },

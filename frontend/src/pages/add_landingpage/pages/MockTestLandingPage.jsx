@@ -131,7 +131,7 @@ export const MockTestLandingPage = ({ boardType }) => {
             highlight: "Mock Test Program",
             badgeText: "WB BOARD MOCK TEST 2026",
             heading: "West Bengal Board Class 10 & 12 Mock Test Series",
-            subHeading: "Prepare for Madhyamik (Class 10) & HS (Class 12) with West Bengal's leading test program.",
+            subHeading: "Prepare for Class 10 & Class 12 (HS) with West Bengal's leading test program.",
             pageSource: "WB Board Mock Test Program",
             coursesFilter: "wb",
             bannerSrc: "/WHY PATH IMAGES/WB BANNER.webp"
@@ -699,8 +699,6 @@ export const MockTestLandingPage = ({ boardType }) => {
                         </div>
                     </div>
                 </section>
-
-                <Footer />
 
                 {/* Success Modal */}
                 {showSuccess && (
