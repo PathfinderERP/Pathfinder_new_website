@@ -12,41 +12,26 @@ from .models import Enrollment, Course
 
 logger = logging.getLogger(__name__)
 
-# Config from environment variables with fallbacks
-ICICI_MODE = os.getenv("ICICI_MODE", "TEST") # 'TEST' or 'LIVE'
-
-# Live Credentials
-ICICI_LIVE_MERCHANT_ID = os.getenv("ICICI_LIVE_MERCHANT_ID", "100000000517815")
-ICICI_LIVE_AGGREGATOR_ID = os.getenv("ICICI_LIVE_AGGREGATOR_ID", "100000000517814")
-ICICI_LIVE_SECRET_KEY = os.getenv("ICICI_LIVE_SECRET_KEY", "db06cca0-838b-4e01-8b20-6ac446ffb6bd")
-ICICI_LIVE_SALE_URL = os.getenv("ICICI_LIVE_SALE_URL", "https://pgpay.icicibank.com/pg/api/v2/initiateSale")
-ICICI_LIVE_COMMAND_URL = os.getenv("ICICI_LIVE_COMMAND_URL", "https://pgpay.icicibank.com/pg/api/command")
-
-# Test / UAT Credentials
-ICICI_TEST_MERCHANT_ID = os.getenv("ICICI_TEST_MERCHANT_ID", "100000000007164")
-ICICI_TEST_AGGREGATOR_ID = os.getenv("ICICI_TEST_AGGREGATOR_ID", "A100000000007164")
-ICICI_TEST_SECRET_KEY = os.getenv("ICICI_TEST_SECRET_KEY", "db06cca0-838b-4e01-8b20-6ac446ffb6bd")
-ICICI_TEST_SALE_URL = os.getenv("ICICI_TEST_SALE_URL", "https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale")
-ICICI_TEST_COMMAND_URL = os.getenv("ICICI_TEST_COMMAND_URL", "https://pgpayuat.icici.bank.in/tsp/pg/api/command")
+# Live Production Config from Environment Variables
+ICICI_MODE = os.getenv("ICICI_MODE", "LIVE")
+ICICI_MERCHANT_ID = os.getenv("ICICI_MERCHANT_ID", os.getenv("ICICI_LIVE_MERCHANT_ID", "100000000517815"))
+ICICI_AGGREGATOR_ID = os.getenv("ICICI_AGGREGATOR_ID", os.getenv("ICICI_LIVE_AGGREGATOR_ID", "100000000517814"))
+ICICI_SECRET_KEY = os.getenv("ICICI_SECRET_KEY", os.getenv("ICICI_LIVE_SECRET_KEY", ""))
+ICICI_SALE_URL = os.getenv("ICICI_SALE_URL", os.getenv("ICICI_LIVE_SALE_URL", "https://pgpay.icicibank.com/pg/api/v2/initiateSale"))
+ICICI_COMMAND_URL = os.getenv("ICICI_COMMAND_URL", os.getenv("ICICI_LIVE_COMMAND_URL", "https://pgpay.icicibank.com/pg/api/command"))
+SECRET_KEY = ICICI_SECRET_KEY
 
 def get_icici_config(mode=None):
-    current_mode = mode or ICICI_MODE
-    if str(current_mode).upper() == "LIVE":
-        return {
-            "mode": "LIVE",
-            "merchantId": ICICI_LIVE_MERCHANT_ID,
-            "aggregatorID": ICICI_LIVE_AGGREGATOR_ID,
-            "secretKey": ICICI_LIVE_SECRET_KEY,
-            "saleUrl": ICICI_LIVE_SALE_URL,
-            "commandUrl": ICICI_LIVE_COMMAND_URL
-        }
+    """
+    Returns production ICICI credentials strictly from .env
+    """
     return {
-        "mode": "TEST",
-        "merchantId": ICICI_TEST_MERCHANT_ID,
-        "aggregatorID": ICICI_TEST_AGGREGATOR_ID,
-        "secretKey": ICICI_TEST_SECRET_KEY,
-        "saleUrl": ICICI_TEST_SALE_URL,
-        "commandUrl": ICICI_TEST_COMMAND_URL
+        "mode": "LIVE",
+        "merchantId": ICICI_MERCHANT_ID,
+        "aggregatorID": ICICI_AGGREGATOR_ID,
+        "secretKey": ICICI_SECRET_KEY,
+        "saleUrl": ICICI_SALE_URL,
+        "commandUrl": ICICI_COMMAND_URL
     }
 
 def calculate_v1_secure_hash(data_dict, secret_key=None):
