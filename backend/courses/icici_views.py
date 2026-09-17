@@ -223,15 +223,19 @@ class ICICIWebhookView(APIView):
 
             response_code = payload.get("responseCode")
             merchant_txn_no = payload.get("merchantTxnNo") or payload.get("txnID")
+            txn_id = payload.get("txnID") or payload.get("paymentID")
             amount = payload.get("amount")
             email = payload.get("customerEmailID")
+            mobile = payload.get("customerMobileNo")
             course_id = payload.get("addlParam1")
+            payment_mode = payload.get("paymentMode")
+            bank_code = payload.get("bankCode")
             
             # Determine success status
             is_success = str(response_code) in ["0000", "00", "SUCCESS", "0"]
 
             if is_success:
-                logger.info(f"[ICICI WEBHOOK] Payment Successful for Txn: {merchant_txn_no}")
+                logger.info(f"[ICICI WEBHOOK] Payment Successful for Txn: {merchant_txn_no}, Gateway TxnID: {txn_id}, Mode: {payment_mode}")
 
                 # Auto-create or update Enrollment in MongoDB
                 if course_id:
@@ -242,7 +246,7 @@ class ICICIWebhookView(APIView):
                     existing_enrollment = Enrollment.objects(payment_id=merchant_txn_no).first()
                     if not existing_enrollment:
                         Enrollment.objects.create(
-                            user_id=email or "Guest",
+                            user_id=email or mobile or "Guest",
                             course_id=course_id,
                             course_name=course_name,
                             amount_paid=float(amount) if amount else 0.0,
@@ -251,7 +255,7 @@ class ICICIWebhookView(APIView):
                             status='active',
                             enrolled_at=datetime.datetime.utcnow()
                         )
-                        logger.info(f"[ICICI WEBHOOK] Created Enrollment for User: {email}, Course: {course_id}")
+                        logger.info(f"[ICICI WEBHOOK] Created Enrollment for User: {email or mobile}, Course: {course_id}")
 
             return Response({"status": "SUCCESS", "message": "Webhook processed successfully"}, status=status.HTTP_200_OK)
 
