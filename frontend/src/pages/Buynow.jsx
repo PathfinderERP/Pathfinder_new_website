@@ -266,11 +266,24 @@ const Buynow = () => {
       rzp.open();
       ========================================================= */
 
-      // ICICI PAYMENT GATEWAY INTEGRATION
-      const merchantId = "100000000007164";
-      const aggregatorID = "A100000000007164";
-      const secretKey = "db06cca0-838b-4e01-8b20-6ac446ffb6bd";
-      const saleUrl = "https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale";
+      // ICICI PAYMENT GATEWAY INTEGRATION - DYNAMIC CONFIG
+      let gatewayConfig = {
+        merchantId: "100000000007164",
+        aggregatorID: "A100000000007164",
+        secretKey: "db06cca0-838b-4e01-8b20-6ac446ffb6bd",
+        saleUrl: "https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale"
+      };
+
+      try {
+        const configRes = await axios.get(`${API_BASE_URL}/api/courses/icici/config/`);
+        if (configRes.data && configRes.data.merchantId) {
+          gatewayConfig = configRes.data;
+        }
+      } catch (cfgErr) {
+        console.warn("Using default ICICI config fallback", cfgErr);
+      }
+
+      const { merchantId, aggregatorID, secretKey, saleUrl } = gatewayConfig;
 
       const merchantTxnNo = `TXN${Date.now()}`;
       const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);

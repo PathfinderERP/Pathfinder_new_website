@@ -2,27 +2,56 @@ import hmac
 import hashlib
 import json
 import logging
+import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from django.shortcuts import redirect
+from .models import Enrollment, Course
 
 logger = logging.getLogger(__name__)
 
-SECRET_KEY = "db06cca0-838b-4e01-8b20-6ac446ffb6bd"
-MERCHANT_ID = "100000000007164"
-AGGREGATOR_ID = "A100000000007164"
+# Config from environment variables with fallbacks
+ICICI_MODE = os.getenv("ICICI_MODE", "TEST") # 'TEST' or 'LIVE'
 
-def calculate_v1_secure_hash(data_dict, secret_key=SECRET_KEY):
-    """
-    V1 Secure Hash Logic:
-    1. Filter out null/empty parameters.
-    2. Sort non-empty parameter key-value pairs alphabetically by key.
-    3. Concatenate parameter values into a single string (hashText).
-    4. Compute HMAC-SHA256 of hashText using secret_key.
-    5. Return lowercase hex digest.
-    Note: Do not include 'secureHash' itself in the calculation if present in data_dict.
-    """
+# Live Credentials
+ICICI_LIVE_MERCHANT_ID = os.getenv("ICICI_LIVE_MERCHANT_ID", "100000000517815")
+ICICI_LIVE_AGGREGATOR_ID = os.getenv("ICICI_LIVE_AGGREGATOR_ID", "100000000517814")
+ICICI_LIVE_SECRET_KEY = os.getenv("ICICI_LIVE_SECRET_KEY", "db06cca0-838b-4e01-8b20-6ac446ffb6bd")
+ICICI_LIVE_SALE_URL = os.getenv("ICICI_LIVE_SALE_URL", "https://pgpay.icicibank.com/pg/api/v2/initiateSale")
+ICICI_LIVE_COMMAND_URL = os.getenv("ICICI_LIVE_COMMAND_URL", "https://pgpay.icicibank.com/pg/api/command")
+
+# Test / UAT Credentials
+ICICI_TEST_MERCHANT_ID = os.getenv("ICICI_TEST_MERCHANT_ID", "100000000007164")
+ICICI_TEST_AGGREGATOR_ID = os.getenv("ICICI_TEST_AGGREGATOR_ID", "A100000000007164")
+ICICI_TEST_SECRET_KEY = os.getenv("ICICI_TEST_SECRET_KEY", "db06cca0-838b-4e01-8b20-6ac446ffb6bd")
+ICICI_TEST_SALE_URL = os.getenv("ICICI_TEST_SALE_URL", "https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale")
+ICICI_TEST_COMMAND_URL = os.getenv("ICICI_TEST_COMMAND_URL", "https://pgpayuat.icici.bank.in/tsp/pg/api/command")
+
+def get_icici_config(mode=None):
+    current_mode = mode or ICICI_MODE
+    if str(current_mode).upper() == "LIVE":
+        return {
+            "mode": "LIVE",
+            "merchantId": ICICI_LIVE_MERCHANT_ID,
+            "aggregatorID": ICICI_LIVE_AGGREGATOR_ID,
+            "secretKey": ICICI_LIVE_SECRET_KEY,
+            "saleUrl": ICICI_LIVE_SALE_URL,
+            "commandUrl": ICICI_LIVE_COMMAND_URL
+        }
+    return {
+        "mode": "TEST",
+        "merchantId": ICICI_TEST_MERCHANT_ID,
+        "aggregatorID": ICICI_TEST_AGGREGATOR_ID,
+        "secretKey": ICICI_TEST_SECRET_KEY,
+        "saleUrl": ICICI_TEST_SALE_URL,
+        "commandUrl": ICICI_TEST_COMMAND_URL
+    }
+
+def calculate_v1_secure_hash(data_dict, secret_key=None):
+    if not secret_key:
+        secret_key = get_icici_config()["secretKey"]
     filtered = {k: str(v) for k, v in data_dict.items() if v is not None and str(v) != '' and k != 'secureHash'}
     sorted_keys = sorted(filtered.keys())
     hash_text = "".join([filtered[k] for k in sorted_keys])
@@ -51,6 +80,14 @@ def calculate_v2_secure_hash(json_payload, secret_key=SECRET_KEY):
     signature = hmac.new(key_bytes, msg_bytes, hashlib.sha256).hexdigest().lower()
     return signature, minified_json
 
+class ICICIConfigView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        mode = request.query_params.get('mode') or ICICI_MODE
+        config = get_icici_config(mode)
+        return Response(config, status=status.HTTP_200_OK)
+
 class ICICIHashGeneratorView(APIView):
     permission_classes = [AllowAny]
 
@@ -61,7 +98,9 @@ class ICICIHashGeneratorView(APIView):
         """
         try:
             mode = request.data.get('mode', 'v1')
-            secret_key = request.data.get('secretKey', SECRET_KEY)
+            req_icici_mode = request.data.get('iciciMode') or ICICI_MODE
+            config = get_icici_config(req_icici_mode)
+            secret_key = request.data.get('secretKey') or config["secretKey"]
             params = request.data.get('params', {})
 
             if mode == 'v2':
@@ -142,8 +181,6 @@ class ICICIProxyView(APIView):
             logger.error(f"ICICI Proxy Error: {e}")
             return Response({"error": str(e), "message": "Failed to connect to ICICI Bank endpoint"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-from django.shortcuts import redirect
-
 class ICICICallbackView(APIView):
     permission_classes = [AllowAny]
 
@@ -171,5 +208,74 @@ class ICICICallbackView(APIView):
         Handle GET callback if gateway redirects via GET.
         """
         return redirect("https://pathfinder.edu.in/my-courses")
+
+class ICICIWebhookView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Production Server-to-Server Realtime Webhook Endpoint for ICICI Bank Payment Gateway.
+        ICICI posts JSON/Form payload when payment event completes.
+        Sample Payload:
+        {
+          "aggregatorID": "100000000517814",
+          "merchantId": "100000000517815",
+          "merchantTxnNo": "TXN12345678",
+          "txnID": "7700228099888",
+          "responseCode": "0000",
+          "respDescription": "Transaction successful",
+          "amount": "100.00",
+          "customerEmailID": "test@gmail.com",
+          "customerMobileNo": "9876543210",
+          "addlParam1": "course_id_123",
+          "addlParam2": "full",
+          "secureHash": "..."
+        }
+        """
+        try:
+            payload = request.data
+            logger.info(f"[ICICI WEBHOOK] Received payload: {json.dumps(payload)}")
+
+            response_code = payload.get("responseCode")
+            merchant_txn_no = payload.get("merchantTxnNo") or payload.get("txnID")
+            amount = payload.get("amount")
+            email = payload.get("customerEmailID")
+            course_id = payload.get("addlParam1")
+            
+            # Determine success status
+            is_success = str(response_code) in ["0000", "00", "SUCCESS", "0"]
+
+            if is_success:
+                logger.info(f"[ICICI WEBHOOK] Payment Successful for Txn: {merchant_txn_no}")
+
+                # Auto-create or update Enrollment in MongoDB
+                if course_id:
+                    course = Course.objects(id=course_id).first()
+                    course_name = course.name if course else "Course Program"
+
+                    # Check if enrollment already recorded
+                    existing_enrollment = Enrollment.objects(payment_id=merchant_txn_no).first()
+                    if not existing_enrollment:
+                        Enrollment.objects.create(
+                            user_id=email or "Guest",
+                            course_id=course_id,
+                            course_name=course_name,
+                            amount_paid=float(amount) if amount else 0.0,
+                            payment_id=merchant_txn_no,
+                            payment_status='completed',
+                            status='active',
+                            enrolled_at=datetime.datetime.utcnow()
+                        )
+                        logger.info(f"[ICICI WEBHOOK] Created Enrollment for User: {email}, Course: {course_id}")
+
+            return Response({"status": "SUCCESS", "message": "Webhook processed successfully"}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"[ICICI WEBHOOK] Error processing webhook: {e}")
+            return Response({"status": "ERROR", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get(self, request):
+        """Support GET request for webhook ping verification"""
+        return Response({"status": "ACTIVE", "gateway": "ICICI Payment Gateway Webhook Endpoint"}, status=status.HTTP_200_OK)
 
 

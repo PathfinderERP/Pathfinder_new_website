@@ -29,19 +29,41 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 
 export const ICICIPaymentDemo = () => {
   const [activeTab, setActiveTab] = useState('initiateSale'); // initiateSale, generateOTP, verifyOTP, authorize, statusCheck, refund, generateQR, userCancel, cardBin, serviceCharges
+  const [gateWayEnv, setGateWayEnv] = useState('TEST'); // 'TEST' or 'LIVE'
 
-  // Default credentials provided in prompt
-  const [credentials, setCredentials] = useState({
-    merchantId: '100000000007164',
-    aggregatorID: 'A100000000007164',
-    secretKey: 'db06cca0-838b-4e01-8b20-6ac446ffb6bd',
-    saleUrl: 'https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale',
-    commandUrl: 'https://pgpayuat.icici.bank.in/tsp/pg/api/command',
-    qrUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/generateQR',
-    cancelUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/userCancel',
-    cardBinUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/getCardBin',
-    serviceChargesUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/getServiceCharges'
-  });
+  // Presets for Test vs Live
+  const PRESETS = {
+    TEST: {
+      merchantId: '100000000007164',
+      aggregatorID: 'A100000000007164',
+      secretKey: 'db06cca0-838b-4e01-8b20-6ac446ffb6bd',
+      saleUrl: 'https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale',
+      commandUrl: 'https://pgpayuat.icici.bank.in/tsp/pg/api/command',
+      qrUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/generateQR',
+      cancelUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/userCancel',
+      cardBinUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/getCardBin',
+      serviceChargesUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/getServiceCharges'
+    },
+    LIVE: {
+      merchantId: '100000000517815',
+      aggregatorID: '100000000517814',
+      secretKey: '', // Awaiting secret key from user
+      saleUrl: 'https://pgpay.icicibank.com/pg/api/v2/initiateSale',
+      commandUrl: 'https://pgpay.icicibank.com/pg/api/command',
+      qrUrl: 'https://pgpay.icicibank.com/pg/api/generateQR',
+      cancelUrl: 'https://pgpay.icicibank.com/pg/api/userCancel',
+      cardBinUrl: 'https://pgpay.icicibank.com/pg/api/getCardBin',
+      serviceChargesUrl: 'https://pgpay.icicibank.com/pg/api/getServiceCharges'
+    }
+  };
+
+  const [credentials, setCredentials] = useState(PRESETS.TEST);
+
+  const switchEnv = (newEnv) => {
+    setGateWayEnv(newEnv);
+    setCredentials(PRESETS[newEnv]);
+    toast.info(`Switched to ICICI Gateway ${newEnv} Environment`);
+  };
 
   // State for Initiate Sale Form
   const [saleForm, setSaleForm] = useState({
@@ -425,13 +447,31 @@ export const ICICIPaymentDemo = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700/60 text-xs">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-slate-300 font-semibold">UAT Sandbox Testing Mode</span>
+          <div className="flex flex-col md:flex-row items-end gap-3">
+            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-700">
+              <button
+                onClick={() => switchEnv('TEST')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  gateWayEnv === 'TEST'
+                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                🧪 TEST (UAT) MODE
+              </button>
+              <button
+                onClick={() => switchEnv('LIVE')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  gateWayEnv === 'LIVE'
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 animate-pulse'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                🚀 LIVE PROD MODE
+              </button>
             </div>
             <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded-md">
-              v1.0.2 (Proxy Active)
+              v1.0.5 (Webhook & Proxy Active)
             </span>
           </div>
         </div>

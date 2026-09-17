@@ -13,8 +13,10 @@ router.register(r'mocktests', views.MockTestViewSet, basename='mocktest')
 
 urlpatterns = [
     path('', views.root, name='courses_root'),
+    path('icici/config/', icici_views.ICICIConfigView.as_view(), name='icici-config'),
     path('icici/generate-hash/', icici_views.ICICIHashGeneratorView.as_view(), name='icici-generate-hash'),
     path('icici/proxy/', icici_views.ICICIProxyView.as_view(), name='icici-proxy'),
     path('icici/callback/', icici_views.ICICICallbackView.as_view(), name='icici-callback'),
+    path('icici/webhook/', icici_views.ICICIWebhookView.as_view(), name='icici-webhook'),
     path('', include(router.urls)),
 ]
