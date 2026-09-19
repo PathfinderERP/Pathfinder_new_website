@@ -15,8 +15,9 @@ import {
     BellIcon,
     CalendarIcon,
     ChatBubbleLeftRightIcon,
-    MagnifyingGlassIcon,
-    ShoppingBagIcon
+    ShoppingBagIcon,
+    ArrowRightOnRectangleIcon,
+    CheckBadgeIcon
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -25,7 +26,6 @@ const StudentSidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-    const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
     React.useEffect(() => {
         const handleToggle = () => setIsMenuOpen(prev => !prev);
@@ -35,196 +35,172 @@ const StudentSidebar = () => {
 
     const menuItems = [
         { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
+        { name: "My Courses", href: "/my-courses", icon: AcademicCapIcon },
         { name: "Payment Info", href: "/payment", icon: CreditCardIcon },
-        { name: "Registration", href: "/portal-registration", icon: IdentificationIcon },
-        { name: "Courses", href: "/my-courses", icon: AcademicCapIcon },
-        { name: "Result", href: "/student-results", icon: TrophyIcon },
         { name: "Physical Assets", href: "/students-corner/orders", icon: ShoppingBagIcon },
-        { name: "Notice", href: "/notices", icon: BellIcon },
-        { name: "Schedule", href: "/schedule", icon: CalendarIcon },
-        { name: "CHATS", href: "/chats", icon: ChatBubbleLeftRightIcon },
+        { name: "Registration", href: "/portal-registration", icon: IdentificationIcon },
+        { name: "Results", href: "/student-results", icon: TrophyIcon },
         { name: "Profile", href: "/profile", icon: UserIcon },
     ];
 
     const currentPath = location.pathname;
 
-    // Mobile specific dock items
-    const dockItems = [
-        { name: "Dash", href: "/dashboard", icon: HomeIcon },
-        { name: "Courses", href: "/my-courses", icon: AcademicCapIcon },
-        { name: "Result", href: "/student-results", icon: TrophyIcon },
-        { name: "Profile", href: "/profile", icon: UserIcon },
-    ];
-
     return (
         <>
-            {/* Mobile Experience - Floating Top Dock */}
-            <div className="lg:hidden">
-                {/* Full Screen Menu Overlay */}
+            {/* Mobile Header / Quick Dock */}
+            <div className="lg:hidden w-full mb-4">
+                <div className="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-sm flex items-center justify-between">
+                    <div 
+                      onClick={() => navigate('/profile')}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-orange-500 text-white font-bold flex items-center justify-center shadow-sm text-base">
+                            {(user?.fullName || user?.full_name || "S").charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-slate-900 text-sm leading-tight flex items-center gap-1">
+                                {user?.fullName || user?.full_name || "Student"}
+                                <CheckBadgeIcon className="w-4 h-4 text-emerald-600 inline shrink-0" />
+                            </h4>
+                            <p className="text-[11px] text-slate-500 font-medium">Class {user?.studentClass || user?.student_class || "N/A"}</p>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => setIsMenuOpen(true)}
+                        className="p-2.5 bg-slate-900 text-white rounded-xl shadow-sm hover:bg-slate-800 transition"
+                    >
+                        <Squares2X2Icon className="h-5 w-5" />
+                    </button>
+                </div>
+
+                {/* Mobile Slide-over Menu Overlay */}
                 <AnimatePresence>
                     {isMenuOpen && (
                         <motion.div
-                            initial={{ opacity: 0, y: "-100%" }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: "-100%" }}
-                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed inset-0 z-[60] bg-black p-8 flex flex-col pt-24"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex justify-end"
                         >
-                            <button
-                                onClick={() => setIsMenuOpen(false)}
-                                className="absolute top-8 right-8 p-3 bg-white/10 rounded-full text-white"
+                            <motion.div
+                                initial={{ x: "100%" }}
+                                animate={{ x: 0 }}
+                                exit={{ x: "100%" }}
+                                transition={{ type: "spring", damping: 25, stiffness: 220 }}
+                                className="w-4/5 max-w-sm bg-white h-full p-6 flex flex-col shadow-2xl overflow-y-auto"
                             >
-                                <XMarkIcon className="h-6 w-6" />
-                            </button>
-
-                            <div className="mb-12">
-                                <h3 className="text-3xl font-black italic text-white uppercase tracking-tighter mb-2">Navigation</h3>
-                                <div className="h-1 w-12 bg-[#FF7D54]"></div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 flex-1 overflow-y-auto no-scrollbar pb-12">
-                                {menuItems.map((item) => (
+                                <div className="flex items-center justify-between pb-6 border-b border-slate-100 mb-6">
+                                    <h3 className="text-lg font-bold text-slate-900">Student Portal</h3>
                                     <button
-                                        key={item.name}
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:text-slate-900"
+                                    >
+                                        <XMarkIcon className="h-5 w-5" />
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
+                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold text-xl flex items-center justify-center shadow-md">
+                                        {(user?.fullName || "S").charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="truncate">
+                                        <h4 className="font-bold text-slate-900 text-sm truncate">{user?.fullName || "Student"}</h4>
+                                        <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                                    </div>
+                                </div>
+
+                                <nav className="space-y-1.5 flex-1">
+                                    {menuItems.map((item) => {
+                                        const isActive = currentPath === item.href;
+                                        return (
+                                            <button
+                                                key={item.name}
+                                                onClick={() => {
+                                                    navigate(item.href);
+                                                    setIsMenuOpen(false);
+                                                }}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all text-left ${
+                                                    isActive 
+                                                      ? "bg-orange-500 text-white shadow-md shadow-orange-500/20" 
+                                                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                                }`}
+                                            >
+                                                <item.icon className="h-5 w-5" />
+                                                <span>{item.name}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </nav>
+
+                                <div className="pt-6 border-t border-slate-100 mt-6">
+                                    <button
                                         onClick={() => {
-                                            navigate(item.href, { state: { from: location.pathname } });
+                                            logout();
                                             setIsMenuOpen(false);
                                         }}
-                                        className="bg-white/5 border border-white/10 p-6 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-white/10 transition-all text-center"
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition"
                                     >
-                                        <item.icon className="h-6 w-6 text-[#FF7D54]" />
-                                        <span className="text-[10px] font-black uppercase text-white tracking-widest">{item.name}</span>
+                                        <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                                        <span>Logout</span>
                                     </button>
-                                ))}
-                                <button
-                                    onClick={() => {
-                                        logout();
-                                        setIsMenuOpen(false);
-                                    }}
-                                    className="bg-red-500/10 border border-red-500/20 p-6 rounded-3xl flex flex-col items-center justify-center gap-3 text-red-500 col-span-2 mt-4"
-                                >
-                                    <span className="text-sm font-black uppercase tracking-[0.2em]">Logout Session</span>
-                                </button>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Floating Navigation Dock - Top */}
-                <div className="relative z-10 w-full max-w-xl mx-auto mb-2">
-                    <div className="bg-black/90 border border-white/10 rounded-[28px] p-1.5 flex items-center justify-between shadow-xl relative">
-                        {dockItems.map((item) => {
-                            const isActive = currentPath === item.href;
-                            return (
-                                <button
-                                    key={item.name}
-                                    onClick={() => navigate(item.href, { state: { from: location.pathname } })}
-                                    className={`relative px-4 py-3 rounded-2xl flex flex-col items-center gap-1 transition-all duration-300
-                                        ${isActive ? "text-[#FF7D54] bg-[#FF7D54]/10" : "text-white/40 hover:text-white"}
-                                    `}
-                                >
-                                    <item.icon className="h-5 w-5" />
-                                    <span className="text-[8px] font-black uppercase tracking-tighter">{item.name}</span>
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="dock-active"
-                                            className="absolute -bottom-1 w-1 h-1 bg-[#FF7D54] rounded-full"
-                                        />
-                                    )}
-                                </button>
-                            );
-                        })}
-                        <div className="flex items-center gap-1">
-                            <button
-                                onClick={() => setIsSearchOpen(!isSearchOpen)}
-                                className={`px-4 py-3 transition-all ${isSearchOpen ? "text-[#FF7D54]" : "text-white/40 hover:text-white"}`}
-                            >
-                                <MagnifyingGlassIcon className={`h-5 w-5 ${isSearchOpen ? "scale-110" : ""}`} />
-                            </button>
-                            <button
-                                onClick={() => setIsMenuOpen(true)}
-                                className="bg-[#FF7D54] p-3.5 rounded-2xl text-black shadow-lg shadow-[#FF7D54]/20 hover:scale-105 active:scale-95 transition-all"
-                            >
-                                <Squares2X2Icon className="h-6 w-6 font-bold" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Floating Search Bar - Positioned "Between Two" (Dock and Content) */}
-                <AnimatePresence>
-                    {isSearchOpen && (
-                        <motion.div
-                            initial={{ y: -20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -20, opacity: 0 }}
-                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="relative z-20 w-full max-w-xl mx-auto px-4 mb-4"
-                        >
-                            <div className="bg-white rounded-[28px] p-2 shadow-2xl border border-slate-100 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-black rounded-2xl flex items-center justify-center shrink-0">
-                                    <MagnifyingGlassIcon className="h-5 w-5 text-[#FF7D54]" />
                                 </div>
-                                <input
-                                    autoFocus
-                                    type="text"
-                                    placeholder="Search portal..."
-                                    className="flex-1 bg-transparent border-none outline-none text-slate-800 font-bold placeholder:text-slate-400 text-sm"
-                                />
-                                <button
-                                    onClick={() => setIsSearchOpen(false)}
-                                    className="p-2 text-slate-400 hover:text-slate-900 transition-all"
-                                >
-                                    <XMarkIcon className="h-5 w-5" />
-                                </button>
-                            </div>
+                            </motion.div>
                         </motion.div>
                     )}
                 </AnimatePresence>
             </div>
 
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:flex w-72 flex-col bg-[#FF7D54] rounded-[45px] pt-12 pb-8 text-white shadow-2xl relative h-full flex-shrink-0 mt-0 overflow-hidden">
-                {/* Top Icon Block */}
-                <div className="flex justify-center mb-10 px-6">
-                    <div className="bg-gradient-to-br from-[#FF9B7A] to-[#FF7D54] w-28 h-28 rounded-[35px] flex items-center justify-center shadow-lg border border-white/20 overflow-hidden">
+            <aside className="hidden lg:flex w-64 flex-col bg-white rounded-3xl p-5 shadow-sm border border-slate-200/90 h-fit sticky top-28 shrink-0">
+                {/* User Profile Card */}
+                <div className="flex items-center gap-3 p-3 bg-slate-50/80 rounded-2xl border border-slate-100 mb-6">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-white font-bold text-lg flex items-center justify-center shadow-md shrink-0">
                         {user?.profile_image_url ? (
-                            <img src={user.profile_image_url} alt="Profile" className="w-full h-full object-cover" />
+                            <img src={user.profile_image_url} alt="Profile" className="w-full h-full object-cover rounded-xl" />
                         ) : (
-                            <UserCircleIcon className="h-16 w-16 text-black" />
+                            (user?.fullName || user?.full_name || "S").charAt(0).toUpperCase()
                         )}
+                    </div>
+                    <div className="truncate">
+                        <h4 className="font-bold text-slate-900 text-sm truncate flex items-center gap-1">
+                            {user?.fullName || user?.full_name || "Student"}
+                        </h4>
+                        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 inline-block mt-0.5">
+                            Class {user?.studentClass || user?.student_class || "12"}
+                        </span>
                     </div>
                 </div>
 
                 {/* Main Navigation */}
-                <nav className="flex-1 flex flex-col space-y-1 overflow-y-auto no-scrollbar">
+                <nav className="space-y-1">
                     {menuItems.map((item) => {
                         const isActive = currentPath === item.href;
 
                         return (
                             <button
                                 key={item.name}
-                                onClick={() => navigate(item.href, { state: { from: location.pathname } })}
-                                className={`w-full transition-all duration-300 group py-4 px-10 relative text-left
-                                    ${isActive
-                                        ? "bg-black text-white font-black italic tracking-widest scale-x-105"
-                                        : "text-white/80 hover:text-white font-medium hover:bg-white/5"}
-                                `}
+                                onClick={() => navigate(item.href)}
+                                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-xs font-bold transition-all duration-200 text-left ${
+                                    isActive
+                                        ? "bg-slate-900 text-white shadow-md shadow-slate-900/10 font-bold"
+                                        : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                                }`}
                             >
-                                <span className="text-base uppercase">
-                                    {item.name}
-                                </span>
+                                <item.icon className={`h-5 w-5 ${isActive ? "text-orange-400" : "text-slate-400"}`} />
+                                <span className="uppercase tracking-wider">{item.name}</span>
                             </button>
                         );
                     })}
                 </nav>
 
-                {/* Bottom logout section */}
-                <div className="mt-12">
+                {/* Bottom Logout */}
+                <div className="mt-8 pt-4 border-t border-slate-100">
                     <button
                         onClick={logout}
-                        className="w-full flex items-center justify-center py-4 text-white font-bold hover:scale-105 transition-all"
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 text-xs font-bold transition-all uppercase tracking-wider"
                     >
+                        <ArrowRightOnRectangleIcon className="h-4 w-4" />
                         <span>Logout</span>
                     </button>
                 </div>
@@ -234,3 +210,4 @@ const StudentSidebar = () => {
 };
 
 export default StudentSidebar;
+

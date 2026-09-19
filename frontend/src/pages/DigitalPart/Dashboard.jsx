@@ -83,80 +83,90 @@ const Dashboard = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col lg:flex-row p-4 lg:p-6 gap-6 font-sans text-slate-900 pt-16 lg:pt-40 pb-12 sm:pb-16 2xl:max-w-7xl 2xl:mx-auto 2xl:shadow-2xl 2xl:rounded-[60px] 2xl:my-8 2xl:border 2xl:border-slate-100">
+    <div className="min-h-screen bg-[#F8F9FA] flex flex-col lg:flex-row p-4 lg:p-6 gap-6 font-sans text-slate-900 pt-28 md:pt-32 pb-16 max-w-7xl mx-auto">
 
       <StudentSidebar />
 
       {/* --- Main Content --- */}
-      <main className="flex-1 flex flex-col gap-6 max-w-full overflow-hidden mt-2 lg:mt-0">
+      <main className="flex-1 flex flex-col gap-6 max-w-full overflow-hidden">
 
-        {/* Desktop Search Bar - Kept for LG screens */}
-        <div className="hidden lg:block px-2 mb-4 lg:mt-6">
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="search"
-              className="w-full bg-white border-none rounded-full py-4 pl-14 pr-6 text-sm shadow-sm focus:ring-2 focus:ring-orange-500 transition-all outline-none"
-            />
-          </div>
-        </div>
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 flex-1">
-
-          {/* Left Column (Hero + Performance + Courses) */}
-          <div className="xl:col-span-9 flex flex-col gap-8">
+          {/* Main Workspace (Hero + Metrics + Batches + Assets) */}
+          <div className="xl:col-span-8 flex flex-col gap-6">
 
             {/* Hero Section */}
-            <div className="bg-black rounded-[40px] p-8 md:p-12 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between min-h-[280px]">
-              <div className="relative z-10 flex flex-col gap-4">
-                <div className="bg-white/10 self-start px-4 py-1 rounded-full text-xs font-medium text-slate-300 backdrop-blur-md">
-                  {currentDate}
+            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-black rounded-3xl p-6 md:p-8 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-slate-800 shadow-md gap-6">
+              <div className="relative z-10 flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="bg-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1 rounded-full border border-orange-500/30 uppercase tracking-wider">
+                    {currentDate}
+                  </span>
+                  {user?.studentClass && (
+                    <span className="bg-emerald-500/20 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30">
+                      Class {user.studentClass}
+                    </span>
+                  )}
                 </div>
-                <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold leading-tight">
-                  Welcome back, <span className="text-[#FF8C61] underline decoration-white/20 underline-offset-8 decoration-2">{user?.fullName?.split(' ')[0] || 'Student'}</span>!
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                  Welcome back, <span className="text-orange-400">{user?.fullName?.split(' ')[0] || user?.full_name?.split(' ')[0] || 'Student'}</span>!
                 </h1>
-                <p className="text-slate-400 text-xs sm:text-sm md:text-base font-medium">
-                  Always stay updated in your student portal
+                <p className="text-slate-400 text-xs sm:text-sm max-w-md leading-relaxed">
+                  Track your learning progress, test performances, and official Pathfinder study materials in one place.
                 </p>
+                <div className="flex items-center gap-3 mt-2">
+                  <button
+                    onClick={() => navigate('/my-courses')}
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition active:scale-95"
+                  >
+                    My Enrolled Batches
+                  </button>
+                  <button
+                    onClick={() => navigate('/applynow')}
+                    className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-5 py-2.5 rounded-xl border border-slate-700 transition"
+                  >
+                    Explore Courses
+                  </button>
+                </div>
               </div>
 
-              {/* 3D Character - Absolute Positioning for better fit */}
-              <div className="mt-8 md:mt-0 md:absolute right-8 bottom-0 w-64 h-64 md:w-80 md:h-80">
+              {/* Character Illustration */}
+              <div className="w-40 h-40 md:w-48 md:h-48 shrink-0 relative">
                 <img
                   src={CHARACTER_IMG}
-                  alt="3D Student Character"
-                  className="w-full h-full object-contain filter drop-shadow-2xl"
+                  alt="Student Portal"
+                  className="w-full h-full object-contain filter drop-shadow-xl"
+                  onError={(e) => { e.target.style.display = 'none'; }}
                 />
               </div>
             </div>
 
-            {/* Performance & Quick Metrics Section */}
-            <section className="space-y-4">
-              <h2 className="text-xl font-bold px-2 text-slate-900">Portal Overview</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Portal Overview Grid */}
+            <section className="space-y-3">
+              <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">Portal Overview</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                   { 
                     title: "Enrolled Courses", 
                     value: myCourses?.length || 0, 
                     label: "Active Learning Batches",
-                    color: "bg-emerald-50 border-emerald-200 text-emerald-900",
+                    color: "bg-emerald-50/80 border-emerald-200/80 text-emerald-900",
                     badge: "bg-emerald-600 text-white",
                     action: () => navigate('/my-courses')
                   },
                   { 
                     title: "Physical Assets", 
                     value: myOrders?.length || 0, 
-                    label: "Materials & Gear Ordered",
-                    color: "bg-orange-50 border-orange-200 text-orange-900",
+                    label: "Study Materials & Gear",
+                    color: "bg-orange-50/80 border-orange-200/80 text-orange-900",
                     badge: "bg-orange-600 text-white",
                     action: () => navigate('/students-corner/orders', { state: { from: '/dashboard' } })
                   },
                   { 
                     title: "Account Status", 
                     value: "Active", 
-                    label: user?.studentClass ? `Class: ${user.studentClass}` : "Verified Student",
-                    color: "bg-blue-50 border-blue-200 text-blue-900",
+                    label: user?.area ? `Area: ${user.area}` : "Verified Pathfinder Student",
+                    color: "bg-blue-50/80 border-blue-200/80 text-blue-900",
                     badge: "bg-blue-600 text-white",
                     action: () => navigate('/profile')
                   },
@@ -164,17 +174,17 @@ const Dashboard = () => {
                   <div 
                     key={i} 
                     onClick={item.action}
-                    className={`${item.color} rounded-[28px] p-6 flex flex-col justify-between shadow-sm border hover:shadow-md transition-all cursor-pointer group h-44`}
+                    className={`${item.color} rounded-2xl p-5 flex flex-col justify-between shadow-sm border hover:shadow-md transition-all cursor-pointer group h-36`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider opacity-75">{item.title}</span>
-                      <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase ${item.badge}`}>
+                      <span className="text-[11px] font-bold uppercase tracking-wider opacity-75">{item.title}</span>
+                      <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase ${item.badge}`}>
                         {item.value}
                       </span>
                     </div>
                     <div>
                       <h3 className="text-2xl font-black">{item.value}</h3>
-                      <p className="text-xs mt-1 font-medium opacity-80">{item.label}</p>
+                      <p className="text-xs mt-0.5 font-medium opacity-80 truncate">{item.label}</p>
                     </div>
                   </div>
                 ))}
@@ -182,37 +192,37 @@ const Dashboard = () => {
             </section>
 
             {/* Enrolled Courses Section */}
-            <section className="space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <h2 className="text-xl font-bold text-slate-900">Enrolled Courses</h2>
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">Enrolled Batches</h2>
                 <button
                   onClick={() => navigate('/my-courses')}
                   className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors uppercase tracking-wider"
                 >
-                  View All ({myCourses?.length || 0})
+                  View All ({myCourses?.length || 0}) →
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {myCourses && myCourses.length > 0 ? (
                   myCourses.slice(0, 2).map((course) => (
-                    <div key={course.id || course._id} className="bg-slate-900 rounded-[32px] p-6 md:p-8 flex items-center justify-between text-white relative overflow-hidden group hover:shadow-xl transition-all h-44 border border-slate-800">
-                      <div className="relative z-10 flex flex-col items-start gap-3">
+                    <div key={course.id || course._id} className="bg-slate-900 rounded-2xl p-5 flex items-center justify-between text-white relative overflow-hidden group hover:shadow-lg transition-all border border-slate-800">
+                      <div className="relative z-10 flex flex-col items-start gap-2">
                         <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-800/50 uppercase">
                           {course.mode === 'online' ? 'Online Batch' : 'Classroom'}
                         </span>
-                        <h3 className="text-lg md:text-xl font-extrabold leading-tight line-clamp-2 max-w-[180px]">{course.name}</h3>
+                        <h3 className="text-base font-bold leading-tight line-clamp-2 max-w-[160px]">{course.name}</h3>
                         <button
                           onClick={() => navigate('/my-courses')}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-md"
+                          className="mt-1 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm"
                         >
                           Access Batch
                         </button>
                       </div>
-                      <div className="w-28 h-28 shrink-0">
+                      <div className="w-24 h-24 shrink-0">
                         {course.thumbnail_url ? (
-                          <img src={course.thumbnail_url} alt={course.name} className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500" />
+                          <img src={course.thumbnail_url} alt={course.name} className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500" />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl flex items-center justify-center font-black text-3xl text-white/90">
+                          <div className="w-full h-full bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center font-black text-2xl text-white/90">
                             {course.name.charAt(0)}
                           </div>
                         )}
@@ -220,14 +230,14 @@ const Dashboard = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="col-span-1 sm:col-span-2 bg-white rounded-[32px] p-8 flex flex-col items-center justify-center text-center border border-slate-200/80 shadow-sm">
-                    <p className="text-slate-600 font-bold text-base mb-1">No Active Courses Enrolled</p>
-                    <p className="text-slate-400 text-xs mb-5 max-w-sm">Browse Pathfinder's top coaching programs for JEE, NEET, Boards & Foundation.</p>
+                  <div className="col-span-1 sm:col-span-2 bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center border border-slate-200/80 shadow-sm">
+                    <p className="text-slate-700 font-bold text-sm mb-1">No Active Batches Enrolled</p>
+                    <p className="text-slate-400 text-xs mb-4 max-w-sm">Explore Pathfinder's top coaching programs for JEE, NEET, Boards & Foundation.</p>
                     <button
                       onClick={() => navigate('/applynow')}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow-md uppercase tracking-wider"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition shadow-sm uppercase tracking-wider"
                     >
-                      Explore Pathfinder Courses
+                      Explore Courses
                     </button>
                   </div>
                 )}
@@ -235,48 +245,48 @@ const Dashboard = () => {
             </section>
 
             {/* Physical Assets Section */}
-            <section className="space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <h2 className="text-xl font-bold text-slate-900">Physical Assets & Materials</h2>
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">Physical Assets & Orders</h2>
                 <button
                   onClick={() => navigate('/students-corner/orders', { state: { from: '/dashboard' } })}
                   className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors uppercase tracking-wider"
                 >
-                  View All Orders
+                  View All Orders →
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {myOrders && myOrders.length > 0 ? (
                   myOrders.slice(0, 2).map((order) => (
-                    <div key={order.id || order._id} className="bg-white rounded-[32px] p-6 md:p-8 flex items-center justify-between shadow-sm border border-slate-200/80 group hover:border-orange-300 transition-all h-44">
-                      <div className="flex flex-col items-start gap-2">
-                        <div className="bg-orange-50 p-2.5 rounded-2xl border border-orange-100/60 flex items-center justify-center">
-                          <ShoppingBagIcon className="h-6 w-6 text-orange-600" />
+                    <div key={order.id || order._id} className="bg-white rounded-2xl p-5 flex items-center justify-between shadow-sm border border-slate-200/80 group hover:border-orange-300 transition-all">
+                      <div className="flex flex-col items-start gap-1.5">
+                        <div className="bg-orange-50 p-2 rounded-xl border border-orange-100/60 flex items-center justify-center">
+                          <ShoppingBagIcon className="h-5 w-5 text-orange-600" />
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-slate-900 line-clamp-1">Ref #{order.payment_id?.substring(0, 10) || (order.id || '').substring(0, 8)}</h3>
-                          <p className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block mt-1">
+                          <h3 className="text-sm font-bold text-slate-900 line-clamp-1">Ref #{order.payment_id?.substring(0, 10) || (order.id || '').substring(0, 8)}</h3>
+                          <p className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block mt-0.5">
                             Status: {order.payment_status || order.status || 'Completed'}
                           </p>
                         </div>
                         <button
                           onClick={() => navigate('/students-corner/orders', { state: { from: '/dashboard' } })}
-                          className="text-orange-600 text-xs font-bold uppercase tracking-wider hover:underline mt-1"
+                          className="text-orange-600 text-xs font-bold uppercase tracking-wider hover:underline"
                         >
                           Track Details →
                         </button>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-black text-slate-900">₹{order.total_amount}</p>
+                        <p className="text-xl font-black text-slate-900">₹{order.total_amount}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="col-span-1 sm:col-span-2 bg-slate-50 rounded-[32px] p-8 flex flex-col items-center justify-center text-center border border-dashed border-slate-300">
+                  <div className="col-span-1 sm:col-span-2 bg-slate-50/80 rounded-2xl p-6 flex flex-col items-center justify-center text-center border border-dashed border-slate-300">
                     <p className="text-slate-500 mb-3 font-semibold text-xs uppercase tracking-wider">No Material Orders Found</p>
                     <button
                       onClick={() => navigate('/students-corner')}
-                      className="bg-black hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow-md uppercase tracking-wider"
+                      className="bg-black hover:bg-orange-600 text-white px-5 py-2 rounded-xl text-xs font-bold transition shadow-sm uppercase tracking-wider"
                     >
                       Visit Student Store
                     </button>
@@ -286,56 +296,57 @@ const Dashboard = () => {
             </section>
           </div>
 
-          {/* Right Column (Instructors + Chats) */}
-          <div className="xl:col-span-3 flex flex-col gap-8">
+          {/* Right Panel (Pathfinder Support & Notice Board) */}
+          <div className="xl:col-span-4 flex flex-col gap-6">
 
-            {/* Course Instructors */}
-            <section className="space-y-4">
-              <h2 className="text-lg font-bold">Course instructors</h2>
-              <div className="flex items-center gap-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-16 w-16 rounded-full overflow-hidden border-2 border-white shadow-md bg-slate-100 flex-shrink-0">
-                    <img src={`https://i.pravatar.cc/150?u=instructor${i}`} alt="Instructor" className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Chat Room */}
-            <section className="flex-1 flex flex-col space-y-4 bg-white rounded-[40px] p-6 shadow-sm border border-slate-100">
-              <div className="flex items-center justify-between">
-                <h2 className="text-[#FF8C61] font-bold">Chat Room</h2>
-                <button className="text-xs text-slate-400 font-bold uppercase tracking-wider hover:text-orange-500">See all</button>
-              </div>
-
-              <div className="space-y-6 overflow-y-auto max-h-[500px] pr-2 scrollbar-hide">
+            {/* Quick Actions / Shortcuts */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/90 space-y-4">
+              <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                Quick Actions
+              </h3>
+              
+              <div className="space-y-2">
                 {[
-                  { name: "Anushuya", course: "Foundation", message: "Yo guys! What EXACTLY happened in R2 today??!!!" },
-                  { name: "Reyan", course: "2 year CRP", message: "Bruoo that new reel dropped on the insta is FIREEEEE!!!! in fact i was a part of it actually! Go drop some love!!!" },
-                ].map((chat, i) => (
-                  <div key={i} className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                      <span className="text-sm font-bold text-slate-800">{chat.name},</span>
-                      <span className="text-xs text-slate-400 font-medium">{chat.course}</span>
+                  { name: "View Payment History", path: "/payment", desc: "Receipts & Transactions" },
+                  { name: "My Profile & Portfolio", path: "/profile", desc: "Student Information" },
+                  { name: "View Exam Results", path: "/student-results", desc: "Mock Tests & Ranks" },
+                  { name: "Student Corner Store", path: "/students-corner", desc: "Books & Study Gear" },
+                ].map((action, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => navigate(action.path)}
+                    className="p-3 bg-slate-50 hover:bg-orange-50/60 rounded-xl border border-slate-100 hover:border-orange-200 transition-all cursor-pointer flex items-center justify-between group"
+                  >
+                    <div>
+                      <h4 className="font-bold text-xs text-slate-900 group-hover:text-orange-600">{action.name}</h4>
+                      <p className="text-[11px] text-slate-400 font-medium">{action.desc}</p>
                     </div>
-                    <div className="bg-white border border-slate-200 rounded-[24px] p-4 text-sm text-slate-700 leading-relaxed shadow-sm">
-                      {chat.message}
-                    </div>
-                    <div className="flex items-center justify-end space-x-4 text-[10px] text-slate-400 font-bold px-2">
-                      <span className="flex items-center space-x-1 hover:text-orange-500 cursor-pointer">
-                        <HeartIcon className="h-3 w-3" />
-                        <span>132</span>
-                      </span>
-                      <span className="flex items-center space-x-1 hover:text-blue-500 cursor-pointer">
-                        <ChatBubbleBottomCenterTextIcon className="h-3 w-3" />
-                        <span>422</span>
-                      </span>
-                    </div>
+                    <span className="text-slate-400 group-hover:text-orange-500 font-bold text-xs">→</span>
                   </div>
                 ))}
               </div>
-            </section>
+            </div>
+
+            {/* Helpdesk Card */}
+            <div className="bg-gradient-to-br from-orange-500 to-amber-600 rounded-3xl p-6 text-white shadow-md relative overflow-hidden space-y-3">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest bg-black/20 px-3 py-1 rounded-full inline-block">
+                Pathfinder Helpdesk
+              </span>
+              <h3 className="text-xl font-extrabold leading-tight">Need Assistance With Your Batch?</h3>
+              <p className="text-xs text-orange-50 leading-relaxed font-medium">
+                Our support team and academic counselors are available to assist you with batch transfers, materials, or technical queries.
+              </p>
+              <div className="pt-2">
+                <button
+                  onClick={() => navigate('/contact')}
+                  className="bg-black hover:bg-slate-900 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-sm transition active:scale-95 uppercase tracking-wider"
+                >
+                  Contact Support
+                </button>
+              </div>
+            </div>
+
           </div>
 
         </div>
