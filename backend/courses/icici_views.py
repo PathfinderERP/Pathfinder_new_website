@@ -3,11 +3,16 @@ import hashlib
 import json
 import logging
 import os
+import urllib.request
+import urllib.parse
+import ssl
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from django.shortcuts import redirect
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from .models import Enrollment, Course
 
 logger = logging.getLogger(__name__)
@@ -49,13 +54,12 @@ def calculate_v1_secure_hash(data_dict, secret_key=None):
 
 def calculate_v2_secure_hash(json_payload, secret_key=SECRET_KEY):
     """
-    V2 Secure Hash Logic (for JSON API requests like Get Card Bin / User Cancel / Get Service Charges):
+    V2 Secure Hash Logic:
     1. Minify JSON (no whitespace, JSON stringify).
     2. Compute HMAC-SHA256 of minified JSON using secret_key.
     3. Return lowercase hex digest.
     """
     if isinstance(json_payload, dict):
-        # ensure minified JSON string without spaces
         minified_json = json.dumps(json_payload, separators=(',', ':'))
     else:
         minified_json = str(json_payload)
@@ -65,7 +69,9 @@ def calculate_v2_secure_hash(json_payload, secret_key=SECRET_KEY):
     signature = hmac.new(key_bytes, msg_bytes, hashlib.sha256).hexdigest().lower()
     return signature, minified_json
 
+@method_decorator(csrf_exempt, name='dispatch')
 class ICICIConfigView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -73,7 +79,9 @@ class ICICIConfigView(APIView):
         config = get_icici_config(mode)
         return Response(config, status=status.HTTP_200_OK)
 
+@method_decorator(csrf_exempt, name='dispatch')
 class ICICIHashGeneratorView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -110,11 +118,9 @@ class ICICIHashGeneratorView(APIView):
             logger.error(f"Error generating hash: {e}")
             return Response({"success": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-import urllib.request
-import urllib.parse
-import ssl
-
+@method_decorator(csrf_exempt, name='dispatch')
 class ICICIProxyView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -166,7 +172,9 @@ class ICICIProxyView(APIView):
             logger.error(f"ICICI Proxy Error: {e}")
             return Response({"error": str(e), "message": "Failed to connect to ICICI Bank endpoint"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@method_decorator(csrf_exempt, name='dispatch')
 class ICICICallbackView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -194,28 +202,15 @@ class ICICICallbackView(APIView):
         """
         return redirect("https://pathfinder.edu.in/my-courses")
 
+@method_decorator(csrf_exempt, name='dispatch')
 class ICICIWebhookView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
         """
         Production Server-to-Server Realtime Webhook Endpoint for ICICI Bank Payment Gateway.
         ICICI posts JSON/Form payload when payment event completes.
-        Sample Payload:
-        {
-          "aggregatorID": "100000000517814",
-          "merchantId": "100000000517815",
-          "merchantTxnNo": "TXN12345678",
-          "txnID": "7700228099888",
-          "responseCode": "0000",
-          "respDescription": "Transaction successful",
-          "amount": "100.00",
-          "customerEmailID": "test@gmail.com",
-          "customerMobileNo": "9876543210",
-          "addlParam1": "course_id_123",
-          "addlParam2": "full",
-          "secureHash": "..."
-        }
         """
         try:
             payload = request.data
@@ -266,5 +261,6 @@ class ICICIWebhookView(APIView):
     def get(self, request):
         """Support GET request for webhook ping verification"""
         return Response({"status": "ACTIVE", "gateway": "ICICI Payment Gateway Webhook Endpoint"}, status=status.HTTP_200_OK)
+
 
 
