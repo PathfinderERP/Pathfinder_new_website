@@ -62,7 +62,7 @@ const Buynow = () => {
   ];
 
   const parseCurrency = (currencyString) => {
-    if (!currencyString) return 0;
+    if (!currencyString && currencyString !== 0) return 0;
     let cleanString = currencyString.toString().trim();
     cleanString = cleanString.replace(/[₹$,]/g, "");
     if (cleanString.toLowerCase().includes("k")) {
@@ -74,14 +74,56 @@ const Buynow = () => {
     }
   };
 
+  const getEffectivePrice = (data) => {
+    if (!data) return 0;
+    const disc = data.discounted_price ?? data.discount_price;
+    if (disc !== undefined && disc !== null && disc !== "" && parseCurrency(disc) > 0) {
+      return parseCurrency(disc);
+    }
+    if (data.plans && Array.isArray(data.plans) && data.plans.length > 0) {
+      const planPrices = data.plans
+        .map(p => parseCurrency(p.discounted_price || p.base_price))
+        .filter(p => p > 0);
+      if (planPrices.length > 0) {
+        return Math.min(...planPrices);
+      }
+    }
+    const base = data.course_price ?? data.price;
+    return parseCurrency(base);
+  };
+
+  const getMrpPrice = (data) => {
+    if (!data) return 0;
+    const base = data.course_price ?? data.price;
+    if (base !== undefined && base !== null && base !== "" && parseCurrency(base) > 0) {
+      return parseCurrency(base);
+    }
+    if (data.plans && Array.isArray(data.plans) && data.plans.length > 0) {
+      const planMrps = data.plans.map(p => parseCurrency(p.base_price)).filter(p => p > 0);
+      if (planMrps.length > 0) {
+        return Math.max(...planMrps);
+      }
+    }
+    return 0;
+  };
+
   const getCourseDisplayInfo = () => {
     if (!courseData) return null;
+    const sellingPrice = getEffectivePrice(courseData);
+    const mrpPrice = getMrpPrice(courseData);
+    const hasDiscount = mrpPrice > sellingPrice && sellingPrice > 0;
+
     return {
       name: courseData.name,
       goal: courseData.class_level ? `Class ${courseData.class_level}` : courseData.name,
       mode: courseData.mode || "Offline",
       location: courseData.centre || courseData.location || "All Centres",
-      price: `₹${courseData.course_price}`,
+      price: `₹${sellingPrice.toLocaleString()}`,
+      mrp: `₹${mrpPrice.toLocaleString()}`,
+      sellingPriceNum: sellingPrice,
+      mrpNum: mrpPrice,
+      hasDiscount: hasDiscount,
+      discountPercent: hasDiscount ? Math.round(((mrpPrice - sellingPrice) / mrpPrice) * 100) : 0,
       duration: courseData.duration,
       start_date: courseData.start_date,
       thumbnail_url: courseData.thumbnail_url,
@@ -99,17 +141,19 @@ const Buynow = () => {
   }, [courseData, navigate]);
 
   useEffect(() => {
-    if (courseData && courseData.course_price) {
-      const price = parseCurrency(courseData.course_price);
-      if (selectedEmiOption === "full") {
-        setEmiAmount(price);
-        setTotalAmount(price);
-      } else {
-        const selectedOption = emiOptions.find((option) => option.value === selectedEmiOption);
-        if (selectedOption) {
-          const monthlyAmount = price / selectedOption.months;
-          setEmiAmount(monthlyAmount);
+    if (courseData) {
+      const price = getEffectivePrice(courseData);
+      if (price > 0) {
+        if (selectedEmiOption === "full") {
+          setEmiAmount(price);
           setTotalAmount(price);
+        } else {
+          const selectedOption = emiOptions.find((option) => option.value === selectedEmiOption);
+          if (selectedOption) {
+            const monthlyAmount = price / selectedOption.months;
+            setEmiAmount(monthlyAmount);
+            setTotalAmount(price);
+          }
         }
       }
     }
@@ -682,6 +726,14 @@ const Buynow = () => {
                   <div className="text-right flex flex-col justify-between">
                     <div>
                       <p className="text-emerald-700 font-extrabold text-2xl">{courseInfo.price}</p>
+                      {courseInfo.hasDiscount && (
+                        <div className="flex items-center justify-end gap-1.5 mt-1">
+                          <span className="text-xs text-slate-400 line-through font-medium">{courseInfo.mrp}</span>
+                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                            {courseInfo.discountPercent}% OFF
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
