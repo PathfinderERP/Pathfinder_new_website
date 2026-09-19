@@ -3,6 +3,7 @@ import hashlib
 import json
 import logging
 import os
+import datetime
 import urllib.request
 import urllib.parse
 import ssl
@@ -234,15 +235,20 @@ class ICICIWebhookView(APIView):
 
                 # Auto-create or update Enrollment in MongoDB
                 if course_id:
-                    course = Course.objects(id=course_id).first()
-                    course_name = course.name if course else "Course Program"
+                    course_name = "Course Program"
+                    try:
+                        course = Course.objects(id=course_id).first()
+                        if course and getattr(course, 'name', None):
+                            course_name = course.name
+                    except Exception as c_err:
+                        logger.warning(f"[ICICI WEBHOOK] Course lookup fallback: {c_err}")
 
                     # Check if enrollment already recorded
                     existing_enrollment = Enrollment.objects(payment_id=merchant_txn_no).first()
                     if not existing_enrollment:
                         Enrollment.objects.create(
                             user_id=email or mobile or "Guest",
-                            course_id=course_id,
+                            course_id=str(course_id),
                             course_name=course_name,
                             amount_paid=float(amount) if amount else 0.0,
                             payment_id=merchant_txn_no,
