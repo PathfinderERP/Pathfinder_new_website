@@ -131,17 +131,51 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Performance Section */}
+            {/* Performance & Quick Metrics Section */}
             <section className="space-y-4">
-              <h2 className="text-xl font-bold px-2">Performance</h2>
+              <h2 className="text-xl font-bold px-2 text-slate-900">Portal Overview</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { icon: PERFORMANCE_ICONS.bars, color: "bg-white" },
-                  { icon: PERFORMANCE_ICONS.pie, border: "border-orange-500", color: "bg-white" },
-                  { icon: PERFORMANCE_ICONS.notebook, color: "bg-white" },
+                  { 
+                    title: "Enrolled Courses", 
+                    value: myCourses?.length || 0, 
+                    label: "Active Learning Batches",
+                    color: "bg-emerald-50 border-emerald-200 text-emerald-900",
+                    badge: "bg-emerald-600 text-white",
+                    action: () => navigate('/my-courses')
+                  },
+                  { 
+                    title: "Physical Assets", 
+                    value: myOrders?.length || 0, 
+                    label: "Materials & Gear Ordered",
+                    color: "bg-orange-50 border-orange-200 text-orange-900",
+                    badge: "bg-orange-600 text-white",
+                    action: () => navigate('/students-corner/orders', { state: { from: '/dashboard' } })
+                  },
+                  { 
+                    title: "Account Status", 
+                    value: "Active", 
+                    label: user?.studentClass ? `Class: ${user.studentClass}` : "Verified Student",
+                    color: "bg-blue-50 border-blue-200 text-blue-900",
+                    badge: "bg-blue-600 text-white",
+                    action: () => navigate('/profile')
+                  },
                 ].map((item, i) => (
-                  <div key={i} className={`${item.color} rounded-[32px] p-8 flex flex-col items-center justify-center shadow-sm border ${item.border || "border-white"} hover:border-orange-200 transition-all cursor-pointer group h-48`}>
-                    <img src={item.icon} alt="stat icon" className="w-24 h-24 object-contain group-hover:scale-110 transition-transform duration-300" />
+                  <div 
+                    key={i} 
+                    onClick={item.action}
+                    className={`${item.color} rounded-[28px] p-6 flex flex-col justify-between shadow-sm border hover:shadow-md transition-all cursor-pointer group h-44`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase tracking-wider opacity-75">{item.title}</span>
+                      <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase ${item.badge}`}>
+                        {item.value}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black">{item.value}</h3>
+                      <p className="text-xs mt-1 font-medium opacity-80">{item.label}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -150,44 +184,50 @@ const Dashboard = () => {
             {/* Enrolled Courses Section */}
             <section className="space-y-4">
               <div className="flex items-center justify-between px-2">
-                <h2 className="text-xl font-bold">Enrolled Courses</h2>
+                <h2 className="text-xl font-bold text-slate-900">Enrolled Courses</h2>
                 <button
                   onClick={() => navigate('/my-courses')}
-                  className="text-sm font-semibold text-slate-400 hover:text-orange-500 transition-colors"
+                  className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors uppercase tracking-wider"
                 >
-                  See all
+                  View All ({myCourses?.length || 0})
                 </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 {myCourses && myCourses.length > 0 ? (
                   myCourses.slice(0, 2).map((course) => (
-                    <div key={course.id || course._id} className="bg-[#FF8C61] rounded-[32px] p-6 md:p-8 flex items-center justify-between text-white relative overflow-hidden group hover:shadow-xl hover:shadow-orange-200/50 transition-all h-40 md:h-44">
-                      <div className="relative z-10 flex flex-col items-start gap-3 md:gap-4">
-                        <h3 className="text-lg md:text-xl font-black leading-tight max-w-[120px] line-clamp-2">{course.name}</h3>
+                    <div key={course.id || course._id} className="bg-slate-900 rounded-[32px] p-6 md:p-8 flex items-center justify-between text-white relative overflow-hidden group hover:shadow-xl transition-all h-44 border border-slate-800">
+                      <div className="relative z-10 flex flex-col items-start gap-3">
+                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-800/50 uppercase">
+                          {course.mode === 'online' ? 'Online Batch' : 'Classroom'}
+                        </span>
+                        <h3 className="text-lg md:text-xl font-extrabold leading-tight line-clamp-2 max-w-[180px]">{course.name}</h3>
                         <button
                           onClick={() => navigate('/my-courses')}
-                          className="bg-black text-white px-6 md:px-8 py-2 md:py-2.5 rounded-2xl text-xs md:text-sm font-bold active:scale-95 transition-all"
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-md"
                         >
-                          View
+                          Access Batch
                         </button>
                       </div>
-                      <div className="absolute right-2 md:right-4 bottom-[-10px] w-32 h-32 md:w-40 md:h-40">
+                      <div className="w-28 h-28 shrink-0">
                         {course.thumbnail_url ? (
-                          <img src={course.thumbnail_url} alt="course" className="w-full h-full object-cover rounded-xl rotate-[-10deg] group-hover:rotate-0 transition-transform duration-500 opacity-80" />
+                          <img src={course.thumbnail_url} alt={course.name} className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500" />
                         ) : (
-                          <img src={BOOKS_IMG} alt="books" className="w-full h-full object-contain rotate-[-10deg] group-hover:rotate-0 transition-transform duration-500" />
+                          <div className="w-full h-full bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl flex items-center justify-center font-black text-3xl text-white/90">
+                            {course.name.charAt(0)}
+                          </div>
                         )}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="col-span-1 sm:col-span-2 bg-white rounded-[32px] p-8 flex flex-col items-center justify-center text-center border dashed border-slate-200">
-                    <p className="text-slate-500 mb-4">You haven't enrolled in any courses yet.</p>
+                  <div className="col-span-1 sm:col-span-2 bg-white rounded-[32px] p-8 flex flex-col items-center justify-center text-center border border-slate-200/80 shadow-sm">
+                    <p className="text-slate-600 font-bold text-base mb-1">No Active Courses Enrolled</p>
+                    <p className="text-slate-400 text-xs mb-5 max-w-sm">Browse Pathfinder's top coaching programs for JEE, NEET, Boards & Foundation.</p>
                     <button
-                      onClick={() => navigate('/all-india')}
-                      className="bg-emerald-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-emerald-700 transition"
+                      onClick={() => navigate('/applynow')}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow-md uppercase tracking-wider"
                     >
-                      Explore Courses
+                      Explore Pathfinder Courses
                     </button>
                   </div>
                 )}
@@ -197,58 +237,48 @@ const Dashboard = () => {
             {/* Physical Assets Section */}
             <section className="space-y-4">
               <div className="flex items-center justify-between px-2">
-                <h2 className="text-xl font-bold">Physical Assets</h2>
+                <h2 className="text-xl font-bold text-slate-900">Physical Assets & Materials</h2>
                 <button
                   onClick={() => navigate('/students-corner/orders', { state: { from: '/dashboard' } })}
-                  className="text-sm font-semibold text-slate-400 hover:text-orange-500 transition-colors"
+                  className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors uppercase tracking-wider"
                 >
-                  See all
+                  View All Orders
                 </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 {myOrders && myOrders.length > 0 ? (
                   myOrders.slice(0, 2).map((order) => (
-                    <div key={order.id || order._id} className="bg-white rounded-[32px] p-6 md:p-8 flex items-center justify-between shadow-sm border border-slate-100 group hover:border-orange-200 transition-all h-40 md:h-44">
+                    <div key={order.id || order._id} className="bg-white rounded-[32px] p-6 md:p-8 flex items-center justify-between shadow-sm border border-slate-200/80 group hover:border-orange-300 transition-all h-44">
                       <div className="flex flex-col items-start gap-2">
-                        <div className="bg-orange-50 p-3 rounded-2xl group-hover:bg-orange-100 transition-colors w-14 h-14 flex items-center justify-center overflow-hidden border border-orange-100/50">
-                          {(order.items?.[0]?.image || order.items?.[0]?.image_url || order.items?.[0]?.img || itemImages[order.items?.[0]?.id] || itemImages[order.items?.[0]?.unique_id]) ? (
-                            <img
-                              src={order.items[0].image || order.items[0].image_url || order.items[0].img || itemImages[order.items[0].id] || itemImages[order.items[0].unique_id]}
-                              alt=""
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                                const icon = e.target.parentElement.querySelector('.fallback-icon-dash');
-                                if (icon) icon.style.display = 'block';
-                              }}
-                            />
-                          ) : null}
-                          <ShoppingBagIcon className={`fallback-icon-dash h-6 w-6 text-orange-600 ${(order.items?.[0]?.image || order.items?.[0]?.image_url || order.items?.[0]?.img || itemImages[order.items?.[0]?.id] || itemImages[order.items?.[0]?.unique_id]) ? 'hidden' : 'block'}`} />
+                        <div className="bg-orange-50 p-2.5 rounded-2xl border border-orange-100/60 flex items-center justify-center">
+                          <ShoppingBagIcon className="h-6 w-6 text-orange-600" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-slate-900 line-clamp-1">#{order.payment_id?.substring(0, 10) || order.id?.substring(0, 8)}</h3>
-                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{order.items?.length || 0} Items • {order.status}</p>
+                          <h3 className="text-base font-bold text-slate-900 line-clamp-1">Ref #{order.payment_id?.substring(0, 10) || (order.id || '').substring(0, 8)}</h3>
+                          <p className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block mt-1">
+                            Status: {order.payment_status || order.status || 'Completed'}
+                          </p>
                         </div>
                         <button
                           onClick={() => navigate('/students-corner/orders', { state: { from: '/dashboard' } })}
-                          className="text-orange-600 text-xs font-black uppercase tracking-widest mt-2 hover:underline"
+                          className="text-orange-600 text-xs font-bold uppercase tracking-wider hover:underline mt-1"
                         >
-                          Track Order
+                          Track Details →
                         </button>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-black text-slate-900 italic">₹{order.total_amount}</p>
+                        <p className="text-2xl font-black text-slate-900">₹{order.total_amount}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="col-span-1 sm:col-span-2 bg-slate-50 rounded-[32px] p-8 flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-200">
-                    <p className="text-slate-500 mb-4 font-medium uppercase text-xs tracking-widest">No Physical Assets Detected</p>
+                  <div className="col-span-1 sm:col-span-2 bg-slate-50 rounded-[32px] p-8 flex flex-col items-center justify-center text-center border border-dashed border-slate-300">
+                    <p className="text-slate-500 mb-3 font-semibold text-xs uppercase tracking-wider">No Material Orders Found</p>
                     <button
                       onClick={() => navigate('/students-corner')}
-                      className="bg-black text-white px-8 py-2.5 rounded-2xl text-xs font-bold hover:bg-orange-600 transition shadow-lg active:scale-95"
+                      className="bg-black hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition shadow-md uppercase tracking-wider"
                     >
-                      Visit Store
+                      Visit Student Store
                     </button>
                   </div>
                 )}
