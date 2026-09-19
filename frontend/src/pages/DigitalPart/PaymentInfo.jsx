@@ -77,33 +77,33 @@ const PaymentInfo = () => {
                             <p className="text-slate-500">Loading payment history...</p>
                         </div>
                     ) : payments.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
+                        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                            <table className="w-full min-w-[640px] text-left">
                                 <thead>
-                                    <tr className="border-b border-slate-100">
-                                        <th className="pb-4 px-4 font-semibold text-slate-600">Transaction ID</th>
-                                        <th className="pb-4 px-4 font-semibold text-slate-600">Product/Course</th>
-                                        <th className="pb-4 px-4 font-semibold text-slate-600">Category</th>
-                                        <th className="pb-4 px-4 font-semibold text-slate-600">Date</th>
-                                        <th className="pb-4 px-4 font-semibold text-slate-600">Amount</th>
-                                        <th className="pb-4 px-4 font-semibold text-slate-600">Status</th>
+                                    <tr className="border-b border-slate-100 text-xs text-slate-400 uppercase tracking-wider">
+                                        <th className="pb-3 px-4 font-bold whitespace-nowrap">Transaction ID</th>
+                                        <th className="pb-3 px-4 font-bold whitespace-nowrap">Product/Course</th>
+                                        <th className="pb-3 px-4 font-bold whitespace-nowrap">Category</th>
+                                        <th className="pb-3 px-4 font-bold whitespace-nowrap">Date</th>
+                                        <th className="pb-3 px-4 font-bold whitespace-nowrap">Amount</th>
+                                        <th className="pb-3 px-4 font-bold whitespace-nowrap">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     {payments.map((payment, index) => (
-                                        <tr key={index} className="group hover:bg-slate-50 transition-colors">
-                                            <td className="py-4 px-4 text-[10px] font-mono font-bold text-slate-400 uppercase tracking-tighter">#{payment.id}</td>
-                                            <td className="py-4 px-4">
-                                                <p className="font-bold text-slate-900 leading-tight">{payment.itemName}</p>
+                                        <tr key={index} className="group hover:bg-slate-50 transition-colors text-sm">
+                                            <td className="py-4 px-4 font-mono text-xs font-semibold text-slate-500 whitespace-nowrap">#{payment.id}</td>
+                                            <td className="py-4 px-4 font-bold text-slate-900 whitespace-nowrap">
+                                                {payment.itemName}
                                             </td>
-                                            <td className="py-4 px-4">
+                                            <td className="py-4 px-4 whitespace-nowrap">
                                                 <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${payment.type === 'Course' ? 'bg-blue-50 text-blue-600' : 'bg-orange-50 text-orange-600'}`}>
                                                     {payment.type}
                                                 </span>
                                             </td>
-                                            <td className="py-4 px-4 text-slate-600 font-medium">{formatDate(payment.date)}</td>
-                                            <td className="py-4 px-4 font-black text-slate-900">₹{payment.amount.toLocaleString()}</td>
-                                            <td className="py-4 px-4">
+                                            <td className="py-4 px-4 text-slate-600 font-medium whitespace-nowrap">{formatDate(payment.date)}</td>
+                                            <td className="py-4 px-4 font-black text-slate-900 whitespace-nowrap">₹{payment.amount.toLocaleString()}</td>
+                                            <td className="py-4 px-4 whitespace-nowrap">
                                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${payment.status === 'completed' || payment.status === 'Active'
                                                     ? 'bg-green-100 text-green-800'
                                                     : 'bg-orange-100 text-orange-800'
