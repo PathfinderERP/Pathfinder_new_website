@@ -337,17 +337,30 @@ const Buynow = () => {
       const resData = proxyRes.data;
       const responseContent = resData.data || resData;
 
-      if (responseContent.redirectURI && responseContent.tranCtx) {
+      console.log("ICICI Gateway Raw Proxy Response:", resData);
+
+      // Extract redirect URL and tranCtx from possible ICICI response key variants
+      const targetRedirect = responseContent.redirectURI || responseContent.redirectUrl || responseContent.redirect_url || responseContent.targetUrl || responseContent.target_url || responseContent.url || responseContent.action;
+      const tranCtx = responseContent.tranCtx || responseContent.tran_ctx || responseContent.tranContext;
+
+      if (targetRedirect && tranCtx) {
         // Direct to payment gateway redirection URL with tranCtx parameter
-        window.location.href = `${responseContent.redirectURI}?tranCtx=${encodeURIComponent(responseContent.tranCtx)}`;
-      } else if (responseContent.redirectURI) {
-        window.location.href = responseContent.redirectURI;
-      } else if (responseContent.targetUrl || responseContent.redirectUrl) {
-        window.location.href = responseContent.targetUrl || responseContent.redirectUrl;
+        const finalUrl = targetRedirect.includes('?') 
+          ? `${targetRedirect}&tranCtx=${encodeURIComponent(tranCtx)}`
+          : `${targetRedirect}?tranCtx=${encodeURIComponent(tranCtx)}`;
+        window.location.href = finalUrl;
+      } else if (targetRedirect) {
+        window.location.href = targetRedirect;
+      } else if (responseContent.html || responseContent.formHtml) {
+        // Render form HTML if gateway returns auto-submit HTML
+        document.open();
+        document.write(responseContent.html || responseContent.formHtml);
+        document.close();
       } else {
-        // Fallback: If gateway returned response status/message or details
-        console.log("ICICI Response:", responseContent);
-        throw new Error(responseContent.responseMessage || responseContent.message || "Payment initiation processed.");
+        // Gateway returned error or unexpected structure
+        console.error("ICICI Gateway unexpected response structure:", responseContent);
+        const errorMsg = responseContent.responseMessage || responseContent.respDescription || responseContent.message || responseContent.error || (typeof responseContent === 'string' ? responseContent : JSON.stringify(responseContent));
+        throw new Error(errorMsg || "Payment initiation returned an unexpected response from ICICI Bank.");
       }
 
     } catch (err) {
