@@ -16,6 +16,7 @@ import MyCourses from "../pages/DigitalPart/MyCourses";
 import StudentResults from "../pages/DigitalPart/StudentResults";
 import Notices from "../pages/DigitalPart/Notices";
 import Schedule from "../pages/DigitalPart/Schedule";
+import Chats from "../pages/DigitalPart/Chats";
 import PhysicalAssets from "../pages/DigitalPart/PhysicalAssets";
 import ProtectedRoute from "../components/ProtectedRoute";
 import NotFound from "../pages/Notfound/NotFound";
