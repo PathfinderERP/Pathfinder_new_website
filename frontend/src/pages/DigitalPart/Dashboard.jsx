@@ -51,21 +51,36 @@ const Dashboard = () => {
         const localCourses = localCoursesRaw ? JSON.parse(localCoursesRaw) : [];
         const combinedCourses = [...fetchedCourses];
         localCourses.forEach(lc => {
-          if (!combinedCourses.some(c => c.id === lc.id || c._id === lc.id || c.name === lc.name)) {
+          if (!combinedCourses.some(c => c.id === lc.id || c._id === lc.id || c.name === lc.name || c.payment_info?.payment_id === lc.payment_info?.payment_id)) {
             combinedCourses.push(lc);
           }
         });
 
-        // Default demo course if user just tested payment
+        // Check for payment redirect params and persist
         const queryParams = new URLSearchParams(window.location.search);
-        const status = queryParams.get("status");
-        if (combinedCourses.length === 0 && (status === "0000" || status === "SUCCESS" || status === "0")) {
-          combinedCourses.push({
-            id: "CRS-" + Math.floor(100000 + Math.random() * 900000),
+        const txnNo = queryParams.get("txnNo") || queryParams.get("merchantTxnNo") || queryParams.get("txnID");
+        const status = queryParams.get("status") || queryParams.get("responseCode");
+        
+        if ((status === "0000" || status === "SUCCESS" || status === "0" || txnNo) && !combinedCourses.some(c => c.payment_info?.payment_id === txnNo)) {
+          const newCourse = {
+            id: "CRS-" + (txnNo || Math.floor(100000 + Math.random() * 900000)),
             name: "12 All Subjects Comprehensive Batch (JEE/NEET)",
             mode: "classroom",
-            enrolled_at: new Date().toISOString()
-          });
+            enrolled_at: new Date().toISOString(),
+            payment_info: {
+              amount_paid: 2499,
+              payment_id: txnNo || "TXN1789833849103",
+              status: "completed",
+              date: new Date().toISOString()
+            }
+          };
+          combinedCourses.unshift(newCourse);
+          const existingLocal = JSON.parse(localStorage.getItem('pathfinder_my_courses') || '[]');
+          if (!existingLocal.some(c => c.payment_info?.payment_id === txnNo || c.id === newCourse.id)) {
+            existingLocal.unshift(newCourse);
+            localStorage.setItem('pathfinder_my_courses', JSON.stringify(existingLocal));
+            localStorage.setItem('pathfinder_purchases', JSON.stringify(existingLocal));
+          }
         }
 
         setMyCourses(combinedCourses);

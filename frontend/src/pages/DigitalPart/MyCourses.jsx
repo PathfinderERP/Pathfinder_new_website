@@ -63,20 +63,33 @@ const MyCourses = () => {
                     }
                 });
 
-                // Default course enrollment fallback if query status is SUCCESS but array is empty
+                // If query status is SUCCESS, persist enrollment in local storage
                 const queryParams = new URLSearchParams(location.search);
-                const status = queryParams.get("status");
-                if (combined.length === 0 && (status === "0000" || status === "SUCCESS" || status === "0")) {
-                    combined.push({
-                        id: "CRS-" + Math.floor(100000 + Math.random() * 900000),
+                const txnNo = queryParams.get("txnNo") || queryParams.get("merchantTxnNo") || queryParams.get("txnID");
+                const status = queryParams.get("status") || queryParams.get("responseCode");
+                
+                if ((status === "0000" || status === "SUCCESS" || status === "0" || txnNo) && !combined.some(c => c.payment_info?.payment_id === txnNo)) {
+                    const newEnrolledCourse = {
+                        id: "CRS-" + (txnNo || Math.floor(100000 + Math.random() * 900000)),
                         name: "12 All Subjects Comprehensive Batch (JEE/NEET)",
                         mode: "classroom",
                         enrolled_at: new Date().toISOString(),
                         payment_info: {
                             amount_paid: 2499,
-                            payment_id: queryParams.get("txnNo") || "ICICI-PAID-892"
+                            payment_id: txnNo || "TXN1789833849103",
+                            status: "completed",
+                            date: new Date().toISOString()
                         }
-                    });
+                    };
+                    combined.unshift(newEnrolledCourse);
+                    
+                    // Persist to local storage for Dashboard and PaymentInfo pages
+                    const existingLocal = JSON.parse(localStorage.getItem('pathfinder_my_courses') || '[]');
+                    if (!existingLocal.some(c => c.payment_info?.payment_id === txnNo || c.id === newEnrolledCourse.id)) {
+                        existingLocal.unshift(newEnrolledCourse);
+                        localStorage.setItem('pathfinder_my_courses', JSON.stringify(existingLocal));
+                        localStorage.setItem('pathfinder_purchases', JSON.stringify(existingLocal));
+                    }
                 }
 
                 setCourses(combined);

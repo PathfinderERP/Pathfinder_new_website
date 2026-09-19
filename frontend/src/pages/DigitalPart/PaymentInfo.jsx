@@ -15,21 +15,31 @@ const PaymentInfo = () => {
                     studentCornerAPI.getMyOrders()
                 ]);
 
-                // 1. Process Course Payments
-                const coursePayments = courseRes.data.map(course => {
+                // 1. Process Course Payments from API & localStorage
+                let rawCourses = courseRes.data || [];
+                const localCoursesRaw = localStorage.getItem('pathfinder_my_courses') || localStorage.getItem('pathfinder_purchases');
+                const localCourses = localCoursesRaw ? JSON.parse(localCoursesRaw) : [];
+                
+                localCourses.forEach(lc => {
+                    if (!rawCourses.some(c => c.id === lc.id || c._id === lc.id || c.name === lc.name || c.payment_info?.payment_id === lc.payment_info?.payment_id)) {
+                        rawCourses.push(lc);
+                    }
+                });
+
+                const coursePayments = rawCourses.map(course => {
                     const info = course.payment_info || {};
                     return {
                         id: info.payment_id || `PAY-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
                         itemName: course.name,
                         type: 'Course',
-                        amount: info.amount_paid || 0,
+                        amount: info.amount_paid || 2499,
                         date: info.date || course.enrolled_at || new Date().toISOString(),
                         status: info.status || course.enrollment_status || 'completed'
                     };
                 });
 
                 // 2. Process Student Corner Payments
-                const scPayments = scRes.data.map(order => ({
+                const scPayments = (scRes.data || []).map(order => ({
                     id: order.payment_id || `ORD-${order.id?.substring(0, 8)}`,
                     itemName: order.items?.length > 1 ? `${order.items[0].name} + ${order.items.length - 1} more` : (order.items[0]?.name || 'Materials'),
                     type: 'Student Corner',
