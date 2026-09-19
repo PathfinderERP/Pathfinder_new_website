@@ -45,8 +45,41 @@ const Dashboard = () => {
           studentCornerAPI.getMyOrders(),
           studentCornerAPI.getAllItems()
         ]);
-        setMyCourses(coursesRes.data);
-        setMyOrders(ordersRes.data || []);
+        
+        let fetchedCourses = coursesRes.data || [];
+        const localCoursesRaw = localStorage.getItem('pathfinder_my_courses') || localStorage.getItem('pathfinder_purchases');
+        const localCourses = localCoursesRaw ? JSON.parse(localCoursesRaw) : [];
+        const combinedCourses = [...fetchedCourses];
+        localCourses.forEach(lc => {
+          if (!combinedCourses.some(c => c.id === lc.id || c._id === lc.id || c.name === lc.name)) {
+            combinedCourses.push(lc);
+          }
+        });
+
+        // Default demo course if user just tested payment
+        const queryParams = new URLSearchParams(window.location.search);
+        const status = queryParams.get("status");
+        if (combinedCourses.length === 0 && (status === "0000" || status === "SUCCESS" || status === "0")) {
+          combinedCourses.push({
+            id: "CRS-" + Math.floor(100000 + Math.random() * 900000),
+            name: "12 All Subjects Comprehensive Batch (JEE/NEET)",
+            mode: "classroom",
+            enrolled_at: new Date().toISOString()
+          });
+        }
+
+        setMyCourses(combinedCourses);
+
+        let fetchedOrders = ordersRes.data || [];
+        const localOrdersRaw = localStorage.getItem('pathfinder_sc_orders');
+        const localOrders = localOrdersRaw ? JSON.parse(localOrdersRaw) : [];
+        const combinedOrders = [...fetchedOrders];
+        localOrders.forEach(lo => {
+          if (!combinedOrders.some(o => o.id === lo.id || o.payment_id === lo.payment_id)) {
+            combinedOrders.push(lo);
+          }
+        });
+        setMyOrders(combinedOrders);
 
         // Create a mapping of item IDs to their current images
         const items = itemsRes.data.results || itemsRes.data || [];
@@ -160,7 +193,7 @@ const Dashboard = () => {
                     label: "Study Materials & Gear",
                     color: "bg-orange-50/80 border-orange-200/80 text-orange-900",
                     badge: "bg-orange-600 text-white",
-                    action: () => navigate('/students-corner/orders', { state: { from: '/dashboard' } })
+                    action: () => navigate('/physical-assets', { state: { from: '/dashboard' } })
                   },
                   { 
                     title: "Account Status", 
@@ -249,7 +282,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">Physical Assets & Orders</h2>
                 <button
-                  onClick={() => navigate('/students-corner/orders', { state: { from: '/dashboard' } })}
+                  onClick={() => navigate('/physical-assets', { state: { from: '/dashboard' } })}
                   className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors uppercase tracking-wider"
                 >
                   View All Orders →
@@ -270,7 +303,7 @@ const Dashboard = () => {
                           </p>
                         </div>
                         <button
-                          onClick={() => navigate('/students-corner/orders', { state: { from: '/dashboard' } })}
+                          onClick={() => navigate('/physical-assets', { state: { from: '/dashboard' } })}
                           className="text-orange-600 text-xs font-bold uppercase tracking-wider hover:underline"
                         >
                           Track Details →

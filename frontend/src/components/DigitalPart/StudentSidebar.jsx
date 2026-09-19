@@ -37,7 +37,7 @@ const StudentSidebar = () => {
         { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
         { name: "My Courses", href: "/my-courses", icon: AcademicCapIcon },
         { name: "Payment Info", href: "/payment", icon: CreditCardIcon },
-        { name: "Physical Assets", href: "/students-corner/orders", icon: ShoppingBagIcon },
+        { name: "Physical Assets", href: "/physical-assets", icon: ShoppingBagIcon },
         { name: "Registration", href: "/portal-registration", icon: IdentificationIcon },
         { name: "Results", href: "/student-results", icon: TrophyIcon },
         { name: "Profile", href: "/profile", icon: UserIcon },
@@ -81,6 +81,7 @@ const StudentSidebar = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
+                            onClick={() => setIsMenuOpen(false)}
                             className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex justify-end"
                         >
                             <motion.div
@@ -88,6 +89,7 @@ const StudentSidebar = () => {
                                 animate={{ x: 0 }}
                                 exit={{ x: "100%" }}
                                 transition={{ type: "spring", damping: 25, stiffness: 220 }}
+                                onClick={(e) => e.stopPropagation()}
                                 className="w-4/5 max-w-sm bg-white h-full p-6 flex flex-col shadow-2xl overflow-y-auto"
                             >
                                 <div className="flex items-center justify-between pb-6 border-b border-slate-100 mb-6">
