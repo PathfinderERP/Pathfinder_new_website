@@ -7,26 +7,140 @@ from .models import ShikshaBandhuPartner, ShikshaBandhuClick, ShikshaBandhuBonus
 from landing_registrations.models import LandingPageRegistration
 
 
-BASE_DEMO_REFERRALS = []
+BASE_DEMO_REFERRALS = [
+    {
+        'id': 'REF-1001',
+        'displayId': 'L-1001',
+        'student': 'Student #1',
+        'studentName': 'Ananya Roy',
+        'mobile': '+91 98301 12345',
+        'program': 'Madhyamik Mock Test 2027',
+        'date': '15 Feb 2026',
+        'status': 'Successful',
+        'bonus': 450
+    },
+    {
+        'id': 'REF-1002',
+        'displayId': 'L-1002',
+        'student': 'Student #2',
+        'studentName': 'Sayan Mukherjee',
+        'mobile': '+91 98312 23456',
+        'program': 'CBSE Class X Mock Test',
+        'date': '18 Feb 2026',
+        'status': 'Successful',
+        'bonus': 750
+    },
+    {
+        'id': 'REF-1003',
+        'displayId': 'L-1003',
+        'student': 'Student #3',
+        'studentName': 'Priya Das',
+        'mobile': '+91 98323 34567',
+        'program': 'CBSE Class XII Mock Test',
+        'date': '22 Feb 2026',
+        'status': 'Pending',
+        'bonus': 750
+    },
+    {
+        'id': 'REF-1004',
+        'displayId': 'L-1004',
+        'student': 'Student #4',
+        'studentName': 'Subhajit Paul',
+        'mobile': '+91 98334 45678',
+        'program': 'ICSE Class X Mock Test',
+        'date': '01 Mar 2026',
+        'status': 'Successful',
+        'bonus': 750
+    },
+    {
+        'id': 'REF-1005',
+        'displayId': 'L-1005',
+        'student': 'Student #5',
+        'studentName': 'Tanushree Sen',
+        'mobile': '+91 98345 56789',
+        'program': 'Madhyamik Mock Test 2027',
+        'date': '05 Mar 2026',
+        'status': 'Successful',
+        'bonus': 450
+    }
+]
 
 
 def seed_default_partner_if_needed():
-    """Ensure default partner SB004 exists in MongoDB."""
+    """Ensure default partners SB004, SB102, SB001 exist in MongoDB."""
     try:
-        partner = ShikshaBandhuPartner.objects(partner_id='SB004').first()
-        if not partner:
-            partner = ShikshaBandhuPartner(
-                partner_id='SB004',
-                name='Rahul Das',
-                mobile='+91 91471 78886',
-                email='rahul.das@example.com',
-                password='demo123',
-                status='active',
-                joined_on=datetime.datetime(2026, 2, 12)
-            )
-            partner.save()
+        initial_partners = [
+            {
+                'partner_id': 'SB004',
+                'name': 'Rahul Das',
+                'mobile': '+91 91471 78886',
+                'email': 'rahul.das@example.com',
+                'password': 'demo123',
+                'status': 'active',
+                'joined_on': datetime.datetime(2026, 2, 12)
+            },
+            {
+                'partner_id': 'SB102',
+                'name': 'Amitabha Sarkar',
+                'mobile': '+91 98300 98765',
+                'email': 'amitabha.sb102@pathfinder.edu.in',
+                'password': 'demo123',
+                'status': 'active',
+                'joined_on': datetime.datetime(2026, 1, 10)
+            },
+            {
+                'partner_id': 'SB001',
+                'name': 'Soumen Banerjee',
+                'mobile': '+91 98311 54321',
+                'email': 'soumen.sb001@example.com',
+                'password': 'demo123',
+                'status': 'active',
+                'joined_on': datetime.datetime(2026, 1, 5)
+            }
+        ]
+
+        for p_data in initial_partners:
+            partner = ShikshaBandhuPartner.objects(partner_id=p_data['partner_id']).first()
+            if not partner:
+                partner = ShikshaBandhuPartner(**p_data)
+                partner.save()
+
+        # Seed initial sample bonuses for SB004 if not present
+        if ShikshaBandhuBonus.objects(partner_id='SB004').count() == 0:
+            for item in BASE_DEMO_REFERRALS:
+                b = ShikshaBandhuBonus(
+                    partner_id='SB004',
+                    lead_id=item['id'],
+                    student_name=item['studentName'],
+                    program=item['program'],
+                    bonus_amount=item['bonus'],
+                    status=item['status'],
+                    created_at=datetime.datetime.utcnow()
+                )
+                b.save()
+
+        # Seed sample demo leads in LandingPageRegistration if none exist for SB004
+        if LandingPageRegistration.objects(referral_id='SB004').count() == 0:
+            for item in BASE_DEMO_REFERRALS:
+                reg = LandingPageRegistration(
+                    name=item['studentName'],
+                    phone=item['mobile'],
+                    email=f"{item['studentName'].lower().replace(' ', '.')}@gmail.com",
+                    student_class='Class X',
+                    course_type=item['program'],
+                    centre='Hazra (Head Office, Kolkata)',
+                    page_source='Shiksha Bandhu Referral (SB004)',
+                    referral_id='SB004',
+                    is_contacted=(item['status'] == 'Successful'),
+                    is_paid=(item['status'] == 'Successful'),
+                    amount_paid=item['bonus'] * 10 if item['status'] == 'Successful' else 0.0,
+                    txn_ref=f"TXN-SB004-{item['id']}",
+                    created_at=datetime.datetime.utcnow()
+                )
+                reg.save()
+
     except Exception as e:
-        print(f"Error seeding default partner: {e}")
+        print(f"Error seeding default partners: {e}")
 
 
 @api_view(['POST'])
@@ -310,23 +424,8 @@ def admin_list_referrals(request):
 
     ref_list = []
     
-    # Add base demo referrals
-    for item in BASE_DEMO_REFERRALS:
-        b_rec = bonuses.get(item['id'])
-        ref_list.append({
-            'id': item['id'],
-            'displayId': item['displayId'],
-            'partnerId': 'SB004',
-            'studentName': item['studentName'],
-            'mobile': item['mobile'],
-            'program': item['program'],
-            'date': item['date'],
-            'status': b_rec.status if b_rec else item['status'],
-            'bonusAmount': b_rec.bonus_amount if b_rec else item['bonus']
-        })
-
-    # Add real MongoDB leads
-    for idx, lead in enumerate(leads, start=1050):
+    # Add MongoDB leads
+    for idx, lead in enumerate(leads, start=1001):
         lead_id_str = str(lead.id)
         b_rec = bonuses.get(lead_id_str)
         ref_list.append({
@@ -338,7 +437,7 @@ def admin_list_referrals(request):
             'program': lead.course_type or 'Pathfinder Mock Test',
             'date': lead.created_at.strftime('%d %b %Y') if lead.created_at else 'Today',
             'status': b_rec.status if b_rec else ('Successful' if lead.is_contacted else 'Pending'),
-            'bonusAmount': b_rec.bonus_amount if b_rec else 250
+            'bonusAmount': b_rec.bonus_amount if b_rec else (int(round((lead.amount_paid or 0) * 0.10)) if lead.is_paid else 250)
         })
 
     return Response({'referrals': ref_list})
