@@ -22,20 +22,37 @@ import env from "../../config/env";
 
 const PATHFINDER_CENTRES = [
   "Hazra (Head Office, Kolkata)",
-  "Salt Lake (Sector V, Kolkata)",
+  "Barasat (North 24 Pgs, Kolkata)",
+  "Behala (Manton Crossing, Kolkata)",
+  "Dumdum (Dum Dum Road, Kolkata)",
   "Garia (South Kolkata)",
-  "Behala (Kolkata)",
+  "Jodhpur Park (Kolkata)",
+  "Salt Lake (Sector V, Kolkata)",
+  "Shyambazar (Kolkata)",
+  "Baruipur (South 24 Pgs)",
+  "Bagnan (Howrah)",
+  "Bally (Howrah)",
   "Howrah (Maidan)",
-  "Barasat (North 24 Pgs)",
-  "Siliguri (Hill Cart Rd)",
-  "Durgapur (City Centre)",
-  "Asansol (GT Road)",
-  "Burdwan (Rajbati)",
-  "Malda (English Bazar)",
+  "Arambagh (Hooghly)",
+  "Chandannagar (Hooghly)",
   "Chinsurah (Hooghly)",
-  "Midnapore (Station Rd)",
+  "Tarakeswar (Hooghly)",
+  "Asansol (GT Road, Paschim Bardhaman)",
+  "Burdwan (Dhaldighi, Purba Bardhaman)",
+  "Durgapur (City Centre, Paschim Bardhaman)",
+  "Kharagpur (Paschim Medinipur)",
+  "Midnapore (Station Rd, Paschim Medinipur)",
+  "Malda (English Bazar)",
   "Ranaghat (Nadia)",
-  "Kharagpur"
+  "Siliguri (College Para, Hill Cart Rd)",
+  "Cooch Behar",
+  "Jalpaiguri",
+  "Raiganj (Uttar Dinajpur)",
+  "Berhampore (Murshidabad)",
+  "Purulia",
+  "Bankura",
+  "Tamluk (Purba Medinipur)",
+  "Contai (Purba Medinipur)"
 ];
 
 export const PublicReferralLanding = () => {
@@ -72,11 +89,16 @@ export const PublicReferralLanding = () => {
     phone: "",
     email: "",
     password: "",
-    studentClass: "Class X",
     centre: PATHFINDER_CENTRES[0],
   });
+  const [centreSearch, setCentreSearch] = useState("");
+  const [centreDropdownOpen, setCentreDropdownOpen] = useState(false);
   const [buyLoading, setBuyLoading] = useState(false);
   const [buyError, setBuyError] = useState("");
+
+  const filteredCentres = PATHFINDER_CENTRES.filter(c =>
+    c.toLowerCase().includes(centreSearch.toLowerCase())
+  );
 
   const openEnquiry = (program) => {
     setActiveEnquiryProgram(program);
@@ -87,6 +109,9 @@ export const PublicReferralLanding = () => {
   const openBuyModal = (program) => {
     setActiveBuyProgram(program);
     setBuyError("");
+    setCentreSearch("");
+    setCentreDropdownOpen(false);
+    setBuyFormData(prev => ({ ...prev, centre: PATHFINDER_CENTRES[0] }));
     setBuyModalOpen(true);
   };
 
@@ -131,7 +156,6 @@ export const PublicReferralLanding = () => {
           phone: buyFormData.phone,
           email: buyFormData.email,
           password: buyFormData.password || "student123",
-          student_class: buyFormData.studentClass,
           area: buyFormData.centre,
           referred_by: referralId
         });
@@ -627,28 +651,22 @@ export const PublicReferralLanding = () => {
 
       {/* Buy Now Registration & ICICI Payment Modal */}
       {buyModalOpen && (
-        <div className="fixed inset-0 z-[99999] flex items-start justify-center bg-slate-900/80 backdrop-blur-sm p-4 pt-24 md:pt-32 pb-12 overflow-y-auto" onClick={() => setBuyModalOpen(false)}>
-          <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-4 my-auto max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setBuyModalOpen(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-100 transition"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase text-amber-900 bg-amber-100 px-3 py-1 rounded-full border border-amber-200">
-                  Partner Referral: {referralId}
-                </span>
-                <span className="text-[10px] font-black uppercase text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200">
-                  10% Partner Bonus Eligible
-                </span>
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => { setBuyModalOpen(false); setCentreDropdownOpen(false); }}>
+          <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-4 my-auto max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3 pr-8">
+              <div>
+                <h3 className="text-xl font-black text-[#66090D] uppercase tracking-tight">Mock Test Registration & Payment</h3>
+                <p className="text-xs text-slate-500 font-bold mt-0.5">
+                  {activeBuyProgram.name} • <strong className="text-emerald-700 font-black">₹{activeBuyProgram.price.toLocaleString("en-IN")}</strong>
+                </p>
               </div>
-              <h3 className="text-2xl font-black text-[#66090D] pt-1">Course Registration & Payment</h3>
-              <p className="text-xs text-slate-500 font-semibold">
-                {activeBuyProgram.name} • <strong className="text-emerald-700 font-black">₹{activeBuyProgram.price.toLocaleString("en-IN")}</strong>
-              </p>
+              <button
+                onClick={() => { setBuyModalOpen(false); setCentreDropdownOpen(false); }}
+                className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-100 transition"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
             </div>
 
             {buyError && (
@@ -657,48 +675,49 @@ export const PublicReferralLanding = () => {
               </div>
             )}
 
-            <form onSubmit={handleBuyNowSubmit} className="space-y-4 text-xs font-bold text-slate-700">
-              <div className="space-y-1">
-                <label className="uppercase tracking-wider">Student Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={buyFormData.fullName}
-                  onChange={(e) => setBuyFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                  placeholder="Enter Student Name"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Scrollable Form Body */}
+            <div className="overflow-y-auto pr-1 space-y-3.5 text-xs font-bold text-slate-700 flex-1">
+              <form id="buy-modal-form" onSubmit={handleBuyNowSubmit} className="space-y-3.5">
                 <div className="space-y-1">
-                  <label className="uppercase tracking-wider">Mobile Number *</label>
+                  <label className="uppercase tracking-wider text-[11px] text-slate-500">Student Full Name *</label>
                   <input
-                    type="tel"
+                    type="text"
                     required
-                    value={buyFormData.phone}
-                    onChange={(e) => setBuyFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="10-digit Phone Number"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                    value={buyFormData.fullName}
+                    onChange={(e) => setBuyFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                    placeholder="Enter Student Name"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="uppercase tracking-wider">Email Address *</label>
-                  <input
-                    type="email"
-                    required
-                    value={buyFormData.email}
-                    onChange={(e) => setBuyFormData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="email@example.com"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
-                  />
-                </div>
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="uppercase tracking-wider text-[11px] text-slate-500">Mobile Number *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={buyFormData.phone}
+                      onChange={(e) => setBuyFormData(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="10-digit Phone Number"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                    />
+                  </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="uppercase tracking-wider text-[11px] text-slate-500">Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      value={buyFormData.email}
+                      onChange={(e) => setBuyFormData(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="email@example.com"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-1">
-                  <label className="uppercase tracking-wider">Password (For Student Portal) *</label>
+                  <label className="uppercase tracking-wider text-[11px] text-slate-500">Password (For Student Portal) *</label>
                   <input
                     type="password"
                     required
@@ -706,72 +725,91 @@ export const PublicReferralLanding = () => {
                     value={buyFormData.password}
                     onChange={(e) => setBuyFormData(prev => ({ ...prev, password: e.target.value }))}
                     placeholder="Create Account Password"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="uppercase tracking-wider">Current Class *</label>
-                  <select
-                    value={buyFormData.studentClass}
-                    onChange={(e) => setBuyFormData(prev => ({ ...prev, studentClass: e.target.value }))}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                {/* Searchable Pathfinder Centre Dropdown */}
+                <div className="space-y-1 relative">
+                  <label className="uppercase tracking-wider text-[11px] text-slate-500 flex items-center gap-1">
+                    <BuildingStorefrontIcon className="w-3.5 h-3.5 text-orange-600" />
+                    Select Preferred Pathfinder Centre *
+                  </label>
+                  
+                  <div
+                    onClick={() => setCentreDropdownOpen(!centreDropdownOpen)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer flex items-center justify-between text-slate-900 font-bold text-xs hover:border-slate-300"
                   >
-                    <option value="Class VIII">Class VIII</option>
-                    <option value="Class IX">Class IX</option>
-                    <option value="Class X">Class X</option>
-                    <option value="Class XI">Class XI</option>
-                    <option value="Class XII">Class XII</option>
-                    <option value="12th Passed / Repeater">12th Passed / Repeater</option>
+                    <span className="truncate">{buyFormData.centre || "Select Centre"}</span>
+                    <span className="text-slate-400 text-xs">▼</span>
+                  </div>
+
+                  {centreDropdownOpen && (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-2 space-y-2 max-h-56 overflow-hidden flex flex-col">
+                      <input
+                        type="text"
+                        autoFocus
+                        value={centreSearch}
+                        onChange={(e) => setCentreSearch(e.target.value)}
+                        placeholder="Type to search centre name or location..."
+                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#66090D]"
+                      />
+                      <div className="overflow-y-auto max-h-40 divide-y divide-slate-50">
+                        {filteredCentres.length === 0 ? (
+                          <div className="p-3 text-center text-slate-400 text-xs">No matching centre found</div>
+                        ) : (
+                          filteredCentres.map((c, i) => (
+                            <div
+                              key={i}
+                              onClick={() => {
+                                setBuyFormData(prev => ({ ...prev, centre: c }));
+                                setCentreDropdownOpen(false);
+                              }}
+                              className={`p-2.5 text-xs font-bold rounded-lg cursor-pointer transition ${
+                                buyFormData.centre === c ? "bg-[#66090D] text-white" : "hover:bg-slate-100 text-slate-800"
+                              }`}
+                            >
+                              {c}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="uppercase tracking-wider text-[11px] text-slate-500">Selected Mock Test Program</label>
+                  <select
+                    value={activeBuyProgram.id}
+                    onChange={(e) => {
+                      const p = getProgram(e.target.value);
+                      if (p) setActiveBuyProgram(p);
+                    }}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                  >
+                    {PROGRAMS.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} (₹{p.price.toLocaleString("en-IN")})
+                      </option>
+                    ))}
                   </select>
                 </div>
-              </div>
+              </form>
+            </div>
 
-              <div className="space-y-1">
-                <label className="uppercase tracking-wider flex items-center gap-1">
-                  <BuildingStorefrontIcon className="w-4 h-4 text-orange-600" />
-                  Select Preferred Pathfinder Centre *
-                </label>
-                <select
-                  value={buyFormData.centre}
-                  onChange={(e) => setBuyFormData(prev => ({ ...prev, centre: e.target.value }))}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
-                >
-                  {PATHFINDER_CENTRES.map((c, i) => (
-                    <option key={i} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="uppercase tracking-wider">Selected Program</label>
-                <select
-                  value={activeBuyProgram.id}
-                  onChange={(e) => {
-                    const p = getProgram(e.target.value);
-                    if (p) setActiveBuyProgram(p);
-                  }}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
-                >
-                  {PROGRAMS.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} (₹{p.price.toLocaleString("en-IN")})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={buyLoading}
-                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl uppercase tracking-wider text-center transition shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <CreditCardIcon className="w-5 h-5" />
-                  {buyLoading ? "Initiating ICICI Payment Gateway..." : `Proceed to Pay ₹${activeBuyProgram.price.toLocaleString("en-IN")}`}
-                </button>
-              </div>
-            </form>
+            {/* Footer Button fixed inside Modal */}
+            <div className="pt-2 border-t border-slate-100">
+              <button
+                type="submit"
+                form="buy-modal-form"
+                disabled={buyLoading}
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl uppercase tracking-wider text-center transition shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 text-xs"
+              >
+                <CreditCardIcon className="w-4 h-4" />
+                {buyLoading ? "Initiating Gateway..." : `Proceed to Pay ₹${activeBuyProgram.price.toLocaleString("en-IN")}`}
+              </button>
+            </div>
           </div>
         </div>
       )}
