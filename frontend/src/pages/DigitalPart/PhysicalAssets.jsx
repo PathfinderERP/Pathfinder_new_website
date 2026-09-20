@@ -201,8 +201,14 @@ const PhysicalAssets = () => {
 
                 {/* Printable Invoice Modal */}
                 {selectedInvoice && (
-                    <div className="fixed inset-0 z-[120] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-                        <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 animate-in fade-in zoom-in duration-200">
+                    <div 
+                        className="fixed inset-0 z-[99999] bg-slate-900/80 backdrop-blur-sm flex items-start justify-center p-4 pt-28 md:pt-36 pb-12 overflow-y-auto"
+                        onClick={() => setSelectedInvoice(null)}
+                    >
+                        <div 
+                            className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 my-auto max-h-[85vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
                             <button
                                 onClick={() => setSelectedInvoice(null)}
                                 className="absolute top-5 right-5 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition"

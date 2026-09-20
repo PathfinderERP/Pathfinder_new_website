@@ -254,11 +254,11 @@ const Dashboard = () => {
                 {myCourses && myCourses.length > 0 ? (
                   myCourses.slice(0, 2).map((course) => (
                     <div key={course.id || course._id} className="bg-slate-900 rounded-2xl p-5 flex items-center justify-between text-white relative overflow-hidden group hover:shadow-lg transition-all border border-slate-800">
-                      <div className="relative z-10 flex flex-col items-start gap-2">
+                      <div className="relative z-10 flex flex-col items-start gap-2 flex-1 pr-2">
                         <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-800/50 uppercase">
                           {course.mode === 'online' ? 'Online Batch' : 'Classroom'}
                         </span>
-                        <h3 className="text-base font-bold leading-tight line-clamp-2 max-w-[160px]">{course.name}</h3>
+                        <h3 className="text-base font-bold leading-tight line-clamp-2">{course.name}</h3>
                         <button
                           onClick={() => navigate('/my-courses')}
                           className="mt-1 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm"
