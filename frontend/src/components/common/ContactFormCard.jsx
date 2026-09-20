@@ -393,28 +393,22 @@ export default function ContactFormCard({ slug, classOptions }) {
                                 </div>
                             )}
 
-                            {/* Centre Name — full width (hidden if online is chosen) */}
-                            {(!isExamProgrammePage || formData.learning_mode === "Offline (at centre)") && (
-                                <div className="space-y-2 md:col-span-2">
-                                    <label htmlFor="centername" className="text-sm font-bold text-slate-700 ml-1">
-                                        {isCustomFormPage ? "Choose centre" : "Centre Name"} <span className="text-orange-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <select
-                                            id="centername"
-                                            value={formData.center_name} onChange={handleChange} required
-                                            className={`w-full px-3 py-2.5 rounded-lg border ${errors.center_name ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium appearance-none text-sm`}
-                                        >
-                                            <option value="">Choose centre</option>
-                                            {centres.map((c) => (
-                                                <option key={c.id || c._id} value={c.centre}>{c.centre}</option>
-                                            ))}
-                                        </select>
-                                        <ChevronDownIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
-                                    {errors.center_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.center_name}</p>}
-                                </div>
-                            )}
+                            {/* City — full width */}
+                            <div className="space-y-2 md:col-span-2">
+                                <label htmlFor="centername" className="text-sm font-bold text-slate-700 ml-1">
+                                    City <span className="text-orange-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="centername"
+                                    value={formData.center_name}
+                                    onChange={handleChange}
+                                    required
+                                    className={`w-full px-3 py-2.5 rounded-lg border ${errors.center_name ? "border-red-500" : "border-slate-200"} focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all bg-slate-50 font-medium text-sm`}
+                                    placeholder="Enter your city"
+                                />
+                                {errors.center_name && <p className="text-red-500 text-xs font-bold ml-1">{errors.center_name}</p>}
+                            </div>
                         </div>
 
                         {/* Message - hidden for custom form pages */}

@@ -95,12 +95,9 @@ import { Neetlandingpage } from "../pages/add_landingpage/pages/Neetlandingpage"
 import { Clatlandingpage } from "../pages/add_landingpage/pages/Clatlandingpage";
 import { Paislandingpage } from "../pages/add_landingpage/pages/Paislandingpage";
 import { MockTestLandingPage } from "../pages/add_landingpage/pages/MockTestLandingPage";
-<<<<<<< HEAD
 import { FoundationLandingPage } from "../pages/add_landingpage/pages/FoundationLandingPage";
 import { PmoLandingPage } from "../pages/add_landingpage/pages/PmoLandingPage";
 import { PmtseLandingPage } from "../pages/add_landingpage/pages/PmtseLandingPage";
-=======
->>>>>>> Soumojit-Dev
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
