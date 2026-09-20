@@ -152,6 +152,7 @@ export const PublicReferralLanding = () => {
     e.preventDefault();
     setBuyError("");
     setBuyLoading(true);
+    const baseUrl = env.API_BASE_URL || env.apiBaseUrl || "";
 
     try {
       // 1. Auto-register or authenticate student
@@ -175,7 +176,7 @@ export const PublicReferralLanding = () => {
       } catch (regErr) {
         // If account already exists, attempt login directly
         try {
-          const loginRes = await axios.post(`${env.apiBaseUrl}/api/auth/login/`, {
+          const loginRes = await axios.post(`${baseUrl}/api/auth/login/`, {
             email: buyFormData.email || buyFormData.phone,
             password: buyFormData.password
           });
@@ -228,7 +229,7 @@ export const PublicReferralLanding = () => {
       };
 
       try {
-        const configRes = await axios.get(`${env.apiBaseUrl}/api/courses/icici/config/`);
+        const configRes = await axios.get(`${baseUrl}/api/courses/icici/config/`);
         if (configRes.data && configRes.data.merchantId) {
           gatewayConfig = configRes.data;
         }
@@ -238,7 +239,7 @@ export const PublicReferralLanding = () => {
 
       const { merchantId, aggregatorID, secretKey, saleUrl } = gatewayConfig;
       const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
-      const returnURL = `${env.apiBaseUrl}/api/courses/icici/callback/`;
+      const returnURL = `${baseUrl}/api/courses/icici/callback/`;
 
       const params = {
         merchantId,
@@ -257,7 +258,7 @@ export const PublicReferralLanding = () => {
         addlParam2: referralId // Passes referral ID for 10% bonus calculation
       };
 
-      const hashRes = await axios.post(`${env.apiBaseUrl}/api/courses/icici/generate-hash/`, {
+      const hashRes = await axios.post(`${baseUrl}/api/courses/icici/generate-hash/`, {
         mode: "v1",
         secretKey,
         params
@@ -270,7 +271,7 @@ export const PublicReferralLanding = () => {
       const secureHash = hashRes.data.secureHash;
       const fullPayload = { ...params, secureHash };
 
-      const proxyRes = await axios.post(`${env.apiBaseUrl}/api/courses/icici/proxy/`, {
+      const proxyRes = await axios.post(`${baseUrl}/api/courses/icici/proxy/`, {
         target_url: saleUrl,
         payload_type: "json",
         payload: fullPayload
