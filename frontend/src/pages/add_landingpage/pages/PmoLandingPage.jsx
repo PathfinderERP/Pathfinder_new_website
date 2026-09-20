@@ -229,7 +229,12 @@ export const PmoLandingPage = () => {
 
         setIsSubmitting(true);
         try {
-            const response = await landingAPI.register(formData);
+            const submitData = {
+                ...formData,
+                centre: formData.city || formData.centre,
+                city: formData.city,
+            };
+            const response = await landingAPI.register(submitData);
             if (response.data.success) {
                 setShowSuccess(true);
                 localStorage.setItem('pathfinder_lead_captured_pmo', 'true');
@@ -239,6 +244,7 @@ export const PmoLandingPage = () => {
                     phone: '',
                     student_class: '',
                     course_type: 'PMO Olympiad',
+                    city: '',
                     centre: '',
                     page_source: 'PMO Olympiad'
                 });
@@ -376,32 +382,16 @@ export const PmoLandingPage = () => {
                                                 </select>
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="block text-sm font-bold">Centre</label>
-                                                <div className="relative">
-                                                    <select
-                                                        name="centre"
-                                                        value={formData.centre}
-                                                        onChange={handleInputChange}
-                                                        className="w-full pl-5 pr-24 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                                        required
-                                                    >
-                                                        <option value="">Select Centre</option>
-                                                        {centres.map((c, idx) => (
-                                                            <option key={idx} value={c.centre || c.name}>
-                                                                {c.centre || c.name}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                    <button
-                                                        type="button"
-                                                        onClick={handleDetectLocation}
-                                                        disabled={isDetecting}
-                                                        className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[9px] font-bold text-white bg-orange-500 hover:bg-orange-600 px-2 py-1.5 rounded-md"
-                                                    >
-                                                        <MapPin className="w-3 h-3" />
-                                                        {isDetecting ? '...' : 'AUTO'}
-                                                    </button>
-                                                </div>
+                                                <label className="block text-sm font-bold">City</label>
+                                                <input
+                                                    type="text"
+                                                    name="city"
+                                                    value={formData.city || ''}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Enter your city"
+                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
+                                                    required
+                                                />
                                             </div>
                                         </div>
 

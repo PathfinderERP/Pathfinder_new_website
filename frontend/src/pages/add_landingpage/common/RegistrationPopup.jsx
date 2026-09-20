@@ -15,6 +15,7 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
         phone: "",
         student_class: "",
         course_type: hideCourseType ? "Mock Test Program" : "",
+        city: "",
         centre: "",
         last_exam_percentage: "",
         page_source: pageSource || "Landing Page"
@@ -110,7 +111,10 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            const submitData = { ...formData };
+            const submitData = { 
+                ...formData,
+                centre: formData.city || formData.centre 
+            };
             if (!showPercentage) {
                 delete submitData.last_exam_percentage;
             }
@@ -266,32 +270,16 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Nearest Centre</label>
-                                        <div className="relative">
-                                            <select
-                                                name="centre"
-                                                value={formData.centre}
-                                                onChange={handleInputChange}
-                                                required
-                                                className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none pr-24"
-                                            >
-                                                <option value="" className="bg-black">Select Centre</option>
-                                                {centres.map((centre, index) => (
-                                                    <option key={index} value={centre.centre || centre.name} className="bg-black">
-                                                        {centre.centre || centre.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <button
-                                                type="button"
-                                                onClick={handleDetectLocation}
-                                                disabled={isDetecting}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[10px] font-bold text-white bg-[#FF9F00] hover:bg-[#FF9F00]/80 px-2.5 py-1.5 rounded-lg transition-colors"
-                                            >
-                                                <MapPin className="w-3 h-3" />
-                                                {isDetecting ? '...' : 'AUTO'}
-                                            </button>
-                                        </div>
+                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">City</label>
+                                        <input
+                                            type="text"
+                                            name="city"
+                                            value={formData.city}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter your city"
+                                            required
+                                            className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] transition-all"
+                                        />
                                     </div>
                                     {showPercentage && (
                                         <div className="space-y-1.5">

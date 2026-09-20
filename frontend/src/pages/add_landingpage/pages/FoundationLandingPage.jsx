@@ -271,6 +271,7 @@ export const FoundationLandingPage = () => {
         try {
             const submitData = {
                 ...formData,
+                centre: formData.city || formData.centre,
                 course_type: formData.course_type || "Foundation Program"
             };
             const response = await landingAPI.register(submitData);
@@ -283,6 +284,7 @@ export const FoundationLandingPage = () => {
                     phone: '',
                     student_class: '',
                     course_type: 'Foundation Program',
+                    city: '',
                     centre: '',
                     page_source: 'Foundation Program'
                 });
@@ -450,39 +452,16 @@ export const FoundationLandingPage = () => {
                                                 </select>
                                             </div>
                                             <div className="space-y-2 flex-1">
-                                                <label className="block text-sm font-bold">Centre</label>
-                                                <div className="relative group">
-                                                    <select
-                                                        name="centre"
-                                                        value={formData.centre}
-                                                        onChange={handleInputChange}
-                                                        className="w-full pl-5 pr-24 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none"
-                                                        required
-                                                    >
-                                                        <option value="">Select Centre</option>
-                                                        {centres.map((centre, index) => (
-                                                            <option key={index} value={centre.centre || centre.name}>
-                                                                {centre.centre || centre.name}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                handleDetectLocation();
-                                                            }}
-                                                            disabled={isDetecting}
-                                                            className="pointer-events-auto flex items-center gap-1 text-[9px] font-bold text-white bg-orange-500 hover:bg-orange-600 px-2 py-1 rounded-md transition-colors shine-effect"
-                                                        >
-                                                            <MapPin className="w-3 h-3" />
-                                                            {isDetecting ? '...' : 'AUTO'}
-                                                        </button>
-                                                        <div className="w-px h-4 bg-gray-200"></div>
-                                                        <ChevronRight className="w-4 h-4 text-gray-400 rotate-90" />
-                                                    </div>
-                                                </div>
+                                                <label className="block text-sm font-bold">City</label>
+                                                <input
+                                                    type="text"
+                                                    name="city"
+                                                    value={formData.city}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Enter your city"
+                                                    required
+                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
+                                                />
                                             </div>
                                         </div>
 

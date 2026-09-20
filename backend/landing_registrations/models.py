@@ -21,6 +21,7 @@ class LandingPageRegistration(Document):
     board = fields.StringField(max_length=100)
     course_type = fields.StringField(max_length=100)
     centre = fields.StringField(max_length=255)
+    city = fields.StringField(max_length=255, required=False, null=True)
     last_exam_percentage = fields.StringField(max_length=10, required=False, null=True)
     
     # Metadata
