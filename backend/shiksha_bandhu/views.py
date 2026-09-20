@@ -142,6 +142,12 @@ def seed_default_partner_if_needed():
     except Exception as e:
         print(f"Error seeding default partners: {e}")
 
+# Trigger seeding when module is loaded
+try:
+    seed_default_partner_if_needed()
+except Exception as _e:
+    pass
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -661,6 +667,11 @@ def seed_default_products_if_empty():
                 item.save()
     except Exception as e:
         print(f"Error seeding products: {e}")
+
+try:
+    seed_default_products_if_empty()
+except Exception as _e:
+    pass
 
 
 @api_view(['GET'])
