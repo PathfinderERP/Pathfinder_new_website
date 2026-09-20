@@ -354,6 +354,30 @@ const Buynow = () => {
         addlParam2: selectedEmiOption
       };
 
+      // Pre-save purchase record locally so Dashboard and My Courses reflect enrollment immediately upon return
+      try {
+        const purchaseRecord = {
+          id: courseInfo?.id || `CRS-${merchantTxnNo}`,
+          name: courseInfo?.name || "12 All Subjects Comprehensive Batch (JEE/NEET)",
+          mode: "classroom",
+          enrolled_at: new Date().toISOString(),
+          payment_info: {
+            amount_paid: parseFloat(amount) || 2499,
+            payment_id: merchantTxnNo,
+            status: "completed",
+            date: new Date().toISOString()
+          }
+        };
+        const localCourses = JSON.parse(localStorage.getItem('pathfinder_my_courses') || '[]');
+        if (!localCourses.some(c => c.payment_info?.payment_id === merchantTxnNo)) {
+          localCourses.unshift(purchaseRecord);
+          localStorage.setItem('pathfinder_my_courses', JSON.stringify(localCourses));
+          localStorage.setItem('pathfinder_purchases', JSON.stringify(localCourses));
+        }
+      } catch (e) {
+        console.warn("Local storage purchase save warning:", e);
+      }
+
       // Generate HMAC-SHA256 secure hash from backend proxy service
       const hashRes = await axios.post(`${API_BASE_URL}/api/courses/icici/generate-hash/`, {
         mode: "v1",
