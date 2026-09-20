@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from .models import ShikshaBandhuPartner, ShikshaBandhuClick, ShikshaBandhuBonus
+from .models import ShikshaBandhuPartner, ShikshaBandhuClick, ShikshaBandhuBonus, ShikshaBandhuItem
 from landing_registrations.models import LandingPageRegistration
 
 
@@ -465,4 +465,240 @@ def admin_get_paid_referrals(request):
         return Response({'success': True, 'paid_referrals': results, 'count': len(results)})
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+DEFAULT_MOCK_TEST_PRODUCTS = [
+    {
+        "id": "madhyamik-2027",
+        "slug": "madhyamik",
+        "title": "Madhyamik Mock Test 2027",
+        "board": "WBBSE",
+        "class_name": "Class X",
+        "price": 4500,
+        "description": "Prepare smarter with mock tests, checked answer scripts and the Key to Success booklet.",
+        "includes": ["Mock Test 1", "Mock Test 2", "Checked Answer Scripts", "Key to Success Booklet"],
+        "featured": True,
+        "status": "active"
+    },
+    {
+        "id": "cbse-x",
+        "slug": "cbse-x",
+        "title": "CBSE Class X Mock Test",
+        "board": "CBSE",
+        "class_name": "Class X",
+        "price": 7500,
+        "description": "Pre-mock and full mock tests with expert-checked answer scripts for CBSE Class X.",
+        "includes": ["Pre-Mock Tests", "Mock Tests", "Checked Answer Scripts", "Key to Success Booklet"],
+        "featured": False,
+        "status": "active"
+    },
+    {
+        "id": "cbse-xii",
+        "slug": "cbse-xii",
+        "title": "CBSE Class XII Mock Test",
+        "board": "CBSE",
+        "class_name": "Class XII",
+        "price": 7500,
+        "description": "Two full mock tests for 5 subjects with corrected answer scripts of CBSE toppers.",
+        "includes": ["Mock Test 1", "Mock Test 2", "Checked Answer Scripts", "Key to Success Booklet"],
+        "featured": False,
+        "status": "active"
+    },
+    {
+        "id": "icse-x",
+        "slug": "icse-x",
+        "title": "ICSE Class X Mock Test",
+        "board": "ICSE",
+        "class_name": "Class X",
+        "price": 7500,
+        "description": "ICSE Class X Board Examination Mock Series with subject-wise evaluation.",
+        "includes": ["Mock Test 1", "Checked Answer Scripts", "Key to Success Booklet"],
+        "featured": False,
+        "status": "active"
+    },
+    {
+        "id": "isc-xii",
+        "slug": "isc-xii",
+        "title": "ISC Class XII Mock Test",
+        "board": "ISC",
+        "class_name": "Class XII",
+        "price": 7500,
+        "description": "Comprehensive ISC Class XII 5-Subject Mock Exam with Examiner Notes.",
+        "includes": ["Mock Test 1", "Mock Test 2", "Checked Answer Scripts", "Key to Success Booklet"],
+        "featured": False,
+        "status": "active"
+    },
+    {
+        "id": "hs-xii-2027",
+        "slug": "hs-xii",
+        "title": "Higher Secondary (HS) Mock Test 2027",
+        "board": "WBCHSE",
+        "class_name": "Class XII",
+        "price": 5500,
+        "description": "West Bengal Higher Secondary 2027 board exam mock series with evaluated answer copies.",
+        "includes": ["Full Length Mock Test", "Checked Answer Scripts", "Key to Success Booklet"],
+        "featured": False,
+        "status": "active"
+    }
+]
+
+
+def seed_default_products_if_empty():
+    """Seed initial Shiksha Bandhu products into Mongo DB if collection is empty."""
+    try:
+        if ShikshaBandhuItem.objects.count() == 0:
+            for p in DEFAULT_MOCK_TEST_PRODUCTS:
+                item = ShikshaBandhuItem(
+                    title=p["title"],
+                    slug=p["slug"],
+                    board=p["board"],
+                    class_name=p["class_name"],
+                    price=p["price"],
+                    description=p["description"],
+                    includes=p["includes"],
+                    featured=p["featured"],
+                    status=p["status"]
+                )
+                item.save()
+    except Exception as e:
+        print(f"Error seeding products: {e}")
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def list_items(request):
+    """Public/Admin endpoint to fetch Shiksha Bandhu products (defaults to active items only unless show_all parameter passed)."""
+    try:
+        seed_default_products_if_empty()
+        show_all = request.GET.get('show_all', 'false').lower() == 'true'
+
+        if show_all:
+            items = ShikshaBandhuItem.objects.all()
+        else:
+            items = ShikshaBandhuItem.objects(status='active')
+
+        result = []
+        for item in items:
+            result.append({
+                'id': str(item.id),
+                'title': item.title,
+                'name': item.title,
+                'slug': item.slug or item.title.lower().replace(' ', '-'),
+                'board': item.board,
+                'className': item.class_name,
+                'class_name': item.class_name,
+                'price': item.price,
+                'description': item.description or '',
+                'includes': item.includes or [],
+                'featured': item.featured,
+                'status': item.status,
+                'created_at': item.created_at.strftime('%d %b %Y') if item.created_at else ''
+            })
+
+        return Response({'success': True, 'products': result, 'count': len(result)})
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_item(request):
+    """Admin endpoint to create a new Shiksha Bandhu product item."""
+    try:
+        data = request.data
+        title = data.get('title') or data.get('name')
+        if not title:
+            return Response({'error': 'Title / Product name is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        includes = data.get('includes', [])
+        if isinstance(includes, str):
+            includes = [i.strip() for i in includes.split(',') if i.strip()]
+
+        item = ShikshaBandhuItem(
+            title=title,
+            slug=data.get('slug') or title.lower().replace(' ', '-'),
+            board=data.get('board', 'WBBSE'),
+            class_name=data.get('class_name') or data.get('className') or 'Class X',
+            price=int(data.get('price') or 4500),
+            description=data.get('description', ''),
+            includes=includes,
+            featured=bool(data.get('featured', False)),
+            status=data.get('status', 'active')
+        )
+        item.save()
+
+        return Response({
+            'success': True,
+            'message': 'Product item created successfully.',
+            'product': {
+                'id': str(item.id),
+                'title': item.title,
+                'name': item.title,
+                'board': item.board,
+                'price': item.price,
+                'status': item.status
+            }
+        })
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['PATCH', 'PUT'])
+@permission_classes([AllowAny])
+def update_item(request, item_id):
+    """Admin endpoint to update an existing Shiksha Bandhu product item."""
+    try:
+        item = ShikshaBandhuItem.objects(id=item_id).first()
+        if not item:
+            return Response({'error': 'Product item not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        data = request.data
+        if 'title' in data or 'name' in data:
+            item.title = data.get('title') or data.get('name')
+        if 'slug' in data:
+            item.slug = data.get('slug')
+        if 'board' in data:
+            item.board = data.get('board')
+        if 'class_name' in data or 'className' in data:
+            item.class_name = data.get('class_name') or data.get('className')
+        if 'price' in data:
+            item.price = int(data.get('price'))
+        if 'description' in data:
+            item.description = data.get('description')
+        if 'includes' in data:
+            inc = data.get('includes')
+            item.includes = [i.strip() for i in inc.split(',') if i.strip()] if isinstance(inc, str) else inc
+        if 'featured' in data:
+            item.featured = bool(data.get('featured'))
+        if 'status' in data:
+            item.status = data.get('status')
+
+        item.updated_at = datetime.datetime.utcnow()
+        item.save()
+
+        return Response({'success': True, 'message': 'Product item updated successfully.'})
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+def delete_item(request, item_id):
+    """
+    Admin endpoint to archive a product item on delete request.
+    Instead of hard deletion, marks status='archived'.
+    """
+    try:
+        item = ShikshaBandhuItem.objects(id=item_id).first()
+        if not item:
+            return Response({'error': 'Product item not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        item.status = 'archived'
+        item.updated_at = datetime.datetime.utcnow()
+        item.save()
+
+        return Response({'success': True, 'message': 'Product item archived successfully.'})
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 

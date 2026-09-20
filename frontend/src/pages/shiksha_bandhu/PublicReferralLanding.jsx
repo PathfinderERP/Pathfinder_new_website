@@ -61,11 +61,19 @@ export const PublicReferralLanding = () => {
   const navigate = useNavigate();
   const { setAuthenticatedUser } = useAuth();
 
+  const [availablePrograms, setAvailablePrograms] = useState(PROGRAMS);
+
   useEffect(() => {
     if (referralId) {
       shikshaBandhuAPI.trackClick({ partner_id: referralId, program_slug: programSlug || "" })
         .catch((err) => console.error("Click tracking error:", err));
     }
+
+    shikshaBandhuAPI.getItems(false).then((res) => {
+      if (res.data && res.data.products && res.data.products.length > 0) {
+        setAvailablePrograms(res.data.products);
+      }
+    }).catch((err) => console.warn("Notice: Using fallback static programs", err));
   }, [referralId, programSlug]);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -417,13 +425,13 @@ export const PublicReferralLanding = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {PROGRAMS.slice(1).map((prog) => (
+          {availablePrograms.slice(1).map((prog) => (
             <div key={prog.id} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-lg transition">
               <div className="space-y-2">
                 <span className="text-[10px] font-black uppercase text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200">
-                  {prog.board} • {prog.className}
+                  {prog.board} • {prog.className || prog.class_name}
                 </span>
-                <h3 className="text-lg font-black text-slate-900">{prog.name}</h3>
+                <h3 className="text-lg font-black text-slate-900">{prog.title || prog.name}</h3>
                 <p className="text-xs text-slate-500 font-semibold">{prog.description}</p>
               </div>
 

@@ -677,6 +677,10 @@ export const shikshaBandhuAPI = {
   adminGetReferrals: () => api.get("/api/shiksha-bandhu/admin/referrals/"),
   adminGetPaidReferrals: () => api.get("/api/shiksha-bandhu/admin/paid-referrals/"),
   adminUpdateReferral: (id, data) => api.patch(`/api/shiksha-bandhu/admin/referrals/${id}/`, data),
+  getItems: (showAll = false) => api.get(`/api/shiksha-bandhu/items/?show_all=${showAll}`),
+  createItem: (data) => api.post("/api/shiksha-bandhu/items/create/", data),
+  updateItem: (id, data) => api.patch(`/api/shiksha-bandhu/items/${id}/`, data),
+  deleteItem: (id) => api.delete(`/api/shiksha-bandhu/items/${id}/delete/`),
 };
 
 // PAIS Exam & Portal API

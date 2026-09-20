@@ -10,5 +10,8 @@ urlpatterns = [
     path('admin/partners/create/', views.admin_create_partner, name='shiksha-admin-create-partner'),
     path('admin/referrals/', views.admin_list_referrals, name='shiksha-admin-referrals'),
     path('admin/paid-referrals/', views.admin_get_paid_referrals, name='shiksha-admin-paid-referrals'),
-    path('admin/referrals/<str:referral_id>/', views.admin_update_referral_status, name='shiksha-admin-update-referral'),
+    path('items/', views.list_items, name='shiksha-items-list'),
+    path('items/create/', views.create_item, name='shiksha-items-create'),
+    path('items/<str:item_id>/', views.update_item, name='shiksha-items-update'),
+    path('items/<str:item_id>/delete/', views.delete_item, name='shiksha-items-delete'),
 ]

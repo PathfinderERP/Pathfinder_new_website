@@ -76,6 +76,7 @@ import JEEAnalysisManagement from "../components/admin/JEEAnalysisManagement.jsx
 import CustomPagesManagement from "../components/admin/CustomPagesManagement.jsx";
 import AdsLeadsList from "../components/admin/AdsLeadsList";
 import ShikshaHubManagement from "../components/admin/ShikshaHubManagement.jsx";
+import ShikshaProductsManagement from "../components/admin/ShikshaProductsManagement.jsx";
 import FranchiseInquiryList from "../components/admin/FranchiseInquiryList";
 import PopupManagement from "../components/admin/PopupManagement";
 import Centres from "../pages/Centres/Centres";
@@ -716,6 +717,16 @@ const AppRoutes = () => {
           <AdminProtectedRoute requiredPermission="manage_ads_leads">
             <AdminLayout>
               <ShikshaHubManagement />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/business/admin/shiksha-products"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_ads_leads">
+            <AdminLayout>
+              <ShikshaProductsManagement />
             </AdminLayout>
           </AdminProtectedRoute>
         }
