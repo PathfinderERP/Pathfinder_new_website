@@ -40,6 +40,7 @@ class ShikshaBandhuBonus(Document):
     program = fields.StringField(required=True, max_length=255)
     bonus_amount = fields.IntField(default=250)
     status = fields.StringField(default='Pending', choices=['Pending', 'Successful', 'Cancelled'])
+    created_at = fields.DateTimeField(default=datetime.datetime.utcnow)
     meta = {
         'collection': 'shiksha_bandhu_bonuses',
         'ordering': ['-created_at'],
