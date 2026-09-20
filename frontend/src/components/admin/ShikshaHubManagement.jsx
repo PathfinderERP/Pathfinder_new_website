@@ -13,7 +13,7 @@ import {
 import { shikshaBandhuAPI } from "../../services/api";
 
 const ShikshaHubManagement = () => {
-  const [activeTab, setActiveTab] = useState("partners"); // 'partners' | 'referrals'
+  const [activeTab, setActiveTab] = useState("partners"); // 'partners' | 'referrals' | 'paid'
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({
     totalPartners: 0,
@@ -23,6 +23,7 @@ const ShikshaHubManagement = () => {
   });
   const [partners, setPartners] = useState([]);
   const [referrals, setReferrals] = useState([]);
+  const [paidReferrals, setPaidReferrals] = useState([]);
 
   // Create Partner Modal State
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -39,9 +40,10 @@ const ShikshaHubManagement = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [partnersRes, refRes] = await Promise.all([
+      const [partnersRes, refRes, paidRes] = await Promise.all([
         shikshaBandhuAPI.adminGetPartners(),
         shikshaBandhuAPI.adminGetReferrals(),
+        shikshaBandhuAPI.adminGetPaidReferrals().catch(() => ({ data: { paid_referrals: [] } })),
       ]);
 
       if (partnersRes.data) {
@@ -50,6 +52,9 @@ const ShikshaHubManagement = () => {
       }
       if (refRes.data) {
         setReferrals(refRes.data.referrals || []);
+      }
+      if (paidRes.data) {
+        setPaidReferrals(paidRes.data.paid_referrals || []);
       }
     } catch (err) {
       console.error("Error fetching Shiksha Hub data:", err);
@@ -202,10 +207,10 @@ const ShikshaHubManagement = () => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-slate-800 flex gap-4">
+      <div className="border-b border-gray-200 dark:border-slate-800 flex gap-4 overflow-x-auto">
         <button
           onClick={() => setActiveTab("partners")}
-          className={`pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition ${
+          className={`pb-3 text-xs font-black uppercase tracking-wider border-b-2 whitespace-nowrap transition ${
             activeTab === "partners"
               ? "border-[#66090D] text-[#66090D] dark:text-orange-500"
               : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
@@ -215,13 +220,24 @@ const ShikshaHubManagement = () => {
         </button>
         <button
           onClick={() => setActiveTab("referrals")}
-          className={`pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition ${
+          className={`pb-3 text-xs font-black uppercase tracking-wider border-b-2 whitespace-nowrap transition ${
             activeTab === "referrals"
               ? "border-[#66090D] text-[#66090D] dark:text-orange-500"
               : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
           }`}
         >
-          Referred Leads & Bonuses ({referrals.length})
+          Enquiries / Leads ({referrals.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("paid")}
+          className={`pb-3 text-xs font-black uppercase tracking-wider border-b-2 whitespace-nowrap transition flex items-center gap-1.5 ${
+            activeTab === "paid"
+              ? "border-emerald-600 text-emerald-700 dark:text-emerald-400 font-extrabold"
+              : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
+          }`}
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Paid Referral Users (10% Bonus) ({paidReferrals.length})
         </button>
       </div>
 
@@ -333,6 +349,89 @@ const ShikshaHubManagement = () => {
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 3: Paid Referral Users (10% Bonus) */}
+      {activeTab === "paid" && (
+        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm space-y-3">
+          <div className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-emerald-100 dark:border-emerald-900/40 flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
+                Verified Paid Course Registrations
+              </h3>
+              <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 font-medium">
+                These users completed online course payments via referral links. A 10% referral bonus is automatically calculated for the partner.
+              </p>
+            </div>
+            <span className="px-3 py-1 bg-emerald-600 text-white rounded-full font-mono text-xs font-black">
+              {paidReferrals.length} Paid
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px] text-xs">
+              <thead className="bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-gray-400 uppercase tracking-wider font-extrabold text-[11px] border-b border-gray-200 dark:border-slate-800">
+                <tr>
+                  <th className="px-5 py-3.5 text-left">Reg ID</th>
+                  <th className="px-5 py-3.5 text-left">Referred Partner</th>
+                  <th className="px-5 py-3.5 text-left">Student Details</th>
+                  <th className="px-5 py-3.5 text-left">Centre</th>
+                  <th className="px-5 py-3.5 text-left">Course / Fee Paid</th>
+                  <th className="px-5 py-3.5 text-center">Txn Ref</th>
+                  <th className="px-5 py-3.5 text-right font-black text-emerald-700">10% Partner Bonus</th>
+                  <th className="px-5 py-3.5 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800 font-semibold text-gray-800 dark:text-gray-200">
+                {paidReferrals.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" className="px-5 py-8 text-center text-gray-400 font-bold">
+                      No paid referral course purchases recorded yet.
+                    </td>
+                  </tr>
+                ) : (
+                  paidReferrals.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50/80 dark:hover:bg-slate-800/50 transition">
+                      <td className="px-5 py-4 font-mono font-bold text-gray-500">#REG-{item.id}</td>
+                      <td className="px-5 py-4 font-mono font-black text-[#66090D] dark:text-orange-500">
+                        {item.referral_code || "SB102"}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="font-bold text-gray-900 dark:text-white">{item.full_name}</div>
+                        <div className="text-[10px] text-gray-400">{item.mobile} • {item.email || "No Email"}</div>
+                        {item.student_class && (
+                          <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-400 font-bold">
+                            Class {item.student_class}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-gray-700 dark:text-gray-300 font-bold">
+                        {item.preferred_centre || "Kolkata Main"}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="font-bold text-gray-900 dark:text-white">{item.course_name || "Course Purchase"}</div>
+                        <div className="font-mono text-emerald-600 font-bold text-[11px]">
+                          ₹{Number(item.amount_paid || 0).toLocaleString("en-IN")} Paid
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-center font-mono text-[10px] text-gray-500">
+                        {item.txn_ref || item.transaction_id || "N/A"}
+                      </td>
+                      <td className="px-5 py-4 text-right font-mono font-black text-emerald-600 text-sm">
+                        ₹{(item.referral_bonus_amount || item.amount_paid * 0.1 || 0).toLocaleString("en-IN")}
+                      </td>
+                      <td className="px-5 py-4 text-center">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          ✓ Paid & Logged
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

@@ -9,5 +9,6 @@ urlpatterns = [
     path('admin/partners/', views.admin_list_partners, name='shiksha-admin-partners'),
     path('admin/partners/create/', views.admin_create_partner, name='shiksha-admin-create-partner'),
     path('admin/referrals/', views.admin_list_referrals, name='shiksha-admin-referrals'),
+    path('admin/paid-referrals/', views.admin_get_paid_referrals, name='shiksha-admin-paid-referrals'),
     path('admin/referrals/<str:referral_id>/', views.admin_update_referral_status, name='shiksha-admin-update-referral'),
 ]

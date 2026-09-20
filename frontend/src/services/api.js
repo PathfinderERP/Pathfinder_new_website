@@ -675,6 +675,7 @@ export const shikshaBandhuAPI = {
   adminGetPartners: () => api.get("/api/shiksha-bandhu/admin/partners/"),
   adminCreatePartner: (data) => api.post("/api/shiksha-bandhu/admin/partners/create/", data),
   adminGetReferrals: () => api.get("/api/shiksha-bandhu/admin/referrals/"),
+  adminGetPaidReferrals: () => api.get("/api/shiksha-bandhu/admin/paid-referrals/"),
   adminUpdateReferral: (id, data) => api.patch(`/api/shiksha-bandhu/admin/referrals/${id}/`, data),
 };
 

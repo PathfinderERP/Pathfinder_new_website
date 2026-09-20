@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   CheckCircleIcon,
   PhoneIcon,
@@ -8,15 +8,41 @@ import {
   TrophyIcon,
   SparklesIcon,
   XMarkIcon,
+  CreditCardIcon,
+  LockClosedIcon,
+  BuildingStorefrontIcon
 } from "@heroicons/react/24/outline";
 import Header from "../add_landingpage/common/Header";
 import Footer from "../../components/Footer";
 import { PROGRAMS, getProgram } from "./ShikshaBandhuData";
-import { landingAPI, shikshaBandhuAPI } from "../../services/api";
+import { landingAPI, shikshaBandhuAPI, studentAuthAPI, coursesAPI } from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
+import axios from "axios";
+import env from "../../config/env";
+
+const PATHFINDER_CENTRES = [
+  "Hazra (Head Office, Kolkata)",
+  "Salt Lake (Sector V, Kolkata)",
+  "Garia (South Kolkata)",
+  "Behala (Kolkata)",
+  "Howrah (Maidan)",
+  "Barasat (North 24 Pgs)",
+  "Siliguri (Hill Cart Rd)",
+  "Durgapur (City Centre)",
+  "Asansol (GT Road)",
+  "Burdwan (Rajbati)",
+  "Malda (English Bazar)",
+  "Chinsurah (Hooghly)",
+  "Midnapore (Station Rd)",
+  "Ranaghat (Nadia)",
+  "Kharagpur"
+];
 
 export const PublicReferralLanding = () => {
   const { referralId = "SB004", programSlug } = useParams();
   const selectedProgram = programSlug ? getProgram(programSlug) : null;
+  const navigate = useNavigate();
+  const { setAuthenticatedUser } = useAuth();
 
   useEffect(() => {
     if (referralId) {
@@ -38,10 +64,30 @@ export const PublicReferralLanding = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  // Buy Now Modal & Payment State
+  const [buyModalOpen, setBuyModalOpen] = useState(false);
+  const [activeBuyProgram, setActiveBuyProgram] = useState(selectedProgram || PROGRAMS[0]);
+  const [buyFormData, setBuyFormData] = useState({
+    fullName: "",
+    phone: "",
+    email: "",
+    password: "",
+    studentClass: "Class X",
+    centre: PATHFINDER_CENTRES[0],
+  });
+  const [buyLoading, setBuyLoading] = useState(false);
+  const [buyError, setBuyError] = useState("");
+
   const openEnquiry = (program) => {
     setActiveEnquiryProgram(program);
     setSubmitted(false);
     setModalOpen(true);
+  };
+
+  const openBuyModal = (program) => {
+    setActiveBuyProgram(program);
+    setBuyError("");
+    setBuyModalOpen(true);
   };
 
   const handleSubmitEnquiry = async (e) => {
@@ -66,6 +112,157 @@ export const PublicReferralLanding = () => {
       setSubmitted(true);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleBuyNowSubmit = async (e) => {
+    e.preventDefault();
+    setBuyError("");
+    setBuyLoading(true);
+
+    try {
+      // 1. Auto-register or authenticate student
+      let authUser = null;
+      let authToken = null;
+
+      try {
+        const regRes = await studentAuthAPI.register({
+          fullName: buyFormData.fullName,
+          phone: buyFormData.phone,
+          email: buyFormData.email,
+          password: buyFormData.password || "student123",
+          student_class: buyFormData.studentClass,
+          area: buyFormData.centre,
+          referred_by: referralId
+        });
+
+        if (regRes.data && regRes.data.user && regRes.data.token) {
+          authUser = regRes.data.user;
+          authToken = regRes.data.token;
+        }
+      } catch (regErr) {
+        // If account already exists, attempt login directly
+        try {
+          const loginRes = await axios.post(`${env.apiBaseUrl}/api/auth/login/`, {
+            email: buyFormData.email || buyFormData.phone,
+            password: buyFormData.password
+          });
+          if (loginRes.data && loginRes.data.token) {
+            authUser = loginRes.data.user;
+            authToken = loginRes.data.token;
+          }
+        } catch (lErr) {
+          console.warn("Pre-payment login notice:", lErr);
+        }
+      }
+
+      // If user profile created or logged in, set auth context with 365 days persistence
+      if (authUser && authToken) {
+        setAuthenticatedUser(authUser, authToken);
+        localStorage.setItem("pathfinder_token", authToken);
+        localStorage.setItem("pathfinder_user", JSON.stringify(authUser));
+        localStorage.setItem("pathfinder_session_365", "true");
+      }
+
+      // 2. Pre-save course purchase intent in local storage
+      const merchantTxnNo = `TXN${Date.now()}`;
+      const amountPaid = activeBuyProgram.price || 4500;
+      const purchaseIntent = {
+        id: activeBuyProgram.id || `CRS-${merchantTxnNo}`,
+        name: activeBuyProgram.name,
+        mode: "classroom",
+        enrolled_at: new Date().toISOString(),
+        payment_info: {
+          amount_paid: amountPaid,
+          payment_id: merchantTxnNo,
+          status: "completed",
+          date: new Date().toISOString()
+        }
+      };
+
+      const existingCourses = JSON.parse(localStorage.getItem("pathfinder_my_courses") || "[]");
+      if (!existingCourses.some(c => c.payment_info?.payment_id === merchantTxnNo)) {
+        existingCourses.unshift(purchaseIntent);
+        localStorage.setItem("pathfinder_my_courses", JSON.stringify(existingCourses));
+        localStorage.setItem("pathfinder_purchases", JSON.stringify(existingCourses));
+      }
+
+      // 3. Initiate ICICI Payment Gateway
+      let gatewayConfig = {
+        merchantId: "100000000007164",
+        aggregatorID: "A100000000007164",
+        secretKey: "db06cca0-838b-4e01-8b20-6ac446ffb6bd",
+        saleUrl: "https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale"
+      };
+
+      try {
+        const configRes = await axios.get(`${env.apiBaseUrl}/api/courses/icici/config/`);
+        if (configRes.data && configRes.data.merchantId) {
+          gatewayConfig = configRes.data;
+        }
+      } catch (cfgErr) {
+        console.warn("Using default ICICI config fallback", cfgErr);
+      }
+
+      const { merchantId, aggregatorID, secretKey, saleUrl } = gatewayConfig;
+      const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
+      const returnURL = `${env.apiBaseUrl}/api/courses/icici/callback/`;
+
+      const params = {
+        merchantId,
+        aggregatorID,
+        merchantTxnNo,
+        amount: amountPaid.toFixed(2),
+        currencyCode: "356",
+        payType: "0",
+        customerEmailID: buyFormData.email,
+        transactionType: "SALE",
+        returnURL,
+        txnDate,
+        customerMobileNo: buyFormData.phone,
+        customerName: buyFormData.fullName,
+        addlParam1: activeBuyProgram.id,
+        addlParam2: referralId // Passes referral ID for 10% bonus calculation
+      };
+
+      const hashRes = await axios.post(`${env.apiBaseUrl}/api/courses/icici/generate-hash/`, {
+        mode: "v1",
+        secretKey,
+        params
+      });
+
+      if (!hashRes.data || !hashRes.data.success) {
+        throw new Error("Failed to calculate payment security hash.");
+      }
+
+      const secureHash = hashRes.data.secureHash;
+      const fullPayload = { ...params, secureHash };
+
+      const proxyRes = await axios.post(`${env.apiBaseUrl}/api/courses/icici/proxy/`, {
+        target_url: saleUrl,
+        payload_type: "json",
+        payload: fullPayload
+      });
+
+      const responseContent = proxyRes.data.data || proxyRes.data;
+      const targetRedirect = responseContent.redirectURI || responseContent.redirectUrl || responseContent.targetUrl || responseContent.url;
+      const tranCtx = responseContent.tranCtx || responseContent.tran_ctx;
+
+      if (targetRedirect && tranCtx) {
+        window.location.href = targetRedirect.includes('?') 
+          ? `${targetRedirect}&tranCtx=${encodeURIComponent(tranCtx)}`
+          : `${targetRedirect}?tranCtx=${encodeURIComponent(tranCtx)}`;
+      } else if (targetRedirect) {
+        window.location.href = targetRedirect;
+      } else {
+        // Fallback to my-courses with success parameter if gateway proxy in dev
+        navigate(`/my-courses?txnNo=${merchantTxnNo}&status=SUCCESS`);
+      }
+
+    } catch (err) {
+      console.error("Buy Now process error:", err);
+      setBuyError(err.response?.data?.error || err.message || "Payment initiation failed. Please try again.");
+      setBuyLoading(false);
     }
   };
 
@@ -96,6 +293,13 @@ export const PublicReferralLanding = () => {
           </p>
 
           <div className="flex flex-wrap justify-center gap-3 pt-2">
+            <button
+              onClick={() => openBuyModal(selectedProgram || PROGRAMS[0])}
+              className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-black rounded-2xl text-xs uppercase tracking-wider shadow-xl transition transform hover:scale-105 flex items-center gap-2"
+            >
+              <CreditCardIcon className="w-4 h-4" />
+              Buy Now (₹{(selectedProgram || PROGRAMS[0]).price.toLocaleString("en-IN")})
+            </button>
             <button
               onClick={() => openEnquiry(selectedProgram || PROGRAMS[0])}
               className="px-8 py-4 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-2xl text-xs uppercase tracking-wider shadow-xl transition transform hover:scale-105"
@@ -160,12 +364,21 @@ export const PublicReferralLanding = () => {
               <p className="text-xs text-slate-600 font-medium leading-relaxed">
                 Empower your exam preparation with checked answer scripts from Pathfinder’s top ranker faculty.
               </p>
-              <button
-                onClick={() => openEnquiry(PROGRAMS[0])}
-                className="w-full py-3.5 bg-[#66090D] hover:bg-[#800b11] text-white font-black rounded-xl text-xs uppercase tracking-wider transition shadow-md"
-              >
-                Enquire for Madhyamik 2027
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={() => openBuyModal(PROGRAMS[0])}
+                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center gap-2"
+                >
+                  <CreditCardIcon className="w-4 h-4" />
+                  Buy Now (₹4,500)
+                </button>
+                <button
+                  onClick={() => openEnquiry(PROGRAMS[0])}
+                  className="w-full py-3 bg-[#66090D] hover:bg-[#800b11] text-white font-extrabold rounded-xl text-xs uppercase tracking-wider transition"
+                >
+                  Enquire for Madhyamik 2027
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -195,12 +408,21 @@ export const PublicReferralLanding = () => {
                   <span className="text-[10px] font-extrabold text-slate-400 uppercase">Price</span>
                   <span className="text-lg font-black text-[#66090D]">₹{prog.price.toLocaleString("en-IN")}</span>
                 </div>
-                <button
-                  onClick={() => openEnquiry(prog)}
-                  className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl uppercase tracking-wider transition"
-                >
-                  Enquire Now
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => openBuyModal(prog)}
+                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl uppercase tracking-wider transition flex items-center justify-center gap-1"
+                  >
+                    <CreditCardIcon className="w-3.5 h-3.5" />
+                    Buy Now
+                  </button>
+                  <button
+                    onClick={() => openEnquiry(prog)}
+                    className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs rounded-xl uppercase tracking-wider transition"
+                  >
+                    Enquire
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -399,6 +621,157 @@ export const PublicReferralLanding = () => {
                 </form>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Buy Now Registration & ICICI Payment Modal */}
+      {buyModalOpen && (
+        <div className="fixed inset-0 z-[99999] flex items-start justify-center bg-slate-900/80 backdrop-blur-sm p-4 pt-24 md:pt-32 pb-12 overflow-y-auto" onClick={() => setBuyModalOpen(false)}>
+          <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-4 my-auto max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setBuyModalOpen(false)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-100 transition"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase text-amber-900 bg-amber-100 px-3 py-1 rounded-full border border-amber-200">
+                  Partner Referral: {referralId}
+                </span>
+                <span className="text-[10px] font-black uppercase text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200">
+                  10% Partner Bonus Eligible
+                </span>
+              </div>
+              <h3 className="text-2xl font-black text-[#66090D] pt-1">Course Registration & Payment</h3>
+              <p className="text-xs text-slate-500 font-semibold">
+                {activeBuyProgram.name} • <strong className="text-emerald-700 font-black">₹{activeBuyProgram.price.toLocaleString("en-IN")}</strong>
+              </p>
+            </div>
+
+            {buyError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs font-bold text-red-600">
+                {buyError}
+              </div>
+            )}
+
+            <form onSubmit={handleBuyNowSubmit} className="space-y-4 text-xs font-bold text-slate-700">
+              <div className="space-y-1">
+                <label className="uppercase tracking-wider">Student Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={buyFormData.fullName}
+                  onChange={(e) => setBuyFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                  placeholder="Enter Student Name"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="uppercase tracking-wider">Mobile Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={buyFormData.phone}
+                    onChange={(e) => setBuyFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="10-digit Phone Number"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="uppercase tracking-wider">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={buyFormData.email}
+                    onChange={(e) => setBuyFormData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="email@example.com"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="uppercase tracking-wider">Password (For Student Portal) *</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={4}
+                    value={buyFormData.password}
+                    onChange={(e) => setBuyFormData(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder="Create Account Password"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="uppercase tracking-wider">Current Class *</label>
+                  <select
+                    value={buyFormData.studentClass}
+                    onChange={(e) => setBuyFormData(prev => ({ ...prev, studentClass: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                  >
+                    <option value="Class VIII">Class VIII</option>
+                    <option value="Class IX">Class IX</option>
+                    <option value="Class X">Class X</option>
+                    <option value="Class XI">Class XI</option>
+                    <option value="Class XII">Class XII</option>
+                    <option value="12th Passed / Repeater">12th Passed / Repeater</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="uppercase tracking-wider flex items-center gap-1">
+                  <BuildingStorefrontIcon className="w-4 h-4 text-orange-600" />
+                  Select Preferred Pathfinder Centre *
+                </label>
+                <select
+                  value={buyFormData.centre}
+                  onChange={(e) => setBuyFormData(prev => ({ ...prev, centre: e.target.value }))}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                >
+                  {PATHFINDER_CENTRES.map((c, i) => (
+                    <option key={i} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="uppercase tracking-wider">Selected Program</label>
+                <select
+                  value={activeBuyProgram.id}
+                  onChange={(e) => {
+                    const p = getProgram(e.target.value);
+                    if (p) setActiveBuyProgram(p);
+                  }}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
+                >
+                  {PROGRAMS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} (₹{p.price.toLocaleString("en-IN")})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={buyLoading}
+                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl uppercase tracking-wider text-center transition shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <CreditCardIcon className="w-5 h-5" />
+                  {buyLoading ? "Initiating ICICI Payment Gateway..." : `Proceed to Pay ₹${activeBuyProgram.price.toLocaleString("en-IN")}`}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

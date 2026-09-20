@@ -227,6 +227,9 @@ class ICICIWebhookView(APIView):
             payment_mode = payload.get("paymentMode")
             bank_code = payload.get("bankCode")
             
+            referral_code = payload.get("addlParam2")
+            customer_name = payload.get("customerName") or "Pathfinder Student"
+            
             # Determine success status
             is_success = str(response_code) in ["0000", "00", "SUCCESS", "0"]
 
@@ -234,8 +237,8 @@ class ICICIWebhookView(APIView):
                 logger.info(f"[ICICI WEBHOOK] Payment Successful for Txn: {merchant_txn_no}, Gateway TxnID: {txn_id}, Mode: {payment_mode}")
 
                 # Auto-create or update Enrollment in MongoDB
+                course_name = "Pathfinder Course Program"
                 if course_id:
-                    course_name = "Course Program"
                     try:
                         course = Course.objects(id=course_id).first()
                         if course and getattr(course, 'name', None):
@@ -257,6 +260,23 @@ class ICICIWebhookView(APIView):
                             enrolled_at=datetime.datetime.utcnow()
                         )
                         logger.info(f"[ICICI WEBHOOK] Created Enrollment for User: {email or mobile}, Course: {course_id}")
+
+                # If purchase came via referral code, credit 10% referral bonus
+                if referral_code:
+                    try:
+                        from shiksha_bandhu.views import process_referral_payment
+                        process_referral_payment(
+                            referral_id=referral_code,
+                            student_name=customer_name,
+                            student_email=email,
+                            student_mobile=mobile,
+                            course_name=course_name,
+                            amount_paid=float(amount) if amount else 4500.0,
+                            merchant_txn_no=merchant_txn_no
+                        )
+                        logger.info(f"[ICICI WEBHOOK] Credited 10% referral bonus to partner {referral_code}")
+                    except Exception as ref_err:
+                        logger.error(f"[ICICI WEBHOOK] Error processing referral bonus: {ref_err}")
 
             return Response({"status": "SUCCESS", "message": "Webhook processed successfully"}, status=status.HTTP_200_OK)
 

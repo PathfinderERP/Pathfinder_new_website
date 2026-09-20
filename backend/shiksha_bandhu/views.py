@@ -380,3 +380,89 @@ def admin_update_referral_status(request, referral_id):
         return Response({'success': True, 'referral_id': referral_id, 'status': new_status, 'bonus': bonus_amount})
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def process_referral_payment(referral_id, student_name, student_email, student_mobile, course_name, amount_paid, merchant_txn_no, centre=None, student_class=None):
+    """
+    Processes 10% referral bonus for partner and registers/updates paid referral student record.
+    """
+    if not referral_id:
+        return None
+
+    p_id = str(referral_id).strip().upper()
+    amount = float(amount_paid or 0)
+    bonus_amount = int(round(amount * 0.10)) # 10% Referral Bonus
+
+    # 1. Save ShikshaBandhuBonus entry for partner
+    try:
+        bonus_rec = ShikshaBandhuBonus(
+            partner_id=p_id,
+            student_name=student_name or 'Referred Student',
+            program=course_name or 'Pathfinder Mock Test',
+            bonus_amount=bonus_amount,
+            status='Successful',
+            created_at=datetime.datetime.utcnow()
+        )
+        bonus_rec.save()
+    except Exception as e:
+        print(f"Error creating ShikshaBandhuBonus: {e}")
+
+    # 2. Save/Update LandingPageRegistration marked as is_paid=True
+    try:
+        reg = LandingPageRegistration(
+            name=student_name or 'Referred Student',
+            phone=student_mobile or '',
+            email=student_email or '',
+            student_class=student_class or 'Class X',
+            course_type=course_name or 'Pathfinder Program',
+            centre=centre or 'Pathfinder Main Centre',
+            page_source=f"Paid Referral ({p_id})",
+            referral_id=p_id,
+            is_paid=True,
+            amount_paid=amount,
+            txn_ref=merchant_txn_no,
+            is_contacted=True,
+            created_at=datetime.datetime.utcnow()
+        )
+        reg.save()
+        return reg
+    except Exception as e:
+        print(f"Error saving paid LandingPageRegistration: {e}")
+        return None
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def admin_get_paid_referrals(request):
+    """
+    Admin endpoint to fetch list of all paid referral students and their 10% bonus partner payouts.
+    """
+    try:
+        paid_leads = list(LandingPageRegistration.objects(is_paid=True))
+        all_bonuses = list(ShikshaBandhuBonus.objects.all())
+
+        results = []
+        for lead in paid_leads:
+            lead_id_str = str(lead.id)
+            bonus_rec = next((b for b in all_bonuses if b.lead_id == lead_id_str or b.student_name == lead.name), None)
+            bonus = bonus_rec.bonus_amount if bonus_rec else int(round((lead.amount_paid or 4500) * 0.10))
+
+            results.append({
+                'id': lead_id_str,
+                'studentName': lead.name,
+                'email': lead.email or 'N/A',
+                'phone': lead.phone,
+                'studentClass': lead.student_class or 'N/A',
+                'centre': lead.centre or 'Main Centre',
+                'course': lead.course_type,
+                'referralId': lead.referral_id or 'DIRECT',
+                'amountPaid': lead.amount_paid or 4500,
+                'bonusAmount': bonus,
+                'txnRef': lead.txn_ref or 'PAID-ONLINE',
+                'created_at': lead.created_at.strftime('%d %b %Y, %I:%M %p') if lead.created_at else 'Recent'
+            })
+
+        return Response({'success': True, 'paid_referrals': results, 'count': len(results)})
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
