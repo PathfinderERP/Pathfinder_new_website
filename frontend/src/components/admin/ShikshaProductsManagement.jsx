@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   PlusIcon,
   PencilSquareIcon,
-  ArchiveBoxIcon,
+  TrashIcon,
   ArrowPathIcon,
   BookOpenIcon,
   CheckCircleIcon,
@@ -20,6 +20,7 @@ const ShikshaProductsManagement = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
+    slug: "",
     board: "WBBSE",
     class_name: "Class X",
     price: 4500,
@@ -30,6 +31,15 @@ const ShikshaProductsManagement = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+
+  const generateSlug = (str) => {
+    return (str || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -53,6 +63,7 @@ const ShikshaProductsManagement = () => {
     setEditingItem(null);
     setFormData({
       title: "",
+      slug: "",
       board: "WBBSE",
       class_name: "Class X",
       price: 4500,
@@ -67,8 +78,10 @@ const ShikshaProductsManagement = () => {
 
   const openEditModal = (item) => {
     setEditingItem(item);
+    const itemTitle = item.title || item.name || "";
     setFormData({
-      title: item.title || item.name || "",
+      title: itemTitle,
+      slug: item.slug || generateSlug(itemTitle),
       board: item.board || "WBBSE",
       class_name: item.class_name || item.className || "Class X",
       price: item.price || 4500,
@@ -81,6 +94,26 @@ const ShikshaProductsManagement = () => {
     setModalOpen(true);
   };
 
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value;
+    setFormData((prev) => {
+      const prevAutoSlug = generateSlug(prev.title);
+      const shouldAutoUpdateSlug = !prev.slug || prev.slug === prevAutoSlug;
+      return {
+        ...prev,
+        title: newTitle,
+        slug: shouldAutoUpdateSlug ? generateSlug(newTitle) : prev.slug,
+      };
+    });
+  };
+
+  const handleTitleBlur = () => {
+    setFormData((prev) => ({
+      ...prev,
+      slug: prev.slug || generateSlug(prev.title),
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
@@ -89,7 +122,8 @@ const ShikshaProductsManagement = () => {
     try {
       const payload = {
         ...formData,
-        includes: formData.includes.split(",").map((s) => s.strip ? s.strip() : s.trim()).filter(Boolean),
+        slug: formData.slug || generateSlug(formData.title),
+        includes: formData.includes.split(",").map((s) => s.trim()).filter(Boolean),
       };
 
       if (editingItem) {
@@ -107,14 +141,14 @@ const ShikshaProductsManagement = () => {
     }
   };
 
-  const handleArchive = async (item) => {
-    if (window.confirm(`Are you sure you want to archive "${item.title || item.name}"? It will be hidden from the public portal.`)) {
+  const handleDelete = async (item) => {
+    if (window.confirm(`Are you sure you want to permanently delete "${item.title || item.name}"? This action cannot be undone.`)) {
       try {
         await shikshaBandhuAPI.deleteItem(item.id);
         fetchProducts();
       } catch (err) {
-        console.error("Error archiving product:", err);
-        alert(err.response?.data?.error || "Failed to archive product.");
+        console.error("Error deleting product:", err);
+        alert(err.response?.data?.error || "Failed to delete product.");
       }
     }
   };
@@ -131,7 +165,7 @@ const ShikshaProductsManagement = () => {
             Shiksha Bandhu Products
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-0.5">
-            Manage mock test packages, prices, board details, and features displayed on referral landing pages.
+            Manage mock test packages, prices, URL slugs, board details, and features displayed on referral landing pages.
           </p>
         </div>
 
@@ -187,6 +221,11 @@ const ShikshaProductsManagement = () => {
                     <SparklesIcon className="w-4 h-4 text-amber-500 inline flex-shrink-0" title="Featured Package" />
                   )}
                 </h3>
+                {item.slug && (
+                  <span className="text-[10px] font-mono text-gray-400 block mt-0.5">
+                    slug: /{item.slug}
+                  </span>
+                )}
                 <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1 leading-relaxed">
                   {item.description || "No description provided."}
                 </p>
@@ -223,15 +262,13 @@ const ShikshaProductsManagement = () => {
                   <PencilSquareIcon className="w-4 h-4 text-sky-600" />
                   Edit
                 </button>
-                {item.status !== "archived" && (
-                  <button
-                    onClick={() => handleArchive(item)}
-                    title="Archive item"
-                    className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-extrabold transition"
-                  >
-                    <ArchiveBoxIcon className="w-4 h-4" />
-                  </button>
-                )}
+                <button
+                  onClick={() => handleDelete(item)}
+                  title="Delete product permanently"
+                  className="p-2 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 rounded-xl text-xs font-extrabold transition"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
@@ -259,9 +296,22 @@ const ShikshaProductsManagement = () => {
                   type="text"
                   required
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g. Madhyamik Mock Test 2027"
+                  onChange={handleTitleChange}
+                  onBlur={handleTitleBlur}
+                  placeholder="e.g. CBSE Class X Mock Test"
                   className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="uppercase">URL Slug (Auto-generated on title change/blur) *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.slug}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  placeholder="e.g. cbse-x"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none text-slate-900 dark:text-white font-mono text-xs"
                 />
               </div>
 

@@ -795,19 +795,16 @@ def update_item(request, item_id):
 @permission_classes([AllowAny])
 def delete_item(request, item_id):
     """
-    Admin endpoint to archive a product item on delete request.
-    Instead of hard deletion, marks status='archived'.
+    Admin endpoint to delete a product item.
+    Permanently deletes item from database.
     """
     try:
         item = ShikshaBandhuItem.objects(id=item_id).first()
         if not item:
             return Response({'error': 'Product item not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        item.status = 'archived'
-        item.updated_at = datetime.datetime.utcnow()
-        item.save()
-
-        return Response({'success': True, 'message': 'Product item archived successfully.'})
+        item.delete()
+        return Response({'success': True, 'message': 'Product item deleted successfully.'})
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
