@@ -205,9 +205,20 @@ def partner_register(request):
         return Response({'error': 'Name, Mobile Number and Password are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
     # Check if mobile or email already exists
-    existing = ShikshaBandhuPartner.objects(mobile=mobile).first()
+    existing = ShikshaBandhuPartner.objects(mobile=mobile).first() or (ShikshaBandhuPartner.objects(email=email).first() if email else None)
     if existing:
-        return Response({'error': 'A partner account with this mobile number already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'success': True,
+            'existing': True,
+            'user': {
+                'id': existing.partner_id,
+                'name': existing.name,
+                'mobile': existing.mobile,
+                'email': existing.email,
+                'joinedOn': existing.joined_on.strftime('%d %b %Y') if existing.joined_on else 'Today',
+                'status': existing.status
+            }
+        }, status=status.HTTP_200_OK)
 
     # Auto-generate Partner ID (e.g. SB101, SB102...)
     count = ShikshaBandhuPartner.objects.count()

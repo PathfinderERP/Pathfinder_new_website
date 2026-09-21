@@ -136,10 +136,15 @@ class ICICIProxyView(APIView):
             if not target_url:
                 return Response({"error": "target_url is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Ignore SSL verification for UAT sandbox if necessary
+            class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+                def redirect_request(self, req, fp, code, msg, headers, newurl):
+                    return None
+
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
+
+            opener = urllib.request.build_opener(NoRedirectHandler(), urllib.request.HTTPSHandler(context=ctx))
 
             if payload_type == 'json':
                 req_data = json.dumps(payload).encode('utf-8')
@@ -154,21 +159,34 @@ class ICICIProxyView(APIView):
                     'User-Agent': 'Mozilla/5.0'
                 })
 
-            with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
+            try:
+                resp = opener.open(req, timeout=30)
                 resp_text = resp.read().decode('utf-8')
                 try:
                     resp_json = json.loads(resp_text)
                     return Response({"status": resp.status, "data": resp_json}, status=status.HTTP_200_OK)
                 except Exception:
                     return Response({"status": resp.status, "raw_response": resp_text}, status=status.HTTP_200_OK)
+            except urllib.error.HTTPError as e:
+                # Capture gateway HTTP 301/302 redirects and send Location header to frontend
+                if e.code in [301, 302, 303, 307, 308]:
+                    redirect_location = e.headers.get('Location') or e.headers.get('location')
+                    if redirect_location:
+                        return Response({
+                            "status": e.code,
+                            "data": {
+                                "redirectURI": redirect_location,
+                                "targetUrl": redirect_location
+                            }
+                        }, status=status.HTTP_200_OK)
 
-        except urllib.error.HTTPError as e:
-            err_text = e.read().decode('utf-8') if e.fp else str(e)
-            try:
-                err_json = json.loads(err_text)
-                return Response({"status": e.code, "data": err_json, "error": str(e)}, status=status.HTTP_200_OK)
-            except Exception:
-                return Response({"status": e.code, "raw_response": err_text, "error": str(e)}, status=status.HTTP_200_OK)
+                err_text = e.read().decode('utf-8') if e.fp else str(e)
+                try:
+                    err_json = json.loads(err_text)
+                    return Response({"status": e.code, "data": err_json, "error": str(e)}, status=status.HTTP_200_OK)
+                except Exception:
+                    return Response({"status": e.code, "raw_response": err_text, "error": str(e)}, status=status.HTTP_200_OK)
+
         except Exception as e:
             logger.error(f"ICICI Proxy Error: {e}")
             return Response({"error": str(e), "message": "Failed to connect to ICICI Bank endpoint"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -181,7 +199,7 @@ class ICICICallbackView(APIView):
     def post(self, request):
         """
         Handle POST callback response sent back by ICICI Payment Gateway after payment attempt.
-        Redirects the browser back to frontend /shiksha-bandhu/dashboard with transaction status query parameters.
+        Processes referral bonus and redirects the browser back to frontend dashboard.
         """
         try:
             data = request.data
@@ -189,19 +207,50 @@ class ICICICallbackView(APIView):
             
             txn_status = data.get('responseCode') or data.get('status') or 'UNKNOWN'
             txn_no = data.get('merchantTxnNo') or data.get('txnRefNo') or ''
+            addl3 = data.get('addlParam3') or ''
+            addl2 = data.get('addlParam2') or '' # referrer partner ID
+            addl1 = data.get('addlParam1') or '' # course ID
+            amount = data.get('amount') or 0
+            email = data.get('customerEmailID') or ''
+            mobile = data.get('customerMobileNo') or ''
+            name = data.get('customerName') or ''
+
+            is_success = str(txn_status) in ["0000", "00", "SUCCESS", "0"]
+            if is_success and addl2:
+                try:
+                    from shiksha_bandhu.views import process_referral_payment
+                    process_referral_payment(
+                        referral_id=addl2,
+                        student_name=name,
+                        student_email=email,
+                        student_mobile=mobile,
+                        course_name=addl1,
+                        amount_paid=float(amount) if amount else 4500.0,
+                        merchant_txn_no=txn_no
+                    )
+                    logger.info(f"Callback credited 10% referral bonus to partner {addl2}")
+                except Exception as ref_err:
+                    logger.error(f"Callback referral processing error: {ref_err}")
             
-            # Construct frontend redirect URL for Shiksha Bandhu portal
-            redirect_url = f"https://pathfinder.edu.in/shiksha-bandhu/dashboard?txnNo={txn_no}&status={txn_status}"
+            host = request.get_host()
+            scheme = 'https' if request.is_secure() else 'http'
+            base_url = f"{scheme}://{host}"
+
+            if addl3 == "shiksha_bandhu" or "shiksha" in request.path:
+                redirect_url = f"{base_url}/shiksha-bandhu/dashboard?txnNo={txn_no}&status={txn_status}"
+            else:
+                redirect_url = f"{base_url}/shiksha-bandhu/dashboard?txnNo={txn_no}&status={txn_status}"
+
             return redirect(redirect_url)
         except Exception as e:
             logger.error(f"Error handling ICICI callback POST: {e}")
-            return redirect("https://pathfinder.edu.in/shiksha-bandhu/dashboard")
+            return redirect("/shiksha-bandhu/dashboard")
 
     def get(self, request):
         """
         Handle GET callback if gateway redirects via GET.
         """
-        return redirect("https://pathfinder.edu.in/shiksha-bandhu/dashboard")
+        return redirect("/shiksha-bandhu/dashboard")
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ICICIWebhookView(APIView):

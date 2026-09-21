@@ -169,7 +169,17 @@ export const PublicReferralLanding = () => {
     e.preventDefault();
     setBuyError("");
     setBuyLoading(true);
-    const baseUrl = env.API_BASE_URL || env.apiBaseUrl || "";
+
+    const baseUrl = (() => {
+      const configured = env.API_BASE_URL || env.apiBaseUrl;
+      if (configured && configured !== "http://localhost:8000" && !configured.includes("localhost")) {
+        return configured;
+      }
+      if (typeof window !== "undefined" && window.location.hostname.includes("pathfinder.edu.in")) {
+        return "https://api.pathfinder.edu.in";
+      }
+      return configured || "https://api.pathfinder.edu.in";
+    })();
 
     try {
       // 1. Save Landing Registration Lead
@@ -189,7 +199,7 @@ export const PublicReferralLanding = () => {
         console.warn("Landing registration lead notice:", leadErr);
       }
 
-      // 2. Auto-register or authenticate student
+      // 2. Auto-register or authenticate student auth profile
       let authUser = null;
       let authToken = null;
 
@@ -208,7 +218,6 @@ export const PublicReferralLanding = () => {
           authToken = regRes.data.token;
         }
       } catch (regErr) {
-        // If account already exists, attempt login directly
         try {
           const loginRes = await axios.post(`${baseUrl}/api/auth/login/`, {
             email: buyFormData.email || buyFormData.phone,
@@ -223,7 +232,6 @@ export const PublicReferralLanding = () => {
         }
       }
 
-      // If user profile created or logged in, set auth context with 365 days persistence
       if (authUser && authToken) {
         setAuthenticatedUser(authUser, authToken);
         localStorage.setItem("pathfinder_token", authToken);
@@ -231,12 +239,50 @@ export const PublicReferralLanding = () => {
         localStorage.setItem("pathfinder_session_365", "true");
       }
 
-      // 3. Pre-save course purchase intent in local storage
+      // 3. Register or authenticate Shiksha Bandhu partner account for the new user
+      let sbPartner = null;
+      try {
+        const sbRegRes = await shikshaBandhuAPI.register({
+          name: buyFormData.fullName,
+          mobile: buyFormData.phone,
+          email: buyFormData.email,
+          password: buyFormData.password || "student123"
+        });
+        if (sbRegRes.data && sbRegRes.data.user) {
+          sbPartner = sbRegRes.data.user;
+        }
+      } catch (sbErr) {
+        try {
+          const sbLoginRes = await shikshaBandhuAPI.login({
+            identifier: buyFormData.phone || buyFormData.email,
+            password: buyFormData.password || "student123"
+          });
+          if (sbLoginRes.data && sbLoginRes.data.user) {
+            sbPartner = sbLoginRes.data.user;
+          }
+        } catch (sbLoginErr) {
+          console.warn("Partner login notice:", sbLoginErr);
+        }
+      }
+
+      if (sbPartner) {
+        localStorage.setItem("shiksha_bandhu_user", JSON.stringify(sbPartner));
+      }
+
+      // 4. Save purchased course info locally for dashboard banner display
       const merchantTxnNo = `TXN${Date.now()}`;
       const amountPaid = activeBuyProgram.price || 4500;
+      const purchasedCourseInfo = {
+        id: activeBuyProgram.id || `CRS-${merchantTxnNo}`,
+        name: activeBuyProgram.name || activeBuyProgram.title || "Pathfinder Mock Test",
+        price: amountPaid,
+        purchasedAt: new Date().toISOString()
+      };
+      localStorage.setItem("shiksha_bandhu_purchased_course", JSON.stringify(purchasedCourseInfo));
+
       const purchaseIntent = {
         id: activeBuyProgram.id || `CRS-${merchantTxnNo}`,
-        name: activeBuyProgram.name,
+        name: activeBuyProgram.name || activeBuyProgram.title || "Pathfinder Mock Test",
         mode: "classroom",
         enrolled_at: new Date().toISOString(),
         payment_info: {
@@ -254,7 +300,7 @@ export const PublicReferralLanding = () => {
         localStorage.setItem("pathfinder_purchases", JSON.stringify(existingCourses));
       }
 
-      // 4. Initiate ICICI Payment Gateway
+      // 5. Initiate ICICI Payment Gateway
       let gatewayConfig = {
         merchantId: "100000000007164",
         aggregatorID: "A100000000007164",
@@ -289,7 +335,7 @@ export const PublicReferralLanding = () => {
         customerMobileNo: buyFormData.phone,
         customerName: buyFormData.fullName,
         addlParam1: activeBuyProgram.id,
-        addlParam2: referralId, // Passes referral ID for 10% bonus calculation
+        addlParam2: referralId, // Passes referral ID for 10% bonus calculation to referrer
         addlParam3: "shiksha_bandhu" // Indicates payment originated from Shiksha Bandhu portal
       };
 
@@ -306,25 +352,35 @@ export const PublicReferralLanding = () => {
       const secureHash = hashRes.data.secureHash;
       const fullPayload = { ...params, secureHash };
 
+      // 5. Call ICICI Initiate Sale API via backend proxy
       const proxyRes = await axios.post(`${baseUrl}/api/courses/icici/proxy/`, {
         target_url: saleUrl,
         payload_type: "json",
         payload: fullPayload
       });
 
-      const responseContent = proxyRes.data.data || proxyRes.data;
-      const targetRedirect = responseContent.redirectURI || responseContent.redirectUrl || responseContent.targetUrl || responseContent.url;
-      const tranCtx = responseContent.tranCtx || responseContent.tran_ctx;
+      const resData = proxyRes.data;
+      const responseContent = resData.data || resData;
+
+      console.log("ICICI Gateway Raw Proxy Response:", resData);
+
+      const targetRedirect = responseContent.redirectURI || responseContent.redirectUrl || responseContent.redirect_url || responseContent.targetUrl || responseContent.target_url || responseContent.url || responseContent.action;
+      const tranCtx = responseContent.tranCtx || responseContent.tran_ctx || responseContent.tranContext;
 
       if (targetRedirect && tranCtx) {
-        window.location.href = targetRedirect.includes('?') 
+        const finalUrl = targetRedirect.includes('?') 
           ? `${targetRedirect}&tranCtx=${encodeURIComponent(tranCtx)}`
           : `${targetRedirect}?tranCtx=${encodeURIComponent(tranCtx)}`;
+        window.location.href = finalUrl;
       } else if (targetRedirect) {
         window.location.href = targetRedirect;
+      } else if (responseContent.html || responseContent.formHtml) {
+        document.open();
+        document.write(responseContent.html || responseContent.formHtml);
+        document.close();
       } else {
-        // Fallback to Shiksha Bandhu portal with success parameter if gateway proxy in dev
-        navigate(`/shiksha-bandhu/dashboard?txnNo=${merchantTxnNo}&status=SUCCESS`);
+        const errorMsg = responseContent.responseMessage || responseContent.respDescription || responseContent.message || responseContent.error || (typeof responseContent === 'string' ? responseContent : JSON.stringify(responseContent));
+        throw new Error(errorMsg || "Payment initiation returned an unexpected response from ICICI Bank.");
       }
 
     } catch (err) {
