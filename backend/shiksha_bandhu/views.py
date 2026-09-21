@@ -261,35 +261,31 @@ def track_click(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def get_partner_stats(request, partner_id):
     """Fetch live stats, referral leads, and earnings history for a partner."""
     seed_default_partner_if_needed()
     p_id = partner_id.strip().upper()
     
     # Real DB Clicks
-    total_clicks = ShikshaBandhuClick.objects(partner_id=p_id).count()
+    total_clicks = ShikshaBandhuClick.objects(partner_id__iexact=p_id).count()
 
     # Real DB Leads submitted with referral_id = p_id
     db_leads = list(LandingPageRegistration.objects(referral_id__iexact=p_id))
     total_registrations = len(db_leads)
 
     # Real DB Bonus records
-    bonuses = list(ShikshaBandhuBonus.objects(partner_id=p_id))
+    bonuses = list(ShikshaBandhuBonus.objects(partner_id__iexact=p_id))
     
-    # Calculate successful and bonus from DB
-    total_successful = sum(1 for b in bonuses if b.status == 'Successful')
-    total_bonus = sum(b.bonus_amount for b in bonuses if b.status == 'Successful')
-    total_pending = sum(b.bonus_amount for b in bonuses if b.status == 'Pending')
-    this_month_bonus = total_bonus
-
-    # Build referrals list (Base demo + real DB leads)
     referrals_list = []
     
     # Add base demo referrals if SB004
     if p_id == 'SB004':
         for item in BASE_DEMO_REFERRALS:
-            # Check if updated in bonus model
             b_rec = next((b for b in bonuses if b.lead_id == item['id']), None)
+            st = b_rec.status if b_rec else item['status']
+            bn = b_rec.bonus_amount if b_rec else item['bonus']
             referrals_list.append({
                 'id': item['id'],
                 'student': item['student'],
@@ -297,14 +293,29 @@ def get_partner_stats(request, partner_id):
                 'mobile': item['mobile'],
                 'program': item['program'],
                 'date': item['date'],
-                'status': b_rec.status if b_rec else item['status'],
-                'bonus': b_rec.bonus_amount if (b_rec and b_rec.status == 'Successful') else item['bonus']
+                'status': st,
+                'bonus': bn
             })
 
     # Add real leads from MongoDB
     for idx, lead in enumerate(db_leads, start=1050):
         lead_id_str = str(lead.id)
-        b_rec = next((b for b in bonuses if b.lead_id == lead_id_str), None)
+        txn_ref_str = str(lead.txn_ref or '')
+        
+        b_rec = next(
+            (b for b in bonuses if b.lead_id and b.lead_id in [lead_id_str, txn_ref_str]),
+            None
+        )
+        if not b_rec and lead.name:
+            b_rec = next(
+                (b for b in bonuses if b.student_name and b.student_name.lower() == lead.name.lower()),
+                None
+            )
+
+        status_val = 'Successful' if (lead.is_paid or (b_rec and b_rec.status == 'Successful')) else ('Pending' if not (b_rec and b_rec.status == 'Cancelled') else 'Cancelled')
+        calculated_bonus = int(round((lead.amount_paid or 4500) * 0.10)) if (lead.is_paid or status_val == 'Successful') else 250
+        bonus_val = b_rec.bonus_amount if b_rec else calculated_bonus
+
         referrals_list.append({
             'id': lead_id_str,
             'student': f"Student #{idx}",
@@ -312,17 +323,16 @@ def get_partner_stats(request, partner_id):
             'mobile': lead.phone,
             'program': lead.course_type or 'Pathfinder Mock Test',
             'date': lead.created_at.strftime('%d %b %Y') if lead.created_at else 'Today',
-            'status': b_rec.status if b_rec else ('Successful' if lead.is_contacted else 'Pending'),
-            'bonus': b_rec.bonus_amount if (b_rec and b_rec.status == 'Successful') else 250
+            'status': status_val,
+            'bonus': bonus_val
         })
 
-    # Build bonus history
-    bonus_history = [
-        {'date': r['date'], 'program': r['program'], 'referral': r['student'], 'status': r['status'], 'bonus': r['bonus'] or 250}
-        for r in referrals_list if r['status'] != 'Cancelled'
-    ]
+    # Recalculate partner totals from full referrals list
+    total_successful_count = sum(1 for r in referrals_list if r['status'] == 'Successful')
+    total_bonus_val = sum(r['bonus'] for r in referrals_list if r['status'] == 'Successful')
+    total_pending_val = sum(r['bonus'] for r in referrals_list if r['status'] == 'Pending')
 
-    partner_doc = ShikshaBandhuPartner.objects(partner_id=p_id).first()
+    partner_doc = ShikshaBandhuPartner.objects(partner_id__iexact=p_id).first()
 
     return Response({
         'partner': {
@@ -336,13 +346,16 @@ def get_partner_stats(request, partner_id):
         'stats': {
             'clicks': total_clicks,
             'registrations': total_registrations,
-            'successfulReferrals': total_successful,
-            'totalBonus': total_bonus,
-            'pendingBonus': total_pending,
-            'thisMonth': this_month_bonus
+            'successfulReferrals': total_successful_count,
+            'totalBonus': total_bonus_val,
+            'pendingBonus': total_pending_val,
+            'thisMonth': total_bonus_val
         },
         'referrals': referrals_list,
-        'bonusHistory': bonus_history
+        'bonusHistory': [
+            {'date': r['date'], 'program': r['program'], 'referral': r['studentName'], 'status': r['status'], 'bonus': r['bonus']}
+            for r in referrals_list if r['status'] == 'Successful'
+        ]
     })
 
 
@@ -353,16 +366,24 @@ def admin_list_partners(request):
     seed_default_partner_if_needed()
     partners = list(ShikshaBandhuPartner.objects.all())
     leads = list(LandingPageRegistration.objects(referral_id__ne=None))
+    bonuses = list(ShikshaBandhuBonus.objects.all())
 
     partner_data = []
     for p in partners:
         p_id = p.partner_id.upper()
-        p_clicks = ShikshaBandhuClick.objects(partner_id=p_id).count()
+        p_clicks = ShikshaBandhuClick.objects(partner_id__iexact=p_id).count()
         p_leads = sum(1 for l in leads if l.referral_id and l.referral_id.upper() == p_id)
         
-        p_bonuses = list(ShikshaBandhuBonus.objects(partner_id=p_id))
+        p_bonuses = [b for b in bonuses if b.partner_id and b.partner_id.upper() == p_id]
+        p_paid_leads = [l for l in leads if l.referral_id and l.referral_id.upper() == p_id and l.is_paid]
+        
+        p_successful = max(
+            sum(1 for b in p_bonuses if b.status == 'Successful'),
+            len(p_paid_leads)
+        )
         p_earned = sum(b.bonus_amount for b in p_bonuses if b.status == 'Successful')
-        p_successful = sum(1 for b in p_bonuses if b.status == 'Successful')
+        if p_earned == 0 and p_paid_leads:
+            p_earned = sum(int(round((l.amount_paid or 4500) * 0.10)) for l in p_paid_leads)
 
         partner_data.append({
             'id': p.partner_id,
@@ -426,14 +447,27 @@ def admin_list_referrals(request):
     """Admin endpoint to get all referred leads and their bonus status."""
     seed_default_partner_if_needed()
     leads = list(LandingPageRegistration.objects(referral_id__ne=None))
-    bonuses = {b.lead_id: b for b in ShikshaBandhuBonus.objects.all()}
+    bonuses = list(ShikshaBandhuBonus.objects.all())
 
     ref_list = []
-    
-    # Add MongoDB leads
     for idx, lead in enumerate(leads, start=1001):
         lead_id_str = str(lead.id)
-        b_rec = bonuses.get(lead_id_str)
+        txn_ref_str = str(lead.txn_ref or '')
+        
+        b_rec = next(
+            (b for b in bonuses if b.lead_id and b.lead_id in [lead_id_str, txn_ref_str]),
+            None
+        )
+        if not b_rec and lead.name:
+            b_rec = next(
+                (b for b in bonuses if b.student_name and b.student_name.lower() == lead.name.lower()),
+                None
+            )
+
+        status_val = b_rec.status if b_rec else ('Successful' if lead.is_paid or lead.is_contacted else 'Pending')
+        calculated_bonus = int(round((lead.amount_paid or 4500) * 0.10)) if (lead.is_paid or status_val == 'Successful') else 250
+        bonus_val = b_rec.bonus_amount if b_rec else calculated_bonus
+
         ref_list.append({
             'id': lead_id_str,
             'displayId': f"L-{idx}",
@@ -442,8 +476,8 @@ def admin_list_referrals(request):
             'mobile': lead.phone,
             'program': lead.course_type or 'Pathfinder Mock Test',
             'date': lead.created_at.strftime('%d %b %Y') if lead.created_at else 'Today',
-            'status': b_rec.status if b_rec else ('Successful' if lead.is_contacted else 'Pending'),
-            'bonusAmount': b_rec.bonus_amount if b_rec else (int(round((lead.amount_paid or 0) * 0.10)) if lead.is_paid else 250)
+            'status': status_val,
+            'bonusAmount': bonus_val
         })
 
     return Response({'referrals': ref_list})
@@ -478,6 +512,7 @@ def admin_update_referral_status(request, referral_id):
             lead = LandingPageRegistration.objects.get(id=referral_id)
             if new_status == 'Successful':
                 lead.is_contacted = True
+                lead.is_paid = True
                 lead.save()
         except Exception:
             pass
@@ -498,38 +533,63 @@ def process_referral_payment(referral_id, student_name, student_email, student_m
     amount = float(amount_paid or 0)
     bonus_amount = int(round(amount * 0.10)) # 10% Referral Bonus
 
-    # 1. Save ShikshaBandhuBonus entry for partner
+    # 1. Save/Update ShikshaBandhuBonus entry for partner
     try:
-        bonus_rec = ShikshaBandhuBonus(
-            partner_id=p_id,
-            student_name=student_name or 'Referred Student',
-            program=course_name or 'Pathfinder Mock Test',
-            bonus_amount=bonus_amount,
-            status='Successful',
-            created_at=datetime.datetime.utcnow()
-        )
-        bonus_rec.save()
+        bonus_rec = ShikshaBandhuBonus.objects(partner_id=p_id, lead_id=str(merchant_txn_no)).first()
+        if not bonus_rec and student_name:
+            bonus_rec = ShikshaBandhuBonus.objects(partner_id=p_id, student_name=student_name, program=course_name).first()
+
+        if not bonus_rec:
+            bonus_rec = ShikshaBandhuBonus(
+                partner_id=p_id,
+                lead_id=str(merchant_txn_no),
+                student_name=student_name or 'Referred Student',
+                program=course_name or 'Pathfinder Mock Test',
+                bonus_amount=bonus_amount,
+                status='Successful',
+                created_at=datetime.datetime.utcnow()
+            )
+            bonus_rec.save()
+        else:
+            bonus_rec.status = 'Successful'
+            bonus_rec.bonus_amount = bonus_amount
+            bonus_rec.save()
     except Exception as e:
-        print(f"Error creating ShikshaBandhuBonus: {e}")
+        print(f"Error creating/updating ShikshaBandhuBonus: {e}")
 
     # 2. Save/Update LandingPageRegistration marked as is_paid=True
     try:
-        reg = LandingPageRegistration(
-            name=student_name or 'Referred Student',
-            phone=student_mobile or '',
-            email=student_email or '',
-            student_class=student_class or 'Class X',
-            course_type=course_name or 'Pathfinder Program',
-            centre=centre or 'Pathfinder Main Centre',
-            page_source=f"Paid Referral ({p_id})",
-            referral_id=p_id,
-            is_paid=True,
-            amount_paid=amount,
-            txn_ref=merchant_txn_no,
-            is_contacted=True,
-            created_at=datetime.datetime.utcnow()
-        )
-        reg.save()
+        reg = None
+        if merchant_txn_no:
+            reg = LandingPageRegistration.objects(txn_ref=merchant_txn_no).first()
+        if not reg and student_mobile:
+            reg = LandingPageRegistration.objects(phone=student_mobile, referral_id__iexact=p_id).first()
+        if not reg and student_email:
+            reg = LandingPageRegistration.objects(email=student_email, referral_id__iexact=p_id).first()
+
+        if reg:
+            reg.is_paid = True
+            reg.amount_paid = amount
+            reg.txn_ref = merchant_txn_no
+            reg.is_contacted = True
+            reg.save()
+        else:
+            reg = LandingPageRegistration(
+                name=student_name or 'Referred Student',
+                phone=student_mobile or '',
+                email=student_email or '',
+                student_class=student_class or 'Class X',
+                course_type=course_name or 'Pathfinder Program',
+                centre=centre or 'Hazra (Head Office, Kolkata)',
+                page_source=f"Paid Referral ({p_id})",
+                referral_id=p_id,
+                is_paid=True,
+                amount_paid=amount,
+                txn_ref=merchant_txn_no,
+                is_contacted=True,
+                created_at=datetime.datetime.utcnow()
+            )
+            reg.save()
         return reg
     except Exception as e:
         print(f"Error saving paid LandingPageRegistration: {e}")
