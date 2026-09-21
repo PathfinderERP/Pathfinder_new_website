@@ -335,8 +335,7 @@ export const PublicReferralLanding = () => {
         customerMobileNo: buyFormData.phone,
         customerName: buyFormData.fullName,
         addlParam1: activeBuyProgram.id,
-        addlParam2: referralId, // Passes referral ID for 10% bonus calculation to referrer
-        addlParam3: "shiksha_bandhu" // Indicates payment originated from Shiksha Bandhu portal
+        addlParam2: referralId // Passes referral ID for 10% bonus calculation to referrer
       };
 
       const hashRes = await axios.post(`${baseUrl}/api/courses/icici/generate-hash/`, {
