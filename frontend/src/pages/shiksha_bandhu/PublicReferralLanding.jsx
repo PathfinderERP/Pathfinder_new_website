@@ -63,6 +63,14 @@ export const PublicReferralLanding = () => {
 
   const [availablePrograms, setAvailablePrograms] = useState(PROGRAMS);
 
+  const featuredProgram = selectedProgram 
+    || availablePrograms.find(p => p.slug === programSlug || p.id === programSlug)
+    || availablePrograms.find(p => p.featured) 
+    || availablePrograms[0] 
+    || PROGRAMS[0];
+
+  const otherPrograms = availablePrograms.filter(p => (p.slug || p.id) !== (featuredProgram.slug || featuredProgram.id));
+
   useEffect(() => {
     if (referralId) {
       shikshaBandhuAPI.trackClick({ partner_id: referralId, program_slug: programSlug || "" })
@@ -77,7 +85,7 @@ export const PublicReferralLanding = () => {
   }, [referralId, programSlug]);
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [activeEnquiryProgram, setActiveEnquiryProgram] = useState(selectedProgram || PROGRAMS[0]);
+  const [activeEnquiryProgram, setActiveEnquiryProgram] = useState(featuredProgram);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -91,7 +99,14 @@ export const PublicReferralLanding = () => {
 
   // Buy Now Modal & Payment State
   const [buyModalOpen, setBuyModalOpen] = useState(false);
-  const [activeBuyProgram, setActiveBuyProgram] = useState(selectedProgram || PROGRAMS[0]);
+  const [activeBuyProgram, setActiveBuyProgram] = useState(featuredProgram);
+
+  useEffect(() => {
+    if (featuredProgram) {
+      setActiveEnquiryProgram(featuredProgram);
+      setActiveBuyProgram(featuredProgram);
+    }
+  }, [programSlug, availablePrograms]);
   const [buyFormData, setBuyFormData] = useState({
     fullName: "",
     phone: "",
@@ -327,17 +342,17 @@ export const PublicReferralLanding = () => {
 
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <button
-              onClick={() => openBuyModal(selectedProgram || PROGRAMS[0])}
+              onClick={() => openBuyModal(featuredProgram)}
               className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-black rounded-2xl text-xs uppercase tracking-wider shadow-xl transition transform hover:scale-105 flex items-center gap-2"
             >
               <CreditCardIcon className="w-4 h-4" />
-              Buy Now (₹{(selectedProgram || PROGRAMS[0]).price.toLocaleString("en-IN")})
+              Buy Now (₹{featuredProgram.price ? featuredProgram.price.toLocaleString("en-IN") : "0"})
             </button>
             <button
-              onClick={() => openEnquiry(selectedProgram || PROGRAMS[0])}
+              onClick={() => openEnquiry(featuredProgram)}
               className="px-8 py-4 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-2xl text-xs uppercase tracking-wider shadow-xl transition transform hover:scale-105"
             >
-              Enquire Now for Mock Tests
+              Enquire Now for {featuredProgram.name || featuredProgram.title || "Mock Tests"}
             </button>
             <a
               href="tel:9147178886"
@@ -358,11 +373,11 @@ export const PublicReferralLanding = () => {
               <span className="bg-red-50 text-red-700 border border-red-200 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">
                 Primary Featured Package
               </span>
-              <h2 className="text-2xl font-black text-slate-900 mt-2">Madhyamik Mock Test 2027</h2>
+              <h2 className="text-2xl font-black text-slate-900 mt-2">{featuredProgram.name || featuredProgram.title}</h2>
             </div>
             <div className="text-right">
               <span className="text-[10px] uppercase font-black text-slate-400 block">Package Price</span>
-              <span className="text-3xl font-black text-[#66090D]">₹4,500</span>
+              <span className="text-3xl font-black text-[#66090D]">₹{featuredProgram.price ? featuredProgram.price.toLocaleString("en-IN") : "0"}</span>
             </div>
           </div>
 
@@ -370,46 +385,38 @@ export const PublicReferralLanding = () => {
             <div className="space-y-3">
               <h4 className="font-extrabold text-slate-800 text-sm">Key Benefits Included:</h4>
               <ul className="space-y-2 text-xs font-semibold text-slate-700">
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Full-length board pattern Mock Test 1 & 2</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Checked Answer Scripts by Senior Examiners</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Answer Writing Techniques & Guidance</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Presentation & Time Management Tips</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Key to Success Booklet</span>
-                </li>
+                {(featuredProgram.includes || [
+                  "Full-length board pattern Mock Tests",
+                  "Checked Answer Scripts by Senior Examiners",
+                  "Answer Writing Techniques & Guidance",
+                  "Presentation & Time Management Tips",
+                  "Key to Success Booklet"
+                ]).map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-2">
+                    <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4">
               <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                Empower your exam preparation with checked answer scripts from Pathfinder’s top ranker faculty.
+                {featuredProgram.description || "Empower your exam preparation with checked answer scripts from Pathfinder’s top ranker faculty."}
               </p>
               <div className="space-y-2">
                 <button
-                  onClick={() => openBuyModal(PROGRAMS[0])}
+                  onClick={() => openBuyModal(featuredProgram)}
                   className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center gap-2"
                 >
                   <CreditCardIcon className="w-4 h-4" />
-                  Buy Now (₹4,500)
+                  Buy Now (₹{featuredProgram.price ? featuredProgram.price.toLocaleString("en-IN") : "0"})
                 </button>
                 <button
-                  onClick={() => openEnquiry(PROGRAMS[0])}
+                  onClick={() => openEnquiry(featuredProgram)}
                   className="w-full py-3 bg-[#66090D] hover:bg-[#800b11] text-white font-extrabold rounded-xl text-xs uppercase tracking-wider transition"
                 >
-                  Enquire for Madhyamik 2027
+                  Enquire for {featuredProgram.name || featuredProgram.title}
                 </button>
               </div>
             </div>
@@ -426,7 +433,7 @@ export const PublicReferralLanding = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {availablePrograms.slice(1).map((prog) => (
+          {otherPrograms.map((prog) => (
             <div key={prog.id} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-lg transition">
               <div className="space-y-2">
                 <span className="text-[10px] font-black uppercase text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200">
