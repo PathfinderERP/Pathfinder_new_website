@@ -172,7 +172,24 @@ export const PublicReferralLanding = () => {
     const baseUrl = env.API_BASE_URL || env.apiBaseUrl || "";
 
     try {
-      // 1. Auto-register or authenticate student
+      // 1. Save Landing Registration Lead
+      try {
+        await landingAPI.register({
+          name: buyFormData.fullName,
+          phone: buyFormData.phone,
+          email: buyFormData.email,
+          student_class: activeBuyProgram ? activeBuyProgram.className || activeBuyProgram.class_name || "Class X" : "Class X",
+          course_type: activeBuyProgram ? activeBuyProgram.title || activeBuyProgram.name : "Mock Test",
+          centre: buyFormData.centre || "Kolkata",
+          city: buyFormData.centre || "Kolkata",
+          page_source: `Shiksha Bandhu Purchase (${referralId})`,
+          referral_id: referralId,
+        });
+      } catch (leadErr) {
+        console.warn("Landing registration lead notice:", leadErr);
+      }
+
+      // 2. Auto-register or authenticate student
       let authUser = null;
       let authToken = null;
 
@@ -214,7 +231,7 @@ export const PublicReferralLanding = () => {
         localStorage.setItem("pathfinder_session_365", "true");
       }
 
-      // 2. Pre-save course purchase intent in local storage
+      // 3. Pre-save course purchase intent in local storage
       const merchantTxnNo = `TXN${Date.now()}`;
       const amountPaid = activeBuyProgram.price || 4500;
       const purchaseIntent = {
@@ -237,7 +254,7 @@ export const PublicReferralLanding = () => {
         localStorage.setItem("pathfinder_purchases", JSON.stringify(existingCourses));
       }
 
-      // 3. Initiate ICICI Payment Gateway
+      // 4. Initiate ICICI Payment Gateway
       let gatewayConfig = {
         merchantId: "100000000007164",
         aggregatorID: "A100000000007164",
@@ -272,7 +289,8 @@ export const PublicReferralLanding = () => {
         customerMobileNo: buyFormData.phone,
         customerName: buyFormData.fullName,
         addlParam1: activeBuyProgram.id,
-        addlParam2: referralId // Passes referral ID for 10% bonus calculation
+        addlParam2: referralId, // Passes referral ID for 10% bonus calculation
+        addlParam3: "shiksha_bandhu" // Indicates payment originated from Shiksha Bandhu portal
       };
 
       const hashRes = await axios.post(`${baseUrl}/api/courses/icici/generate-hash/`, {
@@ -305,8 +323,8 @@ export const PublicReferralLanding = () => {
       } else if (targetRedirect) {
         window.location.href = targetRedirect;
       } else {
-        // Fallback to my-courses with success parameter if gateway proxy in dev
-        navigate(`/my-courses?txnNo=${merchantTxnNo}&status=SUCCESS`);
+        // Fallback to Shiksha Bandhu portal with success parameter if gateway proxy in dev
+        navigate(`/shiksha-bandhu/dashboard?txnNo=${merchantTxnNo}&status=SUCCESS`);
       }
 
     } catch (err) {
