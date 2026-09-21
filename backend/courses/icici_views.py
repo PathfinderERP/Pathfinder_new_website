@@ -234,23 +234,27 @@ class ICICICallbackView(APIView):
             
             host = request.get_host()
             scheme = 'https' if request.is_secure() else 'http'
-            base_url = f"{scheme}://{host}"
 
-            if addl3 == "shiksha_bandhu" or "shiksha" in request.path:
-                redirect_url = f"{base_url}/shiksha-bandhu/dashboard?txnNo={txn_no}&status={txn_status}"
+            # Redirect to frontend domain (pathfinder.edu.in) instead of backend API subdomain (api.pathfinder.edu.in)
+            if 'pathfinder.edu.in' in host:
+                base_url = "https://pathfinder.edu.in"
+            elif 'localhost' in host or '127.0.0.1' in host:
+                base_url = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip('/')
             else:
-                redirect_url = f"{base_url}/shiksha-bandhu/dashboard?txnNo={txn_no}&status={txn_status}"
+                clean_host = host.replace('api.', '')
+                base_url = f"{scheme}://{clean_host}"
 
+            redirect_url = f"{base_url}/shiksha-bandhu/dashboard?txnNo={txn_no}&status={txn_status}"
             return redirect(redirect_url)
         except Exception as e:
             logger.error(f"Error handling ICICI callback POST: {e}")
-            return redirect("/shiksha-bandhu/dashboard")
+            return redirect("https://pathfinder.edu.in/shiksha-bandhu/dashboard")
 
     def get(self, request):
         """
         Handle GET callback if gateway redirects via GET.
         """
-        return redirect("/shiksha-bandhu/dashboard")
+        return redirect("https://pathfinder.edu.in/shiksha-bandhu/dashboard")
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ICICIWebhookView(APIView):
