@@ -57,14 +57,16 @@ const PATHFINDER_CENTRES = [
 
 export const PublicReferralLanding = () => {
   const { referralId = "SB004", programSlug } = useParams();
-  const selectedProgram = programSlug ? getProgram(programSlug) : null;
   const navigate = useNavigate();
   const { setAuthenticatedUser } = useAuth();
 
   const [availablePrograms, setAvailablePrograms] = useState(PROGRAMS);
 
-  const featuredProgram = selectedProgram 
-    || availablePrograms.find(p => p.slug === programSlug || p.id === programSlug)
+  const findProgram = (idOrSlug) => {
+    return availablePrograms.find(p => p.slug === idOrSlug || p.id === idOrSlug) || getProgram(idOrSlug);
+  };
+
+  const featuredProgram = (programSlug && findProgram(programSlug))
     || availablePrograms.find(p => p.featured) 
     || availablePrograms[0] 
     || PROGRAMS[0];
@@ -636,16 +638,16 @@ export const PublicReferralLanding = () => {
                   <div className="space-y-1">
                     <label className="uppercase tracking-wider">Selected Program</label>
                     <select
-                      value={activeEnquiryProgram.id}
+                      value={activeEnquiryProgram.id || activeEnquiryProgram.slug}
                       onChange={(e) => {
-                        const p = getProgram(e.target.value);
+                        const p = findProgram(e.target.value);
                         if (p) setActiveEnquiryProgram(p);
                       }}
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900"
                     >
-                      {PROGRAMS.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name} (₹{p.price.toLocaleString("en-IN")})
+                      {availablePrograms.map((p) => (
+                        <option key={p.id || p.slug} value={p.id || p.slug}>
+                          {p.title || p.name} (₹{Number(p.price || 0).toLocaleString("en-IN")})
                         </option>
                       ))}
                     </select>
@@ -797,16 +799,16 @@ export const PublicReferralLanding = () => {
                 <div className="space-y-1">
                   <label className="uppercase tracking-wider text-[11px] text-slate-500">Selected Mock Test Program</label>
                   <select
-                    value={activeBuyProgram.id}
+                    value={activeBuyProgram.id || activeBuyProgram.slug}
                     onChange={(e) => {
-                      const p = getProgram(e.target.value);
+                      const p = findProgram(e.target.value);
                       if (p) setActiveBuyProgram(p);
                     }}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#66090D] text-slate-900 font-bold"
                   >
-                    {PROGRAMS.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} (₹{p.price.toLocaleString("en-IN")})
+                    {availablePrograms.map((p) => (
+                      <option key={p.id || p.slug} value={p.id || p.slug}>
+                        {p.title || p.name} (₹{Number(p.price || 0).toLocaleString("en-IN")})
                       </option>
                     ))}
                   </select>
