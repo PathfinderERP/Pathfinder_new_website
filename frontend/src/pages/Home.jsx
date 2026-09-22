@@ -2458,6 +2458,7 @@ function ResultsSection({ selectedCentre }) {
                 quote: topper.topper_msg || "No message available",
                 centre: centre.centre || "Unknown",
                 badge: topper.badge || "",
+                year: topper.year ? topper.year.toString() : "",
                 imgHeight: "h-56",
                 imgWidth: "w-full",
               });
@@ -2675,7 +2676,9 @@ function ResultsSection({ selectedCentre }) {
                                 <div className="bg-gradient-to-br from-orange-500 to-red-600 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-md">
                                   {student.score}%
                                 </div>
-                                <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">CLASS OF 2024</span>
+                                <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                                  CLASS OF {student.year || "2024"}
+                                </span>
                               </div>
                             </div>
 
@@ -2778,7 +2781,9 @@ function ResultsSection({ selectedCentre }) {
                         <div className="bg-gradient-to-br from-orange-500 to-red-600 text-white text-[11px] font-black px-3.5 py-1.5 rounded-full shadow-md">
                           {student.score}%
                         </div>
-                        <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg tracking-wider">CLASS OF 2024</span>
+                        <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg tracking-wider">
+                          CLASS OF {student.year || "2024"}
+                        </span>
                       </div>
                     </div>
 
