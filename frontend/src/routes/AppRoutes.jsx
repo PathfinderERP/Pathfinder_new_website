@@ -17,6 +17,7 @@ import StudentResults from "../pages/DigitalPart/StudentResults";
 import Notices from "../pages/DigitalPart/Notices";
 import Schedule from "../pages/DigitalPart/Schedule";
 import Chats from "../pages/DigitalPart/Chats";
+import PhysicalAssets from "../pages/DigitalPart/PhysicalAssets";
 import ProtectedRoute from "../components/ProtectedRoute";
 import NotFound from "../pages/Notfound/NotFound";
 import CustomPageRenderer from "../pages/CustomPageRenderer";
@@ -75,6 +76,7 @@ import JEEAnalysisManagement from "../components/admin/JEEAnalysisManagement.jsx
 import CustomPagesManagement from "../components/admin/CustomPagesManagement.jsx";
 import AdsLeadsList from "../components/admin/AdsLeadsList";
 import ShikshaHubManagement from "../components/admin/ShikshaHubManagement.jsx";
+import ShikshaProductsManagement from "../components/admin/ShikshaProductsManagement.jsx";
 import FranchiseInquiryList from "../components/admin/FranchiseInquiryList";
 import PopupManagement from "../components/admin/PopupManagement";
 import Centres from "../pages/Centres/Centres";
@@ -92,6 +94,10 @@ import { Jeelandingpage } from "../pages/add_landingpage/pages/Jeelandingpage";
 import { Neetlandingpage } from "../pages/add_landingpage/pages/Neetlandingpage";
 import { Clatlandingpage } from "../pages/add_landingpage/pages/Clatlandingpage";
 import { Paislandingpage } from "../pages/add_landingpage/pages/Paislandingpage";
+import { MockTestLandingPage } from "../pages/add_landingpage/pages/MockTestLandingPage";
+import { FoundationLandingPage } from "../pages/add_landingpage/pages/FoundationLandingPage";
+import { PmoLandingPage } from "../pages/add_landingpage/pages/PmoLandingPage";
+import { PmtseLandingPage } from "../pages/add_landingpage/pages/PmtseLandingPage";
 import Pais from "../pages/Pais";
 import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
@@ -189,6 +195,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <MainLayout>
               <StudentResults />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/physical-assets"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <PhysicalAssets />
             </MainLayout>
           </ProtectedRoute>
         }
@@ -377,32 +393,84 @@ const AppRoutes = () => {
         element={<Neetlandingpage />}
       />
       <Route
+        path="/mock-test-program"
+        element={
+          <MainLayout showFooter={false}>
+            <CustomPageRenderer slug="mock-test-program" />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/competitive-exam-programme"
+        element={
+          <MainLayout showFooter={false}>
+            <CustomPageRenderer slug="competitive-exam-programme" />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/cbse-mock-test-program"
+        element={<MockTestLandingPage boardType="cbse" />}
+      />
+      <Route
+        path="/icse-isc-mock-test-program"
+        element={<MockTestLandingPage boardType="icse" />}
+      />
+      <Route
+        path="/wb-board-mock-test-program"
+        element={<MockTestLandingPage boardType="wb" />}
+      />
+      <Route
+        path="/madhyamik-mock-test-program"
+        element={<MockTestLandingPage boardType="wb" />}
+      />
+      <Route
+        path="/foundation-programme"
+        element={<FoundationLandingPage />}
+      />
+      <Route
         path="/apply_now/clat"
         element={<Clatlandingpage />}
       />
       <Route
+        path="/apply_now/allindia/pmo"
+        element={<PmoLandingPage />}
+      />
+      <Route
+        path="/apply_now/allindia/pmtse"
+        element={<PmtseLandingPage />}
+      />
+      <Route
+        path="/pmo"
+        element={<PmoLandingPage />}
+      />
+      <Route
+        path="/pmtse"
+        element={<PmtseLandingPage />}
+      />
+      <Route
         path="/apply_now/pntse"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/apply_now/pais"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/apply_now/scholarship"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/apply_now/allindia/pntse"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/apply_now/allindia/pais"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/pntse"
-        element={<Paislandingpage />}
+        element={<PmtseLandingPage />}
       />
       <Route
         path="/anthe"
@@ -649,6 +717,16 @@ const AppRoutes = () => {
           <AdminProtectedRoute requiredPermission="manage_ads_leads">
             <AdminLayout>
               <ShikshaHubManagement />
+            </AdminLayout>
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/business/admin/shiksha-products"
+        element={
+          <AdminProtectedRoute requiredPermission="manage_ads_leads">
+            <AdminLayout>
+              <ShikshaProductsManagement />
             </AdminLayout>
           </AdminProtectedRoute>
         }

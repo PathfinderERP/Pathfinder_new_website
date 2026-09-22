@@ -41,9 +41,32 @@ class ShikshaBandhuBonus(Document):
     bonus_amount = fields.IntField(default=250)
     status = fields.StringField(default='Pending', choices=['Pending', 'Successful', 'Cancelled'])
     created_at = fields.DateTimeField(default=datetime.datetime.utcnow)
-
     meta = {
         'collection': 'shiksha_bandhu_bonuses',
         'ordering': ['-created_at'],
         'indexes': ['partner_id', 'status', 'created_at']
     }
+
+
+class ShikshaBandhuItem(Document):
+    title = fields.StringField(required=True, max_length=255)
+    slug = fields.StringField(required=False, max_length=100)
+    board = fields.StringField(max_length=100, default='WBBSE')
+    class_name = fields.StringField(max_length=100, default='Class X')
+    price = fields.IntField(required=True, default=4500)
+    description = fields.StringField(required=False, null=True)
+    includes = fields.ListField(fields.StringField(), default=list)
+    featured = fields.BooleanField(default=False)
+    status = fields.StringField(default='active', choices=['active', 'archived'])
+    created_at = fields.DateTimeField(default=datetime.datetime.utcnow)
+    updated_at = fields.DateTimeField(default=datetime.datetime.utcnow)
+
+    meta = {
+        'collection': 'shiksha_bandhu_items',
+        'ordering': ['-created_at'],
+        'indexes': ['slug', 'status', 'featured']
+    }
+
+    def __str__(self):
+        return f"{self.title} (₹{self.price})"
+

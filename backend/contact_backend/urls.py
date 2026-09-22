@@ -30,6 +30,8 @@ def root(request):
         }
     })
 
+from courses import icici_views
+
 urlpatterns = [
     path('', root, name='root'),
     path('business/admin/', admin.site.urls),
@@ -37,6 +39,8 @@ urlpatterns = [
     path('api/auth/', include('users.urls')),    # Your existing auth
     path('api/business/admin/auth/', include('admin_auth.urls')),  # ADD THIS LINE - Admin authentication
     path('api/courses/', include('courses.urls')),  # Courses URLs
+    path('api/icici/webhook/', icici_views.ICICIWebhookView.as_view()),
+    path('api/icici/webhook', icici_views.ICICIWebhookView.as_view()),
     path('api/centres/', include('centres.urls')),
     path('api/business/admin/centres/', include('centres.urls')), # Admin Centres
     path('api/jobs/', include('job_post.urls')),  

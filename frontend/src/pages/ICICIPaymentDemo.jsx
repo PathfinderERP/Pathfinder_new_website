@@ -30,18 +30,36 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 export const ICICIPaymentDemo = () => {
   const [activeTab, setActiveTab] = useState('initiateSale'); // initiateSale, generateOTP, verifyOTP, authorize, statusCheck, refund, generateQR, userCancel, cardBin, serviceCharges
 
-  // Default credentials provided in prompt
+  // Production Live Credentials Config
   const [credentials, setCredentials] = useState({
-    merchantId: '100000000007164',
-    aggregatorID: 'A100000000007164',
-    secretKey: 'db06cca0-838b-4e01-8b20-6ac446ffb6bd',
-    saleUrl: 'https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale',
-    commandUrl: 'https://pgpayuat.icici.bank.in/tsp/pg/api/command',
-    qrUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/generateQR',
-    cancelUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/userCancel',
-    cardBinUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/getCardBin',
-    serviceChargesUrl: 'https://pgpayuat.icicibank.com/tsp/pg/api/getServiceCharges'
+    merchantId: '100000000517815',
+    aggregatorID: '100000000517814',
+    secretKey: '', // Provided via environment variable or manual input
+    saleUrl: 'https://pgpay.icicibank.com/pg/api/v2/initiateSale',
+    commandUrl: 'https://pgpay.icicibank.com/pg/api/command',
+    qrUrl: 'https://pgpay.icicibank.com/pg/api/generateQR',
+    cancelUrl: 'https://pgpay.icicibank.com/pg/api/userCancel',
+    cardBinUrl: 'https://pgpay.icicibank.com/pg/api/getCardBin',
+    serviceChargesUrl: 'https://pgpay.icicibank.com/pg/api/getServiceCharges'
   });
+
+  useEffect(() => {
+    // Fetch live config directly from backend
+    axios.get(`${API_BASE_URL}/api/courses/icici/config/`)
+      .then(res => {
+        if (res.data && res.data.merchantId) {
+          setCredentials(prev => ({
+            ...prev,
+            merchantId: res.data.merchantId || prev.merchantId,
+            aggregatorID: res.data.aggregatorID || prev.aggregatorID,
+            secretKey: res.data.secretKey || prev.secretKey,
+            saleUrl: res.data.saleUrl || prev.saleUrl,
+            commandUrl: res.data.commandUrl || prev.commandUrl
+          }));
+        }
+      })
+      .catch(err => console.warn("Could not load backend ICICI config", err));
+  }, []);
 
   // State for Initiate Sale Form
   const [saleForm, setSaleForm] = useState({
@@ -425,14 +443,11 @@ export const ICICIPaymentDemo = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700/60 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-emerald-950/80 border border-emerald-500/40 px-4 py-2 rounded-xl text-xs">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-slate-300 font-semibold">UAT Sandbox Testing Mode</span>
+              <span className="text-emerald-300 font-extrabold tracking-wide">🚀 LIVE PRODUCTION GATEWAY</span>
             </div>
-            <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded-md">
-              v1.0.2 (Proxy Active)
-            </span>
           </div>
         </div>
 

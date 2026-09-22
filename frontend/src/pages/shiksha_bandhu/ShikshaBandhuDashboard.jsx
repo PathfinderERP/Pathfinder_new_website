@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   CursorArrowRaysIcon,
   UserPlusIcon,
@@ -8,6 +8,8 @@ import {
   ShareIcon,
   ClipboardDocumentIcon,
   CheckIcon,
+  AcademicCapIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { ShikshaBandhuLayout } from "./components/ShikshaBandhuLayout";
 import { StatCard } from "./components/StatCard";
@@ -17,10 +19,39 @@ import { PROGRAMS, formatINR, referralLink } from "./ShikshaBandhuData";
 import { shikshaBandhuAPI } from "../../services/api";
 
 export const ShikshaBandhuDashboard = () => {
+  const [searchParams] = useSearchParams();
+  const txnNo = searchParams.get("txnNo") || searchParams.get("merchantTxnNo") || searchParams.get("txnID");
+  const statusParam = searchParams.get("status");
+
   const [activeShareProgram, setActiveShareProgram] = useState(null);
   const [copiedId, setCopiedId] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [liveStats, setLiveStats] = useState(null);
+
+  const isSuccessPayment = statusParam === "0000" || statusParam === "SUCCESS" || statusParam === "0";
+
+  const purchasedCourse = (() => {
+    try {
+      const saved = localStorage.getItem("shiksha_bandhu_purchased_course");
+      if (saved) return JSON.parse(saved);
+      const myCourses = localStorage.getItem("pathfinder_my_courses");
+      if (myCourses) {
+        const parsed = JSON.parse(myCourses);
+        if (parsed && parsed.length > 0) return parsed[0];
+      }
+      if (txnNo && isSuccessPayment) {
+        return {
+          id: `CRS-${txnNo}`,
+          name: "Pathfinder Mock Test Package",
+          price: 10,
+          purchasedAt: new Date().toISOString()
+        };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  })();
 
   return (
     <ShikshaBandhuLayout>
@@ -32,6 +63,10 @@ export const ShikshaBandhuDashboard = () => {
             shikshaBandhuAPI.getStats(user.id).then((res) => {
               if (res.data && res.data.stats) {
                 setLiveStats(res.data.stats);
+              }
+              if (res.data && res.data.partner) {
+                const updatedUser = { ...user, ...res.data.partner };
+                localStorage.setItem("shiksha_bandhu_user", JSON.stringify(updatedUser));
               }
             }).catch((err) => console.error(err));
           }
@@ -58,6 +93,50 @@ export const ShikshaBandhuDashboard = () => {
 
         return (
           <div className="space-y-6 pb-12">
+            {/* Payment Success Notice */}
+            {txnNo && isSuccessPayment && (
+              <section className="rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950 via-slate-900 to-emerald-950 p-5 text-white shadow-xl flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg">
+                    <CheckCircleIcon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-300">
+                      <SparklesIcon className="w-3.5 h-3.5" />
+                      <span>Payment Confirmed</span>
+                    </div>
+                    <h3 className="font-black text-base text-white">Payment Received & Course Enrolled! 🎉</h3>
+                    <p className="text-xs text-slate-300 font-medium">
+                      Txn Ref: <span className="font-mono font-bold text-emerald-300">{txnNo}</span> • Mock test access & referral portal privileges are active.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Purchased Course Banner */}
+            {purchasedCourse && (
+              <section className="rounded-3xl border-2 border-emerald-400/40 bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 p-6 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-emerald-400/30">
+                    <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Enrolled Course</span>
+                  </div>
+                  <h2 className="text-xl font-black text-white">{purchasedCourse.name}</h2>
+                  <p className="text-xs text-slate-300 font-semibold">
+                    Purchased Package • Mock test papers, answer script review & Key to Success booklet unlocked.
+                  </p>
+                </div>
+                <Link
+                  to="/shiksha-bandhu/mock-tests"
+                  className="px-5 py-3 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-xs rounded-2xl uppercase tracking-wider shadow-lg transition shrink-0 flex items-center gap-2"
+                >
+                  <AcademicCapIcon className="w-4 h-4" />
+                  <span>Access Your Course</span>
+                </Link>
+              </section>
+            )}
+
             {/* Hero Section */}
             <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#4a0609] via-[#66090D] to-[#8a0e14] p-6 sm:p-8 text-white shadow-xl">
               <div className="relative z-10 space-y-4">

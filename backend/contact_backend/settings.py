@@ -206,6 +206,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'contact_backend.urls'
+APPEND_SLASH = False
 
 TEMPLATES = [
     {

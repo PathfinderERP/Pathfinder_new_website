@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import {
@@ -16,12 +16,17 @@ import {
     MegaphoneIcon,
     PresentationChartLineIcon,
     RocketLaunchIcon,
-    TrophyIcon
+    TrophyIcon,
+    ChevronDownIcon,
+    ShoppingBagIcon
 } from "@heroicons/react/24/outline";
 
 const AdminSidebar = ({ isOpen, toggleSidebar }) => {
     const { admin } = useAuth();
     const location = useLocation();
+    const [shikshaMenuOpen, setShikshaMenuOpen] = useState(
+        location.pathname.includes("/shiksha")
+    );
 
     const isActiveLink = (path) => {
         return location.pathname === path || location.pathname.startsWith(path + "/");
@@ -34,7 +39,16 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
         { name: "Applicants",       path: "/business/admin/course-applications", icon: DocumentTextIcon,        permission: "manage_applications" },
         { name: "Ads Leads",        path: "/business/admin/ads-leads",           icon: UserGroupIcon,           permission: "manage_ads_leads" },
         { name: "PNTSE Management", path: "/business/admin/pntse",               icon: TrophyIcon,              permission: "manage_ads_leads" },
-        { name: "Shiksha Hub",       path: "/business/admin/shiksha-hub",        icon: UserGroupIcon,           permission: "manage_ads_leads" },
+        { 
+          name: "Shiksha Portal",       
+          icon: UserGroupIcon,           
+          permission: "manage_ads_leads",
+          isParent: true,
+          subItems: [
+            { name: "Leads & Partners", path: "/business/admin/shiksha-hub", icon: UserGroupIcon },
+            { name: "Shiksha Bandhu Products", path: "/business/admin/shiksha-products", icon: ShoppingBagIcon }
+          ]
+        },
         { name: "Franchise",        path: "/business/admin/franchise-inquiries", icon: BuildingStorefrontIcon,  permission: "manage_franchise" },
         { name: "Counselling",      path: "/business/admin/counselling-bookings", icon: UserIcon,                permission: "manage_counselling_bookings" },
         { name: "Centres",          path: "/business/admin/centres",             icon: BuildingOfficeIcon,      permission: "manage_centres" },
@@ -54,9 +68,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
     // Filter items based on permissions
     const filteredNavItems = navItems.filter(item => {
         if (admin?.is_superuser) return true;
-        // If no specific permission required, show it
         if (!item.permission) return true;
-        // Check if admin has the required permission
         return admin?.permissions?.includes(item.permission);
     });
 
@@ -94,30 +106,83 @@ const AdminSidebar = ({ isOpen, toggleSidebar }) => {
 
                 {/* Navigation Section */}
                 <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar">
-                    {filteredNavItems.map((item) => (
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            title={!isOpen ? item.name : ""}
-                            className={`flex items-center py-2 text-sm font-medium rounded-lg transition-all duration-200 group ${isOpen ? "px-3" : "px-2 justify-center"} ${isActiveLink(item.path)
-                                ? "bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-500"
-                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
-                                }`}
-                        >
-                            <item.icon
-                                className={`w-5 h-5 transition-colors duration-200 flex-shrink-0 ${isOpen ? "mr-3" : "mr-0"} ${isActiveLink(item.path)
-                                    ? "text-orange-600 dark:text-orange-500"
-                                    : "text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400"
+                    {filteredNavItems.map((item) => {
+                        if (item.isParent) {
+                            const isParentActive = item.subItems.some(sub => isActiveLink(sub.path));
+                            return (
+                                <div key={item.name} className="space-y-1">
+                                    <button
+                                        onClick={() => setShikshaMenuOpen(!shikshaMenuOpen)}
+                                        className={`w-full flex items-center justify-between py-2 text-sm font-medium rounded-lg transition-all duration-200 group ${isOpen ? "px-3" : "px-2 justify-center"} ${isParentActive
+                                            ? "bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-500"
+                                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
+                                            }`}
+                                    >
+                                        <div className="flex items-center">
+                                            <item.icon
+                                                className={`w-5 h-5 transition-colors duration-200 flex-shrink-0 ${isOpen ? "mr-3" : "mr-0"} ${isParentActive
+                                                    ? "text-orange-600 dark:text-orange-500"
+                                                    : "text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400"
+                                                    }`}
+                                            />
+                                            <span className={`whitespace-nowrap transition-opacity duration-200 ${isOpen ? "opacity-100" : "hidden opacity-0 w-0 overflow-hidden"}`}>
+                                                {item.name}
+                                            </span>
+                                        </div>
+                                        {isOpen && (
+                                            <ChevronDownIcon className={`w-4 h-4 transition-transform duration-200 ${shikshaMenuOpen ? "transform rotate-180" : ""}`} />
+                                        )}
+                                    </button>
+
+                                    {/* Submenu */}
+                                    {shikshaMenuOpen && (
+                                        <div className={`space-y-1 ${isOpen ? "pl-7" : "pl-0"}`}>
+                                            {item.subItems.map((sub) => (
+                                                <Link
+                                                    key={sub.path}
+                                                    to={sub.path}
+                                                    title={!isOpen ? sub.name : ""}
+                                                    className={`flex items-center py-1.5 text-xs font-semibold rounded-md transition-all duration-200 group ${isOpen ? "px-3" : "px-2 justify-center"} ${isActiveLink(sub.path)
+                                                        ? "text-orange-600 dark:text-orange-500 font-bold"
+                                                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                                                        }`}
+                                                >
+                                                    <span className={`whitespace-nowrap ${isOpen ? "opacity-100" : "hidden opacity-0 w-0 overflow-hidden"}`}>
+                                                        • {sub.name}
+                                                    </span>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        }
+
+                        return (
+                            <Link
+                                key={item.path}
+                                to={item.path}
+                                title={!isOpen ? item.name : ""}
+                                className={`flex items-center py-2 text-sm font-medium rounded-lg transition-all duration-200 group ${isOpen ? "px-3" : "px-2 justify-center"} ${isActiveLink(item.path)
+                                    ? "bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-500"
+                                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
                                     }`}
-                            />
-                            <span className={`whitespace-nowrap transition-opacity duration-200 ${isOpen ? "opacity-100" : "hidden opacity-0 w-0 overflow-hidden"}`}>
-                                {item.name}
-                            </span>
-                            {isActiveLink(item.path) && isOpen && (
-                                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-500 flex-shrink-0" />
-                            )}
-                        </Link>
-                    ))}
+                            >
+                                <item.icon
+                                    className={`w-5 h-5 transition-colors duration-200 flex-shrink-0 ${isOpen ? "mr-3" : "mr-0"} ${isActiveLink(item.path)
+                                        ? "text-orange-600 dark:text-orange-500"
+                                        : "text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400"
+                                        }`}
+                                />
+                                <span className={`whitespace-nowrap transition-opacity duration-200 ${isOpen ? "opacity-100" : "hidden opacity-0 w-0 overflow-hidden"}`}>
+                                    {item.name}
+                                </span>
+                                {isActiveLink(item.path) && isOpen && (
+                                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-500 flex-shrink-0" />
+                                )}
+                            </Link>
+                        );
+                    })}
                 </nav>
 
                 {/* Footer Section */}

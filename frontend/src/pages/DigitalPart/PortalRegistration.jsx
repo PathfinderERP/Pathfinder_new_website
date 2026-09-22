@@ -4,7 +4,7 @@ import { IdentificationIcon } from "@heroicons/react/24/outline";
 
 const PortalRegistration = () => {
     return (
-        <div className="min-h-screen bg-[#F8F9FA] flex flex-col lg:flex-row p-4 lg:p-6 gap-6 font-sans text-slate-900 pt-40 lg:pt-36 pb-12 sm:pb-16 2xl:max-w-7xl 2xl:mx-auto 2xl:shadow-2xl 2xl:rounded-[60px] 2xl:my-8 2xl:border 2xl:border-slate-100">
+        <div className="min-h-screen bg-[#F8F9FA] flex flex-col lg:flex-row p-4 lg:p-6 gap-6 font-sans text-slate-900 pt-16 sm:pt-20 lg:pt-28 xl:pt-30 pb-16 max-w-7xl mx-auto">
             <StudentSidebar />
             <main className="flex-1 flex flex-col gap-6 max-w-full overflow-hidden">
                 <header className="mb-4">

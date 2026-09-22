@@ -5,7 +5,7 @@ import { landingAPI, centresAPI } from "../../../services/api";
 import { toast } from 'react-toastify';
 import confetti from 'canvas-confetti';
 
-const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false }) => {
+const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false, classOptions = null, hideCourseType = false }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [isDetecting, setIsDetecting] = useState(false);
@@ -14,7 +14,8 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
         name: "",
         phone: "",
         student_class: "",
-        course_type: "",
+        course_type: hideCourseType ? "Mock Test Program" : "",
+        city: "",
         centre: "",
         last_exam_percentage: "",
         page_source: pageSource || "Landing Page"
@@ -110,7 +111,10 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            const submitData = { ...formData };
+            const submitData = { 
+                ...formData,
+                centre: formData.city || formData.centre 
+            };
             if (!showPercentage) {
                 delete submitData.last_exam_percentage;
             }
@@ -228,7 +232,7 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className={`grid grid-cols-1 ${hideCourseType ? 'md:grid-cols-1' : 'md:grid-cols-2'} gap-4`}>
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Your Class</label>
                                         <select
@@ -239,55 +243,43 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
                                             className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none"
                                         >
                                             <option value="" className="bg-black">Select Class</option>
-                                            <option value="11" className="bg-black">11</option>
-                                            <option value="12" className="bg-black">12</option>
-                                            <option value="12 Passout" className="bg-black">12 Passout</option>
+                                            {(classOptions || ["11", "12", "12 Passout"]).map((cls, idx) => (
+                                                <option key={idx} value={cls} className="bg-black">
+                                                    {cls.startsWith("Class") ? cls : `Class ${cls}`}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Course Type</label>
-                                        <select
-                                            name="course_type"
-                                            value={formData.course_type}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none"
-                                        >
-                                            <option value="" className="bg-black">Select Program</option>
-                                            <option value="Online Program" className="bg-black">Online Program</option>
-                                            <option value="Offline Program" className="bg-black">Offline Program</option>
-                                        </select>
-                                    </div>
+                                    {!hideCourseType && (
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Course Type</label>
+                                            <select
+                                                name="course_type"
+                                                value={formData.course_type}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none"
+                                            >
+                                                <option value="" className="bg-black">Select Program</option>
+                                                <option value="Online Program" className="bg-black">Online Program</option>
+                                                <option value="Offline Program" className="bg-black">Offline Program</option>
+                                            </select>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Nearest Centre</label>
-                                        <div className="relative">
-                                            <select
-                                                name="centre"
-                                                value={formData.centre}
-                                                onChange={handleInputChange}
-                                                required
-                                                className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none pr-24"
-                                            >
-                                                <option value="" className="bg-black">Select Centre</option>
-                                                {centres.map((centre, index) => (
-                                                    <option key={index} value={centre.centre || centre.name} className="bg-black">
-                                                        {centre.centre || centre.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <button
-                                                type="button"
-                                                onClick={handleDetectLocation}
-                                                disabled={isDetecting}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[10px] font-bold text-white bg-[#FF9F00] hover:bg-[#FF9F00]/80 px-2.5 py-1.5 rounded-lg transition-colors"
-                                            >
-                                                <MapPin className="w-3 h-3" />
-                                                {isDetecting ? '...' : 'AUTO'}
-                                            </button>
-                                        </div>
+                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">City</label>
+                                        <input
+                                            type="text"
+                                            name="city"
+                                            value={formData.city}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter your city"
+                                            required
+                                            className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] transition-all"
+                                        />
                                     </div>
                                     {showPercentage && (
                                         <div className="space-y-1.5">

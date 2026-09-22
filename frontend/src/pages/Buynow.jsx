@@ -62,7 +62,7 @@ const Buynow = () => {
   ];
 
   const parseCurrency = (currencyString) => {
-    if (!currencyString) return 0;
+    if (!currencyString && currencyString !== 0) return 0;
     let cleanString = currencyString.toString().trim();
     cleanString = cleanString.replace(/[₹$,]/g, "");
     if (cleanString.toLowerCase().includes("k")) {
@@ -74,14 +74,56 @@ const Buynow = () => {
     }
   };
 
+  const getEffectivePrice = (data) => {
+    if (!data) return 0;
+    const disc = data.discounted_price ?? data.discount_price;
+    if (disc !== undefined && disc !== null && disc !== "" && parseCurrency(disc) > 0) {
+      return parseCurrency(disc);
+    }
+    if (data.plans && Array.isArray(data.plans) && data.plans.length > 0) {
+      const planPrices = data.plans
+        .map(p => parseCurrency(p.discounted_price || p.base_price))
+        .filter(p => p > 0);
+      if (planPrices.length > 0) {
+        return Math.min(...planPrices);
+      }
+    }
+    const base = data.course_price ?? data.price;
+    return parseCurrency(base);
+  };
+
+  const getMrpPrice = (data) => {
+    if (!data) return 0;
+    const base = data.course_price ?? data.price;
+    if (base !== undefined && base !== null && base !== "" && parseCurrency(base) > 0) {
+      return parseCurrency(base);
+    }
+    if (data.plans && Array.isArray(data.plans) && data.plans.length > 0) {
+      const planMrps = data.plans.map(p => parseCurrency(p.base_price)).filter(p => p > 0);
+      if (planMrps.length > 0) {
+        return Math.max(...planMrps);
+      }
+    }
+    return 0;
+  };
+
   const getCourseDisplayInfo = () => {
     if (!courseData) return null;
+    const sellingPrice = getEffectivePrice(courseData);
+    const mrpPrice = getMrpPrice(courseData);
+    const hasDiscount = mrpPrice > sellingPrice && sellingPrice > 0;
+
     return {
       name: courseData.name,
       goal: courseData.class_level ? `Class ${courseData.class_level}` : courseData.name,
       mode: courseData.mode || "Offline",
       location: courseData.centre || courseData.location || "All Centres",
-      price: `₹${courseData.course_price}`,
+      price: `₹${sellingPrice.toLocaleString()}`,
+      mrp: `₹${mrpPrice.toLocaleString()}`,
+      sellingPriceNum: sellingPrice,
+      mrpNum: mrpPrice,
+      hasDiscount: hasDiscount,
+      discountPercent: hasDiscount ? Math.round(((mrpPrice - sellingPrice) / mrpPrice) * 100) : 0,
       duration: courseData.duration,
       start_date: courseData.start_date,
       thumbnail_url: courseData.thumbnail_url,
@@ -99,17 +141,19 @@ const Buynow = () => {
   }, [courseData, navigate]);
 
   useEffect(() => {
-    if (courseData && courseData.course_price) {
-      const price = parseCurrency(courseData.course_price);
-      if (selectedEmiOption === "full") {
-        setEmiAmount(price);
-        setTotalAmount(price);
-      } else {
-        const selectedOption = emiOptions.find((option) => option.value === selectedEmiOption);
-        if (selectedOption) {
-          const monthlyAmount = price / selectedOption.months;
-          setEmiAmount(monthlyAmount);
+    if (courseData) {
+      const price = getEffectivePrice(courseData);
+      if (price > 0) {
+        if (selectedEmiOption === "full") {
+          setEmiAmount(price);
           setTotalAmount(price);
+        } else {
+          const selectedOption = emiOptions.find((option) => option.value === selectedEmiOption);
+          if (selectedOption) {
+            const monthlyAmount = price / selectedOption.months;
+            setEmiAmount(monthlyAmount);
+            setTotalAmount(price);
+          }
         }
       }
     }
@@ -266,11 +310,24 @@ const Buynow = () => {
       rzp.open();
       ========================================================= */
 
-      // ICICI PAYMENT GATEWAY INTEGRATION
-      const merchantId = "100000000007164";
-      const aggregatorID = "A100000000007164";
-      const secretKey = "db06cca0-838b-4e01-8b20-6ac446ffb6bd";
-      const saleUrl = "https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale";
+      // ICICI PAYMENT GATEWAY INTEGRATION - DYNAMIC CONFIG
+      let gatewayConfig = {
+        merchantId: "100000000007164",
+        aggregatorID: "A100000000007164",
+        secretKey: "db06cca0-838b-4e01-8b20-6ac446ffb6bd",
+        saleUrl: "https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale"
+      };
+
+      try {
+        const configRes = await axios.get(`${API_BASE_URL}/api/courses/icici/config/`);
+        if (configRes.data && configRes.data.merchantId) {
+          gatewayConfig = configRes.data;
+        }
+      } catch (cfgErr) {
+        console.warn("Using default ICICI config fallback", cfgErr);
+      }
+
+      const { merchantId, aggregatorID, secretKey, saleUrl } = gatewayConfig;
 
       const merchantTxnNo = `TXN${Date.now()}`;
       const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
@@ -296,6 +353,30 @@ const Buynow = () => {
         addlParam1: courseInfo ? courseInfo.id : "",
         addlParam2: selectedEmiOption
       };
+
+      // Pre-save purchase record locally so Dashboard and My Courses reflect enrollment immediately upon return
+      try {
+        const purchaseRecord = {
+          id: courseInfo?.id || `CRS-${merchantTxnNo}`,
+          name: courseInfo?.name || "12 All Subjects Comprehensive Batch (JEE/NEET)",
+          mode: "classroom",
+          enrolled_at: new Date().toISOString(),
+          payment_info: {
+            amount_paid: parseFloat(amount) || 2499,
+            payment_id: merchantTxnNo,
+            status: "completed",
+            date: new Date().toISOString()
+          }
+        };
+        const localCourses = JSON.parse(localStorage.getItem('pathfinder_my_courses') || '[]');
+        if (!localCourses.some(c => c.payment_info?.payment_id === merchantTxnNo)) {
+          localCourses.unshift(purchaseRecord);
+          localStorage.setItem('pathfinder_my_courses', JSON.stringify(localCourses));
+          localStorage.setItem('pathfinder_purchases', JSON.stringify(localCourses));
+        }
+      } catch (e) {
+        console.warn("Local storage purchase save warning:", e);
+      }
 
       // Generate HMAC-SHA256 secure hash from backend proxy service
       const hashRes = await axios.post(`${API_BASE_URL}/api/courses/icici/generate-hash/`, {
@@ -324,17 +405,30 @@ const Buynow = () => {
       const resData = proxyRes.data;
       const responseContent = resData.data || resData;
 
-      if (responseContent.redirectURI && responseContent.tranCtx) {
+      console.log("ICICI Gateway Raw Proxy Response:", resData);
+
+      // Extract redirect URL and tranCtx from possible ICICI response key variants
+      const targetRedirect = responseContent.redirectURI || responseContent.redirectUrl || responseContent.redirect_url || responseContent.targetUrl || responseContent.target_url || responseContent.url || responseContent.action;
+      const tranCtx = responseContent.tranCtx || responseContent.tran_ctx || responseContent.tranContext;
+
+      if (targetRedirect && tranCtx) {
         // Direct to payment gateway redirection URL with tranCtx parameter
-        window.location.href = `${responseContent.redirectURI}?tranCtx=${encodeURIComponent(responseContent.tranCtx)}`;
-      } else if (responseContent.redirectURI) {
-        window.location.href = responseContent.redirectURI;
-      } else if (responseContent.targetUrl || responseContent.redirectUrl) {
-        window.location.href = responseContent.targetUrl || responseContent.redirectUrl;
+        const finalUrl = targetRedirect.includes('?') 
+          ? `${targetRedirect}&tranCtx=${encodeURIComponent(tranCtx)}`
+          : `${targetRedirect}?tranCtx=${encodeURIComponent(tranCtx)}`;
+        window.location.href = finalUrl;
+      } else if (targetRedirect) {
+        window.location.href = targetRedirect;
+      } else if (responseContent.html || responseContent.formHtml) {
+        // Render form HTML if gateway returns auto-submit HTML
+        document.open();
+        document.write(responseContent.html || responseContent.formHtml);
+        document.close();
       } else {
-        // Fallback: If gateway returned response status/message or details
-        console.log("ICICI Response:", responseContent);
-        throw new Error(responseContent.responseMessage || responseContent.message || "Payment initiation processed.");
+        // Gateway returned error or unexpected structure
+        console.error("ICICI Gateway unexpected response structure:", responseContent);
+        const errorMsg = responseContent.responseMessage || responseContent.respDescription || responseContent.message || responseContent.error || (typeof responseContent === 'string' ? responseContent : JSON.stringify(responseContent));
+        throw new Error(errorMsg || "Payment initiation returned an unexpected response from ICICI Bank.");
       }
 
     } catch (err) {
@@ -656,6 +750,14 @@ const Buynow = () => {
                   <div className="text-right flex flex-col justify-between">
                     <div>
                       <p className="text-emerald-700 font-extrabold text-2xl">{courseInfo.price}</p>
+                      {courseInfo.hasDiscount && (
+                        <div className="flex items-center justify-end gap-1.5 mt-1">
+                          <span className="text-xs text-slate-400 line-through font-medium">{courseInfo.mrp}</span>
+                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                            {courseInfo.discountPercent}% OFF
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

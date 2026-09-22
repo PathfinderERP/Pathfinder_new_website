@@ -21,6 +21,7 @@ class LandingPageRegistration(Document):
     board = fields.StringField(max_length=100)
     course_type = fields.StringField(max_length=100)
     centre = fields.StringField(max_length=255)
+    city = fields.StringField(max_length=255, required=False, null=True)
     last_exam_percentage = fields.StringField(max_length=10, required=False, null=True)
     
     # Metadata
@@ -28,11 +29,14 @@ class LandingPageRegistration(Document):
     referral_id = fields.StringField(max_length=50, required=False, null=True)
     created_at = fields.DateTimeField(default=datetime.datetime.utcnow)
     is_contacted = fields.BooleanField(default=False)
+    is_paid = fields.BooleanField(default=False)
+    amount_paid = fields.FloatField(default=0.0)
+    txn_ref = fields.StringField(max_length=100, required=False, null=True)
     
     meta = {
         'collection': 'landing_page_registrations',
         'ordering': ['-created_at'],
-        'indexes': ['email', 'phone', 'course_type', 'page_source', 'referral_id']
+        'indexes': ['email', 'phone', 'course_type', 'page_source', 'referral_id', 'is_paid']
     }
     
     def __str__(self):
