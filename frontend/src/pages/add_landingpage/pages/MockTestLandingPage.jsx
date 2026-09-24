@@ -196,9 +196,28 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
     };
 
     const handleICICIPayNow = async () => {
+        if (!formData.name || !formData.phone) {
+            alert("Please fill in your Name and Phone Number to proceed with Buy Now.");
+            scrollToForm();
+            return;
+        }
+
         setIsPayingNow(true);
         try {
-            // Fetch live production credentials and redirect URLs from backend/environment
+            // 1. Pre-save student/lead details into database before redirecting
+            const merchantTxnNo = `TXN${Date.now()}`;
+            try {
+                await landingAPI.register({
+                    ...formData,
+                    centre: formData.city || formData.centre || 'Online',
+                    course_type: `Buy Now Payment (${merchantTxnNo})`,
+                    page_source: `${config.pageSource} [Buy Now Txn: ${merchantTxnNo}]`
+                });
+            } catch (leadErr) {
+                console.warn("Lead save notice on Pay Now:", leadErr);
+            }
+
+            // 2. Fetch live production credentials and redirect URLs from backend/environment
             let gatewayConfig = {
                 merchantId: "100000000517815",
                 aggregatorID: "100000000517814",
@@ -216,7 +235,6 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             }
 
             const { merchantId, aggregatorID, secretKey, saleUrl } = gatewayConfig;
-            const merchantTxnNo = `TXN${Date.now()}`;
             const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
             const amount = "10.00"; // Test amount set to ₹10 as requested
             const customerName = formData.name || 'CBSE Student';
@@ -237,12 +255,12 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 txnDate,
                 customerMobileNo,
                 customerName,
-                addlParam1: 'CBSE Mock Test Program 2',
+                addlParam1: `${config.title} Mock Test Program 2`,
                 addlParam2: 'NONE',
                 addlParam3: formData.student_class || 'Class 10/12'
             };
 
-            // Generate HMAC-SHA256 hash using backend .env secret key
+            // 3. Generate HMAC-SHA256 hash using backend secret key
             const hashRes = await axios.post(`${API_BASE_URL}/api/courses/icici/generate-hash/`, {
                 mode: "v1",
                 params
@@ -251,6 +269,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             const secureHash = hashRes.data?.secureHash || "";
             const fullPayload = { ...params, secureHash };
 
+            // 4. Proxy request to ICICI Bank initiateSale API
             const proxyRes = await axios.post(`${API_BASE_URL}/api/courses/icici/proxy/`, {
                 target_url: saleUrl,
                 payload_type: "json",
@@ -269,18 +288,6 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                     : `${redirectTarget}?tranCtx=${encodeURIComponent(tranCtx)}`;
             }
 
-            // Pre-save lead details along with transaction ID into database before redirecting
-            try {
-                await landingAPI.register({
-                    ...formData,
-                    centre: formData.city || formData.centre || 'Online',
-                    course_type: `Buy Now Payment (${merchantTxnNo})`,
-                    page_source: `${config.pageSource} [Buy Now Txn: ${merchantTxnNo}]`
-                });
-            } catch (leadErr) {
-                console.warn("Lead save error on Pay Now:", leadErr);
-            }
-
             if (redirectTarget) {
                 // Redirect browser directly to ICICI Payment Gateway
                 window.location.href = redirectTarget;
@@ -295,7 +302,6 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
         } catch (error) {
             console.error('ICICI Direct Checkout Error:', error);
             alert(`Payment Gateway Error: ${error.message || 'Unable to connect to ICICI Bank gateway. Please try again.'}`);
-        } finally {
             setIsPayingNow(false);
         }
     };
@@ -506,13 +512,14 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 customPayNowButton={
                     isVersionTwo ? (
                         <motion.button
-                            onClick={() => handleBuyNow()}
+                            onClick={handleICICIPayNow}
+                            disabled={isPayingNow}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold shadow-lg hover:shadow-orange-500/40 transition-all border border-white/20 animate-pulse cursor-pointer"
+                            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold shadow-lg hover:shadow-orange-500/40 transition-all border border-white/20 animate-pulse cursor-pointer disabled:opacity-50"
                         >
                             <CreditCard className="w-5 h-5 text-white" />
-                            <span>BUY NOW</span>
+                            <span>{isPayingNow ? 'REDIRECTING...' : 'BUY NOW'}</span>
                         </motion.button>
                     ) : null
                 }
@@ -680,11 +687,12 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                             {isVersionTwo && (
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleBuyNow()}
-                                                    className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-base md:text-lg rounded-xl shadow-xl hover:shadow-green-500/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2 border border-green-400 cursor-pointer"
+                                                    onClick={handleICICIPayNow}
+                                                    disabled={isPayingNow}
+                                                    className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-base md:text-lg rounded-xl shadow-xl hover:shadow-green-500/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2 border border-green-400 cursor-pointer disabled:opacity-50"
                                                 >
                                                     <CreditCard className="w-5 h-5 text-white" />
-                                                    BUY NOW
+                                                    {isPayingNow ? 'OPENING GATEWAY...' : 'BUY NOW'}
                                                 </button>
                                             )}
                                         </div>

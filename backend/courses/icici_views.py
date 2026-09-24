@@ -216,6 +216,7 @@ class ICICICallbackView(APIView):
             name = data.get('customerName') or ''
 
             is_shiksha_bandhu = bool(addl2 and (str(addl2).startswith('SB') or len(str(addl2)) >= 4))
+            is_success = str(txn_status) in ['0000', '00', 'SUCCESS', '0', 'E000']
 
             if is_success and is_shiksha_bandhu:
                 try:
