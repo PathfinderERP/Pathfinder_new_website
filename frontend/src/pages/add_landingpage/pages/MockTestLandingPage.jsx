@@ -256,7 +256,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 customerMobileNo,
                 customerName,
                 addlParam1: "cbse-mock-test-program-2",
-                addlParam2: "full"
+                addlParam2: ""
             };
 
             // 3. Generate HMAC-SHA256 hash using backend secret key
