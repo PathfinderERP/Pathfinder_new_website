@@ -243,6 +243,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             const amount = "10.00"; // Test amount set to ₹10 as requested
             const customerName = formData.name || 'CBSE Student';
             const customerMobileNo = formData.phone || '9876543210';
+            const customerEmailID = formData.email || `${customerName.toLowerCase().replace(/[^a-z0-9]/g, '')}@pathfinder.edu.in`;
             const returnURL = `${API_BASE_URL}/api/courses/icici/callback/`;
 
             const params = {
