@@ -423,11 +423,11 @@ const AppRoutes = () => {
       />
       <Route
         path="/wb-board-mock-test-program"
-        element={<MockTestLandingPage boardType="wb" />}
+        element={<MockTestLandingPage boardType="wb" isVersionTwo={true} />}
       />
       <Route
         path="/madhyamik-mock-test-program"
-        element={<MockTestLandingPage boardType="wb" />}
+        element={<MockTestLandingPage boardType="wb" isVersionTwo={true} />}
       />
       <Route
         path="/foundation-programme"

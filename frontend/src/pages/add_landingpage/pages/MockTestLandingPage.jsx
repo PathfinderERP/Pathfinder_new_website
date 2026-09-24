@@ -256,6 +256,8 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 } else {
                     amount = "9000.00";
                 }
+            } else if (boardType === 'wb') {
+                amount = "4500.00";
             } else if (boardType === 'cbse') {
                 amount = "7500.00";
             }
@@ -543,7 +545,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                 <span className="text-sm">{isPayingNow ? 'REDIRECTING...' : 'BUY NOW'}</span>
                             </div>
                             <span className="text-[11px] font-black text-amber-200 tracking-wider">
-                                ₹{boardType === 'icse' ? (String(formData.student_class) === '12' ? '5,500' : '9,000') : '7,500'} ONLY
+                                ₹{boardType === 'icse' ? (String(formData.student_class) === '12' ? '5,500' : '9,000') : boardType === 'wb' ? '4,500' : '7,500'} ONLY
                             </span>
                         </motion.button>
                     ) : null
@@ -721,7 +723,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                                         <span className="text-base md:text-lg">{isPayingNow ? 'OPENING GATEWAY...' : 'BUY NOW'}</span>
                                                     </div>
                                                     <span className="text-xs font-extrabold text-emerald-200 tracking-wider">
-                                                        ₹{boardType === 'icse' ? (String(formData.student_class) === '12' ? '5,500' : '9,000') : '7,500'} ONLY
+                                                        ₹{boardType === 'icse' ? (String(formData.student_class) === '12' ? '5,500' : '9,000') : boardType === 'wb' ? '4,500' : '7,500'} ONLY
                                                     </span>
                                                 </button>
                                             )}
