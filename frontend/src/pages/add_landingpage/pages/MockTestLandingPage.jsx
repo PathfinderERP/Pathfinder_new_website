@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from 'react-toastify';
-import { MapPin, Mail, X, CheckCircle, ChevronLeft, ChevronRight, Lock, GraduationCap, Award, ShieldCheck } from 'lucide-react';
+import { MapPin, Mail, X, CheckCircle, ChevronLeft, ChevronRight, Lock, GraduationCap, Award, ShieldCheck, CreditCard } from 'lucide-react';
+import axios from 'axios';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import RegistrationPopup from '../common/RegistrationPopup';
@@ -103,7 +104,7 @@ const FloatingStickyBadge = ({ scrollToForm, onScholarshipClick }) => {
     );
 };
 
-export const MockTestLandingPage = ({ boardType }) => {
+export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
     // boardType: 'cbse' | 'icse' | 'wb'
     const config = {
         cbse: {
@@ -169,6 +170,58 @@ export const MockTestLandingPage = ({ boardType }) => {
         centre: '',
         page_source: config.pageSource
     });
+
+    const [isPayingNow, setIsPayingNow] = useState(false);
+
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+    const handleICICIPayNow = async () => {
+        setIsPayingNow(true);
+        try {
+            const txnNo = `TXN${Date.now()}`;
+            const saleData = {
+                payType: '0',
+                transactionType: 'SALE',
+                amount: '499.00',
+                currencyCode: '356',
+                customerEmailID: formData.name ? `${formData.name.replace(/\s+/g, '').toLowerCase()}@pathfinder.edu.in` : 'student@pathfinder.edu.in',
+                customerMobileNo: formData.phone || '9876543210',
+                customerName: formData.name || 'CBSE Student',
+                merchantTxnNo: txnNo,
+                returnURL: window.location.origin + '/buynow',
+                txnDate: new Date().toISOString().replace(/[-T:\.Z]/g, '').slice(0, 14),
+                addlParam1: 'CBSE Mock Test Program 2',
+                addlParam2: formData.student_class || 'Class 10/12'
+            };
+
+            const response = await axios.post(`${API_BASE_URL}/api/courses/icici/initiate-sale/`, saleData);
+
+            if (response.data && response.data.status === 'SUCCESS') {
+                const targetUrl = response.data.redirectURI || response.data.saleUrl;
+                if (targetUrl) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = targetUrl;
+                    const tranCtxInput = document.createElement('input');
+                    tranCtxInput.type = 'hidden';
+                    tranCtxInput.name = 'tranCtx';
+                    tranCtxInput.value = response.data.tranCtx || response.data.rawResponse?.tranCtx || '';
+                    form.appendChild(tranCtxInput);
+                    document.body.appendChild(form);
+                    form.submit();
+                    return;
+                }
+            }
+
+            // Fallback redirect to BuyNow payment interface
+            window.location.href = `/buynow?course=${encodeURIComponent('CBSE Mock Test Program 2')}&amount=499`;
+        } catch (error) {
+            console.error('ICICI Direct Checkout Error:', error);
+            window.location.href = `/buynow?course=${encodeURIComponent('CBSE Mock Test Program 2')}&amount=499`;
+        } finally {
+            setIsPayingNow(false);
+        }
+    };
 
     const scrollToForm = () => {
         const formElement = document.getElementById('landing-registration-form');
@@ -372,6 +425,23 @@ export const MockTestLandingPage = ({ boardType }) => {
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 selection:bg-orange-500 selection:text-white font-sans overflow-x-hidden">
+            <Header 
+                customPayNowButton={
+                    isVersionTwo ? (
+                        <motion.button
+                            onClick={handleICICIPayNow}
+                            disabled={isPayingNow}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold shadow-lg hover:shadow-orange-500/40 transition-all border border-white/20 animate-pulse cursor-pointer"
+                        >
+                            <CreditCard className="w-5 h-5 text-white" />
+                            <span>{isPayingNow ? 'REDIRECTING...' : 'BUY NOW'}</span>
+                        </motion.button>
+                    ) : null
+                }
+            />
+            <div className="h-20 lg:h-24"></div>
             <FloatingStickyBadge 
                 scrollToForm={scrollToForm} 
                 onScholarshipClick={() => {
