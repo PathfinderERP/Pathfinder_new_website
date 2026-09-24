@@ -57,66 +57,78 @@ const PaymentStatus = () => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Payment Receipt - Pathfinder Academy</title>
+        <title>Payment Invoice - Pathfinder Academy</title>
         <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; }
-          .receipt-box { max-width: 600px; margin: 0 auto; border: 2px solid #FF9F00; padding: 30px; rounded: 15px; }
-          .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
-          .header h1 { color: #EE4600; margin: 0; font-size: 24px; }
-          .header p { color: #666; margin-top: 5px; font-size: 14px; }
-          .details-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
-          .label { font-weight: bold; color: #555; }
-          .value { font-weight: 600; color: #111; }
-          .status-badge { background: #10B981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 15px; }
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; background: #fafafa; }
+          .invoice-box { max-width: 650px; margin: 0 auto; border: 2px solid #EE4600; padding: 35px; border-radius: 16px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+          .header { text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 25px; }
+          .header h1 { color: #EE4600; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 1px; }
+          .header p { color: #666; margin-top: 5px; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+          .section-title { font-size: 14px; font-weight: 800; color: #EE4600; text-transform: uppercase; margin: 20px 0 10px 0; letter-spacing: 0.5px; border-bottom: 1px solid #fee2e2; padding-bottom: 5px; }
+          .details-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed #f0f0f0; font-size: 14px; }
+          .label { font-weight: 600; color: #666; }
+          .value { font-weight: 700; color: #111; }
+          .status-badge { background: #10B981; color: white; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; }
+          .total-box { background: #fff7ed; border: 1px solid #ffedd5; padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
+          .total-title { font-size: 16px; font-weight: 800; color: #9a3412; }
+          .total-amount { font-size: 22px; font-weight: 900; color: #EE4600; }
+          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 20px; leading-height: 1.6; }
           @media print {
+            body { padding: 0; background: #fff; }
+            .invoice-box { border: none; box-shadow: none; padding: 20px; }
             .no-print { display: none; }
           }
         </style>
       </head>
       <body>
-        <div class="receipt-box">
+        <div class="invoice-box">
           <div class="header">
             <h1>PATHFINDER ACADEMY</h1>
-            <p>Official Online Payment Receipt</p>
+            <p>Official Payment Invoice & Receipt</p>
           </div>
+          
+          <div class="section-title">Payment Overview</div>
           <div class="details-row">
-            <span class="label">Transaction Status</span>
-            <span class="status-badge">SUCCESSFUL</span>
-          </div>
-          <div class="details-row">
-            <span class="label">Transaction Reference</span>
+            <span class="label">Invoice / Txn Reference</span>
             <span class="value">${txnNo}</span>
           </div>
           <div class="details-row">
-            <span class="label">Course / Program</span>
-            <span class="value">${courseName}</span>
+            <span class="label">Payment Status</span>
+            <span class="status-badge">0000 SUCCESS</span>
           </div>
+          <div class="details-row">
+            <span class="label">Date & Time</span>
+            <span class="value">${new Date().toLocaleString()}</span>
+          </div>
+
+          <div class="section-title">Student & Registration Details</div>
           <div class="details-row">
             <span class="label">Student Name</span>
             <span class="value">${customerName}</span>
           </div>
           ${customerEmail ? `
           <div class="details-row">
-            <span class="label">Email Address</span>
+            <span class="label">Registered Email</span>
             <span class="value">${customerEmail}</span>
           </div>` : ''}
           <div class="details-row">
-            <span class="label">Amount Paid</span>
-            <span class="value">₹${amount}</span>
+            <span class="label">Enrolled Program</span>
+            <span class="value">${courseName}</span>
           </div>
-          <div class="details-row">
-            <span class="label">Date & Time</span>
-            <span class="value">${new Date().toLocaleString()}</span>
+
+          <div class="total-box">
+            <span class="total-title">Total Amount Paid</span>
+            <span class="total-amount">₹${amount}</span>
           </div>
+
           <div class="footer">
-            <p>This is a computer-generated receipt and does not require a physical signature.</p>
-            <p>Please present this receipt at your nearest Pathfinder Centre.</p>
+            <p><strong>Verification Notice:</strong> Present this invoice at any Pathfinder Offline Centre to claim physical test series papers and student ID.</p>
+            <p>This is an automated computer-generated payment invoice.</p>
           </div>
         </div>
         <br/>
         <div style="text-align: center;" class="no-print">
-          <button onclick="window.print()" style="background: #EE4600; color: white; border: none; padding: 12px 24px; font-weight: bold; border-radius: 8px; cursor: pointer;">Print / Download PDF</button>
+          <button onclick="window.print()" style="background: #EE4600; color: white; border: none; padding: 14px 28px; font-weight: 800; border-radius: 10px; cursor: pointer; font-size: 15px; box-shadow: 0 4px 14px rgba(238,70,0,0.3);">Print / Download Invoice PDF</button>
         </div>
       </body>
       </html>
@@ -140,27 +152,37 @@ const PaymentStatus = () => {
               <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md ring-8 ring-white/10 animate-bounce">
                 <CheckCircle className="w-12 h-12 text-white" />
               </div>
-              <h1 className="text-3xl font-black mb-2">Payment Successful!</h1>
+              <h1 className="text-3xl font-black mb-2">Payment Confirmed & Invoiced!</h1>
               <p className="text-emerald-100 font-medium max-w-md mx-auto">
-                Thank you, <span className="font-bold text-white">{customerName}</span>. Your enrollment for <span className="font-bold text-white">{courseName}</span> has been confirmed.
+                Thank you, <span className="font-bold text-white">{customerName}</span>. Your enrollment for <span className="font-bold text-white">{courseName}</span> is active.
               </p>
             </div>
 
             <div className="p-6 md:p-8 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100 text-center">
-                <div>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Transaction ID</span>
-                  <span className="text-sm font-black text-gray-800 break-all">{txnNo}</span>
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Amount Paid</span>
-                  <span className="text-base font-black text-green-600">₹{amount}</span>
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Status</span>
-                  <span className="inline-flex items-center gap-1 text-xs font-bold bg-green-100 text-green-700 px-2.5 py-1 rounded-full mt-0.5">
-                    <ShieldCheck className="w-3.5 h-3.5" /> 0000 SUCCESS
-                  </span>
+              <div className="bg-orange-50/50 p-6 rounded-2xl border border-orange-100 space-y-3">
+                <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                  <Receipt className="w-5 h-5 text-orange-600" />
+                  Official Student Invoice Details
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                  <div>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Student Name</span>
+                    <span className="text-sm font-black text-gray-800">{customerName}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Transaction ID</span>
+                    <span className="text-sm font-black text-gray-800 break-all">{txnNo}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Amount Paid</span>
+                    <span className="text-sm font-black text-green-600">₹{amount}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Status</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full mt-0.5">
+                      <ShieldCheck className="w-3.5 h-3.5" /> 0000 SUCCESS
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -170,7 +192,7 @@ const PaymentStatus = () => {
                   className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-black rounded-xl shadow-lg hover:shadow-orange-500/25 transition-all flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
                 >
                   <Download className="w-5 h-5" />
-                  DOWNLOAD RECEIPT
+                  DOWNLOAD INVOICE PDF
                 </button>
                 <button
                   onClick={() => navigate('/')}

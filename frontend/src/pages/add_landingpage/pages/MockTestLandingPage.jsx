@@ -254,6 +254,18 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 redirectTarget = saleUrl;
             }
 
+            // Save user details along with transaction ID into database before opening checkout
+            try {
+                await landingAPI.register({
+                    ...formData,
+                    centre: formData.city || formData.centre || 'Online',
+                    course_type: `Buy Now Payment (${merchantTxnNo})`,
+                    page_source: `${config.pageSource} [Buy Now Txn: ${merchantTxnNo}]`
+                });
+            } catch (leadErr) {
+                console.warn("Lead save error on Pay Now:", leadErr);
+            }
+
             // Open payment page in new tab as requested
             window.open(redirectTarget, '_blank');
 
@@ -637,16 +649,26 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                             </div>
                                         </div>
 
-                                        <div className="flex justify-center ">
-                                            <div className="flex justify-center pb-4 ">
+                                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pb-4">
+                                            <button
+                                                type="submit"
+                                                disabled={isSubmitting}
+                                                className={`w-full sm:w-auto px-8 py-3.5 bg-orange-500 hover:bg-orange-600 text-black font-black text-base md:text-lg rounded-xl transition-all transform hover:scale-105 shadow-lg ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                                {isSubmitting ? 'SUBMITTING...' : 'SUBMIT ENQUIRY'}
+                                            </button>
+
+                                            {isVersionTwo && (
                                                 <button
-                                                    type="submit"
-                                                    disabled={isSubmitting}
-                                                    className={`px-12 py-3 mb-4 bg-orange-500 hover:bg-orange-600 text-black font-black text-lg rounded-lg transition-all transform hover:scale-105 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                    type="button"
+                                                    onClick={handleICICIPayNow}
+                                                    disabled={isPayingNow}
+                                                    className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-base md:text-lg rounded-xl shadow-xl hover:shadow-green-500/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2 border border-green-400 cursor-pointer"
                                                 >
-                                                    {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
+                                                    <CreditCard className="w-5 h-5 text-white" />
+                                                    {isPayingNow ? 'OPENING GATEWAY...' : 'BUY NOW'}
                                                 </button>
-                                            </div>
+                                            )}
                                         </div>
                                     </form>
                                 </div>
