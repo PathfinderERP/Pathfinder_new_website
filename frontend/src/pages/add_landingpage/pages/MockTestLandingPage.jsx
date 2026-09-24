@@ -223,10 +223,9 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 addlParam3: formData.student_class || 'Class 10/12'
             };
 
-            // Generate HMAC-SHA256 hash
+            // Generate HMAC-SHA256 hash using backend .env secret key
             const hashRes = await axios.post(`${API_BASE_URL}/api/courses/icici/generate-hash/`, {
                 mode: "v1",
-                secretKey,
                 params
             });
 
