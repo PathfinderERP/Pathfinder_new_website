@@ -255,14 +255,14 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 txnDate,
                 customerMobileNo,
                 customerName,
-                addlParam1: `${config.title} Mock Test Program 2`,
-                addlParam2: 'NONE',
-                addlParam3: formData.student_class || 'Class 10/12'
+                addlParam1: "cbse-mock-test-program-2",
+                addlParam2: "full"
             };
 
             // 3. Generate HMAC-SHA256 hash using backend secret key
             const hashRes = await axios.post(`${API_BASE_URL}/api/courses/icici/generate-hash/`, {
                 mode: "v1",
+                secretKey,
                 params
             });
 
