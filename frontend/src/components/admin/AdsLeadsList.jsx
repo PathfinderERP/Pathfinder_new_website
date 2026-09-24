@@ -439,17 +439,25 @@ const AdsLeadsList = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {lead.is_contacted ? (
-                                            <span className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold uppercase tracking-tight">
-                                                <CheckCircleIcon className="w-4 h-4" />
-                                                Done
-                                            </span>
-                                        ) : (
-                                            <span className="flex items-center gap-1.5 text-orange-500 text-xs font-bold uppercase tracking-tight">
-                                                <ClockIcon className="w-4 h-4" />
-                                                Awaiting
-                                            </span>
-                                        )}
+                                        <div className="flex flex-col gap-1">
+                                            {lead.is_paid ? (
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full w-fit shadow-xs">
+                                                    <CheckCircleIcon className="w-3.5 h-3.5" />
+                                                    Paid: ₹{lead.amount_paid || 10}
+                                                </span>
+                                            ) : null}
+                                            {lead.is_contacted ? (
+                                                <span className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold uppercase tracking-tight">
+                                                    <CheckCircleIcon className="w-4 h-4" />
+                                                    Done
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-1.5 text-orange-500 text-xs font-bold uppercase tracking-tight">
+                                                    <ClockIcon className="w-4 h-4" />
+                                                    Awaiting
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">

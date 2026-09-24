@@ -206,12 +206,15 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
         try {
             // 1. Pre-save student/lead details into database before redirecting
             const merchantTxnNo = `TXN${Date.now()}`;
+            const customerEmailID = formData.name ? `${formData.name.replace(/\s+/g, '').toLowerCase()}@pathfinder.edu.in` : 'student@pathfinder.edu.in';
             try {
                 await landingAPI.register({
                     ...formData,
+                    email: customerEmailID,
                     centre: formData.city || formData.centre || 'Online',
                     course_type: `Buy Now Payment (${merchantTxnNo})`,
-                    page_source: `${config.pageSource} [Buy Now Txn: ${merchantTxnNo}]`
+                    page_source: `${config.pageSource} [Buy Now Txn: ${merchantTxnNo}]`,
+                    txn_ref: merchantTxnNo
                 });
             } catch (leadErr) {
                 console.warn("Lead save notice on Pay Now:", leadErr);
@@ -238,7 +241,6 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
             const amount = "10.00"; // Test amount set to ₹10 as requested
             const customerName = formData.name || 'CBSE Student';
-            const customerEmailID = formData.name ? `${formData.name.replace(/\s+/g, '').toLowerCase()}@pathfinder.edu.in` : 'student@pathfinder.edu.in';
             const customerMobileNo = formData.phone || '9876543210';
             const returnURL = `${API_BASE_URL}/api/courses/icici/callback/`;
 

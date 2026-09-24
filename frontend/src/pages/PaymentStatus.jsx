@@ -25,8 +25,9 @@ const PaymentStatus = () => {
   const status = searchParams.get('status') || '0000';
   const txnNo = searchParams.get('txnNo') || `TXN${Date.now()}`;
   const amount = searchParams.get('amount') || '10.00';
-  const customerName = searchParams.get('name') || 'Student';
+  const customerName = searchParams.get('name') || 'Pathfinder Student';
   const customerEmail = searchParams.get('email') || '';
+  const customerPhone = searchParams.get('phone') || searchParams.get('mobile') || '';
   const courseName = searchParams.get('course') || 'CBSE Mock Test Program 2';
 
   const isSuccess = status === '0000' || status === '00' || status === 'SUCCESS' || status === '0';
@@ -106,6 +107,11 @@ const PaymentStatus = () => {
             <span class="label">Student Name</span>
             <span class="value">${customerName}</span>
           </div>
+          ${customerPhone ? `
+          <div class="details-row">
+            <span class="label">Phone Number</span>
+            <span class="value">${customerPhone}</span>
+          </div>` : ''}
           ${customerEmail ? `
           <div class="details-row">
             <span class="label">Registered Email</span>
@@ -164,11 +170,17 @@ const PaymentStatus = () => {
                   <Receipt className="w-5 h-5 text-orange-600" />
                   Official Student Invoice Details
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 pt-2">
                   <div>
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Student Name</span>
                     <span className="text-sm font-black text-gray-800">{customerName}</span>
                   </div>
+                  {customerPhone && (
+                    <div>
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Phone Number</span>
+                      <span className="text-sm font-black text-gray-800">{customerPhone}</span>
+                    </div>
+                  )}
                   <div>
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Transaction ID</span>
                     <span className="text-sm font-black text-gray-800 break-all">{txnNo}</span>

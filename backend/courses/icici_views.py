@@ -218,6 +218,31 @@ class ICICICallbackView(APIView):
             is_shiksha_bandhu = bool(addl2 and str(addl2).strip().upper().startswith('SB'))
             is_success = str(txn_status) in ['0000', '00', 'SUCCESS', '0', 'E000']
 
+            # Lookup LandingPageRegistration lead in database by transaction reference
+            if txn_no:
+                try:
+                    from landing_registrations.models import LandingPageRegistration
+                    lead = LandingPageRegistration.objects(txn_ref=txn_no).first()
+                    if not lead and email:
+                        lead = LandingPageRegistration.objects(email=email).first()
+                    if lead:
+                        if is_success:
+                            lead.is_paid = True
+                            try:
+                                lead.amount_paid = float(amount) if amount else 10.0
+                            except Exception:
+                                pass
+                            lead.save()
+                            logger.info(f"Updated lead {lead.id} as PAID ({lead.amount_paid}) for txn {txn_no}")
+                        if not name or name == '':
+                            name = lead.name
+                        if not mobile or mobile == '':
+                            mobile = lead.phone
+                        if not email or email == '':
+                            email = lead.email or ''
+                except Exception as lead_err:
+                    logger.warning(f"Callback lead update warning: {lead_err}")
+
             if is_success and is_shiksha_bandhu:
                 try:
                     from shiksha_bandhu.views import process_referral_payment
@@ -249,7 +274,7 @@ class ICICICallbackView(APIView):
             if is_shiksha_bandhu:
                 redirect_url = f"{base_url}/shiksha-bandhu/dashboard?txnNo={txn_no}&status={txn_status}"
             else:
-                redirect_url = f"{base_url}/payment-status?txnNo={txn_no}&status={txn_status}&amount={amount}&email={urllib.parse.quote(str(email))}&name={urllib.parse.quote(str(name))}&course={urllib.parse.quote(str(addl1))}"
+                redirect_url = f"{base_url}/payment-status?txnNo={txn_no}&status={txn_status}&amount={amount}&email={urllib.parse.quote(str(email))}&name={urllib.parse.quote(str(name))}&phone={urllib.parse.quote(str(mobile))}&course={urllib.parse.quote(str(addl1))}"
             return redirect(redirect_url)
         except Exception as e:
             logger.error(f"Error handling ICICI callback POST: {e}")
@@ -261,7 +286,34 @@ class ICICICallbackView(APIView):
         """
         txn_status = request.query_params.get('responseCode') or request.query_params.get('status') or 'UNKNOWN'
         txn_no = request.query_params.get('merchantTxnNo') or request.query_params.get('txnRefNo') or ''
-        return redirect(f"https://pathfinder.edu.in/payment-status?txnNo={txn_no}&status={txn_status}")
+        amount = request.query_params.get('amount') or '10.00'
+        name = request.query_params.get('name') or request.query_params.get('customerName') or ''
+        mobile = request.query_params.get('phone') or request.query_params.get('customerMobileNo') or ''
+        email = request.query_params.get('email') or request.query_params.get('customerEmailID') or ''
+        course = request.query_params.get('course') or request.query_params.get('addlParam1') or ''
+
+        if txn_no:
+            try:
+                from landing_registrations.models import LandingPageRegistration
+                lead = LandingPageRegistration.objects(txn_ref=txn_no).first()
+                if lead:
+                    if str(txn_status) in ['0000', '00', 'SUCCESS', '0', 'E000']:
+                        lead.is_paid = True
+                        try:
+                            lead.amount_paid = float(amount) if amount else 10.0
+                        except Exception:
+                            pass
+                        lead.save()
+                    if not name:
+                        name = lead.name
+                    if not mobile:
+                        mobile = lead.phone
+                    if not email:
+                        email = lead.email or ''
+            except Exception as lead_err:
+                logger.warning(f"GET callback lead lookup warning: {lead_err}")
+
+        return redirect(f"https://pathfinder.edu.in/payment-status?txnNo={txn_no}&status={txn_status}&amount={amount}&name={urllib.parse.quote(str(name))}&phone={urllib.parse.quote(str(mobile))}&email={urllib.parse.quote(str(email))}&course={urllib.parse.quote(str(course))}")
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ICICIWebhookView(APIView):
