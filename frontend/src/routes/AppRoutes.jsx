@@ -419,7 +419,7 @@ const AppRoutes = () => {
       />
       <Route
         path="/icse-isc-mock-test-program"
-        element={<MockTestLandingPage boardType="icse" />}
+        element={<MockTestLandingPage boardType="icse" isVersionTwo={true} />}
       />
       <Route
         path="/wb-board-mock-test-program"

@@ -246,7 +246,18 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
 
             const { merchantId, aggregatorID, secretKey, saleUrl } = gatewayConfig;
             const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
-            const amount = "10.00"; // Test amount set to ₹10 as requested
+            // Determine amount based on board & selected class level
+            let amount = "10.00";
+            if (boardType === 'icse') {
+                if (String(formData.student_class) === '12') {
+                    amount = "5500.00";
+                } else if (String(formData.student_class) === '10') {
+                    amount = "9000.00";
+                } else {
+                    amount = "9000.00"; // default fallback for ICSE
+                }
+            }
+
             const returnURL = `${API_BASE_URL}/api/courses/icici/callback/`;
 
             const params = {
@@ -262,7 +273,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 txnDate,
                 customerMobileNo,
                 customerName,
-                addlParam1: "cbse-mock-test-program-2",
+                addlParam1: config.pageSource || "mock-test-program",
                 addlParam2: ""
             };
 
@@ -529,7 +540,9 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                 <CreditCard className="w-4 h-4 text-white" />
                                 <span className="text-sm">{isPayingNow ? 'REDIRECTING...' : 'BUY NOW'}</span>
                             </div>
-                            <span className="text-[11px] font-black text-amber-200 tracking-wider">₹10.00 ONLY</span>
+                            <span className="text-[11px] font-black text-amber-200 tracking-wider">
+                                ₹{boardType === 'icse' ? (String(formData.student_class) === '12' ? '5,500' : '9,000') : '10'} ONLY
+                            </span>
                         </motion.button>
                     ) : null
                 }
@@ -705,7 +718,9 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                                         <CreditCard className="w-5 h-5 text-white" />
                                                         <span className="text-base md:text-lg">{isPayingNow ? 'OPENING GATEWAY...' : 'BUY NOW'}</span>
                                                     </div>
-                                                    <span className="text-xs font-extrabold text-emerald-200 tracking-wider">₹10.00 ONLY</span>
+                                                    <span className="text-xs font-extrabold text-emerald-200 tracking-wider">
+                                                        ₹{boardType === 'icse' ? (String(formData.student_class) === '12' ? '5,500' : '9,000') : '10'} ONLY
+                                                    </span>
                                                 </button>
                                             )}
                                         </div>
