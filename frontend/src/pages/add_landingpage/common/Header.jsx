@@ -26,7 +26,7 @@ import LoginModal from "../../../components/LoginModal";
 import ApplyNowForm from "../../Student/Applynow";
 import { centresAPI } from "../../../services/api";
 
-const Header = () => {
+const Header = ({ customPayNowButton }) => {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [openSubDropdown, setOpenSubDropdown] = useState(null);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -202,55 +202,9 @@ const Header = () => {
         setSelectedCourseForApply(null);
     };
 
-
-
-    const menuItems = {
-        "About Us": {
-            icon: UserGroupIcon,
-            items: [
-                { name: "Why Pathfinder", href: "/about-us", icon: StarIcon, description: "Discover our excellence" },
-                { name: "CEO's Message", href: "/ceo-message", icon: BriefcaseIcon, description: "Leadership vision" },
-                { name: "Chairman's Message", href: "/chairman-message", icon: TrophyIcon, description: "Founder's insight" },
-            ],
-        },
-        Courses: {
-            icon: AcademicCapIcon,
-            items: [
-                { name: "All India", href: "#", icon: BookOpenIcon, description: "National entrance preparation", badge: "Popular", action: "apply" },
-                { name: "Foundation", href: "#", icon: Cog6ToothIcon, description: "Build your future", badge: "Trending", action: "apply" },
-                { name: "Boards", href: "#", icon: ChartBarIcon, description: "Strong basics", action: "apply" },
-                // { name: "View All Courses", href: "/courses", icon: AcademicCapIcon, description: "Browse all programs" },
-            ],
-        },
-        Results: {
-            icon: TrophyIcon,
-            items: [
-                { name: "All India", href: "#", icon: StarIcon, description: "Celebrate our National Toppers", badge: "Outstanding", action: "apply" },
-                { name: "Foundation", href: "#", icon: TrophyIcon, description: "Future Champions", badge: "Excellent", action: "apply" },
-                { name: "Boards", href: "#", icon: ChartBarIcon, description: "State & Central Board Toppers", badge: "99%+", action: "apply" },
-            ],
-        },
-        "Student's Corner": {
-            icon: BookOpenIcon,
-            href: "/students-corner"
-        },
-        Alumni: { icon: UserGroupIcon, href: "/alumni" },
-        Career: { icon: BriefcaseIcon, href: "/career" },
-        Blog: { icon: BookOpenIcon, href: "/blog" },
-        Center: { icon: BuildingStorefrontIcon, href: "/centres" },
-        Franchise: { icon: BuildingStorefrontIcon, href: "/franchise" },
-        Contact: { icon: PhoneIcon, href: "/contact" },
-    };
-
     const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
     const itemVariants = { hidden: { y: -20, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } } };
-    const mobileMenuVariants = { closed: { x: "100%", transition: { type: "spring", stiffness: 400, damping: 40 } }, open: { x: 0, transition: { type: "spring", stiffness: 400, damping: 40 } } };
     const dropdownVariants = { closed: { opacity: 0, scale: 0.95, y: -10, transition: { duration: 0.2 } }, open: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } } };
-
-    const handleDropdownEnter = (title) => { setOpenDropdown(title); setOpenSubDropdown(null); };
-    const handleDropdownLeave = () => { setOpenDropdown(null); setOpenSubDropdown(null); };
-    const handleSubDropdownEnter = (itemName) => { setOpenSubDropdown(itemName); };
-    const handleSubDropdownLeave = () => { setOpenSubDropdown(null); };
 
     return (
         <>
@@ -344,18 +298,21 @@ const Header = () => {
                                         </div>
                                     ) : (
                                         <>
-
-                                            <motion.a
-                                                href="tel:8443075751"
-                                                className="hidden lg:flex items-center gap-4 px-8 py-2.5 rounded-xl bg-gray-900 text-white hover:bg-[#EE4600] hover:text-white transition-all duration-300 ml-3 border border-white/10 group h-[52px] shine-effect"
-                                                whileTap={{ scale: 0.95 }}
-                                            >
-                                                <PhoneIcon className="h-6 w-6 text-[#EE4600] group-hover:text-white transition-colors duration-300" />
-                                                <div className="flex flex-col -space-y-1 items-start">
-                                                    <span className="text-[10px] font-bold text-orange-500/80 uppercase tracking-widest group-hover:text-white transition-colors duration-300">Help Desk</span>
-                                                    <span className="text-xl font-bold italic">84430 75751</span>
-                                                </div>
-                                            </motion.a>
+                                            {customPayNowButton ? (
+                                                customPayNowButton
+                                            ) : (
+                                                <motion.a
+                                                    href="tel:8443075751"
+                                                    className="hidden lg:flex items-center gap-4 px-8 py-2.5 rounded-xl bg-gray-900 text-white hover:bg-[#EE4600] hover:text-[#EE4600] transition-all duration-300 ml-3 border border-white/10 group h-[52px] shine-effect"
+                                                    whileTap={{ scale: 0.95 }}
+                                                >
+                                                    <PhoneIcon className="h-6 w-6 text-[#EE4600] group-hover:text-white transition-colors duration-300" />
+                                                    <div className="flex flex-col -space-y-1 items-start">
+                                                        <span className="text-[10px] font-bold text-orange-500/80 uppercase tracking-widest group-hover:text-white transition-colors duration-300">Help Desk</span>
+                                                        <span className="text-xl font-bold italic">84430 75751</span>
+                                                    </div>
+                                                </motion.a>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -363,16 +320,11 @@ const Header = () => {
                         </div>
                     </div>
                 </motion.div>
-
-
             </motion.header>
-
-
 
             {/* Login Modal */}
             <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
 
-            {/* Apply Now Form Modal */}
             {/* Apply Now Form Modal */}
             <ApplyNowForm
                 course={selectedCourseData}
