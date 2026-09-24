@@ -233,15 +233,15 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             const secureHash = hashRes.data?.secureHash || "";
             const fullPayload = { ...params, secureHash };
 
-            // Request proxy endpoint
             const proxyRes = await axios.post(`${API_BASE_URL}/api/courses/icici/proxy/`, {
                 target_url: saleUrl,
                 payload_type: "json",
                 payload: fullPayload
             });
 
-            const responseContent = proxyRes.data?.data || proxyRes.data || {};
-            const targetRedirect = responseContent.redirectURI || responseContent.redirectUrl || responseContent.redirect_url || responseContent.targetUrl || responseContent.url;
+            const resData = proxyRes.data;
+            const responseContent = resData?.data || resData || {};
+            const targetRedirect = responseContent.redirectURI || responseContent.redirectUrl || responseContent.redirect_url || responseContent.targetUrl || responseContent.target_url || responseContent.url || responseContent.action;
             const tranCtx = responseContent.tranCtx || responseContent.tran_ctx || responseContent.tranContext;
 
             let redirectTarget = targetRedirect;
@@ -251,11 +251,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                     : `${redirectTarget}?tranCtx=${encodeURIComponent(tranCtx)}`;
             }
 
-            if (!redirectTarget) {
-                throw new Error(responseContent.responseMessage || responseContent.message || "Failed to obtain payment gateway redirect URL");
-            }
-
-            // Save user details along with transaction ID into database before opening checkout
+            // Pre-save lead details along with transaction ID into database before redirecting
             try {
                 await landingAPI.register({
                     ...formData,
@@ -267,15 +263,20 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 console.warn("Lead save error on Pay Now:", leadErr);
             }
 
-            // Open payment page in new tab as requested
-            window.open(redirectTarget, '_blank');
-
-            // Show blurred overlay modal awaiting payment
-            setIsAwaitingPaymentModal(true);
+            if (redirectTarget) {
+                // Redirect browser directly to ICICI Payment Gateway
+                window.location.href = redirectTarget;
+            } else if (responseContent.html || responseContent.formHtml) {
+                document.open();
+                document.write(responseContent.html || responseContent.formHtml);
+                document.close();
+            } else {
+                const errorMsg = responseContent.responseMessage || responseContent.respDescription || responseContent.message || responseContent.error || (typeof responseContent === 'string' ? responseContent : JSON.stringify(responseContent));
+                throw new Error(errorMsg || "Failed to obtain ICICI payment gateway redirect URL");
+            }
         } catch (error) {
             console.error('ICICI Direct Checkout Error:', error);
-            window.open(`/buynow?course=${encodeURIComponent('CBSE Mock Test Program 2')}&amount=10`, '_blank');
-            setIsAwaitingPaymentModal(true);
+            alert(`Payment Gateway Error: ${error.message || 'Unable to connect to ICICI Bank gateway. Please try again.'}`);
         } finally {
             setIsPayingNow(false);
         }
