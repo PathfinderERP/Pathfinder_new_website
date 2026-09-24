@@ -215,8 +215,9 @@ class ICICICallbackView(APIView):
             mobile = data.get('customerMobileNo') or ''
             name = data.get('customerName') or ''
 
-            is_success = str(txn_status) in ["0000", "00", "SUCCESS", "0"]
-            if is_success and addl2:
+            is_shiksha_bandhu = bool(addl2 and (str(addl2).startswith('SB') or len(str(addl2)) >= 4))
+
+            if is_success and is_shiksha_bandhu:
                 try:
                     from shiksha_bandhu.views import process_referral_payment
                     process_referral_payment(
@@ -244,7 +245,7 @@ class ICICICallbackView(APIView):
                 clean_host = host.replace('api.', '')
                 base_url = f"{scheme}://{clean_host}"
 
-            if addl2:
+            if is_shiksha_bandhu:
                 redirect_url = f"{base_url}/shiksha-bandhu/dashboard?txnNo={txn_no}&status={txn_status}"
             else:
                 redirect_url = f"{base_url}/payment-status?txnNo={txn_no}&status={txn_status}&amount={amount}&email={urllib.parse.quote(str(email))}&name={urllib.parse.quote(str(name))}&course={urllib.parse.quote(str(addl1))}"

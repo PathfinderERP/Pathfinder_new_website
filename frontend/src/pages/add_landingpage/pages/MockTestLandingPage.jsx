@@ -219,7 +219,8 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 customerMobileNo,
                 customerName,
                 addlParam1: 'CBSE Mock Test Program 2',
-                addlParam2: formData.student_class || 'Class 10/12'
+                addlParam2: '',
+                addlParam3: formData.student_class || 'Class 10/12'
             };
 
             // Generate HMAC-SHA256 hash
