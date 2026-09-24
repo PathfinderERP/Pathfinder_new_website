@@ -69,7 +69,9 @@ const AdsLeadsList = () => {
         let filteredData = [...allLeads];
 
         if (sourceFilter !== 'all') {
-            filteredData = filteredData.filter(lead => lead.page_source === sourceFilter);
+            filteredData = filteredData.filter(lead => 
+                (lead.page_source || '').toLowerCase().includes(sourceFilter.toLowerCase())
+            );
         }
 
         if (classFilter !== 'all') {
@@ -77,8 +79,13 @@ const AdsLeadsList = () => {
         }
 
         if (contactedFilter !== 'all') {
-            const isContactedStr = contactedFilter === 'contacted';
-            filteredData = filteredData.filter(lead => lead.is_contacted === isContactedStr);
+            if (contactedFilter === 'paid') {
+                filteredData = filteredData.filter(lead => lead.is_paid || (lead.amount_paid && lead.amount_paid > 0));
+            } else if (contactedFilter === 'contacted') {
+                filteredData = filteredData.filter(lead => lead.is_contacted);
+            } else if (contactedFilter === 'pending') {
+                filteredData = filteredData.filter(lead => !lead.is_contacted && !lead.is_paid);
+            }
         }
 
         if (searchQuery) {
@@ -269,22 +276,26 @@ const AdsLeadsList = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Total Leads</p>
                     <h3 className="text-3xl font-black text-gray-900 dark:text-white">{totalItems}</h3>
                 </div>
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">JEE Leads</p>
-                    <h3 className="text-3xl font-black text-blue-600">{allLeads.filter(l => l.page_source === 'JEE').length}</h3>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Online Paid</p>
+                    <h3 className="text-3xl font-black text-emerald-600">{allLeads.filter(l => l.is_paid || (l.amount_paid && l.amount_paid > 0)).length}</h3>
                 </div>
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">NEET Leads</p>
-                    <h3 className="text-3xl font-black text-red-600">{allLeads.filter(l => l.page_source === 'NEET').length}</h3>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Mock Test</p>
+                    <h3 className="text-3xl font-black text-orange-600">{allLeads.filter(l => (l.page_source || '').toLowerCase().includes('mock test') || (l.course_type || '').toLowerCase().includes('mock')).length}</h3>
                 </div>
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">JEE / NEET</p>
+                    <h3 className="text-3xl font-black text-blue-600">{allLeads.filter(l => (l.page_source || '').toLowerCase().includes('jee') || (l.page_source || '').toLowerCase().includes('neet')).length}</h3>
+                </div>
+                <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Followed Up</p>
-                    <h3 className="text-3xl font-black text-emerald-600">{allLeads.filter(l => l.is_contacted).length}</h3>
+                    <h3 className="text-3xl font-black text-purple-600">{allLeads.filter(l => l.is_contacted).length}</h3>
                 </div>
             </div>
 
@@ -334,8 +345,10 @@ const AdsLeadsList = () => {
                             className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm border-none"
                         >
                             <option value="all">All Sources</option>
+                            <option value="Mock Test">Mock Test Series</option>
                             <option value="JEE">JEE Page</option>
                             <option value="NEET">NEET Page</option>
+                            <option value="Foundation">Foundation</option>
                         </select>
                     </div>
                     <div className="md:col-span-2">
@@ -346,6 +359,7 @@ const AdsLeadsList = () => {
                             className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm border-none"
                         >
                             <option value="all">All Status</option>
+                            <option value="paid">Online Paid</option>
                             <option value="contacted">Followed Up</option>
                             <option value="pending">Pending</option>
                         </select>
@@ -433,10 +447,19 @@ const AdsLeadsList = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${lead.page_source === 'JEE' ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'
-                                            }`}>
-                                            {lead.page_source}
-                                        </span>
+                                        {(() => {
+                                            const rawSource = lead.page_source || 'Website Lead';
+                                            let cleanSource = rawSource.replace(/\[Buy Now Txn:.*?\]/g, '').replace(/Paid Referral \(.*?\)/g, '').trim();
+                                            if (!cleanSource || cleanSource === 'CBSE Mock Test Program' || cleanSource === 'Mock Test Program') {
+                                                cleanSource = `Mock Test - Class ${lead.student_class || '10'}`;
+                                            }
+                                            const isJeeNeet = cleanSource.toLowerCase().includes('jee') || cleanSource.toLowerCase().includes('neet');
+                                            return (
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${isJeeNeet ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-orange-50 text-orange-600 border border-orange-200'}`}>
+                                                    {cleanSource}
+                                                </span>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col gap-1">

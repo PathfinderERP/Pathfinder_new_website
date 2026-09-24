@@ -206,14 +206,15 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
         try {
             // 1. Pre-save student/lead details into database before redirecting
             const merchantTxnNo = `TXN${Date.now()}`;
-            const customerEmailID = formData.name ? `${formData.name.replace(/\s+/g, '').toLowerCase()}@pathfinder.edu.in` : 'student@pathfinder.edu.in';
+            const selectedClass = formData.student_class ? `Class ${formData.student_class}` : 'Class 10';
+            const cleanSource = `Mock Test - ${selectedClass}`;
             try {
                 await landingAPI.register({
                     ...formData,
                     email: customerEmailID,
                     centre: formData.city || formData.centre || 'Online',
-                    course_type: `Buy Now Payment (${merchantTxnNo})`,
-                    page_source: `${config.pageSource} [Buy Now Txn: ${merchantTxnNo}]`,
+                    course_type: `${config.title} Mock Test Program`,
+                    page_source: cleanSource,
                     txn_ref: merchantTxnNo
                 });
             } catch (leadErr) {
