@@ -40,12 +40,8 @@ export const ShikshaBandhuDashboard = () => {
         if (parsed && parsed.length > 0) return parsed[0];
       }
       if (txnNo && isSuccessPayment) {
-        return {
-          id: `CRS-${txnNo}`,
-          name: "Pathfinder Mock Test Package",
-          price: 10,
-          purchasedAt: new Date().toISOString()
-        };
+        // Only show if explicitly saved as a Shiksha Bandhu referral course purchase
+        return null;
       }
       return null;
     } catch {
