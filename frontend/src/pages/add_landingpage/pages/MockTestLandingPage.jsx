@@ -247,15 +247,17 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             const { merchantId, aggregatorID, secretKey, saleUrl } = gatewayConfig;
             const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
             // Determine amount based on board & selected class level
-            let amount = "10.00";
+            let amount = "7500.00";
             if (boardType === 'icse') {
                 if (String(formData.student_class) === '12') {
                     amount = "5500.00";
                 } else if (String(formData.student_class) === '10') {
                     amount = "9000.00";
                 } else {
-                    amount = "9000.00"; // default fallback for ICSE
+                    amount = "9000.00";
                 }
+            } else if (boardType === 'cbse') {
+                amount = "7500.00";
             }
 
             const returnURL = `${API_BASE_URL}/api/courses/icici/callback/`;
@@ -541,7 +543,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                 <span className="text-sm">{isPayingNow ? 'REDIRECTING...' : 'BUY NOW'}</span>
                             </div>
                             <span className="text-[11px] font-black text-amber-200 tracking-wider">
-                                ₹{boardType === 'icse' ? (String(formData.student_class) === '12' ? '5,500' : '9,000') : '10'} ONLY
+                                ₹{boardType === 'icse' ? (String(formData.student_class) === '12' ? '5,500' : '9,000') : '7,500'} ONLY
                             </span>
                         </motion.button>
                     ) : null
@@ -719,7 +721,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                                         <span className="text-base md:text-lg">{isPayingNow ? 'OPENING GATEWAY...' : 'BUY NOW'}</span>
                                                     </div>
                                                     <span className="text-xs font-extrabold text-emerald-200 tracking-wider">
-                                                        ₹{boardType === 'icse' ? (String(formData.student_class) === '12' ? '5,500' : '9,000') : '10'} ONLY
+                                                        ₹{boardType === 'icse' ? (String(formData.student_class) === '12' ? '5,500' : '9,000') : '7,500'} ONLY
                                                     </span>
                                                 </button>
                                             )}
