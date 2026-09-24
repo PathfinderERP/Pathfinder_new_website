@@ -43,7 +43,7 @@ def get_icici_config(mode=None):
 def calculate_v1_secure_hash(data_dict, secret_key=None):
     if not secret_key:
         secret_key = get_icici_config()["secretKey"]
-    filtered = {k: str(v) for k, v in data_dict.items() if v is not None and str(v) != '' and k != 'secureHash'}
+    filtered = {k: str(v) for k, v in data_dict.items() if v is not None and k != 'secureHash'}
     sorted_keys = sorted(filtered.keys())
     hash_text = "".join([filtered[k] for k in sorted_keys])
     
