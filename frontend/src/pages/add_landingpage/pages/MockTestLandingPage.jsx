@@ -208,9 +208,15 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             const merchantTxnNo = `TXN${Date.now()}`;
             const selectedClass = formData.student_class ? `Class ${formData.student_class}` : 'Class 10';
             const cleanSource = `Mock Test - ${selectedClass}`;
+            const customerName = formData.name || 'CBSE Student';
+            const customerMobileNo = formData.phone || '9876543210';
+            const customerEmailID = formData.email || `${customerName.toLowerCase().replace(/[^a-z0-9]/g, '')}@pathfinder.edu.in`;
+
             try {
                 await landingAPI.register({
                     ...formData,
+                    name: customerName,
+                    phone: customerMobileNo,
                     email: customerEmailID,
                     centre: formData.city || formData.centre || 'Online',
                     course_type: `${config.title} Mock Test Program`,
@@ -241,9 +247,6 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             const { merchantId, aggregatorID, secretKey, saleUrl } = gatewayConfig;
             const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
             const amount = "10.00"; // Test amount set to ₹10 as requested
-            const customerName = formData.name || 'CBSE Student';
-            const customerMobileNo = formData.phone || '9876543210';
-            const customerEmailID = formData.email || `${customerName.toLowerCase().replace(/[^a-z0-9]/g, '')}@pathfinder.edu.in`;
             const returnURL = `${API_BASE_URL}/api/courses/icici/callback/`;
 
             const params = {
