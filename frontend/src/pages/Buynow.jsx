@@ -48,8 +48,20 @@ const Buynow = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Get course data from navigation state
-  const { courseData } = location.state || {};
+  const DEFAULT_COURSE_DATA = {
+    id: "cbse-mock-test-program-2026",
+    name: "CBSE Board Mock Test Program 2026",
+    price: 10,
+    discounted_price: 10,
+    course_price: 10,
+    discount_price: 10,
+    mode: "Classroom / Digital",
+    location: "All Pathfinder Centres",
+    class_level: "10 & 12"
+  };
+
+  // Get course data from navigation state or fallback to default course
+  const courseData = location.state?.courseData || DEFAULT_COURSE_DATA;
 
   // EMIOptions
   const emiOptions = [
@@ -134,11 +146,8 @@ const Buynow = () => {
   const courseInfo = getCourseDisplayInfo();
 
   useEffect(() => {
-    if (!courseData) {
-      navigate("/");
-    }
     window.scrollTo(0, 0);
-  }, [courseData, navigate]);
+  }, []);
 
   useEffect(() => {
     if (courseData) {

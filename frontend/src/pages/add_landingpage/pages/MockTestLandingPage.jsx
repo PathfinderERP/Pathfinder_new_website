@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from 'react-toastify';
 import { MapPin, Mail, X, CheckCircle, ChevronLeft, ChevronRight, Lock, GraduationCap, Award, ShieldCheck, CreditCard } from 'lucide-react';
@@ -148,6 +149,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
         bannerSrc: "/WHY PATH IMAGES/CBSE BANNER.webp"
     };
 
+    const navigate = useNavigate();
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -175,6 +177,23 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
     const [isAwaitingPaymentModal, setIsAwaitingPaymentModal] = useState(false);
 
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+    const handleBuyNow = (course = null) => {
+        const courseToBuy = course || {
+            id: `cbse-mock-test-program-2026`,
+            name: `${config.title} ${config.highlight} 2026`,
+            price: 10,
+            discounted_price: 10,
+            course_price: 10,
+            discount_price: 10,
+            mode: "Classroom / Digital",
+            location: formData.city || formData.centre || "All Pathfinder Centres",
+            class_level: formData.student_class || "Class 10 & 12",
+            short_description: config.subHeading
+        };
+
+        navigate("/buynow", { state: { courseData: courseToBuy } });
+    };
 
     const handleICICIPayNow = async () => {
         setIsPayingNow(true);
@@ -487,14 +506,13 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 customPayNowButton={
                     isVersionTwo ? (
                         <motion.button
-                            onClick={handleICICIPayNow}
-                            disabled={isPayingNow}
+                            onClick={() => handleBuyNow()}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold shadow-lg hover:shadow-orange-500/40 transition-all border border-white/20 animate-pulse cursor-pointer"
                         >
                             <CreditCard className="w-5 h-5 text-white" />
-                            <span>{isPayingNow ? 'REDIRECTING...' : 'BUY NOW'}</span>
+                            <span>BUY NOW</span>
                         </motion.button>
                     ) : null
                 }
@@ -662,12 +680,11 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                             {isVersionTwo && (
                                                 <button
                                                     type="button"
-                                                    onClick={handleICICIPayNow}
-                                                    disabled={isPayingNow}
+                                                    onClick={() => handleBuyNow()}
                                                     className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-base md:text-lg rounded-xl shadow-xl hover:shadow-green-500/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2 border border-green-400 cursor-pointer"
                                                 >
                                                     <CreditCard className="w-5 h-5 text-white" />
-                                                    {isPayingNow ? 'OPENING GATEWAY...' : 'BUY NOW'}
+                                                    BUY NOW
                                                 </button>
                                             )}
                                         </div>

@@ -141,7 +141,17 @@ const Header = () => {
   };
 
   const handleAuthClick = () => {
-    navigate("/buynow");
+    const defaultCourse = {
+      id: "cbse-mock-test-program-2026",
+      name: "CBSE Board Mock Test Program 2026",
+      price: 10,
+      discounted_price: 10,
+      course_price: 10,
+      discount_price: 10,
+      mode: "Classroom / Digital",
+      location: "All Pathfinder Centres"
+    };
+    navigate("/buynow", { state: { courseData: defaultCourse } });
   };
 
   // Handle Apply Now for a specific course from dropdown
