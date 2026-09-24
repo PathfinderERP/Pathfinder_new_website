@@ -5,6 +5,7 @@ import AdminLayout from "../components/layout/AdminLayout";
 // Student Pages
 import Home from "../pages/Home";
 import Buynow from "../pages/Buynow";
+import PaymentStatus from "../pages/PaymentStatus";
 import Applynow from "../pages/Student/Applynow";
 import MockTests from "../pages/Student/MockTests";
 
@@ -533,6 +534,14 @@ const AppRoutes = () => {
         element={
           <MainLayout>
             <Buynow />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/payment-status"
+        element={
+          <MainLayout>
+            <PaymentStatus />
           </MainLayout>
         }
       />

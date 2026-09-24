@@ -172,52 +172,97 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
     });
 
     const [isPayingNow, setIsPayingNow] = useState(false);
+    const [isAwaitingPaymentModal, setIsAwaitingPaymentModal] = useState(false);
 
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
     const handleICICIPayNow = async () => {
         setIsPayingNow(true);
         try {
-            const txnNo = `TXN${Date.now()}`;
-            const saleData = {
-                payType: '0',
-                transactionType: 'SALE',
-                amount: '499.00',
-                currencyCode: '356',
-                customerEmailID: formData.name ? `${formData.name.replace(/\s+/g, '').toLowerCase()}@pathfinder.edu.in` : 'student@pathfinder.edu.in',
-                customerMobileNo: formData.phone || '9876543210',
-                customerName: formData.name || 'CBSE Student',
-                merchantTxnNo: txnNo,
-                returnURL: window.location.origin + '/buynow',
-                txnDate: new Date().toISOString().replace(/[-T:\.Z]/g, '').slice(0, 14),
+            // Fetch live production credentials and redirect URLs from backend/environment
+            let gatewayConfig = {
+                merchantId: "100000000517815",
+                aggregatorID: "100000000517814",
+                secretKey: "",
+                saleUrl: "https://pgpay.icicibank.com/pg/api/v2/initiateSale"
+            };
+
+            try {
+                const configRes = await axios.get(`${API_BASE_URL}/api/courses/icici/config/`);
+                if (configRes.data && configRes.data.saleUrl) {
+                    gatewayConfig = configRes.data;
+                }
+            } catch (cfgErr) {
+                console.warn("Using fallback ICICI config", cfgErr);
+            }
+
+            const { merchantId, aggregatorID, secretKey, saleUrl } = gatewayConfig;
+            const merchantTxnNo = `TXN${Date.now()}`;
+            const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
+            const amount = "10.00"; // Test amount set to ₹10 as requested
+            const customerName = formData.name || 'CBSE Student';
+            const customerEmailID = formData.name ? `${formData.name.replace(/\s+/g, '').toLowerCase()}@pathfinder.edu.in` : 'student@pathfinder.edu.in';
+            const customerMobileNo = formData.phone || '9876543210';
+            const returnURL = `${API_BASE_URL}/api/courses/icici/callback/`;
+
+            const params = {
+                merchantId,
+                aggregatorID,
+                merchantTxnNo,
+                amount,
+                currencyCode: "356",
+                payType: "0",
+                customerEmailID,
+                transactionType: "SALE",
+                returnURL,
+                txnDate,
+                customerMobileNo,
+                customerName,
                 addlParam1: 'CBSE Mock Test Program 2',
                 addlParam2: formData.student_class || 'Class 10/12'
             };
 
-            const response = await axios.post(`${API_BASE_URL}/api/courses/icici/initiate-sale/`, saleData);
+            // Generate HMAC-SHA256 hash
+            const hashRes = await axios.post(`${API_BASE_URL}/api/courses/icici/generate-hash/`, {
+                mode: "v1",
+                secretKey,
+                params
+            });
 
-            if (response.data && response.data.status === 'SUCCESS') {
-                const targetUrl = response.data.redirectURI || response.data.saleUrl;
-                if (targetUrl) {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = targetUrl;
-                    const tranCtxInput = document.createElement('input');
-                    tranCtxInput.type = 'hidden';
-                    tranCtxInput.name = 'tranCtx';
-                    tranCtxInput.value = response.data.tranCtx || response.data.rawResponse?.tranCtx || '';
-                    form.appendChild(tranCtxInput);
-                    document.body.appendChild(form);
-                    form.submit();
-                    return;
-                }
+            const secureHash = hashRes.data?.secureHash || "";
+            const fullPayload = { ...params, secureHash };
+
+            // Request proxy endpoint
+            const proxyRes = await axios.post(`${API_BASE_URL}/api/courses/icici/proxy/`, {
+                target_url: saleUrl,
+                payload_type: "json",
+                payload: fullPayload
+            });
+
+            const responseContent = proxyRes.data?.data || proxyRes.data || {};
+            const targetRedirect = responseContent.redirectURI || responseContent.redirectUrl || responseContent.redirect_url || responseContent.targetUrl || responseContent.url;
+            const tranCtx = responseContent.tranCtx || responseContent.tran_ctx || responseContent.tranContext;
+
+            let redirectTarget = targetRedirect;
+            if (redirectTarget && tranCtx) {
+                redirectTarget = redirectTarget.includes('?') 
+                    ? `${redirectTarget}&tranCtx=${encodeURIComponent(tranCtx)}`
+                    : `${redirectTarget}?tranCtx=${encodeURIComponent(tranCtx)}`;
             }
 
-            // Fallback redirect to BuyNow payment interface
-            window.location.href = `/buynow?course=${encodeURIComponent('CBSE Mock Test Program 2')}&amount=499`;
+            if (!redirectTarget) {
+                redirectTarget = saleUrl;
+            }
+
+            // Open payment page in new tab as requested
+            window.open(redirectTarget, '_blank');
+
+            // Show blurred overlay modal awaiting payment
+            setIsAwaitingPaymentModal(true);
         } catch (error) {
             console.error('ICICI Direct Checkout Error:', error);
-            window.location.href = `/buynow?course=${encodeURIComponent('CBSE Mock Test Program 2')}&amount=499`;
+            window.open(`/buynow?course=${encodeURIComponent('CBSE Mock Test Program 2')}&amount=10`, '_blank');
+            setIsAwaitingPaymentModal(true);
         } finally {
             setIsPayingNow(false);
         }
@@ -802,6 +847,38 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                 classOptions={["Class 10", "Class 12"]}
                 hideCourseType={true}
             />
+
+            {/* Awaiting Payment Blurred Modal */}
+            {isAwaitingPaymentModal && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="bg-white rounded-3xl max-w-md w-full p-8 text-center shadow-2xl border border-orange-100 transform animate-in zoom-in-95 duration-300 space-y-6">
+                        <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto text-orange-600 relative">
+                            <CreditCard className="w-10 h-10" />
+                            <div className="absolute inset-0 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <h3 className="text-2xl font-black text-gray-900">Awaiting Payment...</h3>
+                            <p className="text-gray-600 text-sm leading-relaxed">
+                                We have opened the secure ICICI Payment Gateway in a new tab. Please complete your transaction of <span className="font-extrabold text-orange-600">₹10.00</span> there.
+                            </p>
+                        </div>
+
+                        <div className="p-4 bg-orange-50 rounded-2xl border border-orange-200 text-xs text-orange-800 font-medium">
+                            🔒 Once completed, you will be redirected to download your receipt and view nearest branches.
+                        </div>
+
+                        <div className="pt-2">
+                            <button
+                                onClick={() => setIsAwaitingPaymentModal(false)}
+                                className="w-full py-3.5 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95"
+                            >
+                                Cancel & Close Window
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

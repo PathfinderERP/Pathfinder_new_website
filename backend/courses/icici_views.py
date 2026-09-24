@@ -244,17 +244,22 @@ class ICICICallbackView(APIView):
                 clean_host = host.replace('api.', '')
                 base_url = f"{scheme}://{clean_host}"
 
-            redirect_url = f"{base_url}/shiksha-bandhu/dashboard?txnNo={txn_no}&status={txn_status}"
+            if addl2:
+                redirect_url = f"{base_url}/shiksha-bandhu/dashboard?txnNo={txn_no}&status={txn_status}"
+            else:
+                redirect_url = f"{base_url}/payment-status?txnNo={txn_no}&status={txn_status}&amount={amount}&email={urllib.parse.quote(str(email))}&name={urllib.parse.quote(str(name))}&course={urllib.parse.quote(str(addl1))}"
             return redirect(redirect_url)
         except Exception as e:
             logger.error(f"Error handling ICICI callback POST: {e}")
-            return redirect("https://pathfinder.edu.in/shiksha-bandhu/dashboard")
+            return redirect("https://pathfinder.edu.in/payment-status")
 
     def get(self, request):
         """
         Handle GET callback if gateway redirects via GET.
         """
-        return redirect("https://pathfinder.edu.in/shiksha-bandhu/dashboard")
+        txn_status = request.query_params.get('responseCode') or request.query_params.get('status') or 'UNKNOWN'
+        txn_no = request.query_params.get('merchantTxnNo') or request.query_params.get('txnRefNo') or ''
+        return redirect(f"https://pathfinder.edu.in/payment-status?txnNo={txn_no}&status={txn_status}")
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ICICIWebhookView(APIView):
