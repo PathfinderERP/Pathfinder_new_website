@@ -252,7 +252,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             }
 
             if (!redirectTarget) {
-                redirectTarget = saleUrl;
+                throw new Error(responseContent.responseMessage || responseContent.message || "Failed to obtain payment gateway redirect URL");
             }
 
             // Save user details along with transaction ID into database before opening checkout
