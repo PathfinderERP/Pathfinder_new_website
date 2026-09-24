@@ -523,10 +523,13 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                             disabled={isPayingNow}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold shadow-lg hover:shadow-orange-500/40 transition-all border border-white/20 animate-pulse cursor-pointer disabled:opacity-50"
+                            className="flex flex-col items-center justify-center px-6 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-extrabold shadow-lg hover:shadow-orange-500/40 transition-all border border-white/20 animate-pulse cursor-pointer disabled:opacity-50"
                         >
-                            <CreditCard className="w-5 h-5 text-white" />
-                            <span>{isPayingNow ? 'REDIRECTING...' : 'BUY NOW'}</span>
+                            <div className="flex items-center gap-2">
+                                <CreditCard className="w-4 h-4 text-white" />
+                                <span className="text-sm">{isPayingNow ? 'REDIRECTING...' : 'BUY NOW'}</span>
+                            </div>
+                            <span className="text-[11px] font-black text-amber-200 tracking-wider">₹10.00 ONLY</span>
                         </motion.button>
                     ) : null
                 }
@@ -696,10 +699,13 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                                     type="button"
                                                     onClick={handleICICIPayNow}
                                                     disabled={isPayingNow}
-                                                    className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-base md:text-lg rounded-xl shadow-xl hover:shadow-green-500/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2 border border-green-400 cursor-pointer disabled:opacity-50"
+                                                    className="w-full sm:w-auto px-8 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black rounded-xl shadow-xl hover:shadow-green-500/30 transition-all transform hover:scale-105 flex flex-col items-center justify-center border border-green-400 cursor-pointer disabled:opacity-50"
                                                 >
-                                                    <CreditCard className="w-5 h-5 text-white" />
-                                                    {isPayingNow ? 'OPENING GATEWAY...' : 'BUY NOW'}
+                                                    <div className="flex items-center gap-2">
+                                                        <CreditCard className="w-5 h-5 text-white" />
+                                                        <span className="text-base md:text-lg">{isPayingNow ? 'OPENING GATEWAY...' : 'BUY NOW'}</span>
+                                                    </div>
+                                                    <span className="text-xs font-extrabold text-emerald-200 tracking-wider">₹10.00 ONLY</span>
                                                 </button>
                                             )}
                                         </div>
