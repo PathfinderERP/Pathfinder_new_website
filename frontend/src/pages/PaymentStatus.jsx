@@ -25,7 +25,8 @@ const PaymentStatus = () => {
   const status = searchParams.get('status') || '0000';
   const txnNo = searchParams.get('txnNo') || `TXN${Date.now()}`;
   const amount = searchParams.get('amount') || '10.00';
-  const customerName = searchParams.get('name') || 'Pathfinder Student';
+  const rawName = searchParams.get('name') || '';
+  const customerName = (rawName && rawName !== 'Referred Student' && rawName !== 'Student') ? rawName : 'Pathfinder Student';
   const customerEmail = searchParams.get('email') || '';
   const customerPhone = searchParams.get('phone') || searchParams.get('mobile') || '';
   const courseName = searchParams.get('course') || 'CBSE Mock Test Program 2';

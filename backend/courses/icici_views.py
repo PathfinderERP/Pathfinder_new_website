@@ -218,13 +218,20 @@ class ICICICallbackView(APIView):
             is_shiksha_bandhu = bool(addl2 and str(addl2).strip().upper().startswith('SB'))
             is_success = str(txn_status) in ['0000', '00', 'SUCCESS', '0', 'E000']
 
-            # Lookup LandingPageRegistration lead in database by transaction reference
+            # Lookup LandingPageRegistration lead in database by transaction reference or contact info
             if txn_no:
                 try:
                     from landing_registrations.models import LandingPageRegistration
                     lead = LandingPageRegistration.objects(txn_ref=txn_no).first()
+                    if not lead:
+                        lead = LandingPageRegistration.objects(course_type__icontains=txn_no).first()
+                    if not lead:
+                        lead = LandingPageRegistration.objects(page_source__icontains=txn_no).first()
+                    if not lead and mobile:
+                        lead = LandingPageRegistration.objects(phone=mobile).first()
                     if not lead and email:
                         lead = LandingPageRegistration.objects(email=email).first()
+                    
                     if lead:
                         if is_success:
                             lead.is_paid = True
@@ -232,9 +239,10 @@ class ICICICallbackView(APIView):
                                 lead.amount_paid = float(amount) if amount else 10.0
                             except Exception:
                                 pass
+                            lead.txn_ref = txn_no
                             lead.save()
-                            logger.info(f"Updated lead {lead.id} as PAID ({lead.amount_paid}) for txn {txn_no}")
-                        if not name or name == '':
+                            logger.info(f"Updated lead {lead.id} ({lead.name}) as PAID ({lead.amount_paid}) for txn {txn_no}")
+                        if not name or name == '' or name == 'Referred Student' or name == 'Student':
                             name = lead.name
                         if not mobile or mobile == '':
                             mobile = lead.phone
@@ -296,6 +304,10 @@ class ICICICallbackView(APIView):
             try:
                 from landing_registrations.models import LandingPageRegistration
                 lead = LandingPageRegistration.objects(txn_ref=txn_no).first()
+                if not lead:
+                    lead = LandingPageRegistration.objects(course_type__icontains=txn_no).first()
+                if not lead:
+                    lead = LandingPageRegistration.objects(page_source__icontains=txn_no).first()
                 if lead:
                     if str(txn_status) in ['0000', '00', 'SUCCESS', '0', 'E000']:
                         lead.is_paid = True
@@ -303,8 +315,9 @@ class ICICICallbackView(APIView):
                             lead.amount_paid = float(amount) if amount else 10.0
                         except Exception:
                             pass
+                        lead.txn_ref = txn_no
                         lead.save()
-                    if not name:
+                    if not name or name == 'Referred Student' or name == 'Student':
                         name = lead.name
                     if not mobile:
                         mobile = lead.phone
