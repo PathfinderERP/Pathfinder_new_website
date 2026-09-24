@@ -59,83 +59,257 @@ const PaymentStatus = () => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Payment Invoice - Pathfinder Academy</title>
+        <title>Payment Invoice - Pathfinder Educational Centre</title>
         <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; background: #fafafa; }
-          .invoice-box { max-width: 650px; margin: 0 auto; border: 2px solid #EE4600; padding: 35px; border-radius: 16px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-          .header { text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 25px; }
-          .header h1 { color: #EE4600; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 1px; }
-          .header p { color: #666; margin-top: 5px; font-size: 13px; font-weight: 600; text-transform: uppercase; }
-          .section-title { font-size: 14px; font-weight: 800; color: #EE4600; text-transform: uppercase; margin: 20px 0 10px 0; letter-spacing: 0.5px; border-bottom: 1px solid #fee2e2; padding-bottom: 5px; }
-          .details-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed #f0f0f0; font-size: 14px; }
-          .label { font-weight: 600; color: #666; }
-          .value { font-weight: 700; color: #111; }
-          .status-badge { background: #10B981; color: white; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; }
-          .total-box { background: #fff7ed; border: 1px solid #ffedd5; padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
-          .total-title { font-size: 16px; font-weight: 800; color: #9a3412; }
-          .total-amount { font-size: 22px; font-weight: 900; color: #EE4600; }
-          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 20px; leading-height: 1.6; }
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
+          body { 
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; 
+            padding: 30px 20px; 
+            color: #1e293b; 
+            background: #f8fafc; 
+            margin: 0;
+          }
+          .invoice-card { 
+            max-width: 680px; 
+            margin: 0 auto; 
+            border: 3px solid #EE4600; 
+            padding: 40px; 
+            border-radius: 20px; 
+            background: #ffffff; 
+            box-shadow: 0 20px 40px rgba(238, 70, 0, 0.08); 
+            position: relative;
+            overflow: hidden;
+          }
+          .invoice-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #EE4600, #ff7b00);
+          }
+          .top-header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9; 
+            padding-bottom: 24px; 
+            margin-bottom: 28px; 
+          }
+          .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+          }
+          .logo-badge {
+            background: #EE4600;
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(238, 70, 0, 0.3);
+          }
+          .brand-title { 
+            color: #0f172a; 
+            margin: 0; 
+            font-size: 22px; 
+            font-weight: 900; 
+            letter-spacing: -0.5px; 
+          }
+          .brand-sub { 
+            color: #EE4600; 
+            margin: 2px 0 0 0; 
+            font-size: 11px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+          }
+          .invoice-tag {
+            text-align: right;
+          }
+          .invoice-tag h2 {
+            margin: 0;
+            color: #EE4600;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+          }
+          .invoice-tag p {
+            margin: 4px 0 0 0;
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+          }
+          .section-heading { 
+            font-size: 12px; 
+            font-weight: 800; 
+            color: #EE4600; 
+            text-transform: uppercase; 
+            margin: 24px 0 12px 0; 
+            letter-spacing: 1px; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .section-heading::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #fed7aa;
+          }
+          .grid-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+          }
+          .info-cell {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+          }
+          .info-cell.full-width {
+            grid-column: span 2;
+          }
+          .label { 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: #64748b; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            display: block;
+          }
+          .value { 
+            font-size: 14px; 
+            font-weight: 800; 
+            color: #0f172a; 
+            word-break: break-all;
+          }
+          .badge-paid { 
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #10B981; 
+            color: white; 
+            padding: 4px 14px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: 900; 
+            letter-spacing: 0.5px;
+          }
+          .total-card { 
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); 
+            border: 2px solid #fdba74; 
+            padding: 20px; 
+            border-radius: 14px; 
+            margin-top: 24px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+          }
+          .total-title { 
+            font-size: 15px; 
+            font-weight: 800; 
+            color: #9a3412; 
+          }
+          .total-amount { 
+            font-size: 26px; 
+            font-weight: 900; 
+            color: #EE4600; 
+          }
+          .footer-note { 
+            margin-top: 32px; 
+            text-align: center; 
+            font-size: 11px; 
+            color: #64748b; 
+            border-top: 1px dashed #cbd5e1; 
+            padding-top: 20px; 
+            line-height: 1.6; 
+          }
           @media print {
             body { padding: 0; background: #fff; }
-            .invoice-box { border: none; box-shadow: none; padding: 20px; }
+            .invoice-card { border: 2px solid #EE4600; box-shadow: none; padding: 30px; }
             .no-print { display: none; }
           }
         </style>
       </head>
       <body>
-        <div class="invoice-box">
-          <div class="header">
-            <h1>PATHFINDER ACADEMY</h1>
-            <p>Official Payment Invoice & Receipt</p>
+        <div class="invoice-card">
+          <div class="top-header">
+            <div class="logo-container">
+              <div class="logo-badge">P</div>
+              <div>
+                <h1 class="brand-title">PATHFINDER</h1>
+                <p class="brand-sub">Educational Centre</p>
+              </div>
+            </div>
+            <div class="invoice-tag">
+              <h2>PAYMENT INVOICE</h2>
+              <p>Receipt #${txnNo}</p>
+            </div>
           </div>
           
-          <div class="section-title">Payment Overview</div>
-          <div class="details-row">
-            <span class="label">Invoice / Txn Reference</span>
-            <span class="value">${txnNo}</span>
-          </div>
-          <div class="details-row">
-            <span class="label">Payment Status</span>
-            <span class="status-badge">0000 SUCCESS</span>
-          </div>
-          <div class="details-row">
-            <span class="label">Date & Time</span>
-            <span class="value">${new Date().toLocaleString()}</span>
-          </div>
-
-          <div class="section-title">Student & Registration Details</div>
-          <div class="details-row">
-            <span class="label">Student Name</span>
-            <span class="value">${customerName}</span>
-          </div>
-          ${customerPhone ? `
-          <div class="details-row">
-            <span class="label">Phone Number</span>
-            <span class="value">${customerPhone}</span>
-          </div>` : ''}
-          ${customerEmail ? `
-          <div class="details-row">
-            <span class="label">Registered Email</span>
-            <span class="value">${customerEmail}</span>
-          </div>` : ''}
-          <div class="details-row">
-            <span class="label">Enrolled Program</span>
-            <span class="value">${courseName}</span>
+          <div class="section-heading">Transaction Overview</div>
+          <div class="grid-table">
+            <div class="info-cell">
+              <span class="label">Transaction ID</span>
+              <span class="value">${txnNo}</span>
+            </div>
+            <div class="info-cell">
+              <span class="label">Payment Status</span>
+              <div><span class="badge-paid">✓ PAID</span></div>
+            </div>
+            <div class="info-cell full-width">
+              <span class="label">Date & Time</span>
+              <span class="value">${new Date().toLocaleString()}</span>
+            </div>
           </div>
 
-          <div class="total-box">
+          <div class="section-heading">Student & Course Details</div>
+          <div class="grid-table">
+            <div class="info-cell">
+              <span class="label">Student Name</span>
+              <span class="value">${customerName}</span>
+            </div>
+            <div class="info-cell">
+              <span class="label">Contact Number</span>
+              <span class="value">${customerPhone || 'N/A'}</span>
+            </div>
+            ${customerEmail ? `
+            <div class="info-cell full-width">
+              <span class="label">Email Address</span>
+              <span class="value">${customerEmail}</span>
+            </div>` : ''}
+            <div class="info-cell full-width">
+              <span class="label">Enrolled Program</span>
+              <span class="value">${courseName}</span>
+            </div>
+          </div>
+
+          <div class="total-card">
             <span class="total-title">Total Amount Paid</span>
             <span class="total-amount">₹${amount}</span>
           </div>
 
-          <div class="footer">
-            <p><strong>Verification Notice:</strong> Present this invoice at any Pathfinder Offline Centre to claim physical test series papers and student ID.</p>
-            <p>This is an automated computer-generated payment invoice.</p>
+          <div class="footer-note">
+            <p><strong>Note for Offline Verification:</strong> Please present this printed receipt or digital copy at your designated Pathfinder Offline Centre to receive physical study materials and student ID.</p>
+            <p>© ${new Date().getFullYear()} Pathfinder Educational Centre. All Rights Reserved. Computer Generated Official Invoice.</p>
           </div>
         </div>
+
         <br/>
         <div style="text-align: center;" class="no-print">
-          <button onclick="window.print()" style="background: #EE4600; color: white; border: none; padding: 14px 28px; font-weight: 800; border-radius: 10px; cursor: pointer; font-size: 15px; box-shadow: 0 4px 14px rgba(238,70,0,0.3);">Print / Download Invoice PDF</button>
+          <button onclick="window.print()" style="background: linear-gradient(135deg, #EE4600 0%, #ff5500 100%); color: white; border: none; padding: 15px 32px; font-weight: 800; border-radius: 12px; cursor: pointer; font-size: 15px; box-shadow: 0 8px 20px rgba(238,70,0,0.35); font-family: inherit;">
+            🖨️ Print / Download Official Invoice PDF
+          </button>
         </div>
       </body>
       </html>
@@ -146,55 +320,58 @@ const PaymentStatus = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Status Card */}
         {isSuccess ? (
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-green-100">
-            <div className="bg-gradient-to-r from-emerald-600 to-green-500 p-8 text-white text-center relative overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-orange-100">
+            <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-orange-500 p-8 text-white text-center relative overflow-hidden">
               <div className="absolute right-0 top-0 opacity-10 transform translate-x-8 -translate-y-8">
                 <Sparkles className="w-48 h-48" />
               </div>
               <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md ring-8 ring-white/10 animate-bounce">
                 <CheckCircle className="w-12 h-12 text-white" />
               </div>
-              <h1 className="text-3xl font-black mb-2">Payment Confirmed & Invoiced!</h1>
-              <p className="text-emerald-100 font-medium max-w-md mx-auto">
-                Thank you, <span className="font-bold text-white">{customerName}</span>. Your enrollment for <span className="font-bold text-white">{courseName}</span> is active.
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500 text-white text-xs font-black uppercase tracking-wider mb-3 shadow-md">
+                <ShieldCheck className="w-4 h-4" /> Payment Status: Paid
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tight">Enrollment Successful!</h1>
+              <p className="text-orange-100 font-medium max-w-lg mx-auto text-sm sm:text-base">
+                Welcome <span className="font-bold text-white underline decoration-orange-300">{customerName}</span>! You have successfully enrolled in <span className="font-bold text-white">{courseName}</span>.
               </p>
             </div>
 
             <div className="p-6 md:p-8 space-y-6">
-              <div className="bg-orange-50/50 p-6 rounded-2xl border border-orange-100 space-y-3">
-                <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-                  <Receipt className="w-5 h-5 text-orange-600" />
-                  Official Student Invoice Details
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 pt-2">
+              <div className="bg-gradient-to-br from-orange-50/70 to-amber-50/40 p-6 rounded-2xl border-2 border-orange-200/80 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between border-b border-orange-200/60 pb-3">
+                  <h3 className="text-base font-black text-gray-900 flex items-center gap-2">
+                    <Receipt className="w-5 h-5 text-orange-600" />
+                    Student Enrollment & Receipt Summary
+                  </h3>
+                  <span className="px-3 py-1 bg-emerald-600 text-white text-xs font-black rounded-full tracking-wide">
+                    PAID
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-1">
                   <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Student Name</span>
-                    <span className="text-sm font-black text-gray-800">{customerName}</span>
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Student Name</span>
+                    <span className="text-sm font-black text-gray-900">{customerName}</span>
                   </div>
                   {customerPhone && (
                     <div>
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Phone Number</span>
-                      <span className="text-sm font-black text-gray-800">{customerPhone}</span>
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Contact Number</span>
+                      <span className="text-sm font-black text-gray-900">{customerPhone}</span>
                     </div>
                   )}
                   <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Transaction ID</span>
-                    <span className="text-sm font-black text-gray-800 break-all">{txnNo}</span>
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Transaction ID</span>
+                    <span className="text-sm font-black text-gray-900 break-all">{txnNo}</span>
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Amount Paid</span>
-                    <span className="text-sm font-black text-green-600">₹{amount}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Status</span>
-                    <span className="inline-flex items-center gap-1 text-xs font-bold bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full mt-0.5">
-                      <ShieldCheck className="w-3.5 h-3.5" /> 0000 SUCCESS
-                    </span>
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Total Amount Paid</span>
+                    <span className="text-base font-black text-orange-600">₹{amount}</span>
                   </div>
                 </div>
               </div>
@@ -202,16 +379,16 @@ const PaymentStatus = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
                 <button
                   onClick={handleDownloadReceipt}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-black rounded-xl shadow-lg hover:shadow-orange-500/25 transition-all flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
+                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-black rounded-2xl shadow-lg hover:shadow-orange-500/30 transition-all flex items-center justify-center gap-2 transform hover:-translate-y-0.5 text-sm uppercase tracking-wider"
                 >
                   <Download className="w-5 h-5" />
-                  DOWNLOAD INVOICE PDF
+                  Download Official Invoice PDF
                 </button>
                 <button
                   onClick={() => navigate('/')}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider"
                 >
-                  GO TO HOMEPAGE
+                  Go To Homepage
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
