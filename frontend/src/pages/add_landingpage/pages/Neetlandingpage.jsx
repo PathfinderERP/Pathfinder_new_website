@@ -457,9 +457,7 @@ export const Neetlandingpage = () => {
                                     <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center leading-tight">
                                         India’s Future <span className="text-[#FF9F00]">NEET Toppers</span> Start Here.
                                     </h2>
-                                </div>
-
-                                <div className="max-w-4xl mx-auto">
+                                </div>                                 <div className="max-w-4xl mx-auto">
                                     <form onSubmit={handleSubmit} className="space-y-3">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                             <div className="space-y-2">
@@ -472,7 +470,8 @@ export const Neetlandingpage = () => {
                                                     placeholder="Name"
                                                     required
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                                /                                             </div>
+                                                />
+                                            </div>
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-bold">Phone Number</label>
                                                 <input
