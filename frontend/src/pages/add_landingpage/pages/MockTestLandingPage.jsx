@@ -669,6 +669,11 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                         ) : (
                             <div className="w-full">
                                 <div className="max-w-5xl mx-auto">
+                                    <div className="flex justify-center mb-3">
+                                        <span className="bg-orange-600 text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider shadow-lg">
+                                            Official 2026-27 Registration & Online Admission
+                                        </span>
+                                    </div>
                                     <h2 className="text-3xl md:text-5xl font-bold mb-4 text-center leading-tight">
                                         {config.title} <span className="text-[#FF9F00]">{config.highlight}</span>
                                     </h2>
