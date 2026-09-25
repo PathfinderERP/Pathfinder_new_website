@@ -506,7 +506,7 @@ export const Jeelandingpage = () => {
                                                     ))}
                                                 </select>
                                             </div>
-                                        </div>v>
+                                        </div>
 
                                         <div className="flex justify-center ">
                                             <div className="flex justify-center pb-4 ">

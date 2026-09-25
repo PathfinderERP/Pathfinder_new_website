@@ -318,7 +318,7 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
                                         </select>
                                     </div>
                                 </div>
-                                    {showPercentage && (
+                                     {showPercentage && (
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Last Exam (%)</label>
                                             <input
@@ -332,7 +332,6 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
                                             />
                                         </div>
                                     )}
-                                </div>
 
                                 <button
                                     type="submit"

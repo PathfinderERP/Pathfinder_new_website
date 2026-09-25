@@ -472,8 +472,8 @@ export const Neetlandingpage = () => {
                                                     placeholder="Name"
                                                     required
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                                />
-                                            </div                                             <div className="space-y-2">
+                                                /                                             </div>
+                                            <div className="space-y-2">
                                                 <label className="block text-sm font-bold">Phone Number</label>
                                                 <input
                                                     type="tel"
@@ -561,7 +561,7 @@ export const Neetlandingpage = () => {
                                                     ))}
                                                 </select>
                                             </div>
-                                        </div>v>
+                                        </div>
 
                                         <div className="flex justify-center ">
                                             <div className="flex justify-center pb-4 ">

@@ -429,7 +429,7 @@ export const PmoLandingPage = () => {
                                                     ))}
                                                 </select>
                                             </div>
-                                        </div></div>
+                                        </div>
 
                                         <div className="flex justify-center pt-4">
                                             <button
