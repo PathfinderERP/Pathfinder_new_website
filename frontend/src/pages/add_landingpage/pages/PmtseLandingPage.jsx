@@ -214,6 +214,15 @@ export const PmtseLandingPage = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        if (name === "phone") {
+            const digitsOnly = value.replace(/\D/g, "");
+            if (digitsOnly.length > 0 && !/^[6-9]/.test(digitsOnly)) {
+                return;
+            }
+            if (digitsOnly.length > 10) return;
+            setFormData(prev => ({ ...prev, [name]: digitsOnly }));
+            return;
+        }
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -227,9 +236,24 @@ export const PmtseLandingPage = () => {
             return;
         }
 
+        if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+            alert("Please enter a valid 10-digit Indian phone number starting with 6, 7, 8, or 9.");
+            return;
+        }
+
+        if (!formData.centre) {
+            alert("Please select a centre.");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
-            const response = await landingAPI.register(formData);
+            const submitData = {
+                ...formData,
+                centre: formData.centre,
+                city: formData.city || formData.centre
+            };
+            const response = await landingAPI.register(submitData);
             if (response.data.success) {
                 setShowSuccess(true);
                 localStorage.setItem('pathfinder_lead_captured_pmtse', 'true');
@@ -239,6 +263,7 @@ export const PmtseLandingPage = () => {
                     phone: '',
                     student_class: '',
                     course_type: 'PNTSE Talent Search',
+                    city: '',
                     centre: '',
                     page_source: 'PNTSE Talent Search'
                 });
@@ -349,14 +374,15 @@ export const PmtseLandingPage = () => {
                                                     name="phone"
                                                     value={formData.phone}
                                                     onChange={handleInputChange}
-                                                    placeholder="+91"
+                                                    placeholder="10-digit mobile number"
                                                     required
+                                                    maxLength={10}
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
                                                 />
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-bold">Your Class (5 to 10)</label>
                                                 <select
@@ -376,7 +402,18 @@ export const PmtseLandingPage = () => {
                                                 </select>
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="block text-sm font-bold">Centre</label>
+                                                <label className="block text-sm font-bold">City</label>
+                                                <input
+                                                    type="text"
+                                                    name="city"
+                                                    value={formData.city || ''}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Enter your city"
+                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="block text-sm font-bold">Choose Centre *</label>
                                                 <div className="relative">
                                                     <select
                                                         name="centre"
@@ -385,7 +422,7 @@ export const PmtseLandingPage = () => {
                                                         className="w-full pl-5 pr-24 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
                                                         required
                                                     >
-                                                        <option value="">Select Centre</option>
+                                                        <option value="">Select Centre *</option>
                                                         {centres.map((c, idx) => (
                                                             <option key={idx} value={c.centre || c.name}>
                                                                 {c.centre || c.name}
@@ -403,7 +440,7 @@ export const PmtseLandingPage = () => {
                                                     </button>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div>  </div>
 
                                         <div className="flex justify-center pt-4">
                                             <button

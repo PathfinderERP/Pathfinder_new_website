@@ -39,5 +39,25 @@ class LandingPageRegistration(Document):
         'indexes': ['email', 'phone', 'course_type', 'page_source', 'referral_id', 'is_paid']
     }
     
+    def clean(self):
+        """Custom validation for phone number"""
+        import re
+        from mongoengine.errors import ValidationError
+        if self.phone:
+            cleaned_phone = re.sub(r'[\s\-]+', '', str(self.phone))
+            if cleaned_phone.startswith('+91'):
+                cleaned_phone = cleaned_phone[3:]
+            elif cleaned_phone.startswith('91') and len(cleaned_phone) == 12:
+                cleaned_phone = cleaned_phone[2:]
+            phone_pattern = r'^[6-9]\d{9}$'
+            if not re.match(phone_pattern, cleaned_phone):
+                raise ValidationError('Please enter a valid 10-digit Indian phone number starting with 6, 7, 8, or 9.')
+            self.phone = cleaned_phone
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        return super(LandingPageRegistration, self).save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.name} - {self.course_type} ({self.page_source})"
+

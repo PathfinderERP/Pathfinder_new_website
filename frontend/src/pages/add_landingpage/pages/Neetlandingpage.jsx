@@ -268,6 +268,20 @@ export const Neetlandingpage = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        if (name === 'phone') {
+            let digits = value.replace(/\D/g, '');
+            if (digits.length > 0 && !/[6-9]/.test(digits[0])) {
+                return;
+            }
+            if (digits.length > 10) {
+                digits = digits.slice(0, 10);
+            }
+            setFormData(prev => ({
+                ...prev,
+                phone: digits
+            }));
+            return;
+        }
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -277,17 +291,21 @@ export const Neetlandingpage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Basic validation
-        if (!formData.name || !formData.phone) {
-            alert("Please fill in all required fields (Name, Phone)");
+        if (!formData.name || !formData.phone || !formData.centre) {
+            alert("Please fill in all required fields (Name, Phone, Centre)");
+            return;
+        }
+
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneRegex.test(formData.phone)) {
+            alert("Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.");
             return;
         }
 
         setIsSubmitting(true);
         try {
             const submitData = { 
-                ...formData,
-                centre: formData.city || formData.centre 
+                ...formData
             };
             delete submitData.last_exam_percentage; // Static form doesn't use this
             const response = await landingAPI.register(submitData);
@@ -455,15 +473,15 @@ export const Neetlandingpage = () => {
                                                     required
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
                                                 />
-                                            </div>
-                                            <div className="space-y-2">
+                                            </div                                             <div className="space-y-2">
                                                 <label className="block text-sm font-bold">Phone Number</label>
                                                 <input
                                                     type="tel"
                                                     name="phone"
                                                     value={formData.phone}
                                                     onChange={handleInputChange}
-                                                    placeholder="+91"
+                                                    placeholder="Enter 10-digit number"
+                                                    maxLength={10}
                                                     required
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
                                                 />
@@ -502,8 +520,8 @@ export const Neetlandingpage = () => {
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                                            <div className="space-y-2 flex-1">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                            <div className="space-y-2">
                                                 <label className="block text-sm font-bold">City</label>
                                                 <input
                                                     type="text"
@@ -515,7 +533,35 @@ export const Neetlandingpage = () => {
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
                                                 />
                                             </div>
-                                        </div>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center">
+                                                    <label className="block text-sm font-bold">Choose Centre *</label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleDetectLocation}
+                                                        className="text-xs text-[#FF9F00] hover:underline flex items-center gap-1"
+                                                        disabled={isDetecting}
+                                                    >
+                                                        <MapPin className="w-3 h-3" />
+                                                        {isDetecting ? 'Detecting...' : 'Near Me'}
+                                                    </button>
+                                                </div>
+                                                <select
+                                                    name="centre"
+                                                    value={formData.centre}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
+                                                >
+                                                    <option value="">Select Centre</option>
+                                                    {centres.map((c) => (
+                                                        <option key={c._id || c.id} value={c.centre || c.name}>
+                                                            {c.centre || c.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>v>
 
                                         <div className="flex justify-center ">
                                             <div className="flex justify-center pb-4 ">

@@ -44,6 +44,15 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        if (name === "phone") {
+            const digitsOnly = value.replace(/\D/g, "");
+            if (digitsOnly.length > 0 && !/^[6-9]/.test(digitsOnly)) {
+                return;
+            }
+            if (digitsOnly.length > 10) return;
+            setFormData(prev => ({ ...prev, [name]: digitsOnly }));
+            return;
+        }
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -61,6 +70,7 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
                         const city = data.address.city || data.address.town || data.address.suburb;
 
                         if (city) {
+                            setFormData(prev => ({ ...prev, city: city }));
                             const nearestCentre = centres.find(c =>
                                 c.centre.toLowerCase().includes(city.toLowerCase()) ||
                                 city.toLowerCase().includes(c.centre.toLowerCase())
@@ -69,7 +79,7 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
                                 setFormData(prev => ({ ...prev, centre: nearestCentre.centre }));
                                 toast.success(`Found nearest centre: ${nearestCentre.centre}`);
                             } else {
-                                toast.info("No matching centre found for your location.");
+                                toast.info("City detected. Please select your nearest centre.");
                             }
                         }
                     } catch (err) {
@@ -109,11 +119,20 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+            toast.error("Please enter a valid 10-digit phone number starting with 6, 7, 8, or 9.");
+            return;
+        }
+        if (!formData.centre) {
+            toast.error("Please select a centre.");
+            return;
+        }
         setIsSubmitting(true);
         try {
             const submitData = { 
                 ...formData,
-                centre: formData.city || formData.centre 
+                centre: formData.centre,
+                city: formData.city || formData.centre
             };
             if (!showPercentage) {
                 delete submitData.last_exam_percentage;
@@ -225,8 +244,9 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
                                             name="phone"
                                             value={formData.phone}
                                             onChange={handleInputChange}
-                                            placeholder="Enter phone number"
+                                            placeholder="10-digit mobile number"
                                             required
+                                            maxLength={10}
                                             className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] transition-all"
                                         />
                                     </div>
@@ -277,10 +297,27 @@ const RegistrationPopup = ({ isOpen, onClose, pageSource, showPercentage = false
                                             value={formData.city}
                                             onChange={handleInputChange}
                                             placeholder="Enter your city"
-                                            required
                                             className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] transition-all"
                                         />
                                     </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Centre *</label>
+                                        <select
+                                            name="centre"
+                                            value={formData.centre}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="w-full px-5 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00] appearance-none"
+                                        >
+                                            <option value="" className="bg-black">Select Centre *</option>
+                                            {centres.map((c, idx) => (
+                                                <option key={idx} value={c.centre || c.name} className="bg-black">
+                                                    {c.centre || c.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
                                     {showPercentage && (
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Last Exam (%)</label>

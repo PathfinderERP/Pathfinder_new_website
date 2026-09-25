@@ -179,7 +179,7 @@ const AdsLeadsList = () => {
     };
 
     const exportToCSV = () => {
-        const headers = ['Name', 'Phone', 'Email', 'Class', 'Board', 'Course Type', 'Centre', 'Source', 'Contacted', 'Date'];
+        const headers = ['Name', 'Phone', 'Email', 'Class', 'Board', 'Course Type', 'Centre', 'City', 'Source', 'Contacted', 'Date'];
         let dataToExport = [...allLeads];
 
         if (sourceFilter !== 'all') {
@@ -197,7 +197,8 @@ const AdsLeadsList = () => {
                 lead.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 lead.phone?.includes(searchQuery) ||
                 lead.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                lead.centre?.toLowerCase().includes(searchQuery.toLowerCase())
+                lead.centre?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                lead.city?.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
         if (startDate) {
@@ -221,6 +222,7 @@ const AdsLeadsList = () => {
                 `"${lead.board || ''}"`,
                 `"${lead.course_type || ''}"`,
                 `"${lead.centre || ''}"`,
+                `"${lead.city || ''}"`,
                 `"${lead.page_source || ''}"`,
                 lead.is_contacted ? 'Yes' : 'No',
                 `"${new Date(lead.created_at).toLocaleString()}"`
@@ -415,6 +417,7 @@ const AdsLeadsList = () => {
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-slate-300">Contact</th>
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-slate-300">Target</th>
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-slate-300">Centre</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-slate-300">City</th>
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-slate-300">Source</th>
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-slate-300">Status</th>
                             <th className="px-6 py-4 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest text-slate-300">Action</th>
@@ -423,7 +426,7 @@ const AdsLeadsList = () => {
                     <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                         {leads.length === 0 ? (
                             <tr>
-                                <td colSpan="7" className="px-6 py-12 text-center text-gray-500">No leads found matching current filters</td>
+                                <td colSpan="8" className="px-6 py-12 text-center text-gray-500">No leads found matching current filters</td>
                             </tr>
                         ) : (
                             leads.map((lead) => (
@@ -441,10 +444,13 @@ const AdsLeadsList = () => {
                                         <div className="text-[10px] text-gray-400 font-medium">Class {lead.student_class}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-sm text-gray-600 dark:text-gray-300 line-clamp-1">{lead.centre}</div>
+                                        <div className="text-sm text-gray-600 dark:text-gray-300 line-clamp-1">{lead.centre || 'N/A'}</div>
                                         <div className="text-[10px] text-gray-400 tracking-tighter uppercase font-medium">
                                             {new Date(lead.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} | {new Date(lead.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
                                         </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="text-sm text-gray-600 dark:text-gray-300 line-clamp-1">{lead.city || '—'}</div>
                                     </td>
                                     <td className="px-6 py-4">
                                         {(() => {

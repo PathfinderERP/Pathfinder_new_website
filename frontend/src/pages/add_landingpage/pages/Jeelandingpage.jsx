@@ -252,6 +252,15 @@ export const Jeelandingpage = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        if (name === "phone") {
+            const digitsOnly = value.replace(/\D/g, "");
+            if (digitsOnly.length > 0 && !/^[6-9]/.test(digitsOnly)) {
+                return;
+            }
+            if (digitsOnly.length > 10) return;
+            setFormData(prev => ({ ...prev, [name]: digitsOnly }));
+            return;
+        }
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -261,11 +270,20 @@ export const Jeelandingpage = () => {
             alert("Please fill in all required fields (Name, Phone)");
             return;
         }
+        if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+            alert("Please enter a valid 10-digit Indian phone number starting with 6, 7, 8, or 9.");
+            return;
+        }
+        if (!formData.centre) {
+            alert("Please select a centre.");
+            return;
+        }
         setIsSubmitting(true);
         try {
             const submitData = { 
                 ...formData,
-                centre: formData.city || formData.centre 
+                centre: formData.centre,
+                city: formData.city || formData.centre
             };
             delete submitData.last_exam_percentage;
             const response = await landingAPI.register(submitData);
@@ -286,7 +304,6 @@ export const Jeelandingpage = () => {
         } catch (error) {
             console.error("Submission error:", error);
         } finally {
-            setIsSubmitting(true); // Wait, this should be false, I'll fix in next step if needed
             setIsSubmitting(false);
         }
     };
@@ -421,8 +438,9 @@ export const Jeelandingpage = () => {
                                                     name="phone"
                                                     value={formData.phone}
                                                     onChange={handleInputChange}
-                                                    placeholder="+91"
+                                                    placeholder="10-digit mobile number"
                                                     required
+                                                    maxLength={10}
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
                                                 />
                                             </div>
@@ -459,7 +477,7 @@ export const Jeelandingpage = () => {
                                                 </select>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                             <div className="space-y-2 flex-1">
                                                 <label className="block text-sm font-bold">City</label>
                                                 <input
@@ -468,11 +486,27 @@ export const Jeelandingpage = () => {
                                                     value={formData.city}
                                                     onChange={handleInputChange}
                                                     placeholder="Enter your city"
-                                                    required
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
                                                 />
                                             </div>
-                                        </div>
+                                            <div className="space-y-2 flex-1">
+                                                <label className="block text-sm font-bold">Choose Centre *</label>
+                                                <select
+                                                    name="centre"
+                                                    value={formData.centre}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
+                                                    required
+                                                >
+                                                    <option value="">Select Centre *</option>
+                                                    {centres.map((c, idx) => (
+                                                        <option key={idx} value={c.centre || c.name}>
+                                                            {c.centre || c.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>v>
 
                                         <div className="flex justify-center ">
                                             <div className="flex justify-center pb-4 ">

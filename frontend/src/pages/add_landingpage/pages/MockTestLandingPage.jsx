@@ -202,6 +202,18 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             return;
         }
 
+        if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+            alert("Please enter a valid 10-digit Indian phone number starting with 6, 7, 8, or 9.");
+            scrollToForm();
+            return;
+        }
+
+        if (!formData.centre) {
+            alert("Please select a centre to proceed with Buy Now.");
+            scrollToForm();
+            return;
+        }
+
         setIsPayingNow(true);
         try {
             // 1. Pre-save student/lead details into database before redirecting
@@ -218,7 +230,8 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                     name: customerName,
                     phone: customerMobileNo,
                     email: customerEmailID,
-                    centre: formData.city || formData.centre || 'Online',
+                    centre: formData.centre,
+                    city: formData.city || formData.centre || 'Online',
                     course_type: `${config.title} Mock Test Program`,
                     page_source: cleanSource,
                     txn_ref: merchantTxnNo
@@ -454,6 +467,15 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        if (name === "phone") {
+            const digitsOnly = value.replace(/\D/g, "");
+            if (digitsOnly.length > 0 && !/^[6-9]/.test(digitsOnly)) {
+                return;
+            }
+            if (digitsOnly.length > 10) return;
+            setFormData(prev => ({ ...prev, [name]: digitsOnly }));
+            return;
+        }
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -468,11 +490,22 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
             return;
         }
 
+        if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+            alert("Please enter a valid 10-digit Indian phone number starting with 6, 7, 8, or 9.");
+            return;
+        }
+
+        if (!formData.centre) {
+            alert("Please select a centre.");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const submitData = {
                 ...formData,
-                centre: formData.city || formData.centre,
+                centre: formData.centre,
+                city: formData.city || formData.centre,
                 course_type: formData.course_type || "Mock Test Program"
             };
             const response = await landingAPI.register(submitData);
@@ -666,14 +699,15 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                                     name="phone"
                                                     value={formData.phone}
                                                     onChange={handleInputChange}
-                                                    placeholder="+91"
+                                                    placeholder="10-digit mobile number"
                                                     required
+                                                    maxLength={10}
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
                                                 />
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-bold">Your Class</label>
                                                 <select
@@ -688,7 +722,7 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                                     <option value="12">Class 12</option>
                                                 </select>
                                             </div>
-                                            <div className="space-y-2 flex-1">
+                                            <div className="space-y-2">
                                                 <label className="block text-sm font-bold">City</label>
                                                 <input
                                                     type="text"
@@ -696,9 +730,25 @@ export const MockTestLandingPage = ({ boardType, isVersionTwo = false }) => {
                                                     value={formData.city}
                                                     onChange={handleInputChange}
                                                     placeholder="Enter your city"
-                                                    required
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
                                                 />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="block text-sm font-bold">Choose Centre *</label>
+                                                <select
+                                                    name="centre"
+                                                    value={formData.centre}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
+                                                    required
+                                                >
+                                                    <option value="">Select Centre *</option>
+                                                    {centres.map((c, idx) => (
+                                                        <option key={idx} value={c.centre || c.name}>
+                                                            {c.centre || c.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </div>
                                         </div>
 
