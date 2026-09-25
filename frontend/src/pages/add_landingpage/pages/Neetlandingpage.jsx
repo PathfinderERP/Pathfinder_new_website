@@ -30,7 +30,7 @@ const FloatingStickyBadge = ({ scrollToForm, onScholarshipClick }) => {
         >
             {/* Admissions Badge */}
             <motion.div
-                animate={{ 
+                animate={{
                     scale: [1, 1.05, 1],
                     boxShadow: [
                         "0 10px 15px -3px rgba(234, 88, 12, 0.2)",
@@ -55,7 +55,7 @@ const FloatingStickyBadge = ({ scrollToForm, onScholarshipClick }) => {
 
             {/* Scholarship Badge */}
             <motion.div
-                animate={{ 
+                animate={{
                     x: [0, -5, 0]
                 }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -81,7 +81,7 @@ const FloatingStickyBadge = ({ scrollToForm, onScholarshipClick }) => {
                     <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
                     LAST 06 HOURS
                 </motion.div>
-                
+
                 <motion.div
                     className="bg-white/95 backdrop-blur-sm border border-orange-200 text-gray-900 text-[10px] font-black px-3 py-2 rounded-xl shadow-xl flex items-center gap-2"
                 >
@@ -304,7 +304,7 @@ export const Neetlandingpage = () => {
 
         setIsSubmitting(true);
         try {
-            const submitData = { 
+            const submitData = {
                 ...formData
             };
             delete submitData.last_exam_percentage; // Static form doesn't use this
@@ -365,8 +365,8 @@ export const Neetlandingpage = () => {
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 selection:bg-indigo-500 selection:text-white font-sans overflow-x-hidden">
             <Header />
-            <FloatingStickyBadge 
-                scrollToForm={scrollToForm} 
+            <FloatingStickyBadge
+                scrollToForm={scrollToForm}
                 onScholarshipClick={() => {
                     setPopupShowPercentage(true);
                     setIsRegistrationPopupOpen(true);
@@ -472,7 +472,7 @@ export const Neetlandingpage = () => {
                                                     placeholder="Name"
                                                     required
                                                     className="w-full px-5 py-4 bg-white text-black rounded-xl outline-none focus:ring-2 focus:ring-[#FF9F00]"
-                                                /                                             </div>
+                                                />                                            </div>
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-bold">Phone Number</label>
                                                 <input
@@ -1176,9 +1176,9 @@ export const Neetlandingpage = () => {
                     }}
                 />
             </div >
-            <RegistrationPopup 
-                isOpen={isRegistrationPopupOpen} 
-                onClose={() => setIsRegistrationPopupOpen(false)} 
+            <RegistrationPopup
+                isOpen={isRegistrationPopupOpen}
+                onClose={() => setIsRegistrationPopupOpen(false)}
                 pageSource="NEET Landing Page"
                 showPercentage={popupShowPercentage}
             />
