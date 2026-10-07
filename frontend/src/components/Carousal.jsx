@@ -38,6 +38,15 @@ export const HeroCarousel = () => {
       scaleClass: "scale-100",
     },
     {
+      name: "Debangana Sen Mondal",
+      exam: "ICSE 2026",
+      branch: "Malda Branch",
+      desc: "AIR Rank:",
+      rank: "6",
+      img: "https://pub-7c94e07c9acb46369c7f4fa8eb00e4cb.r2.dev/homepagecarousal_images/2026/10/07/f08f0112a748483fb39dce184081a71f.png",
+      scaleClass: "scale-100",
+    },
+    {
       name: "Jishnu Kundu",
       exam: "HS 2026",
       branch: "",
