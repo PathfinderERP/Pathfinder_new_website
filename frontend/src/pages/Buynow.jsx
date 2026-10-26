@@ -863,11 +863,7 @@ const Buynow = () => {
                 {loading ? "Processing..." : "Pay Now"}
               </button>
 
-              <div className="mt-3 text-center">
-                <span className="text-[11px] font-mono text-emerald-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full inline-block">
-                  Build Version: v1.0.4 (Live ICICI Gateway)
-                </span>
-              </div>
+
             </div>
           </div>
         </div>

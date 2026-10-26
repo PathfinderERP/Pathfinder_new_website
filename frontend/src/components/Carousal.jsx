@@ -9,6 +9,54 @@ export const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const descriptions = [
+    // New Active Students (Uploaded to Cloudflare R2)
+    {
+      name: "Rishit Dutta",
+      exam: "ICSE 2026",
+      branch: "Jodhpur Park Branch",
+      desc: "AIR Rank:",
+      rank: "2",
+      img: "https://pub-7c94e07c9acb46369c7f4fa8eb00e4cb.r2.dev/homepagecarousal_images/2026/10/07/e5d41ce8c25d4872a41e3c9697c9694d.png",
+      scaleClass: "scale-100",
+    },
+    {
+      name: "Suchetana Bose",
+      exam: "ICSE 2026",
+      branch: "Chandannagar Branch",
+      desc: "AIR Rank:",
+      rank: "3",
+      img: "https://pub-7c94e07c9acb46369c7f4fa8eb00e4cb.r2.dev/homepagecarousal_images/2026/10/07/590f6dd450644250a28d3d1520f7927b.png",
+      scaleClass: "scale-100",
+    },
+    {
+      name: "Priyotosh Mukherjee",
+      exam: "Madhyamik 2026",
+      branch: "Bolpur Branch",
+      desc: "Rank 2 | Marks:",
+      rank: "696/700",
+      img: "https://pub-7c94e07c9acb46369c7f4fa8eb00e4cb.r2.dev/homepagecarousal_images/2026/10/07/4571704844bc48299d08b393ebcf73ba.png",
+      scaleClass: "scale-100",
+    },
+    {
+      name: "Debangana Sen Mondal",
+      exam: "ICSE 2026",
+      branch: "Malda Branch",
+      desc: "AIR Rank:",
+      rank: "6",
+      img: "https://pub-7c94e07c9acb46369c7f4fa8eb00e4cb.r2.dev/homepagecarousal_images/2026/10/07/f08f0112a748483fb39dce184081a71f.png",
+      scaleClass: "scale-100",
+    },
+    {
+      name: "Jishnu Kundu",
+      exam: "HS 2026",
+      branch: "",
+      desc: "Marks:",
+      rank: "495/500",
+      img: "https://pub-7c94e07c9acb46369c7f4fa8eb00e4cb.r2.dev/homepagecarousal_images/2026/10/07/4ec992b850954bdea1eff3faa22c3210.png",
+      scaleClass: "scale-100",
+    },
+    /*
+    // Previous Students (Commented Out)
     // 1
     {
       name: "Adrita Sarkar",
@@ -27,7 +75,7 @@ export const HeroCarousel = () => {
       img: getImageUrl("images/homepagecarousal_images/devdutta majhi.webp"),
       scaleClass: "scale-100",
     },
-    // 3   rupayan pal all achivement .png cool
+    // 3
     {
       name: "Rupayan Pal",
       exam: "NEET 2025",
@@ -63,6 +111,7 @@ export const HeroCarousel = () => {
       img: getImageUrl("images/homepagecarousal_images/Pranami halder.webp"),
       scaleClass: "scale-[1.15]",
     },
+    */
   ];
 
   const sliderSettings = {
@@ -189,6 +238,11 @@ export const HeroCarousel = () => {
                   <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
                     {item.exam}
                   </p>
+                  {item.branch && (
+                    <p className="text-[11px] sm:text-xs text-slate-500 font-normal mt-0.5">
+                      {item.branch}
+                    </p>
+                  )}
                 </div>
 
                 {/* Rank/Score Display - Tight spacing */}
