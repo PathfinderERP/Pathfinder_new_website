@@ -512,17 +512,17 @@ function Pillars() {
     {
       title: "Mentorship",
       sub: "Elite teachers who build champions.",
-      icon: "🎓",
+      icon: "",
     },
     {
       title: "Systems",
       sub: "Doubt-clearing, mocks, analytics, routines.",
-      icon: "⚙️",
+      icon: "",
     },
     {
       title: "Community",
       sub: "A tribe that compounds your effort.",
-      icon: "🌱",
+      icon: "",
     },
   ];
   return (
