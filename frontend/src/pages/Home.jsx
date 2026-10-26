@@ -536,9 +536,9 @@ function Pillars() {
             <div className="text-2xl">{i.icon}</div>
             <div className="mt-2 font-semibold text-lg">{i.title}</div>
             <div className="text-slate-600">{i.sub}</div>
-            <a href="#about" className="inline-block mt-3 text-orange-600 font-medium hover:text-orange-700">
+            {/* <a href="#about" className="inline-block mt-3 text-orange-600 font-medium hover:text-orange-700">
               Learn more →
-            </a>
+            </a> */}
           </div>
         ))}
       </div>
