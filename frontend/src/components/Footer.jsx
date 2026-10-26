@@ -520,11 +520,11 @@ const Footer = () => {
                     <h4 className="text-xl font-semibold mb-3">Contact</h4>
                     <div className="space-y-2">
                       <motion.a
-                        href="tel:+918585070176"
+                        href="tel:+919147178886"
                         className="block text-gray-400 hover:text-orange-500 transition-colors duration-300"
                         whileHover={{ x: 5 }}
                       >
-                        +91 8585070176
+                        +91 9147178886
                       </motion.a>
                       <motion.a
                         href="mailto:support@pathfinder.edu.in"
