@@ -119,7 +119,7 @@ export default function PathVerseOverview() {
         centres={centres}
         loadingCentres={loadingCentres}
       />
-      <Students />
+      {/* <Students /> */}
       {/* <Admissions />
       <Events /> */}
       {/* <Lumos /> */}
