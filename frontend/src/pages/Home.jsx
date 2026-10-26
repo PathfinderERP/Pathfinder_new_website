@@ -122,13 +122,13 @@ export default function PathVerseOverview() {
       <Students />
       {/* <Admissions />
       <Events /> */}
-      <Lumos />
+      {/* <Lumos /> */}
       {/* <PathTex />
       <Blog />
       <Community /> */}
       {/* FAQ */}
       <FAQ />
-      
+
       {/* Popups */}
       <PredictionPopup />
     </div>
@@ -613,7 +613,7 @@ const LocationFilter = forwardRef(({
         const name = (c.centre || c.name || "").toLowerCase();
         return name === "hazra" || name.includes("hazra");
       });
-      
+
       if (hazraCentre) {
         if (hazraCentre.state) setSelectedState(hazraCentre.state);
         if (hazraCentre.district) setSelectedDistrict(hazraCentre.district);
@@ -1513,7 +1513,7 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
   }, [courses, selectedState, selectedDistrict, selectedCentre]);
 
   // Log location-filtered results
-    // Location-filtered count check removed
+  // Location-filtered count check removed
 
 
   // Extract unique filter options from LOCATION-FILTERED courses only
