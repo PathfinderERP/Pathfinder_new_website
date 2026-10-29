@@ -2138,11 +2138,11 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
                       {/* Price Section */}
                       <div className="flex items-end gap-2 mb-4">
                         <div className="text-2xl font-bold text-[#66090D] leading-none">
-                          ₹{Math.round(displayPrice).toLocaleString()}
+                          ₹{Math.round(displayPrice).toLocaleString('en-IN')}
                         </div>
                         {originalPrice > displayPrice && (
                           <div className="text-sm text-slate-400 line-through mb-0.5">
-                            ₹{Math.round(originalPrice).toLocaleString()}
+                            ₹{Math.round(originalPrice).toLocaleString('en-IN')}
                           </div>
                         )}
                         {discountLabel > 0 && (
@@ -2257,12 +2257,12 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
                 ? new Date(selectedCourse.start_date || selectedCourse.starting_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
                 : "Coming Soon"),
               price: selectedCourse.displayPrice !== undefined
-                ? `₹${Math.round(selectedCourse.displayPrice).toLocaleString()}`
+                ? `₹${Math.round(selectedCourse.displayPrice).toLocaleString('en-IN')}`
                 : (selectedCourse.course_price
-                  ? `₹${Math.round(parseFloat(selectedCourse.course_price)).toLocaleString()}`
+                  ? `₹${Math.round(parseFloat(selectedCourse.course_price)).toLocaleString('en-IN')}`
                   : "Contact for Price"),
               originalPrice: selectedCourse.originalPrice && selectedCourse.originalPrice > selectedCourse.displayPrice
-                ? `₹${Math.round(selectedCourse.originalPrice).toLocaleString()}`
+                ? `₹${Math.round(selectedCourse.originalPrice).toLocaleString('en-IN')}`
                 : null,
               discountLabel: selectedCourse.discountLabel || 0,
             }}

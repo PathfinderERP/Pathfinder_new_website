@@ -35,40 +35,45 @@ const formatStartDate = (dateStr) => {
   return dateStr;
 };
 
+const parsePriceNumber = (val) => {
+  if (val === undefined || val === null || val === "") return 0;
+  if (typeof val === "number") return val;
+  const cleaned = val.toString().replace(/[₹$,]/g, "").trim();
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
+};
+
 const formatDisplayPrice = (val) => {
   if (val === undefined || val === null || val === "") return "Contact for Price";
-  if (typeof val === "string" && (val.includes("₹") || isNaN(Number(val.replace(/,/g, ""))))) {
+  if (typeof val === "string" && (val.includes("₹") || isNaN(Number(val.replace(/[₹$,]/g, ""))))) {
     return val;
   }
-  const num = parseFloat(val);
-  if (!isNaN(num) && num > 0) {
-    return `₹${Math.round(num).toLocaleString()}`;
+  const num = parsePriceNumber(val);
+  if (num > 0) {
+    return `₹${Math.round(num).toLocaleString('en-IN')}`;
   }
   return val;
 };
 
 const resolveCoursePricing = (courseObj) => {
-  if (!courseObj) return { price: "Contact for Price", originalPrice: null, discountLabel: 0 };
+  if (!courseObj) return { price: "Contact for Price", originalPrice: null, discountLabel: 0, priceNum: 0, originalPriceNum: 0 };
 
-  if (courseObj.displayPrice !== undefined) {
+  if (courseObj.displayPrice !== undefined && parsePriceNumber(courseObj.displayPrice) > 0) {
+    const pNum = parsePriceNumber(courseObj.displayPrice);
+    const origNum = parsePriceNumber(courseObj.originalPrice);
+    const hasDiscount = origNum > pNum;
+    const discount = courseObj.discountLabel || (hasDiscount ? Math.round(((origNum - pNum) / origNum) * 100) : 0);
     return {
-      price: formatDisplayPrice(courseObj.displayPrice),
-      originalPrice: courseObj.originalPrice ? formatDisplayPrice(courseObj.originalPrice) : null,
-      discountLabel: courseObj.discountLabel || 0,
+      price: `₹${Math.round(pNum).toLocaleString('en-IN')}`,
+      originalPrice: hasDiscount ? `₹${Math.round(origNum).toLocaleString('en-IN')}` : null,
+      discountLabel: discount,
+      priceNum: Math.round(pNum),
+      originalPriceNum: Math.round(origNum),
     };
   }
 
-  // If explicit formatted price string passed (e.g. "₹121,000")
-  if (typeof courseObj.price === "string" && courseObj.price.includes("₹")) {
-    return {
-      price: courseObj.price,
-      originalPrice: courseObj.originalPrice ? formatDisplayPrice(courseObj.originalPrice) : null,
-      discountLabel: courseObj.discountLabel || 0,
-    };
-  }
-
-  const rawPrice = parseFloat(courseObj.course_price || courseObj.price || 0);
-  const rawDiscounted = parseFloat(courseObj.discounted_price || courseObj.discount_price || 0);
+  const rawPrice = parsePriceNumber(courseObj.course_price || courseObj.price);
+  const rawDiscounted = parsePriceNumber(courseObj.discounted_price || courseObj.discount_price);
   const offer = parseFloat(courseObj.offers || 0);
 
   let calcPrice = rawPrice;
@@ -76,28 +81,31 @@ const resolveCoursePricing = (courseObj) => {
   let calcDiscount = 0;
 
   if (courseObj.plans && Array.isArray(courseObj.plans) && courseObj.plans.length > 0) {
-    const planPrices = courseObj.plans.map(p => parseFloat(p.discounted_price || p.base_price || 0)).filter(p => p > 0);
+    const planPrices = courseObj.plans.map(p => parsePriceNumber(p.discounted_price || p.base_price)).filter(p => p > 0);
     if (planPrices.length > 0) calcPrice = Math.min(...planPrices);
-    const matchingPlan = courseObj.plans.find(p => parseFloat(p.discounted_price || p.base_price) === calcPrice);
-    if (matchingPlan && parseFloat(matchingPlan.base_price) > calcPrice) {
-      calcOriginal = parseFloat(matchingPlan.base_price);
+    const matchingPlan = courseObj.plans.find(p => parsePriceNumber(p.discounted_price || p.base_price) === calcPrice);
+    if (matchingPlan && parsePriceNumber(matchingPlan.base_price) > calcPrice) {
+      calcOriginal = parsePriceNumber(matchingPlan.base_price);
       calcDiscount = Math.round(((calcOriginal - calcPrice) / calcOriginal) * 100);
     }
   } else if (rawDiscounted > 0 && rawDiscounted < rawPrice) {
     calcPrice = rawDiscounted;
     calcOriginal = rawPrice;
     calcDiscount = Math.round(((rawPrice - rawDiscounted) / rawPrice) * 100);
-  } else if (offer > 0) {
+  } else if (offer > 0 && rawPrice > 0) {
     calcOriginal = rawPrice;
     calcPrice = rawPrice - (rawPrice * (offer / 100));
     calcDiscount = Math.round(offer);
   }
 
   if (calcPrice > 0) {
+    const hasDiscount = calcOriginal > calcPrice;
     return {
-      price: `₹${Math.round(calcPrice).toLocaleString()}`,
-      originalPrice: calcOriginal > calcPrice ? `₹${Math.round(calcOriginal).toLocaleString()}` : (courseObj.originalPrice ? formatDisplayPrice(courseObj.originalPrice) : null),
+      price: `₹${Math.round(calcPrice).toLocaleString('en-IN')}`,
+      originalPrice: hasDiscount ? `₹${Math.round(calcOriginal).toLocaleString('en-IN')}` : null,
       discountLabel: calcDiscount || courseObj.discountLabel || 0,
+      priceNum: Math.round(calcPrice),
+      originalPriceNum: Math.round(calcOriginal),
     };
   }
 
@@ -105,6 +113,8 @@ const resolveCoursePricing = (courseObj) => {
     price: formatDisplayPrice(courseObj.price || courseObj.course_price),
     originalPrice: courseObj.originalPrice ? formatDisplayPrice(courseObj.originalPrice) : null,
     discountLabel: courseObj.discountLabel || 0,
+    priceNum: 0,
+    originalPriceNum: 0,
   };
 };
 
@@ -681,7 +691,7 @@ function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnC
                 const name = c.name || "Coaching Program";
                 const desc = c.description || "Comprehensive coaching and test preparation program.";
                 const duration = c.duration || "Varies";
-                const price = c.course_price || c.price || "Contact for Price";
+                const pricing = resolveCoursePricing(c);
                 const badge = c.badge || null;
                 const centresList = c.centres || ["Online", "Hazra", "Garia", "Salt Lake", "Howrah"];
                 const isOnlineAvailable = (c.mode || "").toLowerCase().includes("online") || name.toLowerCase().includes("online") || (c.mode || "").toLowerCase().includes("hybrid");
@@ -733,14 +743,26 @@ function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnC
                       </p>
 
                       {/* Info badges */}
-                      <div className="grid grid-cols-2 gap-2 mt-5 py-3 border-y border-gray-50 text-xs font-semibold text-gray-600">
+                      <div className="grid grid-cols-2 gap-2 mt-5 py-3 border-y border-gray-50 text-xs font-semibold text-gray-600 items-center">
                         <div className="flex items-center gap-1.5">
-                          <ClockIcon className="w-4 h-4 text-gray-400" />
+                          <ClockIcon className="w-4 h-4 text-gray-400 shrink-0" />
                           <span>Duration: <strong>{duration}</strong></span>
                         </div>
-                        <div className="flex items-center gap-1.5 justify-end">
-                          <TagIcon className="w-4 h-4 text-gray-400 font-bold" />
-                          <span className="text-orange-600 font-extrabold">{price}</span>
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-center gap-1.5">
+                            <TagIcon className="w-4 h-4 text-orange-500 font-bold shrink-0" />
+                            <span className="text-orange-600 font-extrabold text-base">{pricing.price}</span>
+                          </div>
+                          {pricing.originalPrice && pricing.originalPrice !== pricing.price && (
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-xs text-gray-400 line-through font-medium">{pricing.originalPrice}</span>
+                              {pricing.discountLabel > 0 && (
+                                <span className="text-[10px] font-bold text-green-700 bg-green-50 px-1.5 py-0.2 rounded border border-green-200">
+                                  {pricing.discountLabel}% OFF
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -765,6 +787,11 @@ function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnC
                                   courseData: {
                                     ...c,
                                     name: name,
+                                    displayPrice: pricing.price,
+                                    originalPrice: pricing.originalPrice,
+                                    discountLabel: pricing.discountLabel,
+                                    sellingPriceNum: pricing.priceNum,
+                                    mrpNum: pricing.originalPriceNum,
                                     course_price: c.course_price || c.price || "Contact for Price",
                                     mode: isOnlineAvailable ? "Online" : "Offline",
                                     centre: isOnlineAvailable ? "Online" : centresList[0]

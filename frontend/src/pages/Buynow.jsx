@@ -88,6 +88,12 @@ const Buynow = () => {
 
   const getEffectivePrice = (data) => {
     if (!data) return 0;
+    if (data.sellingPriceNum !== undefined && parseCurrency(data.sellingPriceNum) > 0) {
+      return parseCurrency(data.sellingPriceNum);
+    }
+    if (data.displayPrice !== undefined && parseCurrency(data.displayPrice) > 0) {
+      return parseCurrency(data.displayPrice);
+    }
     const disc = data.discounted_price ?? data.discount_price;
     if (disc !== undefined && disc !== null && disc !== "" && parseCurrency(disc) > 0) {
       return parseCurrency(disc);
@@ -100,12 +106,22 @@ const Buynow = () => {
         return Math.min(...planPrices);
       }
     }
-    const base = data.course_price ?? data.price;
-    return parseCurrency(base);
+    const base = parseCurrency(data.course_price ?? data.price);
+    const offer = parseFloat(data.offers || 0);
+    if (offer > 0 && base > 0) {
+      return Math.round(base - (base * (offer / 100)));
+    }
+    return base;
   };
 
   const getMrpPrice = (data) => {
     if (!data) return 0;
+    if (data.mrpNum !== undefined && parseCurrency(data.mrpNum) > 0) {
+      return parseCurrency(data.mrpNum);
+    }
+    if (data.originalPrice !== undefined && parseCurrency(data.originalPrice) > 0) {
+      return parseCurrency(data.originalPrice);
+    }
     const base = data.course_price ?? data.price;
     if (base !== undefined && base !== null && base !== "" && parseCurrency(base) > 0) {
       return parseCurrency(base);
@@ -130,12 +146,14 @@ const Buynow = () => {
       goal: courseData.class_level ? `Class ${courseData.class_level}` : courseData.name,
       mode: courseData.mode || "Offline",
       location: courseData.centre || courseData.location || "All Centres",
-      price: `₹${sellingPrice.toLocaleString()}`,
-      mrp: `₹${mrpPrice.toLocaleString()}`,
+      price: `₹${sellingPrice.toLocaleString('en-IN')}`,
+      mrp: `₹${mrpPrice.toLocaleString('en-IN')}`,
       sellingPriceNum: sellingPrice,
       mrpNum: mrpPrice,
       hasDiscount: hasDiscount,
-      discountPercent: hasDiscount ? Math.round(((mrpPrice - sellingPrice) / mrpPrice) * 100) : 0,
+      discountPercent: hasDiscount
+        ? Math.round(((mrpPrice - sellingPrice) / mrpPrice) * 100)
+        : (courseData.discountLabel || 0),
       duration: courseData.duration,
       start_date: courseData.start_date,
       thumbnail_url: courseData.thumbnail_url,
