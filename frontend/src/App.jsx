@@ -13,10 +13,10 @@ import "react-toastify/dist/ReactToastify.css";
 const App = () => {
   return (
     <AuthProvider>
-      <CartProvider>
-        <FilterProvider>
-          <ThemeProvider>
-            <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <FilterProvider>
+        <ThemeProvider>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <CartProvider>
               <ScrollToTop />
               <div className="App relative">
                 {/* Debug info in development */}
@@ -42,10 +42,10 @@ const App = () => {
                   theme="colored"
                 />
               </div>
-            </Router>
-          </ThemeProvider>
-        </FilterProvider>
-      </CartProvider>
+            </CartProvider>
+          </Router>
+        </ThemeProvider>
+      </FilterProvider>
     </AuthProvider>
   );
 };

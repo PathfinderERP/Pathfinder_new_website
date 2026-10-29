@@ -279,11 +279,9 @@ const AppRoutes = () => {
       <Route
         path="/students-corner/orders"
         element={
-          <ProtectedRoute>
-            <MainLayout>
-              <StudentCornerOrders />
-            </MainLayout>
-          </ProtectedRoute>
+          <MainLayout>
+            <StudentCornerOrders />
+          </MainLayout>
         }
       />
       <Route

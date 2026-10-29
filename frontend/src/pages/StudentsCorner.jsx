@@ -29,6 +29,7 @@ export default function StudentsCorner() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedBoard, setSelectedBoard] = useState('');
     const [selectedClass, setSelectedClass] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         // Show sidebar by default on desktop
@@ -37,26 +38,34 @@ export default function StudentsCorner() {
         }
     }, []);
 
-
     const allItems = useMemo(() => {
         const raw = allItemsRaw?.results || allItemsRaw || [];
         return Array.isArray(raw) ? raw : [];
     }, [allItemsRaw]);
 
-    const popularItems = useMemo(() => allItems.filter(item => item.popular), [allItems]);
+    const popularItems = useMemo(() => allItems.filter(item => item.popular || item.is_popular), [allItems]);
     const studyMaterialsItems = useMemo(() => allItems.filter(item => item.category === 'Study Materials'), [allItems]);
     const iitJeeItems = useMemo(() => allItems.filter(item => item.category === 'All India'), [allItems]);
     const foundationItems = useMemo(() => allItems.filter(item => item.category === 'Foundation'), [allItems]);
     const olympiadsItems = useMemo(() => allItems.filter(item => item.category === 'Olympiads'), [allItems]);
     const boardsItems = useMemo(() => allItems.filter(item => item.category === 'Boards'), [allItems]);
-    const cbse10Items = useMemo(() => allItems.filter(item => item.board === 'CBSE' && item.class_level === '10'), [allItems]);
-    const cbse12Items = useMemo(() => allItems.filter(item => item.board === 'CBSE' && item.class_level === '12'), [allItems]);
+    const cbse10Items = useMemo(() => allItems.filter(item => item.board === 'CBSE' && String(item.class_level) === '10'), [allItems]);
+    const cbse12Items = useMemo(() => allItems.filter(item => item.board === 'CBSE' && String(item.class_level) === '12'), [allItems]);
     const timetablesItems = useMemo(() => allItems.filter(item => item.category === 'Timetables'), [allItems]);
     const stationeryItems = useMemo(() => allItems.filter(item => item.category === 'Stationery'), [allItems]);
     const merchandiseItems = useMemo(() => allItems.filter(item => item.category === 'Merchandise'), [allItems]);
 
     const filteredItems = useMemo(() => {
         let result = allItems;
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            result = result.filter(item =>
+                item.name?.toLowerCase().includes(q) ||
+                item.category?.toLowerCase().includes(q) ||
+                item.board?.toLowerCase().includes(q) ||
+                item.description?.toLowerCase().includes(q)
+            );
+        }
         if (activeCategory !== 'All') {
             result = result.filter(item => item.category === activeCategory);
         }
@@ -72,10 +81,10 @@ export default function StudentsCorner() {
             result = result.filter(item => item.board === selectedBoard);
         }
         if (selectedClass) {
-            result = result.filter(item => item.class_level === selectedClass);
+            result = result.filter(item => String(item.class_level) === String(selectedClass));
         }
         return result;
-    }, [allItems, activeCategory, freeDelivery, priceFilter, selectedBoard, selectedClass]);
+    }, [allItems, searchQuery, activeCategory, freeDelivery, priceFilter, selectedBoard, selectedClass]);
 
     const handleCategoryChange = useCallback((cat) => {
         setActiveCategory(cat);
@@ -91,14 +100,16 @@ export default function StudentsCorner() {
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.1
+                staggerChildren: 0.05
             }
         }
     };
 
+    const isSearching = searchQuery.trim().length > 0;
+
     return (
-        <div className="min-h-screen font-sans bg-slate-50 text-slate-900">
-            <div className="2xl:max-w-[1600px] mx-auto bg-white sm:shadow-2xl sm:shadow-gray-200 sm:border-x sm:border-gray-100 min-h-screen pt-6 md:pt-10">
+        <div className="min-h-screen font-sans bg-[#F8FAFC] text-slate-900">
+            <div className="2xl:max-w-[1600px] mx-auto bg-white min-h-screen border-x border-slate-200/60 shadow-xl shadow-slate-100">
                 <style>
                     {`
                     @keyframes marquee {
@@ -107,7 +118,7 @@ export default function StudentsCorner() {
                     }
                     .animate-marquee {
                         display: inline-block;
-                        animation: marquee 100s linear infinite;
+                        animation: marquee 80s linear infinite;
                         white-space: nowrap;
                     }
                     .animate-marquee:hover {
@@ -116,96 +127,112 @@ export default function StudentsCorner() {
                     `}
                 </style>
 
-                {/* Christmas Ticker */}
-                <div className="bg-gradient-to-r from-[#FFB36D] to-[#FF5E5E] py-2.5 overflow-hidden border-b border-white/10 tracking-widest text-[11px] font-bold">
+                {/* Promotional Top Ticker */}
+                <div className="bg-gradient-to-r from-[#FF7D54] via-[#FF6B3D] to-[#FF5E5E] py-2 overflow-hidden text-[11px] font-black tracking-widest text-white shadow-sm">
                     <div className="animate-marquee">
-                        {[...Array(10)].map((_, i) => (
+                        {[...Array(8)].map((_, i) => (
                             <span key={i} className="mx-8 whitespace-nowrap">
-                                <span className="text-black font-black">BIG NEWS!</span>
-                                <span className="text-white"> | WE ARE OFFERING AWESOME CHRISTMAS DISCOUNT AND GIFTS ON REFERRALS!</span>
+                                <span className="bg-white/20 px-2 py-0.5 rounded-full mr-2">NEW</span>
+                                <span>GET UP TO 20% DISCOUNT ON ALL ACADEMIC BOOKS & STUDY MATERIALS | FREE EXPRESS DELIVERY ON ALL ORDERS</span>
                             </span>
                         ))}
                     </div>
                 </div>
 
-                {/* Header Layer: Sticky on mobile, relative on desktop */}
-                <header className="sticky top-[56px] lg:relative lg:top-0 z-[40] lg:z-[60] bg-white border-b border-gray-100 py-3 lg:py-3 px-4 sm:px-6 lg:px-8 shadow-sm lg:shadow-none">
-                    <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4 lg:gap-12">
-                        {/* Left Side: Toggle (Mobile) or Branding (Desktop) */}
-                        <div className="flex items-center gap-4">
+                {/* Header Layer: Modern Glassmorphic Bar */}
+                <header className="sticky top-[56px] lg:top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 py-3.5 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-3 sm:gap-6 lg:gap-10">
+                        {/* Left Side: Sidebar Toggle & Branding */}
+                        <div className="flex items-center gap-3">
                             <button
                                 onClick={handleSidebarToggle}
-                                className="relative z-[70] p-2 sm:p-2.5 bg-[#FF7D54] text-white rounded-xl shadow-lg shadow-orange-200 hover:bg-[#FF6B3D] transition-all active:scale-95 flex-shrink-0"
+                                className="p-2 sm:p-2.5 bg-gradient-to-r from-[#FF7D54] to-[#FF6B3D] text-white rounded-2xl shadow-md shadow-orange-500/20 hover:from-orange-600 hover:to-orange-500 transition-all active:scale-95 flex-shrink-0"
+                                title="Toggle categories filter"
                             >
                                 {isSidebarOpen ? (
-                                    <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+                                    <XMarkIcon className="h-5 w-5 sm:h-5 sm:w-5 stroke-[2.5]" />
                                 ) : (
-                                    <Bars3Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                                    <Bars3Icon className="h-5 w-5 sm:h-5 sm:w-5 stroke-[2.5]" />
                                 )}
                             </button>
-                            <h1 className="hidden xl:block text-xl font-black text-slate-900 italic uppercase tracking-tighter">
-                                Students<span className="text-[#FF7D54]">Corner</span>
-                            </h1>
+                            <Link to="/students-corner" className="hidden sm:block">
+                                <h1 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">
+                                    Students<span className="text-[#FF7D54]">Corner</span>
+                                </h1>
+                            </Link>
                         </div>
 
-                        {/* Center: Search Bar - Limited width on desktop */}
+                        {/* Center: Live Search Bar */}
                         <div className="flex-1 max-w-2xl">
                             <div className="relative group">
                                 <input
                                     type="text"
-                                    placeholder="Search for books, materials, stationery..."
-                                    className="w-full border border-slate-200 rounded-2xl py-2 sm:py-3 pl-4 sm:pl-6 pr-12 focus:outline-none focus:ring-4 focus:ring-[#FF7D54]/10 focus:border-[#FF7D54] placeholder:text-slate-400 font-medium text-sm transition-all bg-slate-50 focus:bg-white"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search by book title, subject, board, class..."
+                                    className="w-full border border-slate-200 rounded-2xl py-2 sm:py-2.5 pl-10 sm:pl-11 pr-10 focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-[#FF7D54] placeholder:text-slate-400 font-medium text-xs sm:text-sm transition-all bg-slate-50 focus:bg-white"
                                 />
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#FF7D54] transition-all">
-                                    <MagnifyingGlassIcon className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2.5} />
+                                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#FF7D54] transition-colors pointer-events-none">
+                                    <MagnifyingGlassIcon className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.5]" />
                                 </div>
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => setSearchQuery('')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1"
+                                    >
+                                        <XMarkIcon className="h-4 w-4" />
+                                    </button>
+                                )}
                             </div>
                         </div>
 
-                        {/* Right: User Actions - Vertical on desktop */}
-                        <div className="flex items-center gap-3 sm:gap-8 flex-shrink-0">
-                            <Link to="/students-corner/orders" className="flex flex-col items-center group transition-all text-slate-600 hover:text-[#FF7D54]">
-                                <div className="p-1 px-2 rounded-xl group-hover:bg-orange-50 transition-colors">
-                                    <CubeIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-                                </div>
-                                <span className="hidden sm:block text-[10px] font-bold mt-0.5 uppercase tracking-wide">Orders</span>
+                        {/* Right: User Actions */}
+                        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                            <Link
+                                to="/students-corner/orders"
+                                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-2xl text-slate-700 hover:text-[#FF7D54] hover:bg-orange-50/70 transition-all font-bold text-xs uppercase tracking-wider border border-transparent hover:border-orange-200/60"
+                            >
+                                <CubeIcon className="h-5 w-5 text-slate-500" strokeWidth={2} />
+                                <span className="hidden md:inline">Orders</span>
                             </Link>
-                            <Link to="/students-corner/bag" className="flex flex-col items-center group transition-all text-slate-600 hover:text-[#FF7D54] relative">
-                                <div className="p-1 px-2 rounded-xl group-hover:bg-orange-50 transition-colors relative">
-                                    <ShoppingBagIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-                                    {cartCount > 0 && (
-                                        <span className="absolute -top-1 -right-1 bg-[#FF7D54] text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm transition-transform group-hover:scale-110">
-                                            {cartCount}
-                                        </span>
-                                    )}
-                                </div>
-                                <span className="hidden sm:block text-[10px] font-bold mt-0.5 uppercase tracking-wide">My Bag</span>
+
+                            <Link
+                                to="/students-corner/bag"
+                                className="relative flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-2xl bg-orange-50 hover:bg-orange-100/80 text-[#FF7D54] transition-all font-black text-xs uppercase tracking-wider border border-orange-200/60 active:scale-95"
+                            >
+                                <ShoppingBagIcon className="h-5 w-5" strokeWidth={2.2} />
+                                <span className="hidden md:inline">Bag</span>
+                                {cartCount > 0 && (
+                                    <span className="bg-[#FF7D54] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
+                                        {cartCount}
+                                    </span>
+                                )}
                             </Link>
                         </div>
                     </div>
                 </header>
 
-                {/* Non-Sticky Mobile Category Nav (Scrolls with page) */}
-                <div className="lg:hidden bg-slate-50/50 py-3 px-4 overflow-x-auto whitespace-nowrap border-b border-gray-100 scrollbar-hide">
+                {/* Mobile Horizontal Category Pills */}
+                <div className="lg:hidden bg-slate-50/90 py-2.5 px-4 overflow-x-auto whitespace-nowrap border-b border-slate-200/70 scrollbar-hide">
                     <div className="flex gap-2">
                         {['All', 'Study Materials', 'All India', 'Foundation', 'Olympiads', 'Boards', 'Timetables', 'Stationery', 'Merchandise'].map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => handleCategoryChange(cat)}
-                                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${activeCategory === cat
-                                    ? 'bg-[#FF7D54] text-white border-[#FF7D54] shadow-md shadow-orange-100'
-                                    : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'
+                                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all border ${activeCategory === cat
+                                    ? 'bg-[#FF7D54] text-white border-[#FF7D54] shadow-sm shadow-orange-500/20'
+                                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
                                     }`}
                             >
-                                {cat === 'All' ? 'Home' : cat}
+                                {cat === 'All' ? 'All Items' : cat}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <div className="mx-auto max-w-[1600px] relative">
+                <div className="mx-auto max-w-[1600px] relative px-4 sm:px-6 lg:px-8 pt-6">
                     <div className="flex flex-col lg:flex-row min-h-screen">
-                        {/* Sidebar: Handles both Mobile and Desktop internally */}
+                        {/* Sidebar */}
                         <Sidebar
                             activeCategory={activeCategory}
                             onCategoryChange={handleCategoryChange}
@@ -222,17 +249,72 @@ export default function StudentsCorner() {
                         />
 
                         {/* Main Content Area */}
-                        <div className="flex-1 w-full lg:overflow-visible px-4 sm:px-6 lg:px-0">
-                            {/* Persistent Hero Banner */}
-                            <div className="mb-8 overflow-hidden aspect-[21/9] lg:aspect-auto">
-                                <img
-                                    src={getImageUrl("/images/student corner/student coner hero image.webp")}
-                                    alt="Pathfinder Topper"
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
+                        <div className="flex-1 w-full min-w-0 pb-20">
+                            {/* Hero Banner (Shown when not searching and on All category) */}
+                            {!isSearching && activeCategory === 'All' && (
+                                <div className="mb-10 rounded-3xl overflow-hidden shadow-lg border border-slate-200/80 bg-slate-100">
+                                    <img
+                                        src={getImageUrl("/images/student corner/student coner hero image.webp")}
+                                        alt="Pathfinder Student's Corner"
+                                        className="w-full h-auto object-cover max-h-[380px]"
+                                    />
+                                </div>
+                            )}
 
-                            {activeCategory === 'All' ? (
+                            {/* Section content */}
+                            {isSearching ? (
+                                <div>
+                                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+                                        <div>
+                                            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                                                Search Results for "{searchQuery}"
+                                            </h2>
+                                            <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">
+                                                Found {filteredItems.length} book{filteredItems.length !== 1 ? 's' : ''}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => setSearchQuery('')}
+                                            className="text-xs font-bold text-[#FF7D54] hover:underline"
+                                        >
+                                            Clear Search
+                                        </button>
+                                    </div>
+
+                                    {globalLoading ? (
+                                        <div className="flex items-center justify-center h-96">
+                                            <LoadingSpinner />
+                                        </div>
+                                    ) : (
+                                        <motion.div
+                                            variants={containerVariants}
+                                            initial="hidden"
+                                            animate="visible"
+                                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                                        >
+                                            {filteredItems.length > 0 ? (
+                                                filteredItems.map((item) => (
+                                                    <ProductCard key={item.id || item.unique_id} item={item} />
+                                                ))
+                                            ) : (
+                                                <div className="col-span-full bg-white border-2 border-dashed border-slate-200 rounded-3xl p-16 flex flex-col items-center justify-center text-center">
+                                                    <MagnifyingGlassIcon className="h-12 w-12 text-slate-300 mb-4" />
+                                                    <h3 className="text-xl font-black text-slate-800 mb-2">No matching books found</h3>
+                                                    <p className="text-slate-400 text-sm max-w-sm mb-6">
+                                                        Try searching with different keywords or browse our categories.
+                                                    </p>
+                                                    <button
+                                                        onClick={() => setSearchQuery('')}
+                                                        className="bg-[#FF7D54] text-white px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#FF6B3D] transition-colors"
+                                                    >
+                                                        View All Books
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+                                </div>
+                            ) : activeCategory === 'All' ? (
                                 <HomeTab
                                     popularItems={popularItems}
                                     studyMaterialsItems={studyMaterialsItems}
@@ -249,16 +331,24 @@ export default function StudentsCorner() {
                                 />
                             ) : (
                                 <>
-                                    <div className="flex items-center justify-between mb-6 px-2">
-                                        <h2 className="text-2xl font-black text-slate-900">
-                                            {activeCategory}
-                                        </h2>
-                                        <span className="text-sm font-bold text-slate-400">
-                                            {filteredItems.length} Result{filteredItems.length !== 1 ? 's' : ''}
-                                        </span>
+                                    <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-200">
+                                        <div>
+                                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                                                {activeCategory}
+                                            </h2>
+                                            <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">
+                                                Showing {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => handleCategoryChange('All')}
+                                            className="text-xs font-bold text-[#FF7D54] hover:underline"
+                                        >
+                                            ← Back to All
+                                        </button>
                                     </div>
 
-                                    <div className="min-h-[600px]">
+                                    <div className="min-h-[500px]">
                                         {globalLoading ? (
                                             <div className="flex items-center justify-center h-96">
                                                 <LoadingSpinner />
@@ -268,21 +358,29 @@ export default function StudentsCorner() {
                                                 variants={containerVariants}
                                                 initial="hidden"
                                                 animate="visible"
-                                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 relative"
+                                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                                             >
                                                 {filteredItems.length > 0 ? (
                                                     filteredItems.map((item) => (
                                                         <ProductCard key={item.id || item.unique_id} item={item} />
                                                     ))
                                                 ) : (
-                                                    <div className="col-span-full bg-white border-2 border-dashed border-slate-200 rounded-[40px] p-20 flex flex-col items-center justify-center text-center">
-                                                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
-                                                            <MagnifyingGlassIcon className="h-10 w-10 text-slate-300" />
-                                                        </div>
-                                                        <h3 className="text-2xl font-black text-slate-900 mb-2 uppercase italic">No items found</h3>
-                                                        <p className="text-slate-500 font-medium max-w-xs">
-                                                            Try adjusting your filters or selecting a different category.
+                                                    <div className="col-span-full bg-white border-2 border-dashed border-slate-200 rounded-3xl p-16 flex flex-col items-center justify-center text-center">
+                                                        <MagnifyingGlassIcon className="h-12 w-12 text-slate-300 mb-4" />
+                                                        <h3 className="text-xl font-black text-slate-800 mb-2">No items found</h3>
+                                                        <p className="text-slate-400 text-sm max-w-sm mb-6">
+                                                            Try adjusting your price range or academic filters.
                                                         </p>
+                                                        <button
+                                                            onClick={() => {
+                                                                setPriceFilter(null);
+                                                                setSelectedBoard('');
+                                                                setSelectedClass('');
+                                                            }}
+                                                            className="bg-[#FF7D54] text-white px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#FF6B3D] transition-colors"
+                                                        >
+                                                            Reset Filters
+                                                        </button>
                                                     </div>
                                                 )}
                                             </motion.div>

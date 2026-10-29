@@ -18,50 +18,73 @@ const HomeTab = ({
     merchandiseItems,
     onCategoryChange
 }) => {
-    // Utility to create drag constraints for a section
+    // Utility to create scrollable section with both buttons and drag support
     const DraggableSection = ({ items, title, category, onCategoryChange }) => {
-        const carouselRef = useRef(null);
-        const [constraints, setConstraints] = useState({ left: 0, right: 0 });
+        const scrollContainerRef = useRef(null);
 
-        useEffect(() => {
-            if (carouselRef.current) {
-                const scrollWidth = carouselRef.current.scrollWidth;
-                const offsetWidth = carouselRef.current.offsetWidth;
-                setConstraints({ left: -(scrollWidth - offsetWidth + 48), right: 0 });
+        const handleScroll = (direction) => {
+            if (scrollContainerRef.current) {
+                const scrollAmount = 600;
+                scrollContainerRef.current.scrollBy({
+                    left: direction === 'left' ? -scrollAmount : scrollAmount,
+                    behavior: 'smooth'
+                });
             }
-        }, [items]);
+        };
 
         return (
-            <div className="mb-10 group/section">
-                <div className="flex items-center justify-between mb-1 px-6">
-                    <h2 className="text-2xl font-black text-slate-900">{title}</h2>
-                    {category && (
-                        <button
-                            onClick={() => onCategoryChange(category)}
-                            className="text-xs font-bold text-slate-400 hover:text-[#FF7D54] flex items-center gap-1 transition-colors"
-                        >
-                            See all <ChevronRightIcon className="h-3 w-3" strokeWidth={4} />
-                        </button>
-                    )}
+            <div className="mb-12 group/section">
+                <div className="flex items-center justify-between mb-3 px-4 sm:px-6">
+                    <div>
+                        <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{title}</h2>
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{items.length} Books Available</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {/* Scroll Arrows */}
+                        <div className="hidden sm:flex items-center gap-1.5 mr-2">
+                            <button
+                                onClick={() => handleScroll('left')}
+                                className="w-8 h-8 rounded-full border border-slate-200 bg-white hover:border-[#FF7D54] hover:text-[#FF7D54] text-slate-600 flex items-center justify-center transition-all shadow-sm active:scale-90"
+                                aria-label="Scroll left"
+                            >
+                                <ChevronRightIcon className="h-4 w-4 rotate-180" strokeWidth={2.5} />
+                            </button>
+                            <button
+                                onClick={() => handleScroll('right')}
+                                className="w-8 h-8 rounded-full border border-slate-200 bg-white hover:border-[#FF7D54] hover:text-[#FF7D54] text-slate-600 flex items-center justify-center transition-all shadow-sm active:scale-90"
+                                aria-label="Scroll right"
+                            >
+                                <ChevronRightIcon className="h-4 w-4" strokeWidth={2.5} />
+                            </button>
+                        </div>
+
+                        {category && (
+                            <button
+                                onClick={() => onCategoryChange(category)}
+                                className="text-xs font-bold text-[#FF7D54] hover:text-orange-600 flex items-center gap-1 bg-orange-50 hover:bg-orange-100/80 px-3 py-1.5 rounded-xl transition-colors"
+                            >
+                                See all <ChevronRightIcon className="h-3 w-3" strokeWidth={3} />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
-                <div className="relative overflow-hidden cursor-grab active:cursor-grabbing px-6">
-                    <motion.div
-                        ref={carouselRef}
-                        drag="x"
-                        dragConstraints={constraints}
-                        dragElastic={0.1}
-                        className="grid grid-rows-2 grid-flow-col gap-x-4 gap-y-8 pt-6 pb-14 w-fit"
-                    >
+                <div
+                    ref={scrollContainerRef}
+                    className="overflow-x-auto scrollbar-hide px-4 sm:px-6 py-2"
+                    style={{ scrollBehavior: 'smooth' }}
+                >
+                    <div className="flex gap-4 sm:gap-6 w-max pb-4">
                         {items.map((item) => (
                             <div
                                 key={item.id || item.unique_id}
-                                className="min-w-[280px] w-[280px] flex-shrink-0 select-none px-2"
+                                className="w-[260px] sm:w-[280px] flex-shrink-0 select-none"
                             >
                                 <ProductCard item={item} />
                             </div>
                         ))}
-                    </motion.div>
+                    </div>
                 </div>
             </div>
         );

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import SidebarCategoryNav from './SidebarCategoryNav';
 import SidebarPriceFilter from './SidebarPriceFilter';
@@ -38,19 +37,25 @@ const Sidebar = ({
                 <>
                     <div
                         onClick={onToggle}
-                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[2000] lg:hidden"
+                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] lg:hidden"
                     />
                     <div
-                        className="fixed left-0 top-0 bottom-0 w-[280px] bg-gradient-to-br from-[#FF9D66] to-[#FF6B3D] z-[2001] lg:hidden overflow-y-auto"
+                        className="fixed left-0 top-0 bottom-0 w-[280px] bg-white z-[2001] lg:hidden overflow-y-auto shadow-2xl flex flex-col"
                     >
-                        <div className="relative h-full flex flex-col pt-20">
+                        {/* Mobile Drawer Header */}
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                            <h3 className="text-base font-black text-slate-900 tracking-tight">
+                                Categories & Filters
+                            </h3>
                             <button
                                 onClick={onToggle}
-                                className="absolute right-4 top-6 text-white bg-white/10 hover:bg-white/20 p-2 rounded-xl border border-white/20 shadow-lg transition-all active:scale-95"
+                                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors"
                             >
-                                <XMarkIcon className="h-6 w-6" />
+                                <XMarkIcon className="h-5 w-5" />
                             </button>
+                        </div>
 
+                        <div className="flex-1 overflow-y-auto">
                             <SidebarCategoryNav
                                 categories={categories}
                                 activeCategory={activeCategory}
@@ -75,28 +80,15 @@ const Sidebar = ({
                 </>
             )}
 
+            {/* Desktop Sidebar */}
             <div
                 className={`hidden lg:flex relative transition-all duration-300 ${isOpen ? 'w-64 mr-6 opacity-100' : 'w-0 mr-0 opacity-0 overflow-hidden'}`}
-                style={{ zIndex: 1001 }}
+                style={{ zIndex: 30 }}
             >
                 <aside
-                    className="sticky top-[72px] h-[calc(100vh-72px)] w-60 bg-gradient-to-br from-[#FF9D66] to-[#FF6B3D] shadow-[15px_0_40px_rgba(0,0,0,0.05)] flex flex-col rounded-r-3xl"
+                    className="sticky top-[80px] h-[calc(100vh-100px)] w-64 bg-white border border-slate-200/80 rounded-3xl shadow-sm flex flex-col overflow-hidden"
                 >
-                    {/* Decoration */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
-
-                    <div className="relative h-full flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                        {/* Internal Close Button Header */}
-                        <div className="flex justify-end px-5 pt-5 pb-2">
-                            <button
-                                onClick={onToggle}
-                                className="text-white/40 hover:text-white transition-all hover:rotate-90 duration-300 p-1 group z-20 bg-white/5 rounded-lg border border-white/10"
-                                title="Close Sidebar"
-                            >
-                                <XMarkIcon className="h-5 w-5" />
-                            </button>
-                        </div>
-
+                    <div className="relative h-full flex flex-col overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-200">
                         {/* 1. Category Navigation */}
                         <SidebarCategoryNav
                             categories={categories}
