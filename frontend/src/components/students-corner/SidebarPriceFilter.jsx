@@ -63,16 +63,6 @@ const SidebarPriceFilter = ({ priceFilter, onPriceChange, freeDelivery, onDelive
                         </button>
                     </div>
                 </div>
-
-                <button
-                    onClick={() => onDeliveryChange(!freeDelivery)}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${freeDelivery ? 'bg-emerald-500 text-white shadow-lg' : 'bg-white/10 text-white'}`}
-                >
-                    <span className="text-xs font-bold">Free Delivery</span>
-                    <div className={`w-8 h-4 rounded-full relative transition-all ${freeDelivery ? 'bg-white/20' : 'bg-black/20'}`}>
-                        <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${freeDelivery ? 'left-4.5' : 'left-0.5'}`} />
-                    </div>
-                </button>
             </div>
         </div>
     );
