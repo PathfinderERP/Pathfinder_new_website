@@ -60,6 +60,10 @@ export const CartProvider = ({ children }) => {
         );
     };
 
+    const clearCart = () => {
+        setCartItems([]);
+    };
+
     const getItemSellingPrice = (item) => {
         if (!item) return 0;
         const discounted = parseFloat(item.discounted_price);
