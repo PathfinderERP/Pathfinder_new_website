@@ -17,7 +17,7 @@ const MainLayout = ({ children, showHeader = true, showFooter = true }) => {
       <main 
         className="min-h-screen" 
         style={{ 
-          paddingTop: showHeader ? `calc(var(--announcement-height, 48px) + ${width < 768 ? '60px' : '112px'})` : '0px'
+          paddingTop: showHeader ? `var(--header-total-height, calc(var(--announcement-height, 0px) + ${width < 1024 ? '72px' : '148px'}))` : '0px'
         }}
       >
         {children}

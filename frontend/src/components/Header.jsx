@@ -94,6 +94,29 @@ const Header = () => {
   const dropdownRef = useRef(null);
   const userMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const updateHeaderHeight = () => {
+      if (headerRef.current && window.scrollY < 20) {
+        const height = Math.ceil(headerRef.current.getBoundingClientRect().height);
+        if (height > 50) {
+          document.documentElement.style.setProperty('--header-total-height', `${height}px`);
+        }
+      }
+    };
+    updateHeaderHeight();
+    const ro = new ResizeObserver(() => {
+      if (window.scrollY < 20) updateHeaderHeight();
+    });
+    ro.observe(headerRef.current);
+    window.addEventListener("resize", updateHeaderHeight);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateHeaderHeight);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -313,7 +336,7 @@ const Header = () => {
 
   return (
     <>
-      <motion.header className="w-full fixed top-0 z-[1000]" initial={{ y: -60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.3, ease: "easeOut" }}>
+      <motion.header ref={headerRef} className="w-full fixed top-0 z-[1000]" initial={{ y: -60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.3, ease: "easeOut" }}>
         <AnnouncementBar />
         <motion.div
           className={`relative bg-gradient-to-br from-white/80 to-white/60 backdrop-blur-2xl border-b transition-all duration-500 w-full shadow-sm ${isScrolled ? "border-orange-200/30 shadow-2xl shadow-orange-500/5 py-2" : "border-orange-100/20 py-2"}`}
