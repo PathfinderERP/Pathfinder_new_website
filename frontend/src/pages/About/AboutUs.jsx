@@ -97,22 +97,10 @@ const AboutUs = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
               >
-                <h1 className="text-3xl md:text-7xl lg:text-[60px] font-black text-[#1a1a1a] leading-none tracking-tighter mb-10">
+                <h1 className="text-3xl md:text-7xl lg:text-[60px] font-black text-[#1a1a1a] leading-none tracking-tighter">
                   DECODING <span className="text-[#FF7F3E]">SUCCESS</span><br />
                   SINCE 1993
                 </h1>
-
-                <motion.button
-                  whileHover={{
-                    scale: 1.02,
-                    boxShadow: "0 25px 50px -12px rgba(255, 127, 62, 0.5)",
-                    background: "linear-gradient(to right, #FFA366, #FF5F00)"
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  className="bg-gradient-to-r from-[#FFB380] to-[#FF5F00] text-white px-12 lg:px-20 py-4 lg:py-6 rounded-[20px] text-2xl lg:text-4xl font-black shadow-[0_20px_40px_-5px_rgba(255, 95, 0, 0.3)] transition-all duration-300 uppercase tracking-tight"
-                >
-                  START
-                </motion.button>
               </motion.div>
             </div>
 
