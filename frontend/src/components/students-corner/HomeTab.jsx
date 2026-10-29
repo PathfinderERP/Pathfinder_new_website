@@ -72,14 +72,14 @@ const HomeTab = ({
 
                 <div
                     ref={scrollContainerRef}
-                    className="overflow-x-auto scrollbar-hide px-4 sm:px-6 py-2"
+                    className="overflow-x-auto scrollbar-hide px-3 sm:px-6 py-2 snap-x snap-mandatory"
                     style={{ scrollBehavior: 'smooth' }}
                 >
-                    <div className="flex gap-4 sm:gap-6 w-max pb-4">
+                    <div className="flex gap-2.5 sm:gap-6 w-max pb-3 sm:pb-4">
                         {items.map((item) => (
                             <div
                                 key={item.id || item.unique_id}
-                                className="w-[260px] sm:w-[280px] flex-shrink-0 select-none"
+                                className="w-[calc((100vw-38px)/2)] max-w-[210px] sm:w-[260px] lg:w-[275px] flex-shrink-0 select-none snap-start"
                             >
                                 <ProductCard item={item} />
                             </div>

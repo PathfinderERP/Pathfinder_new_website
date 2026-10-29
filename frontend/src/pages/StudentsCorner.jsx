@@ -230,7 +230,7 @@ export default function StudentsCorner() {
                     </div>
                 </div>
 
-                <div className="mx-auto max-w-[1600px] relative px-4 sm:px-6 lg:px-8 pt-6">
+                <div className="mx-auto max-w-[1600px] relative px-2.5 sm:px-6 lg:px-8 pt-4 sm:pt-6">
                     <div className="flex flex-col lg:flex-row min-h-screen">
                         {/* Sidebar */}
                         <Sidebar
@@ -290,7 +290,7 @@ export default function StudentsCorner() {
                                             variants={containerVariants}
                                             initial="hidden"
                                             animate="visible"
-                                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                                            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6"
                                         >
                                             {filteredItems.length > 0 ? (
                                                 filteredItems.map((item) => (
@@ -358,7 +358,7 @@ export default function StudentsCorner() {
                                                 variants={containerVariants}
                                                 initial="hidden"
                                                 animate="visible"
-                                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                                                className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6"
                                             >
                                                 {filteredItems.length > 0 ? (
                                                     filteredItems.map((item) => (
