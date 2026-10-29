@@ -13,7 +13,7 @@ const PredictionPopup = () => {
         const fetchConfig = async () => {
             try {
                 const response = await siteConfigAPI.getPopupLatest();
-                if (response.data && response.data.id && response.data.is_active !== false) {
+                if (response.data && response.data.id && response.data.is_active) {
                     setConfig(response.data);
                     
                     // Show popup after configured delay

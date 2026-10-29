@@ -15,10 +15,10 @@ class PublicPopupConfigView(APIView):
     def get(self, request):
         config = PredictionPopupConfig.objects(is_active=True).first()
         if not config:
-            return Response({"error": "No active popup configuration found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"is_active": False, "message": "No active popup configuration found"}, status=status.HTTP_200_OK)
         
         serializer = PredictionPopupConfigSerializer(config)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class AdminPopupConfigViewSet(viewsets.ModelViewSet):
     """

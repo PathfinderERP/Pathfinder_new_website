@@ -231,7 +231,6 @@ const StudentCheckout = () => {
 
             const resData = proxyRes.data;
             const responseContent = resData.data || resData;
-            console.log("ICICI Gateway Raw Response:", resData);
 
             const targetRedirect = responseContent.redirectURI || responseContent.redirectUrl || responseContent.redirect_url || responseContent.targetUrl || responseContent.target_url || responseContent.url || responseContent.action;
             const tranCtx = responseContent.tranCtx || responseContent.tran_ctx || responseContent.tranContext;
