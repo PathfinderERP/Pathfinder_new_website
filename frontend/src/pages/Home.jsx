@@ -1689,13 +1689,16 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
     if (sliderRef.current) sliderRef.current.scrollLeft = 0;
   }, [sortedCourses]);
 
-  const handleApplyClick = (course) => {
-    setSelectedCourse(course);
+  const handleApplyClick = (course, displayData = {}) => {
+    setSelectedCourse({
+      ...course,
+      ...displayData,
+    });
     setIsFormOpen(true);
   };
 
-  const handleBuyNowClick = (course) => {
-    navigate("/buynow", { state: { courseData: course } });
+  const handleBuyNowClick = (course, displayData = {}) => {
+    navigate("/buynow", { state: { courseData: { ...course, ...displayData } } });
   };
 
   const handleFormSubmit = (applicationData) => {
@@ -2158,13 +2161,23 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
                       {/* Action Buttons */}
                       <div className="grid grid-cols-2 gap-3">
                         <button
-                          onClick={() => handleApplyClick(c)}
+                          onClick={() => handleApplyClick(c, {
+                            displayPrice,
+                            originalPrice,
+                            discountLabel,
+                            formattedDate,
+                          })}
                           className="py-2.5 rounded-xl border-2 border-[#66090D] text-[#66090D] font-bold text-sm hover:bg-orange-50 transition-all duration-200 uppercase tracking-wide"
                         >
                           Explore
                         </button>
                         <button
-                          onClick={() => handleBuyNowClick(c)}
+                          onClick={() => handleBuyNowClick(c, {
+                            displayPrice,
+                            originalPrice,
+                            discountLabel,
+                            formattedDate,
+                          })}
                           className="py-2.5 rounded-xl bg-[#66090D] text-white font-bold text-sm hover:bg-[#55080b] transition-all duration-200 shadow-md hover:shadow-lg uppercase tracking-wide"
                         >
                           Buy Now
@@ -2240,8 +2253,18 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
               goal: selectedCourse.name,
               // Override location with centre name
               location: selectedCourse.centre || selectedCourse.location,
-              start: selectedCourse.start_date || "Coming Soon",
-              price: selectedCourse.course_price || "Contact for Price",
+              start: selectedCourse.formattedDate || (selectedCourse.start_date || selectedCourse.starting_date
+                ? new Date(selectedCourse.start_date || selectedCourse.starting_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                : "Coming Soon"),
+              price: selectedCourse.displayPrice !== undefined
+                ? `₹${Math.round(selectedCourse.displayPrice).toLocaleString()}`
+                : (selectedCourse.course_price
+                  ? `₹${Math.round(parseFloat(selectedCourse.course_price)).toLocaleString()}`
+                  : "Contact for Price"),
+              originalPrice: selectedCourse.originalPrice && selectedCourse.originalPrice > selectedCourse.displayPrice
+                ? `₹${Math.round(selectedCourse.originalPrice).toLocaleString()}`
+                : null,
+              discountLabel: selectedCourse.discountLabel || 0,
             }}
             isOpen={isFormOpen}
             onClose={handleFormClose}

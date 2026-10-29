@@ -16,6 +16,98 @@ import {
   IdentificationIcon
 } from "@heroicons/react/24/outline";
 
+const formatStartDate = (dateStr) => {
+  if (!dateStr) return "Coming Soon";
+  if (typeof dateStr === "string") {
+    // If it's already a clean non-ISO string like "23 Apr 2026", "Coming Soon", "Flexible"
+    if (!dateStr.includes("T") && !/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+      return dateStr;
+    }
+  }
+  const parsed = new Date(dateStr);
+  if (!isNaN(parsed.getTime())) {
+    return parsed.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+  }
+  return dateStr;
+};
+
+const formatDisplayPrice = (val) => {
+  if (val === undefined || val === null || val === "") return "Contact for Price";
+  if (typeof val === "string" && (val.includes("₹") || isNaN(Number(val.replace(/,/g, ""))))) {
+    return val;
+  }
+  const num = parseFloat(val);
+  if (!isNaN(num) && num > 0) {
+    return `₹${Math.round(num).toLocaleString()}`;
+  }
+  return val;
+};
+
+const resolveCoursePricing = (courseObj) => {
+  if (!courseObj) return { price: "Contact for Price", originalPrice: null, discountLabel: 0 };
+
+  if (courseObj.displayPrice !== undefined) {
+    return {
+      price: formatDisplayPrice(courseObj.displayPrice),
+      originalPrice: courseObj.originalPrice ? formatDisplayPrice(courseObj.originalPrice) : null,
+      discountLabel: courseObj.discountLabel || 0,
+    };
+  }
+
+  // If explicit formatted price string passed (e.g. "₹121,000")
+  if (typeof courseObj.price === "string" && courseObj.price.includes("₹")) {
+    return {
+      price: courseObj.price,
+      originalPrice: courseObj.originalPrice ? formatDisplayPrice(courseObj.originalPrice) : null,
+      discountLabel: courseObj.discountLabel || 0,
+    };
+  }
+
+  const rawPrice = parseFloat(courseObj.course_price || courseObj.price || 0);
+  const rawDiscounted = parseFloat(courseObj.discounted_price || courseObj.discount_price || 0);
+  const offer = parseFloat(courseObj.offers || 0);
+
+  let calcPrice = rawPrice;
+  let calcOriginal = 0;
+  let calcDiscount = 0;
+
+  if (courseObj.plans && Array.isArray(courseObj.plans) && courseObj.plans.length > 0) {
+    const planPrices = courseObj.plans.map(p => parseFloat(p.discounted_price || p.base_price || 0)).filter(p => p > 0);
+    if (planPrices.length > 0) calcPrice = Math.min(...planPrices);
+    const matchingPlan = courseObj.plans.find(p => parseFloat(p.discounted_price || p.base_price) === calcPrice);
+    if (matchingPlan && parseFloat(matchingPlan.base_price) > calcPrice) {
+      calcOriginal = parseFloat(matchingPlan.base_price);
+      calcDiscount = Math.round(((calcOriginal - calcPrice) / calcOriginal) * 100);
+    }
+  } else if (rawDiscounted > 0 && rawDiscounted < rawPrice) {
+    calcPrice = rawDiscounted;
+    calcOriginal = rawPrice;
+    calcDiscount = Math.round(((rawPrice - rawDiscounted) / rawPrice) * 100);
+  } else if (offer > 0) {
+    calcOriginal = rawPrice;
+    calcPrice = rawPrice - (rawPrice * (offer / 100));
+    calcDiscount = Math.round(offer);
+  }
+
+  if (calcPrice > 0) {
+    return {
+      price: `₹${Math.round(calcPrice).toLocaleString()}`,
+      originalPrice: calcOriginal > calcPrice ? `₹${Math.round(calcOriginal).toLocaleString()}` : (courseObj.originalPrice ? formatDisplayPrice(courseObj.originalPrice) : null),
+      discountLabel: calcDiscount || courseObj.discountLabel || 0,
+    };
+  }
+
+  return {
+    price: formatDisplayPrice(courseObj.price || courseObj.course_price),
+    originalPrice: courseObj.originalPrice ? formatDisplayPrice(courseObj.originalPrice) : null,
+    discountLabel: courseObj.discountLabel || 0,
+  };
+};
+
 function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnClose, onSubmit: propOnSubmit, allowMultipleCentres = true, isFromHeader: propIsFromHeader = false, formTitle, formSubtitle }) {
   const { setGlobalSelectedCentre } = useFilter(); // Use global filter context
   const location = useLocation();
@@ -860,18 +952,36 @@ function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnC
                       📅
                     </span>
                     <span>
-                      Starts: <strong className="text-gray-800">{course.start}</strong>
+                      Starts: <strong className="text-gray-800">{formatStartDate(course.start || course.start_date || course.starting_date)}</strong>
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-2 border-t border-orange-200/50 mt-2">
-                    <span className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center text-red-600">
-                      💰
-                    </span>
-                    <span className="text-lg font-bold text-orange-600">
-                      {course.price}
-                    </span>
-                  </div>
+                  {(() => {
+                    const pricing = resolveCoursePricing(course);
+                    return (
+                      <div className="flex items-center flex-wrap gap-2 pt-2 border-t border-orange-200/50 mt-2">
+                        <span className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center text-red-600 shrink-0">
+                          💰
+                        </span>
+                        <span className="text-lg font-bold text-orange-600">
+                          {pricing.price}
+                        </span>
+                        {pricing.originalPrice && pricing.originalPrice !== pricing.price && (
+                          <span className="text-sm text-gray-400 line-through">
+                            {pricing.originalPrice}
+                          </span>
+                        )}
+                        {pricing.discountLabel > 0 && (
+                          <span className="ml-auto bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                            </svg>
+                            {pricing.discountLabel}% OFF
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="space-y-2 text-sm text-gray-600">
