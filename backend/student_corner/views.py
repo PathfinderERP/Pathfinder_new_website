@@ -221,6 +221,7 @@ class StudentCornerPurchaseViewSet(viewsets.ViewSet):
                 return Response({"error": "Could not verify or create user"}, status=400)
 
             # 2. Create Order
+            delivery_addr = data.get('delivery_address', {})
             order = StudentCornerOrder(
                 user_id=str(user.id),
                 full_name=user.full_name,
@@ -228,12 +229,12 @@ class StudentCornerPurchaseViewSet(viewsets.ViewSet):
                 phone=user.phone,
                 items=items,
                 total_amount=total_amount,
-                payment_id=f"SC-PAY-{datetime.datetime.now().timestamp()}",
-                payment_status='completed',
+                payment_id=payment_details.get('txn_id') or payment_details.get('payment_id') or f"SC-PAY-{datetime.datetime.now().timestamp()}",
+                payment_status=payment_details.get('status', 'pending' if payment_details.get('method') == 'icici' else 'completed'),
                 delivery_address={
-                    'area': user.area,
-                    'school': user.school,
-                    'board': getattr(user, 'board', '')
+                    'area': delivery_addr.get('area') or user_data.get('area') or getattr(user, 'area', ''),
+                    'school': delivery_addr.get('school') or user_data.get('school') or getattr(user, 'school', ''),
+                    'board': delivery_addr.get('board') or user_data.get('board') or getattr(user, 'board', '')
                 }
             )
             order.save()

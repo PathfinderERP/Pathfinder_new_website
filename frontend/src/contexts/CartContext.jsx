@@ -60,12 +60,30 @@ export const CartProvider = ({ children }) => {
         );
     };
 
-    const clearCart = () => {
-        setCartItems([]);
+    const getItemSellingPrice = (item) => {
+        if (!item) return 0;
+        const discounted = parseFloat(item.discounted_price);
+        const original = parseFloat(item.price);
+        if (!isNaN(discounted) && discounted > 0) {
+            return discounted;
+        }
+        return !isNaN(original) ? original : 0;
+    };
+
+    const getItemOriginalPrice = (item) => {
+        if (!item) return 0;
+        const original = parseFloat(item.price);
+        const discounted = parseFloat(item.discounted_price);
+        if (!isNaN(original) && original > 0) {
+            return original;
+        }
+        return !isNaN(discounted) && discounted > 0 ? discounted : 0;
     };
 
     const cartCount = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
-    const cartTotal = cartItems.reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
+    const cartTotal = cartItems.reduce((acc, item) => acc + (getItemSellingPrice(item) * (item.quantity || 1)), 0);
+    const cartOriginalTotal = cartItems.reduce((acc, item) => acc + (getItemOriginalPrice(item) * (item.quantity || 1)), 0);
+    const cartSavings = Math.max(0, cartOriginalTotal - cartTotal);
 
     return (
         <CartContext.Provider value={{
@@ -75,7 +93,11 @@ export const CartProvider = ({ children }) => {
             updateQuantity,
             clearCart,
             cartCount,
-            cartTotal
+            cartTotal,
+            cartOriginalTotal,
+            cartSavings,
+            getItemSellingPrice,
+            getItemOriginalPrice
         }}>
             {children}
 

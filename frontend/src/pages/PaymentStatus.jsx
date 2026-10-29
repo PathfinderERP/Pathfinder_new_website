@@ -384,6 +384,15 @@ const PaymentStatus = () => {
                   <Download className="w-5 h-5" />
                   Download Official Invoice PDF
                 </button>
+                {(courseName?.toLowerCase().includes('student') || courseName?.toLowerCase().includes('corner') || localStorage.getItem('student_corner_last_order')) && (
+                  <button
+                    onClick={() => navigate('/students-corner/orders')}
+                    className="w-full sm:w-auto px-8 py-4 bg-[#FF7D54] hover:bg-[#FF6B3D] text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 transform hover:-translate-y-0.5 text-sm uppercase tracking-wider"
+                  >
+                    View My Orders
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   onClick={() => navigate('/')}
                   className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider"

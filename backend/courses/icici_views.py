@@ -251,6 +251,28 @@ class ICICICallbackView(APIView):
                 except Exception as lead_err:
                     logger.warning(f"Callback lead update warning: {lead_err}")
 
+            # Check and update StudentCornerOrder if transaction matches
+            if txn_no:
+                try:
+                    from student_corner.models import StudentCornerOrder
+                    sc_order = StudentCornerOrder.objects(payment_id=txn_no).first()
+                    if sc_order:
+                        if is_success:
+                            sc_order.payment_status = 'completed'
+                            sc_order.status = 'processing'
+                        else:
+                            sc_order.payment_status = 'failed'
+                        sc_order.save()
+                        logger.info(f"Updated StudentCornerOrder {sc_order.id} payment_status to {sc_order.payment_status} for txn {txn_no}")
+                        if not name or name in ['', 'Referred Student', 'Student']:
+                            name = sc_order.full_name
+                        if not mobile or mobile == '':
+                            mobile = sc_order.phone
+                        if not email or email == '':
+                            email = sc_order.email
+                except Exception as sc_err:
+                    logger.warning(f"StudentCornerOrder callback lookup warning: {sc_err}")
+
             if is_success and is_shiksha_bandhu:
                 try:
                     from shiksha_bandhu.views import process_referral_payment
@@ -325,6 +347,25 @@ class ICICICallbackView(APIView):
                         email = lead.email or ''
             except Exception as lead_err:
                 logger.warning(f"GET callback lead lookup warning: {lead_err}")
+
+        # Check and update StudentCornerOrder if GET callback matches
+        if txn_no:
+            try:
+                from student_corner.models import StudentCornerOrder
+                sc_order = StudentCornerOrder.objects(payment_id=txn_no).first()
+                if sc_order:
+                    if str(txn_status) in ['0000', '00', 'SUCCESS', '0', 'E000']:
+                        sc_order.payment_status = 'completed'
+                        sc_order.status = 'processing'
+                    sc_order.save()
+                    if not name or name in ['', 'Referred Student', 'Student']:
+                        name = sc_order.full_name
+                    if not mobile:
+                        mobile = sc_order.phone
+                    if not email:
+                        email = sc_order.email
+            except Exception as sc_err:
+                logger.warning(f"StudentCornerOrder GET callback lookup warning: {sc_err}")
 
         return redirect(f"https://pathfinder.edu.in/payment-status?txnNo={txn_no}&status={txn_status}&amount={amount}&name={urllib.parse.quote(str(name))}&phone={urllib.parse.quote(str(mobile))}&email={urllib.parse.quote(str(email))}&course={urllib.parse.quote(str(course))}")
 
@@ -402,6 +443,19 @@ class ICICIWebhookView(APIView):
                         logger.info(f"[ICICI WEBHOOK] Credited 10% referral bonus to partner {referral_code}")
                     except Exception as ref_err:
                         logger.error(f"[ICICI WEBHOOK] Error processing referral bonus: {ref_err}")
+
+                # Check and update StudentCornerOrder if transaction matches
+                if merchant_txn_no:
+                    try:
+                        from student_corner.models import StudentCornerOrder
+                        sc_order = StudentCornerOrder.objects(payment_id=merchant_txn_no).first()
+                        if sc_order:
+                            sc_order.payment_status = 'completed'
+                            sc_order.status = 'processing'
+                            sc_order.save()
+                            logger.info(f"[ICICI WEBHOOK] Updated StudentCornerOrder {sc_order.id} payment_status to completed")
+                    except Exception as sc_hook_err:
+                        logger.warning(f"[ICICI WEBHOOK] StudentCornerOrder webhook update warning: {sc_hook_err}")
 
             return Response({"status": "SUCCESS", "message": "Webhook processed successfully"}, status=status.HTTP_200_OK)
 

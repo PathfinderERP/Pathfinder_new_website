@@ -6,13 +6,24 @@ import {
     PlusIcon,
     MinusIcon,
     ArrowRightIcon,
-    ShoppingBagIcon
+    ShoppingBagIcon,
+    ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 
 const StudentBag = () => {
-    const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
+    const { 
+        cartItems, 
+        removeFromCart, 
+        updateQuantity, 
+        cartTotal, 
+        cartOriginalTotal, 
+        cartSavings, 
+        cartCount,
+        getItemSellingPrice,
+        getItemOriginalPrice
+    } = useCart();
     const navigate = useNavigate();
 
     const containerVariants = {
@@ -114,15 +125,27 @@ const StudentBag = () => {
 
                                                     {/* Price Info */}
                                                     <div className="text-right">
-                                                        <div className="flex items-center gap-2 justify-end">
-                                                            {item.discount > 0 && (
-                                                                <span className="text-xs font-black text-green-500">-{item.discount}%</span>
-                                                            )}
-                                                            <span className="text-xl font-black text-[#FF7D54]">₹{item.discounted_price * (item.quantity || 1)}</span>
-                                                        </div>
-                                                        {item.discount > 0 && (
-                                                            <span className="text-sm text-slate-400 font-bold line-through tracking-tighter">₹{item.price * (item.quantity || 1)}</span>
-                                                        )}
+                                                        {(() => {
+                                                            const sellingPrice = getItemSellingPrice ? getItemSellingPrice(item) : (parseFloat(item.discounted_price) || parseFloat(item.price) || 0);
+                                                            const originalPrice = getItemOriginalPrice ? getItemOriginalPrice(item) : (parseFloat(item.price) || sellingPrice);
+                                                            const hasDiscount = originalPrice > sellingPrice;
+                                                            const discountPercent = item.discount || (hasDiscount ? Math.round(((originalPrice - sellingPrice) / originalPrice) * 100) : 0);
+                                                            const qty = item.quantity || 1;
+
+                                                            return (
+                                                                <>
+                                                                    <div className="flex items-center gap-2 justify-end">
+                                                                        {discountPercent > 0 && (
+                                                                            <span className="text-xs font-black text-green-500">-{discountPercent}%</span>
+                                                                        )}
+                                                                        <span className="text-xl font-black text-[#FF7D54]">₹{(sellingPrice * qty).toLocaleString('en-IN')}</span>
+                                                                    </div>
+                                                                    {hasDiscount && (
+                                                                        <span className="text-sm text-slate-400 font-bold line-through tracking-tighter">₹{(originalPrice * qty).toLocaleString('en-IN')}</span>
+                                                                    )}
+                                                                </>
+                                                            );
+                                                        })()}
                                                     </div>
                                                 </div>
                                             </div>
@@ -167,8 +190,14 @@ const StudentBag = () => {
                             <div className="space-y-4 mb-8 relative z-10">
                                 <div className="flex justify-between font-bold text-gray-400 uppercase text-sm tracking-widest">
                                     <span>Subtotal ({cartCount} Items)</span>
-                                    <span className="text-white">₹{cartTotal}</span>
+                                    <span className="text-white">₹{(cartOriginalTotal || cartTotal).toLocaleString('en-IN')}</span>
                                 </div>
+                                {cartSavings > 0 && (
+                                    <div className="flex justify-between font-bold text-emerald-400 uppercase text-sm tracking-widest">
+                                        <span>Discount Savings</span>
+                                        <span>-₹{cartSavings.toLocaleString('en-IN')}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between font-bold text-gray-400 uppercase text-sm tracking-widest">
                                     <span>Delivery</span>
                                     <span className="text-green-400">FREE</span>
@@ -182,7 +211,10 @@ const StudentBag = () => {
                             <div className="flex justify-between items-end mb-10 relative z-10">
                                 <span className="text-gray-400 font-bold uppercase tracking-widest text-lg">Total</span>
                                 <div className="text-right">
-                                    <span className="text-4xl font-black italic">₹{cartTotal}</span>
+                                    {cartSavings > 0 && (
+                                        <p className="text-xs text-gray-400 line-through font-bold">₹{cartOriginalTotal.toLocaleString('en-IN')}</p>
+                                    )}
+                                    <span className="text-4xl font-black italic text-[#FF7D54]">₹{cartTotal.toLocaleString('en-IN')}</span>
                                     <p className="text-[10px] text-gray-500 font-bold uppercase mt-1">Inclusive of all taxes</p>
                                 </div>
                             </div>
@@ -196,7 +228,7 @@ const StudentBag = () => {
                             </button>
 
                             <div className="mt-8 flex items-center justify-center gap-6 text-gray-500 font-bold text-[10px] uppercase tracking-widest relative z-10">
-                                <span className="flex items-center gap-1"><TrashIcon className="h-3 w-3" /> Secure Payment</span>
+                                <span className="flex items-center gap-1.5 text-emerald-400/90"><ShieldCheckIcon className="h-3.5 w-3.5 text-emerald-400" /> ICICI 3D Secure</span>
                                 <span className="flex items-center gap-1 text-green-500/50 italic">Easy Returns</span>
                             </div>
                         </div>

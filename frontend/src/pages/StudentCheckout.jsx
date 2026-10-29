@@ -1,14 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 import { studentCornerAPI } from "../services/api";
 import { useCart } from "../contexts/CartContext";
-import { EyeIcon, EyeSlashIcon, ChevronLeftIcon, ShoppingBagIcon, ShieldCheckIcon, CreditCardIcon, MapPinIcon, UserIcon } from "@heroicons/react/24/outline";
+import { 
+    EyeIcon, 
+    EyeSlashIcon, 
+    ChevronLeftIcon, 
+    ShoppingBagIcon, 
+    ShieldCheckIcon, 
+    CreditCardIcon, 
+    MapPinIcon, 
+    UserIcon,
+    CheckCircleIcon,
+    LockClosedIcon
+} from "@heroicons/react/24/outline";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 const StudentCheckout = () => {
     const navigate = useNavigate();
     const { user, setAuthenticatedUser } = useAuth();
-    const { cartItems, cartTotal, clearCart } = useCart();
+    const { 
+        cartItems, 
+        cartTotal, 
+        cartOriginalTotal, 
+        cartSavings, 
+        clearCart,
+        getItemSellingPrice 
+    } = useCart();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -36,6 +57,21 @@ const StudentCheckout = () => {
         window.scrollTo(0, 0);
     }, [cartItems, navigate]);
 
+    useEffect(() => {
+        if (user) {
+            setRegistrationData(prev => ({
+                ...prev,
+                fullName: prev.fullName || user.fullName || user.full_name || "",
+                email: prev.email || user.email || "",
+                phone: prev.phone || user.phone || user.mobile || "",
+                area: prev.area || user.area || "",
+                school: prev.school || user.school || "",
+                studentClass: prev.studentClass || user.studentClass || user.student_class || "12",
+                board: prev.board || user.board || ""
+            }));
+        }
+    }, [user]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setRegistrationData(prev => ({
@@ -50,11 +86,21 @@ const StudentCheckout = () => {
         // Validate Registration if not logged in
         if (!user) {
             if (!registrationData.fullName || !registrationData.email || !registrationData.phone || !registrationData.password || !registrationData.area) {
-                setError("Please fill all required fields (Name, Email, Phone, Area, Password)");
+                setError("Please fill all required fields (Name, Email, Phone, Delivery Area, Password)");
                 return;
             }
             if (registrationData.password !== registrationData.confirmPassword) {
                 setError("Passwords do not match");
+                return;
+            }
+            const cleanPhone = registrationData.phone.replace(/\D/g, "");
+            if (cleanPhone.length < 10) {
+                setError("Please enter a valid 10-digit mobile number");
+                return;
+            }
+        } else {
+            if (!registrationData.area && !user.area) {
+                setError("Please enter your complete delivery area / address");
                 return;
             }
         }
@@ -62,37 +108,157 @@ const StudentCheckout = () => {
         setLoading(true);
 
         try {
-            const payload = {
-                items: cartItems.map(item => ({
+            const customerName = user ? (user.fullName || user.full_name) : registrationData.fullName;
+            const customerEmailID = user ? user.email : registrationData.email;
+            const customerMobileNo = user ? (user.phone || user.mobile || registrationData.phone || "9876543210") : registrationData.phone;
+            const merchantTxnNo = `TXN${Date.now()}`;
+            const txnDate = new Date().toISOString().replace(/[-T:\.Z]/g, "").slice(0, 14);
+            const amount = cartTotal ? cartTotal.toFixed(2) : "0.00";
+
+            // 1. Prepare items payload using selling price
+            const items = cartItems.map(item => {
+                const itemPrice = getItemSellingPrice ? getItemSellingPrice(item) : (parseFloat(item.discounted_price) || parseFloat(item.price) || 0);
+                return {
                     id: item.id || item.unique_id,
                     name: item.name,
-                    price: item.discounted_price || item.price,
+                    price: itemPrice,
                     quantity: item.quantity || 1,
                     image: item.image_url || item.image || item.img
-                })),
+                };
+            });
+
+            // 2. Pre-create order and user account in backend
+            const orderPayload = {
+                items,
                 totalAmount: cartTotal,
                 payment: {
-                    method: 'card',
-                    status: 'completed'
+                    method: 'icici',
+                    status: 'pending',
+                    txn_id: merchantTxnNo
+                },
+                delivery_address: {
+                    area: registrationData.area || user?.area || '',
+                    school: registrationData.school || user?.school || '',
+                    board: registrationData.board || user?.board || ''
                 },
                 user: !user ? registrationData : undefined
             };
 
-            const response = await studentCornerAPI.purchase(payload);
+            const purchaseRes = await studentCornerAPI.purchase(orderPayload);
 
-            if (response.data.token && response.data.user) {
-                // Global auth update
-                setAuthenticatedUser(response.data.user, response.data.token);
+            if (purchaseRes.data?.token && purchaseRes.data?.user) {
+                // Update global auth state
+                setAuthenticatedUser(purchaseRes.data.user, purchaseRes.data.token);
             }
 
-            // Clear cart and redirect
+            // Save order reference locally for dashboard and receipts
+            try {
+                const orderRecord = {
+                    id: purchaseRes.data?.order_id || `ORD-${merchantTxnNo}`,
+                    items,
+                    total_amount: cartTotal,
+                    merchantTxnNo,
+                    customerName,
+                    customerEmail: customerEmailID,
+                    date: new Date().toISOString()
+                };
+                localStorage.setItem('student_corner_last_order', JSON.stringify(orderRecord));
+            } catch (e) {
+                console.warn("Could not save last order in localStorage:", e);
+            }
+
+            // 3. Fetch ICICI Payment Gateway Configuration
+            let gatewayConfig = {
+                merchantId: "100000000007164",
+                aggregatorID: "A100000000007164",
+                secretKey: "db06cca0-838b-4e01-8b20-6ac446ffb6bd",
+                saleUrl: "https://pgpayuat.icici.bank.in/tsp/pg/api/v2/initiateSale"
+            };
+
+            try {
+                const configRes = await axios.get(`${API_BASE_URL}/api/courses/icici/config/`);
+                if (configRes.data && configRes.data.merchantId) {
+                    gatewayConfig = configRes.data;
+                }
+            } catch (cfgErr) {
+                console.warn("Using default ICICI config fallback", cfgErr);
+            }
+
+            const { merchantId, aggregatorID, secretKey, saleUrl } = gatewayConfig;
+            const returnURL = `${API_BASE_URL}/api/courses/icici/callback/`;
+
+            const itemSummaryNames = cartItems.map(i => i.name).slice(0, 2).join(', ');
+            const params = {
+                merchantId,
+                aggregatorID,
+                merchantTxnNo,
+                amount,
+                currencyCode: "356",
+                payType: "0", // Standard 3DS Redirection
+                customerEmailID,
+                transactionType: "SALE",
+                returnURL,
+                txnDate,
+                customerMobileNo,
+                customerName,
+                addlParam1: `Student Corner - ${itemSummaryNames || 'Items'}`.slice(0, 100),
+                addlParam2: ""
+            };
+
+            // 4. Generate HMAC-SHA256 secure hash from backend proxy
+            const hashRes = await axios.post(`${API_BASE_URL}/api/courses/icici/generate-hash/`, {
+                mode: "v1",
+                secretKey,
+                params
+            });
+
+            if (!hashRes.data || !hashRes.data.success) {
+                throw new Error("Failed to calculate payment security hash.");
+            }
+
+            const secureHash = hashRes.data.secureHash;
+            const fullPayload = {
+                ...params,
+                secureHash
+            };
+
+            // 5. Initiate Sale API via backend proxy
+            const proxyRes = await axios.post(`${API_BASE_URL}/api/courses/icici/proxy/`, {
+                target_url: saleUrl,
+                payload_type: "json",
+                payload: fullPayload
+            });
+
+            const resData = proxyRes.data;
+            const responseContent = resData.data || resData;
+            console.log("ICICI Gateway Raw Response:", resData);
+
+            const targetRedirect = responseContent.redirectURI || responseContent.redirectUrl || responseContent.redirect_url || responseContent.targetUrl || responseContent.target_url || responseContent.url || responseContent.action;
+            const tranCtx = responseContent.tranCtx || responseContent.tran_ctx || responseContent.tranContext;
+
+            // Clear cart upon successful handoff to payment gateway
             clearCart();
-            navigate("/students-corner/orders", { state: { success: true, orderId: response.data.order_id } });
+
+            if (targetRedirect && tranCtx) {
+                const finalUrl = targetRedirect.includes('?') 
+                    ? `${targetRedirect}&tranCtx=${encodeURIComponent(tranCtx)}`
+                    : `${targetRedirect}?tranCtx=${encodeURIComponent(tranCtx)}`;
+                window.location.href = finalUrl;
+            } else if (targetRedirect) {
+                window.location.href = targetRedirect;
+            } else if (responseContent.html || responseContent.formHtml) {
+                document.open();
+                document.write(responseContent.html || responseContent.formHtml);
+                document.close();
+            } else {
+                console.error("ICICI Gateway unexpected response structure:", responseContent);
+                const errorMsg = responseContent.responseMessage || responseContent.respDescription || responseContent.message || responseContent.error || (typeof responseContent === 'string' ? responseContent : JSON.stringify(responseContent));
+                throw new Error(errorMsg || "Payment initiation returned an unexpected response from ICICI Bank.");
+            }
 
         } catch (err) {
-            console.error("Purchase failed:", err);
-            setError(err.response?.data?.error || "Order failed. Please try again.");
-        } finally {
+            console.error("Purchase or ICICI payment failed:", err);
+            setError(err.response?.data?.error || err.message || "Payment initiation failed. Please try again.");
             setLoading(false);
         }
     };
@@ -267,36 +433,47 @@ const StudentCheckout = () => {
                             </div>
                         </div>
 
-                        {/* 3. Payment Method Mock */}
+                        {/* 3. Payment Method: ICICI Bank Payment Gateway */}
                         <div className="bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/5 rounded-full -mr-20 -mt-20" />
                             <div className="flex items-center gap-4 mb-8">
-                                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center">
-                                    <CreditCardIcon className="h-6 w-6 text-emerald-500" />
+                                <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center">
+                                    <CreditCardIcon className="h-6 w-6 text-[#FF7D54]" />
                                 </div>
-                                <h2 className="text-xl font-black text-slate-900 uppercase">Payment Method</h2>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 uppercase">Payment Method</h2>
+                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Official Bank Secured Gateway</p>
+                                </div>
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <div className="flex-1 p-6 border-2 border-orange-500 bg-orange-50/30 rounded-[2rem] flex items-center gap-4 relative">
-                                    <div className="w-10 h-10 bg-[#FF7D54] rounded-full flex items-center justify-center shrink-0">
-                                        <ShieldCheckIcon className="h-6 w-6 text-white" />
+                            <div className="space-y-4">
+                                {/* ICICI Bank Primary Option */}
+                                <div className="p-6 border-2 border-orange-500 bg-orange-50/40 rounded-[2rem] flex flex-col md:flex-row md:items-center justify-between gap-4 relative shadow-sm">
+                                    <div className="flex items-start sm:items-center gap-4">
+                                        <div className="w-12 h-12 bg-[#B02A30] rounded-2xl flex items-center justify-center shrink-0 shadow-md shadow-red-900/20 text-white font-black text-sm tracking-tighter">
+                                            ICICI
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="font-black text-slate-900 uppercase text-sm">ICICI Bank Payment Gateway</h4>
+                                                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Active</span>
+                                            </div>
+                                            <p className="text-xs text-slate-600 font-medium mt-1">
+                                                Pay securely via UPI (GPay, PhonePe, Paytm, BHIM), Credit / Debit Card (Visa, MasterCard, RuPay), or Net Banking
+                                            </p>
+                                            <div className="flex flex-wrap items-center gap-3 mt-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                                <span className="flex items-center gap-1 text-emerald-600">
+                                                    <ShieldCheckIcon className="w-3.5 h-3.5" /> 3D Secure 2.0
+                                                </span>
+                                                <span>• 256-Bit SSL Encrypted</span>
+                                                <span>• Instant Receipt</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h4 className="font-black text-slate-900 uppercase text-xs">Pathfinder Direct</h4>
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Instant Confirmation & Tracking</p>
-                                    </div>
-                                    <div className="absolute top-4 right-6">
-                                        <div className="w-4 h-4 rounded-full border-4 border-[#FF7D54] flex items-center justify-center" />
-                                    </div>
-                                </div>
-                                <div className="flex-1 p-6 border border-slate-100 bg-white rounded-[2rem] flex items-center gap-4 opacity-50 grayscale">
-                                    <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center shrink-0">
-                                        <CreditCardIcon className="h-6 w-6 text-slate-400" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-black text-slate-400 uppercase text-xs">UPI / Other</h4>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter italic">Coming Soon</p>
+                                    <div className="flex items-center gap-2 self-end md:self-center">
+                                        <span className="w-6 h-6 rounded-full bg-[#FF7D54] flex items-center justify-center text-white">
+                                            <CheckCircleIcon className="w-5 h-5" />
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -314,29 +491,44 @@ const StudentCheckout = () => {
                             </div>
 
                             <div className="space-y-4 mb-8 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                                {cartItems.map((item) => (
-                                    <div key={item.id || item.unique_id} className="flex justify-between items-start gap-4">
-                                        <div className="flex-1">
-                                            <h4 className="text-xs font-black uppercase line-clamp-1">{item.name}</h4>
-                                            <p className="text-[10px] text-gray-400 font-bold mt-1">QTY: {item.quantity || 1}</p>
+                                {cartItems.map((item) => {
+                                    const itemPrice = getItemSellingPrice ? getItemSellingPrice(item) : (parseFloat(item.discounted_price) || parseFloat(item.price) || 0);
+                                    const qty = item.quantity || 1;
+                                    return (
+                                        <div key={item.id || item.unique_id} className="flex justify-between items-start gap-4">
+                                            <div className="flex-1">
+                                                <h4 className="text-xs font-black uppercase line-clamp-1">{item.name}</h4>
+                                                <p className="text-[10px] text-gray-400 font-bold mt-1">QTY: {qty}</p>
+                                            </div>
+                                            <span className="text-xs font-black text-orange-400">₹{(itemPrice * qty).toLocaleString('en-IN')}</span>
                                         </div>
-                                        <span className="text-xs font-black text-orange-400">₹{(item.discounted_price || item.price) * (item.quantity || 1)}</span>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
 
                             <div className="pt-6 border-t border-white/10 space-y-4 mb-8">
                                 <div className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-widest">
                                     <span>Subtotal</span>
-                                    <span className="text-white">₹{cartTotal}</span>
+                                    <span className="text-white">₹{(cartOriginalTotal || cartTotal).toLocaleString('en-IN')}</span>
                                 </div>
+                                {cartSavings > 0 && (
+                                    <div className="flex justify-between text-xs font-bold text-emerald-400 uppercase tracking-widest">
+                                        <span>Discount Savings</span>
+                                        <span>-₹{cartSavings.toLocaleString('en-IN')}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-widest">
                                     <span>Delivery</span>
                                     <span className="text-emerald-400">FREE</span>
                                 </div>
                                 <div className="flex justify-between items-end pt-4">
                                     <span className="text-sm font-black text-gray-400 uppercase tracking-widest">Total</span>
-                                    <span className="text-3xl font-black text-white italic">₹{cartTotal}</span>
+                                    <div className="text-right">
+                                        {cartSavings > 0 && (
+                                            <p className="text-xs text-gray-400 line-through font-bold">₹{cartOriginalTotal.toLocaleString('en-IN')}</p>
+                                        )}
+                                        <span className="text-3xl font-black text-[#FF7D54] italic">₹{cartTotal.toLocaleString('en-IN')}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -348,10 +540,13 @@ const StudentCheckout = () => {
                                 {loading ? (
                                     <>
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        <span>Encrypting...</span>
+                                        <span>Connecting to ICICI Gateway...</span>
                                     </>
                                 ) : (
-                                    "Place Order Now"
+                                    <>
+                                        <LockClosedIcon className="w-5 h-5" />
+                                        <span>Pay ₹{cartTotal.toLocaleString('en-IN')} via ICICI Bank</span>
+                                    </>
                                 )}
                             </button>
 
