@@ -68,9 +68,48 @@ def test_email_api(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
+def verify_email_config(request):
+    import os
+    import smtplib
+
+    pwd = getattr(settings, 'EMAIL_HOST_PASSWORD', '') or ''
+    masked_pwd = (pwd[:3] + '***' + pwd[-3:]) if len(pwd) >= 6 else ('*' * len(pwd))
+
+    smtp_status = "unknown"
+    try:
+        s = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=8)
+        if settings.EMAIL_USE_TLS:
+            s.starttls()
+        s.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+        s.quit()
+        smtp_status = "SUCCESS: Authenticated with Gmail SMTP"
+    except Exception as e:
+        smtp_status = f"FAILED: {str(e)}"
+
+    return JsonResponse({
+        "status": "online",
+        "settings_in_memory": {
+            "EMAIL_BACKEND": getattr(settings, 'EMAIL_BACKEND', None),
+            "EMAIL_HOST": getattr(settings, 'EMAIL_HOST', None),
+            "EMAIL_PORT": getattr(settings, 'EMAIL_PORT', None),
+            "EMAIL_USE_TLS": getattr(settings, 'EMAIL_USE_TLS', None),
+            "EMAIL_HOST_USER": getattr(settings, 'EMAIL_HOST_USER', None),
+            "EMAIL_HOST_PASSWORD_MASKED": masked_pwd,
+            "DEFAULT_FROM_EMAIL": getattr(settings, 'DEFAULT_FROM_EMAIL', None),
+            "OFFICIAL_EMAIL": getattr(settings, 'OFFICIAL_EMAIL', None),
+        },
+        "env_raw_values": {
+            "EMAIL_HOST_USER": os.getenv("EMAIL_HOST_USER", "(not set)"),
+            "DEFAULT_FROM_EMAIL": os.getenv("DEFAULT_FROM_EMAIL", "(not set)"),
+            "OFFICIAL_EMAIL": os.getenv("OFFICIAL_EMAIL", "(not set)"),
+        },
+        "smtp_live_connection": smtp_status
+    }, json_dumps_params={'indent': 2})
+
 urlpatterns = [
     path('', root, name='root'),
     path('api/test-email/', test_email_api, name='test_email_api'),
+    path('api/verify-email-config/', verify_email_config, name='verify_email_config'),
     path('business/admin/', admin.site.urls),
     path('api/', include('contact_api.urls')),   # Your existing contact API
     path('api/auth/', include('users.urls')),    # Your existing auth
