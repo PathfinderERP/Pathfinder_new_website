@@ -145,8 +145,27 @@ class StudentCornerOrderViewSet(viewsets.ViewSet):
         try:
             user_id = str(request.user.id)
             orders = StudentCornerOrder.objects(user_id=user_id)
-            serializer = StudentCornerOrderSerializer(orders, many=True)
-            return Response(serializer.data)
+            data = StudentCornerOrderSerializer(orders, many=True).data
+
+            for order_data in data:
+                items = order_data.get('items', [])
+                has_physical = False
+                for itm in items:
+                    if 'is_physical_asset' not in itm:
+                        itm_id = itm.get('id') or itm.get('unique_id')
+                        db_item = StudentCornerItem.objects(id=itm_id).first() if itm_id else None
+                        if not db_item and itm_id:
+                            db_item = StudentCornerItem.objects(unique_id=itm_id).first()
+                        if db_item:
+                            itm['is_physical_asset'] = getattr(db_item, 'is_physical_asset', True)
+                        else:
+                            cat = (itm.get('category') or '').lower()
+                            itm['is_physical_asset'] = False if ('note' in cat or 'ebook' in cat or 'digital' in cat) else True
+                    if itm.get('is_physical_asset', True):
+                        has_physical = True
+                order_data['has_physical_items'] = has_physical
+
+            return Response(data)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
@@ -178,6 +197,22 @@ class StudentCornerPurchaseViewSet(viewsets.ViewSet):
             
             if not items:
                 return Response({"error": "No items provided"}, status=400)
+
+            # Enrich items with is_physical_asset status
+            enriched_items = []
+            for itm in items:
+                itm_copy = dict(itm)
+                if 'is_physical_asset' not in itm_copy:
+                    itm_id = itm.get('id') or itm.get('unique_id')
+                    db_item = StudentCornerItem.objects(id=itm_id).first() if itm_id else None
+                    if not db_item and itm_id:
+                        db_item = StudentCornerItem.objects(unique_id=itm_id).first()
+                    if db_item:
+                        itm_copy['is_physical_asset'] = getattr(db_item, 'is_physical_asset', True)
+                    else:
+                        cat = (itm.get('category') or '').lower()
+                        itm_copy['is_physical_asset'] = False if ('note' in cat or 'ebook' in cat or 'digital' in cat) else True
+                enriched_items.append(itm_copy)
 
             # 1. Handle User (Same logic as Course purchase)
             user = None
@@ -227,7 +262,7 @@ class StudentCornerPurchaseViewSet(viewsets.ViewSet):
                 full_name=user.full_name,
                 email=user.email,
                 phone=user.phone,
-                items=items,
+                items=enriched_items,
                 total_amount=total_amount,
                 payment_id=payment_details.get('txn_id') or payment_details.get('payment_id') or f"SC-PAY-{datetime.datetime.now().timestamp()}",
                 payment_status=payment_details.get('status', 'pending' if payment_details.get('method') == 'icici' else 'completed'),

@@ -35,6 +35,7 @@ class StudentCornerItem(Document):
     course_type = fields.StringField(max_length=50) 
     custom_course_type = fields.StringField(max_length=50) 
     is_popular = fields.BooleanField(default=False) 
+    is_physical_asset = fields.BooleanField(default=True)
 
     unique_id = fields.StringField(unique=True)
     created_by = fields.StringField()

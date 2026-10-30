@@ -89,6 +89,7 @@ const StudentCornerManagement = () => {
         custom_course_type: "",
         is_popular: false,
         free_delivery: false,
+        is_physical_asset: true,
         image_url: ""
     };
 
@@ -160,6 +161,7 @@ const StudentCornerManagement = () => {
                 custom_class_level: classes.includes(item.class_level) ? "" : item.class_level,
                 course_type: courseTypes.includes(item.course_type) ? item.course_type : "Others",
                 custom_course_type: courseTypes.includes(item.course_type) ? "" : item.course_type,
+                is_physical_asset: item.is_physical_asset !== undefined ? item.is_physical_asset : true,
             });
             setImagePreview(item.image_url);
         } else {
@@ -381,6 +383,15 @@ const StudentCornerManagement = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex flex-col gap-1">
+                                            {item.is_physical_asset !== false ? (
+                                                <span className="inline-flex items-center gap-1 w-fit px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[8px] font-black uppercase tracking-wider">
+                                                    📦 Physical
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 w-fit px-2 py-0.5 rounded-md bg-purple-100 text-purple-700 text-[8px] font-black uppercase tracking-wider">
+                                                    ⚡ Digital
+                                                </span>
+                                            )}
                                             {item.is_popular && <span className="inline-flex w-fit px-2 py-0.5 rounded-md bg-orange-100 text-orange-600 text-[8px] font-black uppercase italic">Popular</span>}
                                             {item.free_delivery && <span className="inline-flex w-fit px-2 py-0.5 rounded-md bg-green-100 text-green-600 text-[8px] font-black uppercase">Free Delivery</span>}
                                         </div>
@@ -559,7 +570,14 @@ const StudentCornerManagement = () => {
                                         <input name="tags" value={formData.tags} onChange={handleInputChange} disabled={isViewOnly} className="w-full rounded-2xl border-none font-bold text-base p-4 bg-[#141721] text-white placeholder-slate-600 focus:ring-2 focus:ring-orange-500/50" placeholder="Trending, New, BestSeller" />
                                     </div>
 
-                                    <div className="flex gap-10 py-2">
+                                    <div className="flex flex-wrap gap-8 py-2">
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <input type="checkbox" name="is_physical_asset" checked={formData.is_physical_asset ?? true} onChange={handleInputChange} disabled={isViewOnly} className="rounded border-none bg-white text-blue-600 focus:ring-0 w-6 h-6 shadow-lg transition-all" />
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest group-hover:text-white transition-colors">Physical Asset</span>
+                                                <span className="text-[9px] text-slate-500 font-semibold">(Requires shipping & delivery)</span>
+                                            </div>
+                                        </label>
                                         <label className="flex items-center gap-3 cursor-pointer group">
                                             <input type="checkbox" name="is_popular" checked={formData.is_popular} onChange={handleInputChange} disabled={isViewOnly} className="rounded border-none bg-white text-orange-600 focus:ring-0 w-6 h-6 shadow-lg transition-all" />
                                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-white transition-colors">Popular</span>
