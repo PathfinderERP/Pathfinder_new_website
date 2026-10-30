@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   CheckCircle, 
@@ -13,9 +13,69 @@ import {
   ShieldCheck, 
   ArrowRight,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  Send,
+  Check,
+  AlertCircle
 } from 'lucide-react';
-import { centresAPI } from '../services/api';
+import { centresAPI, invoiceAPI } from '../services/api';
+
+const numberToWords = (amt) => {
+  try {
+    const val = parseFloat(amt);
+    if (isNaN(val) || val <= 0) return 'Zero Rupees Only';
+    
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+      'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    const convertLessThanThousand = (num) => {
+      let res = '';
+      if (num >= 100) {
+        res += ones[Math.floor(num / 100)] + ' Hundred ';
+        num %= 100;
+      }
+      if (num >= 20) {
+        res += tens[Math.floor(num / 10)] + ' ';
+        num %= 10;
+      }
+      if (num > 0) {
+        res += ones[num] + ' ';
+      }
+      return res.trim();
+    };
+
+    const rupees = Math.floor(val);
+    const paise = Math.round((val - rupees) * 100);
+
+    const convertIndian = (num) => {
+      if (num === 0) return 'Zero';
+      const crore = Math.floor(num / 10000000);
+      num %= 10000000;
+      const lakh = Math.floor(num / 100000);
+      num %= 100000;
+      const thousand = Math.floor(num / 1000);
+      num %= 1000;
+      const rem = num;
+
+      const parts = [];
+      if (crore) parts.push(convertLessThanThousand(crore) + ' Crore');
+      if (lakh) parts.push(convertLessThanThousand(lakh) + ' Lakh');
+      if (thousand) parts.push(convertLessThanThousand(thousand) + ' Thousand');
+      if (rem) parts.push(convertLessThanThousand(rem));
+      return parts.join(' ').trim();
+    };
+
+    const rStr = convertIndian(rupees) + ' Rupees';
+    if (paise > 0) {
+      const pStr = convertLessThanThousand(paise) + ' Paise';
+      return `${rStr} and ${pStr} Only`;
+    }
+    return `${rStr} Only`;
+  } catch (e) {
+    return `${amt} Rupees Only`;
+  }
+};
 
 const PaymentStatus = () => {
   const location = useLocation();
@@ -36,6 +96,13 @@ const PaymentStatus = () => {
   const [centres, setCentres] = useState([]);
   const [loadingCentres, setLoadingCentres] = useState(true);
 
+  // Email status states
+  const [emailStatus, setEmailStatus] = useState('idle'); // idle, sending, sent, error
+  const [emailTarget, setEmailTarget] = useState(customerEmail || '');
+  const [emailFeedback, setEmailFeedback] = useState('');
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const emailSentRef = useRef(false);
+
   useEffect(() => {
     const fetchCentres = async () => {
       try {
@@ -51,264 +118,671 @@ const PaymentStatus = () => {
     fetchCentres();
   }, []);
 
+  // Automatically trigger email sending if student email is present upon success
+  useEffect(() => {
+    if (isSuccess && customerEmail && !emailSentRef.current) {
+      emailSentRef.current = true;
+      setEmailStatus('sending');
+      invoiceAPI.sendInvoiceEmail({
+        email: customerEmail,
+        name: customerName,
+        txnNo,
+        amount,
+        course: courseName,
+        phone: customerPhone
+      })
+      .then(() => {
+        setEmailStatus('sent');
+        setEmailFeedback(`Official invoice emailed to ${customerEmail}`);
+      })
+      .catch((err) => {
+        console.error("Auto email invoice failed:", err);
+        setEmailStatus('idle');
+      });
+    }
+  }, [isSuccess, customerEmail, customerName, txnNo, amount, courseName, customerPhone]);
+
+  const handleSendManualEmail = async (targetEmail) => {
+    const to = targetEmail || emailTarget || customerEmail;
+    if (!to || !to.includes('@')) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+    setEmailStatus('sending');
+    try {
+      await invoiceAPI.sendInvoiceEmail({
+        email: to,
+        name: customerName,
+        txnNo,
+        amount,
+        course: courseName,
+        phone: customerPhone
+      });
+      setEmailStatus('sent');
+      setEmailFeedback(`Official invoice emailed successfully to ${to}`);
+      setShowEmailModal(false);
+    } catch (err) {
+      console.error("Manual invoice email error:", err);
+      setEmailStatus('error');
+      setEmailFeedback("Failed to send email. Please verify the address and try again.");
+    }
+  };
+
   const handleDownloadReceipt = () => {
     const receiptWindow = window.open('', '_blank');
     if (!receiptWindow) return;
 
+    const formattedAmount = parseFloat(amount || 0).toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    const amountInWords = numberToWords(amount);
+    const currentDateStr = new Date().toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+
     const htmlContent = `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
-        <title>Payment Invoice - Pathfinder Educational Centre</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Official Fee Receipt & Tax Invoice - Pathfinder Educational Centre</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
-          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
+          * {
+            box-sizing: border-box;
+          }
           body { 
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; 
-            padding: 30px 20px; 
-            color: #1e293b; 
-            background: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            padding: 30px 15px; 
+            color: #0F172A; 
+            background: #F1F5F9; 
             margin: 0;
+            line-height: 1.5;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
-          .invoice-card { 
-            max-width: 680px; 
+          .invoice-sheet { 
+            max-width: 820px; 
             margin: 0 auto; 
-            border: 3px solid #EE4600; 
-            padding: 40px; 
-            border-radius: 20px; 
-            background: #ffffff; 
-            box-shadow: 0 20px 40px rgba(238, 70, 0, 0.08); 
-            position: relative;
+            background: #FFFFFF; 
+            border-radius: 18px; 
+            box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.12), 0 0 0 1px #E2E8F0;
             overflow: hidden;
+            position: relative;
           }
-          .invoice-card::before {
+          
+          /* Top Institutional Header */
+          .inst-header {
+            background: #FFFFFF;
+            border-bottom: 2px solid #F1F5F9;
+            padding: 28px 36px 22px 36px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+          }
+          .inst-header::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 8px;
-            background: linear-gradient(90deg, #EE4600, #ff7b00);
+            height: 5px;
+            background: linear-gradient(90deg, #EE4600 0%, #FF7D54 50%, #0F172A 100%);
           }
-          .top-header { 
+          .brand-col {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+          }
+          .logo-img {
+            height: 48px;
+            max-width: 220px;
+            display: block;
+            object-fit: contain;
+          }
+          .inst-info {
+            border-left: 2px solid #E2E8F0;
+            padding-left: 16px;
+          }
+          .inst-info h1 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 900;
+            color: #0F172A;
+            letter-spacing: 0.3px;
+          }
+          .inst-info p {
+            margin: 2px 0 0;
+            font-size: 10px;
+            color: #64748B;
+            font-weight: 600;
+          }
+          .inst-info .contacts {
+            margin-top: 4px;
+            font-size: 10px;
+            color: #EE4600;
+            font-weight: 700;
+          }
+
+          /* Receipt Tag Box */
+          .receipt-tag-box {
+            text-align: right;
+          }
+          .receipt-badge {
+            display: inline-block;
+            background: #0F172A;
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+          }
+          .receipt-num {
+            font-size: 13px;
+            font-weight: 800;
+            color: #334155;
+            margin: 0;
+          }
+          .receipt-date {
+            font-size: 11px;
+            color: #64748B;
+            margin: 3px 0 0;
+          }
+
+          /* Content Area */
+          .content-wrap {
+            padding: 30px 36px 36px 36px;
+          }
+
+          /* 2-column Student and Course Meta */
+          .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 26px;
+          }
+          .meta-card {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 16px 20px;
+          }
+          .meta-card-title {
+            font-size: 10.5px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #EE4600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-bottom: 1px dashed #CBD5E1;
+            padding-bottom: 6px;
+          }
+          .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 7px;
+            font-size: 12px;
+          }
+          .meta-row:last-child {
+            margin-bottom: 0;
+          }
+          .meta-label {
+            color: #64748B;
+            font-weight: 600;
+            flex-shrink: 0;
+            margin-right: 8px;
+          }
+          .meta-val {
+            color: #0F172A;
+            font-weight: 800;
+            text-align: right;
+            word-break: break-word;
+          }
+          .badge-paid {
+            background: #10B981;
+            color: #FFFFFF;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            letter-spacing: 0.5px;
+            display: inline-block;
+          }
+
+          /* Program Schedule Table */
+          .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            overflow: hidden;
+          }
+          .items-table th {
+            background: #0F172A;
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 14px;
+            text-align: left;
+          }
+          .items-table th.text-right {
+            text-align: right;
+          }
+          .items-table th.text-center {
+            text-align: center;
+          }
+          .items-table td {
+            padding: 14px;
+            font-size: 12.5px;
+            color: #1E293B;
+            border-bottom: 1px solid #E2E8F0;
+            background: #FFFFFF;
+          }
+          .items-table td.text-right {
+            text-align: right;
+          }
+          .items-table td.text-center {
+            text-align: center;
+          }
+          .items-table tr:last-child td {
+            border-bottom: none;
+          }
+
+          /* Total Breakdown Box */
+          .total-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 26px;
+          }
+          .total-box {
+            width: 360px;
+            background: #FFF7ED;
+            border: 1px solid #FED7AA;
+            border-radius: 12px;
+            padding: 16px 20px;
+          }
+          .total-table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          .total-table td {
+            padding: 4px 0;
+            font-size: 13px;
+          }
+          .total-grand {
+            border-top: 1.5px dashed #FDBA74;
+            padding-top: 10px !important;
+            margin-top: 6px;
+            font-size: 16px;
+            font-weight: 900;
+            color: #9A3412;
+          }
+          .total-grand-amt {
+            border-top: 1.5px dashed #FDBA74;
+            padding-top: 10px !important;
+            font-size: 22px;
+            font-weight: 900;
+            color: #EE4600;
+            text-align: right;
+          }
+          .words-row {
+            padding-top: 8px !important;
+            font-size: 11px;
+            color: #78350F;
+            font-style: italic;
+          }
+
+          /* Verification Stamp & Signatory */
+          .auth-grid {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #f1f5f9; 
-            padding-bottom: 24px; 
-            margin-bottom: 28px; 
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 18px 24px;
+            margin-bottom: 24px;
           }
-          .logo-container {
+          .seal-wrap {
             display: flex;
             align-items: center;
             gap: 12px;
           }
-          .logo-badge {
-            background: #EE4600;
-            color: #ffffff;
-            font-weight: 900;
-            font-size: 24px;
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+          .seal-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px dashed #EE4600;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(238, 70, 0, 0.3);
-          }
-          .brand-title { 
-            color: #0f172a; 
-            margin: 0; 
-            font-size: 22px; 
-            font-weight: 900; 
-            letter-spacing: -0.5px; 
-          }
-          .brand-sub { 
-            color: #EE4600; 
-            margin: 2px 0 0 0; 
-            font-size: 11px; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            letter-spacing: 1.5px; 
-          }
-          .invoice-tag {
-            text-align: right;
-          }
-          .invoice-tag h2 {
-            margin: 0;
             color: #EE4600;
             font-size: 20px;
-            font-weight: 900;
-            letter-spacing: 0.5px;
+            background: #FFF7ED;
           }
-          .invoice-tag p {
-            margin: 4px 0 0 0;
+          .seal-text {
+            font-size: 11px;
+            color: #334155;
+          }
+          .seal-text strong {
+            color: #0F172A;
+            display: block;
             font-size: 12px;
-            color: #64748b;
-            font-weight: 600;
           }
-          .section-heading { 
-            font-size: 12px; 
-            font-weight: 800; 
-            color: #EE4600; 
-            text-transform: uppercase; 
-            margin: 24px 0 12px 0; 
-            letter-spacing: 1px; 
-            display: flex;
-            align-items: center;
-            gap: 8px;
+          .signatory-box {
+            text-align: right;
           }
-          .section-heading::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #fed7aa;
-          }
-          .grid-table {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-          }
-          .info-cell {
-            background: #f8fafc;
-            padding: 12px 16px;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-          }
-          .info-cell.full-width {
-            grid-column: span 2;
-          }
-          .label { 
-            font-size: 11px; 
-            font-weight: 700; 
-            color: #64748b; 
+          .signatory-stamp {
+            font-size: 12px;
+            font-weight: 800;
+            color: #0F172A;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
-            display: block;
           }
-          .value { 
-            font-size: 14px; 
-            font-weight: 800; 
-            color: #0f172a; 
-            word-break: break-all;
+          .signatory-sub {
+            font-size: 10px;
+            color: #64748B;
+            margin-top: 2px;
           }
-          .badge-paid { 
-            display: inline-flex;
+
+          /* Mandatory Notices and Helpline */
+          .notice-panel {
+            background: #FEF3C7;
+            border-left: 4px solid #F59E0B;
+            border-radius: 0 10px 10px 0;
+            padding: 12px 16px;
+            font-size: 11.5px;
+            color: #92400E;
+            line-height: 1.5;
+            margin-bottom: 18px;
+          }
+          .helpline-panel {
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: #166534;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 4px;
-            background: #10B981; 
-            color: white; 
-            padding: 4px 14px; 
-            border-radius: 20px; 
-            font-size: 12px; 
-            font-weight: 900; 
+            flex-wrap: wrap;
+            gap: 10px;
+          }
+          .helpline-link {
+            font-size: 16px;
+            font-weight: 900;
+            color: #EE4600;
+            text-decoration: none;
             letter-spacing: 0.5px;
           }
-          .total-card { 
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); 
-            border: 2px solid #fdba74; 
-            padding: 20px; 
-            border-radius: 14px; 
-            margin-top: 24px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+
+          /* Receipt Footer */
+          .inst-footer {
+            background: #0F172A;
+            color: #94A3B8;
+            padding: 18px 36px;
+            font-size: 10.5px;
+            text-align: center;
+            line-height: 1.6;
           }
-          .total-title { 
-            font-size: 15px; 
-            font-weight: 800; 
-            color: #9a3412; 
+          .inst-footer a {
+            color: #FF7D54;
+            text-decoration: none;
           }
-          .total-amount { 
-            font-size: 26px; 
-            font-weight: 900; 
-            color: #EE4600; 
+
+          /* Print / PDF Button Toolbar */
+          .action-toolbar {
+            text-align: center;
+            margin-top: 24px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
           }
-          .footer-note { 
-            margin-top: 32px; 
-            text-align: center; 
-            font-size: 11px; 
-            color: #64748b; 
-            border-top: 1px dashed #cbd5e1; 
-            padding-top: 20px; 
-            line-height: 1.6; 
+          .btn-print {
+            background: linear-gradient(135deg, #EE4600 0%, #FF6B3D 100%);
+            color: #FFFFFF;
+            border: none;
+            padding: 14px 30px;
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 8px 20px rgba(238, 70, 0, 0.35);
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
           }
+          .btn-print:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(238, 70, 0, 0.45);
+          }
+          .btn-close {
+            background: #0F172A;
+            color: #FFFFFF;
+            border: none;
+            padding: 14px 24px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: inherit;
+          }
+
           @media print {
-            body { padding: 0; background: #fff; }
-            .invoice-card { border: 2px solid #EE4600; box-shadow: none; padding: 30px; }
-            .no-print { display: none; }
+            body { 
+              padding: 0; 
+              background: #FFFFFF; 
+            }
+            .invoice-sheet { 
+              box-shadow: none; 
+              border: 1px solid #CBD5E1; 
+              border-radius: 0;
+              max-width: 100%;
+            }
+            .no-print { 
+              display: none !important; 
+            }
+            @page {
+              size: A4 portrait;
+              margin: 8mm 10mm;
+            }
           }
         </style>
       </head>
       <body>
-        <div class="invoice-card">
-          <div class="top-header">
-            <div class="logo-container">
-              <div class="logo-badge">P</div>
-              <div>
-                <h1 class="brand-title">PATHFINDER</h1>
-                <p class="brand-sub">Educational Centre</p>
+        <div class="invoice-sheet">
+          <!-- Institutional Header -->
+          <div class="inst-header">
+            <div class="brand-col">
+              <img src="https://pathfinder.edu.in/images/icon/logo-1.svg" alt="Pathfinder Educational Centre" class="logo-img" />
+              <div class="inst-info">
+                <h1>PATHFINDER EDUCATIONAL CENTRE LLP</h1>
+                <p>Premier Coaching for JEE (Main & Adv) | NEET | WBJEE | Foundation | Boards</p>
+                <p>Head Office: 96K, Shyama Prasad Mukherjee Road, Hazra, Kolkata - 700026</p>
+                <div class="contacts">
+                  📞 Student Helpline: 9147178886 &nbsp;|&nbsp; ✉️ support@pathfinder.edu.in &nbsp;|&nbsp; 🌐 pathfinder.edu.in
+                </div>
               </div>
             </div>
-            <div class="invoice-tag">
-              <h2>PAYMENT INVOICE</h2>
-              <p>Receipt #${txnNo}</p>
-            </div>
-          </div>
-          
-          <div class="section-heading">Transaction Overview</div>
-          <div class="grid-table">
-            <div class="info-cell">
-              <span class="label">Transaction ID</span>
-              <span class="value">${txnNo}</span>
-            </div>
-            <div class="info-cell">
-              <span class="label">Payment Status</span>
-              <div><span class="badge-paid">✓ PAID</span></div>
-            </div>
-            <div class="info-cell full-width">
-              <span class="label">Date & Time</span>
-              <span class="value">${new Date().toLocaleString()}</span>
+            <div class="receipt-tag-box">
+              <div class="receipt-badge">FEE RECEIPT & TAX INVOICE</div>
+              <p class="receipt-num">Receipt #${txnNo}</p>
+              <p class="receipt-date">${currentDateStr}</p>
             </div>
           </div>
 
-          <div class="section-heading">Student & Course Details</div>
-          <div class="grid-table">
-            <div class="info-cell">
-              <span class="label">Student Name</span>
-              <span class="value">${customerName}</span>
+          <div class="content-wrap">
+            <!-- 2-Column Student & Academic Meta -->
+            <div class="meta-grid">
+              <!-- Student Particulars -->
+              <div class="meta-card">
+                <div class="meta-card-title">
+                  👤 Student Particulars
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Student Name:</span>
+                  <span class="meta-val">${customerName}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Contact Number:</span>
+                  <span class="meta-val">${customerPhone || 'N/A'}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Email Address:</span>
+                  <span class="meta-val">${customerEmail || 'N/A'}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Student Reg. Ref:</span>
+                  <span class="meta-val">${txnNo}</span>
+                </div>
+              </div>
+
+              <!-- Academic Program & Transaction -->
+              <div class="meta-card">
+                <div class="meta-card-title">
+                  🎓 Academic & Payment Summary
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Academic Program:</span>
+                  <span class="meta-val" style="color:#EE4600;">${courseName}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Academic Session:</span>
+                  <span class="meta-val">2026 - 2027</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Payment Gateway:</span>
+                  <span class="meta-val">ICICI 3D Secure / Online</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Payment Status:</span>
+                  <span class="meta-val"><span class="badge-paid">✓ PAID & VERIFIED</span></span>
+                </div>
+              </div>
             </div>
-            <div class="info-cell">
-              <span class="label">Contact Number</span>
-              <span class="value">${customerPhone || 'N/A'}</span>
+
+            <!-- Itemized Course Fee Table -->
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th style="width: 8%;" class="text-center">Sl.</th>
+                  <th style="width: 52%;">Description of Academic Program / Courseware</th>
+                  <th style="width: 14%;" class="text-center">SAC Code</th>
+                  <th style="width: 8%;" class="text-center">Qty</th>
+                  <th style="width: 18%;" class="text-right">Total Net (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-center">01</td>
+                  <td>
+                    <strong>${courseName}</strong><br>
+                    <span style="font-size: 11px; color: #64748B;">Comprehensive Learning Material, Question Banks & Academic Support Access</span>
+                  </td>
+                  <td class="text-center">999293</td>
+                  <td class="text-center">1</td>
+                  <td class="text-right"><strong>₹${formattedAmount}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Total Amount Card -->
+            <div class="total-wrapper">
+              <div class="total-box">
+                <table class="total-table">
+                  <tr>
+                    <td style="color:#64748B;">Course Fee Subtotal:</td>
+                    <td style="text-align:right; font-weight:700;">₹${formattedAmount}</td>
+                  </tr>
+                  <tr>
+                    <td style="color:#64748B;">Taxes & GST (Inclusive):</td>
+                    <td style="text-align:right; font-weight:700;">₹0.00</td>
+                  </tr>
+                  <tr>
+                    <td class="total-grand">Total Fee Paid:</td>
+                    <td class="total-grand total-grand-amt">₹${formattedAmount}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" class="words-row">
+                      <strong>Amount in Words:</strong> ${amountInWords}
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </div>
-            ${customerEmail ? `
-            <div class="info-cell full-width">
-              <span class="label">Email Address</span>
-              <span class="value">${customerEmail}</span>
-            </div>` : ''}
-            <div class="info-cell full-width">
-              <span class="label">Enrolled Program</span>
-              <span class="value">${courseName}</span>
+
+            <!-- Verification & Digital Seal -->
+            <div class="auth-grid">
+              <div class="seal-wrap">
+                <div class="seal-badge">✓</div>
+                <div class="seal-text">
+                  <strong>PATHFINDER ACCOUNTS & ADMISSIONS CELL</strong>
+                  Digitally Authenticated & Gateway Validated
+                </div>
+              </div>
+              <div class="signatory-box">
+                <div class="signatory-stamp">Authorized Signatory</div>
+                <div class="signatory-sub">Pathfinder Educational Centre LLP (Computer Generated Receipt)</div>
+              </div>
+            </div>
+
+            <!-- Notice & Disclaimers -->
+            <div class="notice-panel">
+              <strong>⚠️ Auto-Generated Notification:</strong>
+              This is an automatically generated official receipt from the Pathfinder portal. <strong>Please do not reply directly to this mail/receipt</strong> as incoming messages are not monitored.
+            </div>
+
+            <div class="helpline-panel">
+              <div>
+                <strong>Need assistance regarding batch allocation or study material collection?</strong><br>
+                Our student counseling & support desk is available to assist you.
+              </div>
+              <div>
+                <a href="tel:9147178886" class="helpline-link">📞 9147178886</a>
+              </div>
             </div>
           </div>
 
-          <div class="total-card">
-            <span class="total-title">Total Amount Paid</span>
-            <span class="total-amount">₹${amount}</span>
-          </div>
-
-          <div class="footer-note">
-            <p><strong>Note for Offline Verification:</strong> Please present this printed receipt or digital copy at your designated Pathfinder Offline Centre to receive physical study materials and student ID.</p>
-            <p>© ${new Date().getFullYear()} Pathfinder Educational Centre. All Rights Reserved. Computer Generated Official Invoice.</p>
+          <!-- Institutional Footer -->
+          <div class="inst-footer">
+            <strong>PATHFINDER EDUCATIONAL CENTRE LLP</strong> — Shaping Medical & Engineering Careers for Over 3 Decades<br>
+            Corporate HQ: 96K, S. P. Mukherjee Road, Hazra, Kolkata - 700026, West Bengal | Helpline: 9147178886 | Email: support@pathfinder.edu.in<br>
+            &copy; ${new Date().getFullYear()} Pathfinder Educational Centre. All Rights Reserved. Computer Generated Official Tax Invoice.
           </div>
         </div>
 
-        <br/>
-        <div style="text-align: center;" class="no-print">
-          <button onclick="window.print()" style="background: linear-gradient(135deg, #EE4600 0%, #ff5500 100%); color: white; border: none; padding: 15px 32px; font-weight: 800; border-radius: 12px; cursor: pointer; font-size: 15px; box-shadow: 0 8px 20px rgba(238,70,0,0.35); font-family: inherit;">
-            🖨️ Print / Download Official Invoice PDF
+        <!-- Print Action Toolbar -->
+        <div class="action-toolbar no-print">
+          <button onclick="window.print()" class="btn-print">
+            🖨️ Print / Save Official Invoice (PDF)
+          </button>
+          <button onclick="window.close()" class="btn-close">
+            Close Window
           </button>
         </div>
       </body>
@@ -334,7 +808,7 @@ const PaymentStatus = () => {
                 <CheckCircle className="w-12 h-12 text-white" />
               </div>
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500 text-white text-xs font-black uppercase tracking-wider mb-3 shadow-md">
-                <ShieldCheck className="w-4 h-4" /> Payment Status: Paid
+                <ShieldCheck className="w-4 h-4" /> Payment Status: Paid & Verified
               </div>
               <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tight">Enrollment Successful!</h1>
               <p className="text-orange-100 font-medium max-w-lg mx-auto text-sm sm:text-base">
@@ -343,12 +817,20 @@ const PaymentStatus = () => {
             </div>
 
             <div className="p-6 md:p-8 space-y-6">
+              {/* Receipt Summary Box */}
               <div className="bg-gradient-to-br from-orange-50/70 to-amber-50/40 p-6 rounded-2xl border-2 border-orange-200/80 space-y-4 shadow-sm">
                 <div className="flex items-center justify-between border-b border-orange-200/60 pb-3">
-                  <h3 className="text-base font-black text-gray-900 flex items-center gap-2">
-                    <Receipt className="w-5 h-5 text-orange-600" />
-                    Student Enrollment & Receipt Summary
-                  </h3>
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src="https://pathfinder.edu.in/images/icon/logo-1.svg" 
+                      alt="Pathfinder" 
+                      className="h-8 max-w-[140px] object-contain bg-white px-2 py-1 rounded-lg border border-orange-200" 
+                    />
+                    <h3 className="text-base font-black text-gray-900 flex items-center gap-1.5">
+                      <Receipt className="w-5 h-5 text-orange-600" />
+                      Official Fee Receipt Summary
+                    </h3>
+                  </div>
                   <span className="px-3 py-1 bg-emerald-600 text-white text-xs font-black rounded-full tracking-wide">
                     PAID
                   </span>
@@ -374,8 +856,37 @@ const PaymentStatus = () => {
                     <span className="text-base font-black text-orange-600">₹{amount}</span>
                   </div>
                 </div>
+
+                {/* Email Delivery Feedback Banner */}
+                {emailFeedback && (
+                  <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 text-emerald-800 text-xs font-semibold">
+                    <span className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                      {emailFeedback}
+                    </span>
+                    <button 
+                      onClick={() => setShowEmailModal(true)}
+                      className="text-emerald-700 underline hover:text-emerald-900 text-[11px] font-bold"
+                    >
+                      Send to Another Email
+                    </button>
+                  </div>
+                )}
+
+                {/* Auto Generated Disclaimer & Contact Info */}
+                <div className="pt-2 border-t border-orange-200/60 text-xs text-gray-500 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                    <span>Auto-generated invoice. Please don't reply to notification emails.</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 font-bold text-orange-600">
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Student Helpline: 9147178886</span>
+                  </div>
+                </div>
               </div>
 
+              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
                 <button
                   onClick={handleDownloadReceipt}
@@ -384,6 +895,16 @@ const PaymentStatus = () => {
                   <Download className="w-5 h-5" />
                   Download Official Invoice PDF
                 </button>
+
+                <button
+                  onClick={() => setShowEmailModal(true)}
+                  disabled={emailStatus === 'sending'}
+                  className="w-full sm:w-auto px-6 py-4 bg-white hover:bg-orange-50 text-orange-600 font-black rounded-2xl border-2 border-orange-200 shadow-sm transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider"
+                >
+                  <Mail className="w-5 h-5" />
+                  {emailStatus === 'sending' ? 'Sending Invoice...' : 'Email Invoice'}
+                </button>
+
                 {(courseName?.toLowerCase().includes('student') || courseName?.toLowerCase().includes('corner') || localStorage.getItem('student_corner_last_order')) && (
                   <button
                     onClick={() => navigate('/students-corner/orders')}
@@ -393,6 +914,7 @@ const PaymentStatus = () => {
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 )}
+
                 <button
                   onClick={() => navigate('/')}
                   className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider"
@@ -401,6 +923,40 @@ const PaymentStatus = () => {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Email Send Modal / Popover */}
+              {showEmailModal && (
+                <div className="p-4 bg-orange-50/70 border-2 border-orange-200 rounded-2xl flex flex-col sm:flex-row items-center gap-3">
+                  <div className="flex-1 w-full">
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Recipient Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={emailTarget}
+                      onChange={(e) => setEmailTarget(e.target.value)}
+                      placeholder="Enter student or parent email"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto sm:self-end">
+                    <button
+                      onClick={() => handleSendManualEmail(emailTarget)}
+                      disabled={emailStatus === 'sending'}
+                      className="flex-1 sm:flex-none px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-1.5 shadow-md"
+                    >
+                      <Send className="w-4 h-4" />
+                      {emailStatus === 'sending' ? 'Sending...' : 'Send Invoice'}
+                    </button>
+                    <button
+                      onClick={() => setShowEmailModal(false)}
+                      className="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (

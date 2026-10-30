@@ -68,6 +68,54 @@ def test_email_api(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
+@csrf_exempt
+def send_invoice_email_api(request):
+    """
+    API endpoint to send or resend an official payment invoice email to a student.
+    Accepts GET or POST with to/email, name, txnNo, amount, course, phone.
+    """
+    from datetime import datetime
+    if request.method == 'POST':
+        try:
+            body = json.loads(request.body.decode('utf-8')) if request.body else {}
+        except Exception:
+            body = {}
+        to_email = body.get('to') or body.get('email') or request.POST.get('to') or request.POST.get('email')
+        name = body.get('name') or body.get('student_name') or request.POST.get('name') or 'Pathfinder Student'
+        txn_no = body.get('txnNo') or body.get('txn_no') or request.POST.get('txnNo') or ''
+        amount = body.get('amount') or request.POST.get('amount') or '0.00'
+        course = body.get('course') or body.get('course_name') or request.POST.get('course') or 'Academic Program'
+        phone = body.get('phone') or body.get('mobile') or request.POST.get('phone') or ''
+    else:
+        to_email = request.GET.get('to') or request.GET.get('email')
+        name = request.GET.get('name') or request.GET.get('student_name') or 'Pathfinder Student'
+        txn_no = request.GET.get('txnNo') or request.GET.get('txn_no') or ''
+        amount = request.GET.get('amount') or '0.00'
+        course = request.GET.get('course') or request.GET.get('course_name') or 'Academic Program'
+        phone = request.GET.get('phone') or request.GET.get('mobile') or ''
+
+    if not to_email:
+        return JsonResponse({'status': 'error', 'message': 'Missing recipient email parameter (email or to)'}, status=400)
+
+    try:
+        from contact_backend.email_service import send_invoice_email_async
+        send_invoice_email_async(
+            recipient_email=to_email,
+            student_name=name,
+            txn_no=txn_no or f"TXN{int(datetime.now().timestamp()*1000)}",
+            amount=amount,
+            course_name=course,
+            phone=phone
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Invoice email queued successfully for {to_email}',
+            'to': to_email,
+            'txnNo': txn_no
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
 def verify_email_config(request):
     import os
     import smtplib
@@ -108,6 +156,8 @@ def verify_email_config(request):
 
 urlpatterns = [
     path('', root, name='root'),
+    path('api/send-invoice-email/', send_invoice_email_api, name='send_invoice_email_api'),
+    path('api/send-invoice-email', send_invoice_email_api),
     path('api/test-email/', test_email_api, name='test_email_api'),
     path('api/test-email', test_email_api),
     path('api/verify-email-config/', verify_email_config, name='verify_email_config'),

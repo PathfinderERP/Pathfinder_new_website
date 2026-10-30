@@ -794,3 +794,9 @@ export const mockTestsAPI = {
   saveQuestion: (id, data) => api.post(`/api/courses/mocktests/${id}/questions-save/`, data),
   getAttempts: () => api.get('/api/courses/mocktests/attempts/')
 };
+
+// Invoice & Email API
+export const invoiceAPI = {
+  sendInvoiceEmail: (data) => api.post('/api/send-invoice-email/', data),
+};
+

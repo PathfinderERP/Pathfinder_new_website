@@ -335,8 +335,8 @@ EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
 EMAIL_TIMEOUT = 30  # Timeout after 30 seconds
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@pathfinder.com')
-OFFICIAL_EMAIL = os.getenv('OFFICIAL_EMAIL', 'hrpathfinder3@gmail.com')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Pathfinder <support@pathfinder.edu.in>')
+OFFICIAL_EMAIL = os.getenv('OFFICIAL_EMAIL', 'support@pathfinder.edu.in')
 
 # Frontend URLs
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')

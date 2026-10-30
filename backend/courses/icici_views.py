@@ -288,6 +288,21 @@ class ICICICallbackView(APIView):
                     logger.info(f"Callback credited 10% referral bonus to partner {addl2}")
                 except Exception as ref_err:
                     logger.error(f"Callback referral processing error: {ref_err}")
+
+            if is_success and email:
+                try:
+                    from contact_backend.email_service import send_invoice_email_async
+                    send_invoice_email_async(
+                        recipient_email=email,
+                        student_name=name,
+                        txn_no=txn_no,
+                        amount=amount,
+                        course_name=addl1 or "Pathfinder Program",
+                        phone=mobile
+                    )
+                    logger.info(f"Triggered invoice email for {email} on callback POST")
+                except Exception as mail_err:
+                    logger.error(f"Failed to trigger invoice email on callback POST: {mail_err}")
             
             host = request.get_host()
             scheme = 'https' if request.is_secure() else 'http'
@@ -366,6 +381,21 @@ class ICICICallbackView(APIView):
                         email = sc_order.email
             except Exception as sc_err:
                 logger.warning(f"StudentCornerOrder GET callback lookup warning: {sc_err}")
+
+        if str(txn_status) in ['0000', '00', 'SUCCESS', '0', 'E000'] and email:
+            try:
+                from contact_backend.email_service import send_invoice_email_async
+                send_invoice_email_async(
+                    recipient_email=email,
+                    student_name=name,
+                    txn_no=txn_no,
+                    amount=amount,
+                    course_name=course or "Pathfinder Program",
+                    phone=mobile
+                )
+                logger.info(f"Triggered invoice email for {email} on callback GET")
+            except Exception as mail_err:
+                logger.error(f"Failed to trigger invoice email on callback GET: {mail_err}")
 
         return redirect(f"https://pathfinder.edu.in/payment-status?txnNo={txn_no}&status={txn_status}&amount={amount}&name={urllib.parse.quote(str(name))}&phone={urllib.parse.quote(str(mobile))}&email={urllib.parse.quote(str(email))}&course={urllib.parse.quote(str(course))}")
 
@@ -456,6 +486,21 @@ class ICICIWebhookView(APIView):
                             logger.info(f"[ICICI WEBHOOK] Updated StudentCornerOrder {sc_order.id} payment_status to completed")
                     except Exception as sc_hook_err:
                         logger.warning(f"[ICICI WEBHOOK] StudentCornerOrder webhook update warning: {sc_hook_err}")
+
+                if email:
+                    try:
+                        from contact_backend.email_service import send_invoice_email_async
+                        send_invoice_email_async(
+                            recipient_email=email,
+                            student_name=customer_name,
+                            txn_no=merchant_txn_no,
+                            amount=amount,
+                            course_name=course_name,
+                            phone=mobile
+                        )
+                        logger.info(f"[ICICI WEBHOOK] Triggered invoice email for {email}")
+                    except Exception as mail_err:
+                        logger.error(f"[ICICI WEBHOOK] Failed to trigger invoice email: {mail_err}")
 
             return Response({"status": "SUCCESS", "message": "Webhook processed successfully"}, status=status.HTTP_200_OK)
 
