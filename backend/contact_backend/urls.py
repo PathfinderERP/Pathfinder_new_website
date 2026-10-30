@@ -109,7 +109,9 @@ def verify_email_config(request):
 urlpatterns = [
     path('', root, name='root'),
     path('api/test-email/', test_email_api, name='test_email_api'),
+    path('api/test-email', test_email_api),
     path('api/verify-email-config/', verify_email_config, name='verify_email_config'),
+    path('api/verify-email-config', verify_email_config),
     path('business/admin/', admin.site.urls),
     path('api/', include('contact_api.urls')),   # Your existing contact API
     path('api/auth/', include('users.urls')),    # Your existing auth
