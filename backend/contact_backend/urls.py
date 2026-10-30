@@ -31,9 +31,46 @@ def root(request):
     })
 
 from courses import icici_views
+from django.core.mail import send_mail
+from django.conf import settings
+import json
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def test_email_api(request):
+    if request.method == 'POST':
+        try:
+            body = json.loads(request.body.decode('utf-8')) if request.body else {}
+        except Exception:
+            body = {}
+        to_email = body.get('to') or request.POST.get('to') or 'support@pathfinder.edu.in'
+        subject = body.get('subject') or request.POST.get('subject') or 'Test Email from Pathfinder API'
+        message = body.get('message') or request.POST.get('message') or 'This is a test notification from the Pathfinder system.'
+    else:
+        to_email = request.GET.get('to', 'support@pathfinder.edu.in')
+        subject = request.GET.get('subject', 'Test Email from Pathfinder API')
+        message = request.GET.get('message', 'This is a test notification from the Pathfinder system.')
+
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[to_email],
+            fail_silently=False
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Email sent successfully',
+            'to': to_email,
+            'from': settings.DEFAULT_FROM_EMAIL
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 urlpatterns = [
     path('', root, name='root'),
+    path('api/test-email/', test_email_api, name='test_email_api'),
     path('business/admin/', admin.site.urls),
     path('api/', include('contact_api.urls')),   # Your existing contact API
     path('api/auth/', include('users.urls')),    # Your existing auth
