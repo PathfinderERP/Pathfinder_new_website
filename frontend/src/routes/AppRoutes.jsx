@@ -1,129 +1,153 @@
+import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout";
 import AdminLayout from "../components/layout/AdminLayout";
-
-// Student Pages
-import Home from "../pages/Home";
-import Buynow from "../pages/Buynow";
-import PaymentStatus from "../pages/PaymentStatus";
-import Applynow from "../pages/Student/Applynow";
-import MockTests from "../pages/Student/MockTests";
-
-import Dashboard from "../pages/DigitalPart/Dashboard";
-import Profile from "../pages/DigitalPart/Profile";
-import PaymentInfo from "../pages/DigitalPart/PaymentInfo";
-import PortalRegistration from "../pages/DigitalPart/PortalRegistration";
-import MyCourses from "../pages/DigitalPart/MyCourses";
-import StudentResults from "../pages/DigitalPart/StudentResults";
-import Notices from "../pages/DigitalPart/Notices";
-import Schedule from "../pages/DigitalPart/Schedule";
-import Chats from "../pages/DigitalPart/Chats";
-import PhysicalAssets from "../pages/DigitalPart/PhysicalAssets";
 import ProtectedRoute from "../components/ProtectedRoute";
-import NotFound from "../pages/Notfound/NotFound";
-import CustomPageRenderer from "../pages/CustomPageRenderer";
-import Foundation from "../pages/Courses/Foundation";
-import AllIndia from "../pages/Courses/AllIndia";
-import Boards from "../pages/Courses/Boards";
-import Alumni from "../pages/Alumni";
-import StudentsCorner from "../pages/StudentsCorner";
-import StudentBag from "../pages/StudentBag";
-import StudentCheckout from "../pages/StudentCheckout";
-import StudentCornerOrders from "../pages/StudentCornerOrders";
-
-// Result Pages
-import FoundationResult from "../pages/Results/Foundation";
-import AllIndiaResult from "../pages/Results/AllIndia";
-import BoardsResult from "../pages/Results/Boards";
-
-// Admin Components
-import AdminLogin from "../components/auth/AdminLogin";
-import AdminForgotPassword from "../components/auth/AdminForgotPassword";
-import AdminResetPassword from "../components/auth/AdminResetPassword";
-import AdminRegisterWithInvite from "../components/auth/AdminRegisterWithInvite";
-import AdminDashboard from "../components/admin/AdminDashboard";
-import CourseList from "../components/admin/CourseList";
-import CourseCreate from "../components/admin/CourseCreate";
-import CourseEdit from "../components/admin/CourseEdit";
-import AdminManagement from "../components/admin/AdminManagement";
-import UsersManagement from "../components/admin/UsersManagement";
-import AdminSettings from "../components/admin/AdminSettings";
-import MockTestsManagement from "../components/admin/MockTestsManagement";
-import CounsellingBookingsList from "../components/admin/CounsellingBookingsList";
 import AdminProtectedRoute from "../components/common/AdminProtectedRoute";
 import SuperAdminProtectedRoute from "../components/common/SuperAdminProtectedRoute";
 
-// Centre Components
-import CentreList from "../components/admin/CentreList";
-import CentreCreate from "../components/admin/CentreCreate";
-import CentreEdit from "../components/admin/CentreEdit";
+// Core Entry Page (synchronous for instantaneous first render)
+import Home from "../pages/Home";
 
-// Job Components - ADD THESE IMPORTS
-import JobManagement from "../components/admin/JobManagement";
-import JobPostForm from "../components/admin/JobPostForm";
-import JobApplicationList from "../components/admin/JobApplicationList";
-import Career from "../pages/Career";
-import JobDetail from "../pages/JobDetail";
-import JobApplication from "../pages/JobApplication";
-import CentreDetailPage from "../pages/Centres/CentreDetail";
-import ApplicantsList from "../components/admin/ApplicantsList";
-import AlumniManagement from "../components/admin/AlumniManagement";
-import StudentCornerManagement from "../components/admin/StudentCornerManagement";
-import BlogManagement from "../components/admin/BlogManagement";
-import AnnouncementManagement from "../components/admin/AnnouncementManagement";
-import WBJEEAnalysisManagement from "../components/admin/WBJEEAnalysisManagement.jsx";
-import NEETAnalysisManagement from "../components/admin/NEETAnalysisManagement.jsx";
-import JEEAnalysisManagement from "../components/admin/JEEAnalysisManagement.jsx";
-import CustomPagesManagement from "../components/admin/CustomPagesManagement.jsx";
-import AdsLeadsList from "../components/admin/AdsLeadsList";
-import ShikshaHubManagement from "../components/admin/ShikshaHubManagement.jsx";
-import ShikshaProductsManagement from "../components/admin/ShikshaProductsManagement.jsx";
-import FranchiseInquiryList from "../components/admin/FranchiseInquiryList";
-import PopupManagement from "../components/admin/PopupManagement";
-import Centres from "../pages/Centres/Centres";
-import ContactUs from "../pages/ContactUs";
-import Blog from "../pages/Blog";
-import BlogPostDetail from "../pages/BlogPostDetail";
-import WBJEEAnswerKey from "../pages/WBJEEAnswerKey";
-import NEETAnswerKey from "../pages/NEETAnswerKey";
-import JEEAnswerKey from "../pages/JEEAnswerKey";
-import AboutUs from "../pages/About/AboutUs";
-import CEOMessage from "../pages/About/CEOMessage";
-import ChairmanMessage from "../pages/About/ChairmanMessage";
-import Franchise from "../pages/Franchise";
-import { Jeelandingpage } from "../pages/add_landingpage/pages/Jeelandingpage";
-import { Neetlandingpage } from "../pages/add_landingpage/pages/Neetlandingpage";
-import { Clatlandingpage } from "../pages/add_landingpage/pages/Clatlandingpage";
-import { Paislandingpage } from "../pages/add_landingpage/pages/Paislandingpage";
-import { MockTestLandingPage } from "../pages/add_landingpage/pages/MockTestLandingPage";
-import { FoundationLandingPage } from "../pages/add_landingpage/pages/FoundationLandingPage";
-import { PmoLandingPage } from "../pages/add_landingpage/pages/PmoLandingPage";
-import { PmtseLandingPage } from "../pages/add_landingpage/pages/PmtseLandingPage";
-import Pais from "../pages/Pais";
-import TermsAndConditions from "../pages/TermsAndConditions";
-import PrivacyPolicy from "../pages/PrivacyPolicy";
-import CancellationPolicy from "../pages/CancellationPolicy";
-import RefundPolicy from "../pages/RefundPolicy";
-import { ICICIPaymentDemo } from "../pages/ICICIPaymentDemo";
+// Helper for dynamic imports with named exports fallback
+const lazyNamed = (importFn, exportName) =>
+  lazy(() =>
+    importFn().then((mod) => ({
+      default: mod[exportName] || mod.default,
+    }))
+  );
 
-// PAIS Portal Pages
-import { PaisLogin } from "../pages/pais/PaisLogin";
-import { PaisDashboard } from "../pages/pais/PaisDashboard";
-import { PaisExamEngine } from "../pages/pais/PaisExamEngine";
-import { PaisAdminManagement } from "../components/admin/PaisAdminManagement";
+// Student Pages (Lazy Loaded)
+const Buynow = lazy(() => import("../pages/Buynow"));
+const PaymentStatus = lazy(() => import("../pages/PaymentStatus"));
+const Applynow = lazy(() => import("../pages/Student/Applynow"));
+const MockTests = lazy(() => import("../pages/Student/MockTests"));
 
-// Shiksha Bandhu Pages
-import { ShikshaBandhuLogin } from "../pages/shiksha_bandhu/ShikshaBandhuLogin";
-import { ShikshaBandhuDashboard } from "../pages/shiksha_bandhu/ShikshaBandhuDashboard";
-import { ShikshaBandhuMockTests } from "../pages/shiksha_bandhu/ShikshaBandhuMockTests";
-import { ShikshaBandhuReferrals } from "../pages/shiksha_bandhu/ShikshaBandhuReferrals";
-import { ShikshaBandhuEarnings } from "../pages/shiksha_bandhu/ShikshaBandhuEarnings";
-import { ShikshaBandhuProfile } from "../pages/shiksha_bandhu/ShikshaBandhuProfile";
-import { PublicReferralLanding } from "../pages/shiksha_bandhu/PublicReferralLanding";
+const Dashboard = lazy(() => import("../pages/DigitalPart/Dashboard"));
+const Profile = lazy(() => import("../pages/DigitalPart/Profile"));
+const PaymentInfo = lazy(() => import("../pages/DigitalPart/PaymentInfo"));
+const PortalRegistration = lazy(() => import("../pages/DigitalPart/PortalRegistration"));
+const MyCourses = lazy(() => import("../pages/DigitalPart/MyCourses"));
+const StudentResults = lazy(() => import("../pages/DigitalPart/StudentResults"));
+const Notices = lazy(() => import("../pages/DigitalPart/Notices"));
+const Schedule = lazy(() => import("../pages/DigitalPart/Schedule"));
+const Chats = lazy(() => import("../pages/DigitalPart/Chats"));
+const PhysicalAssets = lazy(() => import("../pages/DigitalPart/PhysicalAssets"));
+const NotFound = lazy(() => import("../pages/Notfound/NotFound"));
+const CustomPageRenderer = lazy(() => import("../pages/CustomPageRenderer"));
+const Foundation = lazy(() => import("../pages/Courses/Foundation"));
+const AllIndia = lazy(() => import("../pages/Courses/AllIndia"));
+const Boards = lazy(() => import("../pages/Courses/Boards"));
+const Alumni = lazy(() => import("../pages/Alumni"));
+const StudentsCorner = lazy(() => import("../pages/StudentsCorner"));
+const StudentBag = lazy(() => import("../pages/StudentBag"));
+const StudentCheckout = lazy(() => import("../pages/StudentCheckout"));
+const StudentCornerOrders = lazy(() => import("../pages/StudentCornerOrders"));
+
+// Result Pages (Lazy Loaded)
+const FoundationResult = lazy(() => import("../pages/Results/Foundation"));
+const AllIndiaResult = lazy(() => import("../pages/Results/AllIndia"));
+const BoardsResult = lazy(() => import("../pages/Results/Boards"));
+
+// Admin Components (Lazy Loaded)
+const AdminLogin = lazy(() => import("../components/auth/AdminLogin"));
+const AdminForgotPassword = lazy(() => import("../components/auth/AdminForgotPassword"));
+const AdminResetPassword = lazy(() => import("../components/auth/AdminResetPassword"));
+const AdminRegisterWithInvite = lazy(() => import("../components/auth/AdminRegisterWithInvite"));
+const AdminDashboard = lazy(() => import("../components/admin/AdminDashboard"));
+const CourseList = lazy(() => import("../components/admin/CourseList"));
+const CourseCreate = lazy(() => import("../components/admin/CourseCreate"));
+const CourseEdit = lazy(() => import("../components/admin/CourseEdit"));
+const AdminManagement = lazy(() => import("../components/admin/AdminManagement"));
+const UsersManagement = lazy(() => import("../components/admin/UsersManagement"));
+const AdminSettings = lazy(() => import("../components/admin/AdminSettings"));
+const MockTestsManagement = lazy(() => import("../components/admin/MockTestsManagement"));
+const CounsellingBookingsList = lazy(() => import("../components/admin/CounsellingBookingsList"));
+
+// Centre Components (Lazy Loaded)
+const CentreList = lazy(() => import("../components/admin/CentreList"));
+const CentreCreate = lazy(() => import("../components/admin/CentreCreate"));
+const CentreEdit = lazy(() => import("../components/admin/CentreEdit"));
+
+// Job & Management Components (Lazy Loaded)
+const JobManagement = lazy(() => import("../components/admin/JobManagement"));
+const JobPostForm = lazy(() => import("../components/admin/JobPostForm"));
+const JobApplicationList = lazy(() => import("../components/admin/JobApplicationList"));
+const Career = lazy(() => import("../pages/Career"));
+const JobDetail = lazy(() => import("../pages/JobDetail"));
+const JobApplication = lazy(() => import("../pages/JobApplication"));
+const CentreDetailPage = lazy(() => import("../pages/Centres/CentreDetail"));
+const ApplicantsList = lazy(() => import("../components/admin/ApplicantsList"));
+const AlumniManagement = lazy(() => import("../components/admin/AlumniManagement"));
+const StudentCornerManagement = lazy(() => import("../components/admin/StudentCornerManagement"));
+const BlogManagement = lazy(() => import("../components/admin/BlogManagement"));
+const AnnouncementManagement = lazy(() => import("../components/admin/AnnouncementManagement"));
+const WBJEEAnalysisManagement = lazy(() => import("../components/admin/WBJEEAnalysisManagement.jsx"));
+const NEETAnalysisManagement = lazy(() => import("../components/admin/NEETAnalysisManagement.jsx"));
+const JEEAnalysisManagement = lazy(() => import("../components/admin/JEEAnalysisManagement.jsx"));
+const CustomPagesManagement = lazy(() => import("../components/admin/CustomPagesManagement.jsx"));
+const AdsLeadsList = lazy(() => import("../components/admin/AdsLeadsList"));
+const ShikshaHubManagement = lazy(() => import("../components/admin/ShikshaHubManagement.jsx"));
+const ShikshaProductsManagement = lazy(() => import("../components/admin/ShikshaProductsManagement.jsx"));
+const FranchiseInquiryList = lazy(() => import("../components/admin/FranchiseInquiryList"));
+const PopupManagement = lazy(() => import("../components/admin/PopupManagement"));
+const Centres = lazy(() => import("../pages/Centres/Centres"));
+const ContactUs = lazy(() => import("../pages/ContactUs"));
+const Blog = lazy(() => import("../pages/Blog"));
+const BlogPostDetail = lazy(() => import("../pages/BlogPostDetail"));
+const WBJEEAnswerKey = lazy(() => import("../pages/WBJEEAnswerKey"));
+const NEETAnswerKey = lazy(() => import("../pages/NEETAnswerKey"));
+const JEEAnswerKey = lazy(() => import("../pages/JEEAnswerKey"));
+const AboutUs = lazy(() => import("../pages/About/AboutUs"));
+const CEOMessage = lazy(() => import("../pages/About/CEOMessage"));
+const ChairmanMessage = lazy(() => import("../pages/About/ChairmanMessage"));
+const Franchise = lazy(() => import("../pages/Franchise"));
+
+// Landing Pages (Named Exports)
+const Jeelandingpage = lazyNamed(() => import("../pages/add_landingpage/pages/Jeelandingpage"), "Jeelandingpage");
+const Neetlandingpage = lazyNamed(() => import("../pages/add_landingpage/pages/Neetlandingpage"), "Neetlandingpage");
+const Clatlandingpage = lazyNamed(() => import("../pages/add_landingpage/pages/Clatlandingpage"), "Clatlandingpage");
+const Paislandingpage = lazyNamed(() => import("../pages/add_landingpage/pages/Paislandingpage"), "Paislandingpage");
+const MockTestLandingPage = lazyNamed(() => import("../pages/add_landingpage/pages/MockTestLandingPage"), "MockTestLandingPage");
+const FoundationLandingPage = lazyNamed(() => import("../pages/add_landingpage/pages/FoundationLandingPage"), "FoundationLandingPage");
+const PmoLandingPage = lazyNamed(() => import("../pages/add_landingpage/pages/PmoLandingPage"), "PmoLandingPage");
+const PmtseLandingPage = lazyNamed(() => import("../pages/add_landingpage/pages/PmtseLandingPage"), "PmtseLandingPage");
+
+// Policy Pages & Demo
+const Pais = lazy(() => import("../pages/Pais"));
+const TermsAndConditions = lazy(() => import("../pages/TermsAndConditions"));
+const PrivacyPolicy = lazy(() => import("../pages/PrivacyPolicy"));
+const CancellationPolicy = lazy(() => import("../pages/CancellationPolicy"));
+const RefundPolicy = lazy(() => import("../pages/RefundPolicy"));
+const ICICIPaymentDemo = lazyNamed(() => import("../pages/ICICIPaymentDemo"), "ICICIPaymentDemo");
+
+// PAIS Portal Pages (Named Exports)
+const PaisLogin = lazyNamed(() => import("../pages/pais/PaisLogin"), "PaisLogin");
+const PaisDashboard = lazyNamed(() => import("../pages/pais/PaisDashboard"), "PaisDashboard");
+const PaisExamEngine = lazyNamed(() => import("../pages/pais/PaisExamEngine"), "PaisExamEngine");
+const PaisAdminManagement = lazyNamed(() => import("../components/admin/PaisAdminManagement"), "PaisAdminManagement");
+
+// Shiksha Bandhu Pages (Named Exports)
+const ShikshaBandhuLogin = lazyNamed(() => import("../pages/shiksha_bandhu/ShikshaBandhuLogin"), "ShikshaBandhuLogin");
+const ShikshaBandhuDashboard = lazyNamed(() => import("../pages/shiksha_bandhu/ShikshaBandhuDashboard"), "ShikshaBandhuDashboard");
+const ShikshaBandhuMockTests = lazyNamed(() => import("../pages/shiksha_bandhu/ShikshaBandhuMockTests"), "ShikshaBandhuMockTests");
+const ShikshaBandhuReferrals = lazyNamed(() => import("../pages/shiksha_bandhu/ShikshaBandhuReferrals"), "ShikshaBandhuReferrals");
+const ShikshaBandhuEarnings = lazyNamed(() => import("../pages/shiksha_bandhu/ShikshaBandhuEarnings"), "ShikshaBandhuEarnings");
+const ShikshaBandhuProfile = lazyNamed(() => import("../pages/shiksha_bandhu/ShikshaBandhuProfile"), "ShikshaBandhuProfile");
+const PublicReferralLanding = lazyNamed(() => import("../pages/shiksha_bandhu/PublicReferralLanding"), "PublicReferralLanding");
+
+// Subtle loading spinner for async route transitions
+const PageLoadingFallback = () => (
+  <div className="min-h-[50vh] flex flex-col items-center justify-center p-8">
+    <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+    <span className="mt-3 text-xs font-semibold tracking-wider text-gray-400 uppercase">Loading...</span>
+  </div>
+);
 
 const AppRoutes = () => {
   return (
-    <Routes>
+    <Suspense fallback={<PageLoadingFallback />}>
+      <Routes>
       {/* Public Student Routes with Main Layout */}
       <Route
         path="/"
@@ -1032,6 +1056,7 @@ const AppRoutes = () => {
         }
       />
     </Routes>
+    </Suspense>
   );
 };
 
