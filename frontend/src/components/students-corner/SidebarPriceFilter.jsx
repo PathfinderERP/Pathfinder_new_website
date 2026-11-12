@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const SidebarPriceFilter = ({ priceFilter, onPriceChange }) => {
-    const [minPrice, setMinPrice] = useState(priceFilter?.min || '');
-    const [maxPrice, setMaxPrice] = useState(priceFilter?.max || '');
+const SidebarPriceFilter = ({ priceFilter, onPriceChange, freeDelivery, onDeliveryChange }) => {
+    const [minPrice, setMinPrice] = useState(priceFilter?.min ?? '');
+    const [maxPrice, setMaxPrice] = useState(priceFilter?.max === Infinity ? '' : (priceFilter?.max ?? ''));
+
+    useEffect(() => {
+        setMinPrice(priceFilter?.min ?? '');
+        setMaxPrice(priceFilter?.max === Infinity ? '' : (priceFilter?.max ?? ''));
+    }, [priceFilter]);
 
     const applyPriceFilter = () => {
-        onPriceChange({ min: minPrice, max: maxPrice });
+        const min = minPrice !== '' && !isNaN(Number(minPrice)) ? parseFloat(minPrice) : 0;
+        const max = maxPrice !== '' && !isNaN(Number(maxPrice)) ? parseFloat(maxPrice) : Infinity;
+        onPriceChange({ min, max });
     };
 
     const handleReset = () => {
@@ -18,7 +25,7 @@ const SidebarPriceFilter = ({ priceFilter, onPriceChange }) => {
         { label: 'Under ₹200', min: 0, max: 200 },
         { label: '₹200 - ₹500', min: 200, max: 500 },
         { label: '₹500 - ₹1000', min: 500, max: 1000 },
-        { label: '₹1000+', min: 1000, max: '' },
+        { label: '₹1000+', min: 1000, max: Infinity },
     ];
 
     const hasActiveFilter = Boolean(priceFilter && (priceFilter.min !== undefined || priceFilter.max !== undefined));
@@ -41,7 +48,11 @@ const SidebarPriceFilter = ({ priceFilter, onPriceChange }) => {
 
             <div className="space-y-2 mb-3">
                 {defaultPriceRanges.map((range) => {
-                    const isSelected = priceFilter?.min === range.min && priceFilter?.max === range.max;
+                    const isSelected = Boolean(
+                        priceFilter &&
+                        Number(priceFilter.min || 0) === range.min &&
+                        (Number(priceFilter.max) === range.max || (range.max === Infinity && (priceFilter.max === Infinity || priceFilter.max === '' || priceFilter.max === undefined)))
+                    );
                     return (
                         <button
                             key={range.label}
@@ -49,8 +60,8 @@ const SidebarPriceFilter = ({ priceFilter, onPriceChange }) => {
                                 if (isSelected) {
                                     handleReset();
                                 } else {
-                                    setMinPrice(range.min);
-                                    setMaxPrice(range.max);
+                                    setMinPrice(range.min === 0 ? '' : range.min);
+                                    setMaxPrice(range.max === Infinity ? '' : range.max);
                                     onPriceChange({ min: range.min, max: range.max });
                                 }
                             }}
@@ -96,6 +107,38 @@ const SidebarPriceFilter = ({ priceFilter, onPriceChange }) => {
             >
                 Apply Range
             </button>
+
+            {/* SC-01: Visual Free Delivery Sliding Toggle Switch */}
+            {onDeliveryChange && (
+                <div className="pt-3 mt-3 border-t border-slate-200/70">
+                    <button
+                        type="button"
+                        onClick={() => onDeliveryChange(!freeDelivery)}
+                        className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-white border border-slate-200/80 hover:border-slate-300 transition-all group"
+                    >
+                        <div className="flex items-center gap-2">
+                            <span className="text-base">🚚</span>
+                            <div className="text-left">
+                                <span className="text-xs font-black text-slate-800 block leading-none">Free Delivery</span>
+                                <span className="text-[9px] font-bold text-slate-400">Zero shipping fees</span>
+                            </div>
+                        </div>
+
+                        {/* Interactive sliding switch */}
+                        <div
+                            className={`w-11 h-6 flex items-center rounded-full p-0.5 transition-colors duration-300 ease-in-out cursor-pointer ${
+                                freeDelivery ? 'bg-emerald-500' : 'bg-slate-200'
+                            }`}
+                        >
+                            <div
+                                className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
+                                    freeDelivery ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                            />
+                        </div>
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

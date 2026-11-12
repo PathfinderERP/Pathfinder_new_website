@@ -55,6 +55,20 @@ export default function StudentsCorner() {
     const stationeryItems = useMemo(() => allItems.filter(item => item.category === 'Stationery'), [allItems]);
     const merchandiseItems = useMemo(() => allItems.filter(item => item.category === 'Merchandise'), [allItems]);
 
+    const hasActiveFilters = Boolean(
+        priceFilter !== null ||
+        freeDelivery ||
+        selectedBoard ||
+        selectedClass
+    );
+
+    const handleResetAllFilters = useCallback(() => {
+        setPriceFilter(null);
+        setFreeDelivery(false);
+        setSelectedBoard('');
+        setSelectedClass('');
+    }, []);
+
     const filteredItems = useMemo(() => {
         let result = allItems;
         if (searchQuery.trim()) {
@@ -63,25 +77,71 @@ export default function StudentsCorner() {
                 item.name?.toLowerCase().includes(q) ||
                 item.category?.toLowerCase().includes(q) ||
                 item.board?.toLowerCase().includes(q) ||
-                item.description?.toLowerCase().includes(q)
+                item.description?.toLowerCase().includes(q) ||
+                item.course_type?.toLowerCase().includes(q) ||
+                (Array.isArray(item.tags) && item.tags.some(t => String(t).toLowerCase().includes(q)))
             );
         }
         if (activeCategory !== 'All') {
             result = result.filter(item => item.category === activeCategory);
         }
         if (freeDelivery) {
-            result = result.filter(item => item.free_delivery);
+            result = result.filter(item => Boolean(item.free_delivery === true || item.free_delivery === 'true'));
         }
         if (priceFilter) {
-            const min = priceFilter.min || 0;
-            const max = priceFilter.max || Infinity;
-            result = result.filter(item => item.price >= min && item.price <= max);
+            const min = priceFilter.min !== undefined && priceFilter.min !== '' && !isNaN(priceFilter.min)
+                ? parseFloat(priceFilter.min)
+                : 0;
+            const max = priceFilter.max !== undefined && priceFilter.max !== '' && !isNaN(priceFilter.max)
+                ? parseFloat(priceFilter.max)
+                : Infinity;
+
+            result = result.filter(item => {
+                const discPrice = parseFloat(item.discounted_price);
+                const regPrice = parseFloat(item.price);
+                const effectivePrice = (!isNaN(discPrice) && discPrice > 0 && discPrice < regPrice)
+                    ? discPrice
+                    : (!isNaN(regPrice) ? regPrice : 0);
+                return effectivePrice >= min && effectivePrice <= max;
+            });
         }
         if (selectedBoard) {
-            result = result.filter(item => item.board === selectedBoard);
+            const target = selectedBoard.trim().toLowerCase();
+            result = result.filter(item => {
+                const b = String(item.board || '').trim().toLowerCase();
+                if (!b) return false;
+                if (b === target) return true;
+                if (target.includes('cbse')) return b.includes('cbse');
+                if (target.includes('icse')) return b.includes('icse') || b.includes('isc');
+                if (target.includes('wb') || target.includes('state')) {
+                    return b.includes('wb') || b.includes('state') || b.includes('bengal') || b.includes('wbbse') || b.includes('wbchse');
+                }
+                return b.includes(target);
+            });
         }
         if (selectedClass) {
-            result = result.filter(item => String(item.class_level) === String(selectedClass));
+            const target = String(selectedClass).trim().toLowerCase();
+            result = result.filter(item => {
+                // If target exam (NEET, JEE, WBJEE)
+                if (['neet', 'jee', 'wbjee'].includes(target)) {
+                    const inCourse = item.course_type && item.course_type.toLowerCase().includes(target);
+                    const inName = item.name && item.name.toLowerCase().includes(target);
+                    const inCategory = item.category && item.category.toLowerCase().includes(target);
+                    const inTags = Array.isArray(item.tags) && item.tags.some(t => String(t).toLowerCase().includes(target));
+                    const inClass = item.class_level && item.class_level.toLowerCase().includes(target);
+                    return Boolean(inCourse || inName || inCategory || inTags || inClass);
+                }
+
+                // If class level (e.g. 8, 9, 10, 11, 12)
+                const c = String(item.class_level || '').trim().toLowerCase();
+                if (c === target || c === `class ${target}` || c === `${target}th`) return true;
+                if (c.replace(/\D/g, '') === target) return true;
+
+                // Also check item name for "Class 10", "Class-10", etc.
+                const nameLower = (item.name || '').toLowerCase();
+                const classRegex = new RegExp(`\\b(class|cl)\\s*-?\\s*${target}\\b`, 'i');
+                return classRegex.test(nameLower) || classRegex.test(c);
+            });
         }
         return result;
     }, [allItems, searchQuery, activeCategory, freeDelivery, priceFilter, selectedBoard, selectedClass]);
@@ -250,8 +310,8 @@ export default function StudentsCorner() {
 
                         {/* Main Content Area */}
                         <div className="flex-1 w-full min-w-0 pb-20">
-                            {/* Hero Banner (Shown when not searching and on All category) */}
-                            {!isSearching && activeCategory === 'All' && (
+                            {/* Hero Banner (Shown when not searching, no active filters, and on All category) */}
+                            {!isSearching && activeCategory === 'All' && !hasActiveFilters && (
                                 <div className="mb-10 rounded-3xl overflow-hidden shadow-lg border border-slate-200/80 bg-slate-100">
                                     <img
                                         src={getImageUrl("/images/student corner/student coner hero image.webp")}
@@ -314,7 +374,7 @@ export default function StudentsCorner() {
                                         </motion.div>
                                     )}
                                 </div>
-                            ) : activeCategory === 'All' ? (
+                            ) : (activeCategory === 'All' && !hasActiveFilters) ? (
                                 <HomeTab
                                     popularItems={popularItems}
                                     studyMaterialsItems={studyMaterialsItems}
@@ -331,22 +391,87 @@ export default function StudentsCorner() {
                                 />
                             ) : (
                                 <>
-                                    <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-200">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200">
                                         <div>
-                                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-                                                {activeCategory}
-                                            </h2>
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                                                    {activeCategory === 'All' ? 'Filtered Books' : activeCategory}
+                                                </h2>
+                                                {hasActiveFilters && (
+                                                    <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-[#FF7D54] text-xs font-black uppercase">
+                                                        Filtered
+                                                    </span>
+                                                )}
+                                            </div>
                                             <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">
                                                 Showing {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}
                                             </p>
                                         </div>
-                                        <button
-                                            onClick={() => handleCategoryChange('All')}
-                                            className="text-xs font-bold text-[#FF7D54] hover:underline"
-                                        >
-                                            ← Back to All
-                                        </button>
+
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            {activeCategory !== 'All' && (
+                                                <button
+                                                    onClick={() => handleCategoryChange('All')}
+                                                    className="text-xs font-bold text-slate-600 hover:text-[#FF7D54] px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:border-orange-300 transition-all"
+                                                >
+                                                    ← Back to All
+                                                </button>
+                                            )}
+                                            {hasActiveFilters && (
+                                                <button
+                                                    onClick={handleResetAllFilters}
+                                                    className="text-xs font-bold text-[#FF7D54] hover:bg-orange-50 px-3 py-1.5 rounded-xl border border-orange-200 transition-all"
+                                                >
+                                                    Clear All Filters
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
+
+                                    {/* Active Filter Badges */}
+                                    {hasActiveFilters && (
+                                        <div className="flex items-center gap-2 flex-wrap mb-6">
+                                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Active:</span>
+                                            {freeDelivery && (
+                                                <button
+                                                    onClick={() => setFreeDelivery(false)}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                                                >
+                                                    <span>🚚 Free Delivery</span>
+                                                    <span className="text-emerald-500 font-black">×</span>
+                                                </button>
+                                            )}
+                                            {priceFilter && (
+                                                <button
+                                                    onClick={() => setPriceFilter(null)}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 transition-colors"
+                                                >
+                                                    <span>
+                                                        ₹{priceFilter.min || 0} - {priceFilter.max === Infinity || !priceFilter.max ? 'Above' : `₹${priceFilter.max}`}
+                                                    </span>
+                                                    <span className="text-orange-500 font-black">×</span>
+                                                </button>
+                                            )}
+                                            {selectedBoard && (
+                                                <button
+                                                    onClick={() => setSelectedBoard('')}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
+                                                >
+                                                    <span>Board: {selectedBoard}</span>
+                                                    <span className="text-blue-500 font-black">×</span>
+                                                </button>
+                                            )}
+                                            {selectedClass && (
+                                                <button
+                                                    onClick={() => setSelectedClass('')}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors"
+                                                >
+                                                    <span>{['NEET', 'JEE', 'WBJEE'].includes(selectedClass) ? selectedClass : `Class ${selectedClass}`}</span>
+                                                    <span className="text-purple-500 font-black">×</span>
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
 
                                     <div className="min-h-[500px]">
                                         {globalLoading ? (
@@ -369,17 +494,16 @@ export default function StudentsCorner() {
                                                         <MagnifyingGlassIcon className="h-12 w-12 text-slate-300 mb-4" />
                                                         <h3 className="text-xl font-black text-slate-800 mb-2">No items found</h3>
                                                         <p className="text-slate-400 text-sm max-w-sm mb-6">
-                                                            Try adjusting your price range or academic filters.
+                                                            Try adjusting your price range, delivery, or academic filters.
                                                         </p>
                                                         <button
                                                             onClick={() => {
-                                                                setPriceFilter(null);
-                                                                setSelectedBoard('');
-                                                                setSelectedClass('');
+                                                                handleResetAllFilters();
+                                                                if (activeCategory !== 'All') handleCategoryChange('All');
                                                             }}
                                                             className="bg-[#FF7D54] text-white px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#FF6B3D] transition-colors"
                                                         >
-                                                            Reset Filters
+                                                            Reset All Filters
                                                         </button>
                                                     </div>
                                                 )}
