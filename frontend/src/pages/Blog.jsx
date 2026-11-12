@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Slider from "react-slick";
 import {
@@ -9,12 +9,13 @@ import {
     ArrowsUpDownIcon,
     ArrowUpRightIcon,
     PlusIcon,
-    MinusIcon
+    MinusIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
+import { PlayIcon } from '@heroicons/react/24/solid';
 import { blogAPI } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useCachedData } from '../hooks/useCachedData';
-import { useCallback } from 'react';
 
 const Blog = () => {
     const { data: posts, loading: postsLoading } = useCachedData("blog_posts", () => blogAPI.getAll(), {
@@ -62,8 +63,26 @@ const Blog = () => {
             filtered = filtered.filter(post => post.category === selectedCategory);
         }
 
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase().trim();
+            filtered = filtered.filter(post => {
+                const title = (post.title || "").toLowerCase();
+                const summary = (post.summary || post.excerpt || "").toLowerCase();
+                const content = (post.content || "").toLowerCase();
+                const category = (post.category || "").toLowerCase();
+                const author = (post.author || "").toLowerCase();
+                const tags = Array.isArray(post.tags) ? post.tags.map(t => String(t).toLowerCase()) : [];
+                return title.includes(query) ||
+                    summary.includes(query) ||
+                    content.includes(query) ||
+                    category.includes(query) ||
+                    author.includes(query) ||
+                    tags.some(t => t.includes(query));
+            });
+        }
+
         return filtered.slice(0, 30);
-    }, [posts, selectedCategory]);
+    }, [posts, selectedCategory, searchQuery]);
 
     // Auto-playing Carousel Logic
     useEffect(() => {
@@ -225,21 +244,41 @@ const Blog = () => {
                 </div>
 
                 {/* Search Bar - Repositioned slightly for better flow */}
-                <div className="max-w-xl mx-auto flex gap-2 md:gap-4 mt-8 md:mt-12 px-4">
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        const feedEl = document.getElementById('blog-feed-section');
+                        if (feedEl) feedEl.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="max-w-xl mx-auto flex gap-2 md:gap-4 mt-8 md:mt-12 px-4"
+                >
                     <div className="flex-grow relative group">
                         <MagnifyingGlassIcon className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
                         <input
                             type="text"
-                            placeholder="Find specific topics..."
+                            placeholder="Find specific topics, exams, or strategies..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 md:pl-14 md:pr-6 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all font-medium text-sm md:text-lg shadow-sm"
+                            className="w-full pl-10 pr-10 py-3 md:pl-14 md:pr-12 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all font-medium text-sm md:text-lg shadow-sm"
                         />
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                onClick={() => setSearchQuery("")}
+                                className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-200 transition-colors cursor-pointer"
+                                title="Clear search"
+                            >
+                                <XMarkIcon className="w-5 h-5" />
+                            </button>
+                        )}
                     </div>
-                    <button className="px-6 md:px-10 py-3 md:py-4 bg-[#FF7A45] text-white font-black rounded-xl md:rounded-2xl hover:bg-orange-600 transition-all shadow-lg active:scale-95 text-sm md:text-xl whitespace-nowrap">
+                    <button
+                        type="submit"
+                        className="px-6 md:px-10 py-3 md:py-4 bg-[#FF7A45] text-white font-black rounded-xl md:rounded-2xl hover:bg-orange-600 transition-all shadow-lg active:scale-95 text-sm md:text-xl whitespace-nowrap cursor-pointer"
+                    >
                         Search
                     </button>
-                </div>
+                </form>
             </section >
 
             {/* Main Content Body */}
@@ -302,11 +341,27 @@ const Blog = () => {
                 </div >
 
                 {/* Trending Feed */}
-                < div className="lg:col-span-5" >
-                    <div className="flex items-center gap-8 mb-12">
-                        <h3 className="text-3xl font-black text-black text-center w-full lg:text-left">Trending Topics</h3>
+                <div className="lg:col-span-5" id="blog-feed-section">
+                    <div className="flex items-center gap-8 mb-6">
+                        <h3 className="text-3xl font-black text-black text-center w-full lg:text-left">
+                            {searchQuery.trim() ? "Search Results" : "Trending Topics"}
+                        </h3>
                         <div className="h-[2px] bg-slate-100 flex-grow hidden lg:block" />
                     </div>
+
+                    {searchQuery.trim() && (
+                        <div className="flex items-center justify-between gap-4 mb-6 px-1">
+                            <span className="text-sm font-semibold text-slate-600">
+                                Results for <span className="text-orange-600 font-black">"{searchQuery}"</span> ({latestPosts.length} {latestPosts.length === 1 ? 'article' : 'articles'})
+                            </span>
+                            <button
+                                onClick={() => setSearchQuery("")}
+                                className="text-xs font-bold text-red-500 hover:text-red-700 hover:underline cursor-pointer"
+                            >
+                                Clear search
+                            </button>
+                        </div>
+                    )}
 
                     <div className="relative h-[800px]"> {/* Fixed container height */}
                         <div className="h-full overflow-y-auto pr-2 pb-20 space-y-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-orange-200">
@@ -335,10 +390,10 @@ const Blog = () => {
                                             <div className="flex items-center gap-3 mb-2">
                                                 <span className="w-2 h-2 rounded-full bg-slate-300 group-hover:bg-orange-500 transition-colors" />
                                                 <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                                    {new Date(post.published_date).toLocaleDateString('en-US', {
+                                                    {post.published_date ? new Date(post.published_date).toLocaleDateString('en-US', {
                                                         month: 'short',
                                                         day: 'numeric'
-                                                    })}
+                                                    }) : 'Recent'}
                                                 </div>
                                             </div>
                                             <h4 className="text-lg font-bold text-black leading-snug group-hover:text-orange-600 transition-colors line-clamp-2">
@@ -348,14 +403,23 @@ const Blog = () => {
                                     </Link>
                                 </motion.div>
                             )) : (
-                                <div className="py-20 text-center text-slate-400 font-medium border-2 border-dashed border-slate-100 rounded-3xl">No trending topics found.</div>
+                                <div className="py-16 text-center text-slate-500 font-medium border-2 border-dashed border-slate-200 rounded-3xl p-6">
+                                    <p className="text-base font-bold text-slate-800 mb-1">No articles found</p>
+                                    <p className="text-xs text-slate-500 mb-4">No content matches "{searchQuery}". Try searching for another topic or reset filters.</p>
+                                    <button
+                                        onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}
+                                        className="px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition-colors cursor-pointer"
+                                    >
+                                        Reset Filters
+                                    </button>
+                                </div>
                             )}
                         </div>
 
                         {/* Elegant Bottom Fade for Scroll Indication */}
                         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none" />
                     </div>
-                </div >
+                </div>
             </main >
 
             {/* Free Content Section */}
@@ -370,29 +434,40 @@ const Blog = () => {
 export default Blog;
 
 function FreeContentSection() {
+    const navigate = useNavigate();
+    const [activeVideo, setActiveVideo] = useState(null);
+
     const freeContents = [
         {
-            title: "Basic Chemistry 01: How to complete syllabus in 3 hours...",
-            description: "Learn the secrets of mastering chemistry fundamentals quickly with our expert faculty.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
+            id: "vid-1",
+            youtubeId: "dl-QLpDplLE",
+            title: "Topper's Talk: Strategic Preparation for JEE & NEET",
+            description: "Learn high-scoring strategies, daily study schedules, and problem-solving methods directly from Pathfinder top rankers.",
+            thumbnail: "https://img.youtube.com/vi/dl-QLpDplLE/hqdefault.jpg",
             published_date: "2025-11-10"
         },
         {
-            title: "Hybridization: For students targeting JEE & NEET 2026....",
-            description: "Deep dive into chemical bonding and molecular geometry for competitive exams.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
+            id: "vid-2",
+            youtubeId: "wGnX7j4EULA",
+            title: "Success Story: How to Clear Backlogs & Master Tough Concepts",
+            description: "Deep dive into chemical bonding, organic mechanisms, and solving complex physics numericals with expert guidance.",
+            thumbnail: "https://img.youtube.com/vi/wGnX7j4EULA/hqdefault.jpg",
             published_date: "2025-10-10"
         },
         {
-            title: "Newton's Laws of Motion: Concept Clarity & problem solving",
-            description: "Master the foundation of mechanics with this comprehensive guide to NLM.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
+            id: "vid-3",
+            youtubeId: "KOFomNzzluc",
+            title: "Newton's Laws of Motion: Concept Clarity & Problem Solving",
+            description: "Master the foundation of mechanics with this comprehensive conceptual guide and shortcut techniques.",
+            thumbnail: "https://img.youtube.com/vi/KOFomNzzluc/hqdefault.jpg",
             published_date: "2025-11-10"
         },
         {
-            title: "Math Shortcut Tricks for JEE Main 2026",
-            description: "Save time and improve accuracy with these elite mathematical shortcuts.",
-            thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/maxresdefault.webp",
+            id: "vid-4",
+            youtubeId: "Zd_H0PmG6fo",
+            title: "Math & Physics Shortcut Tricks for JEE & NEET Aspirants",
+            description: "Save time and improve accuracy with elite mathematical shortcuts and smart elimination methods.",
+            thumbnail: "https://img.youtube.com/vi/Zd_H0PmG6fo/hqdefault.jpg",
             published_date: "2025-12-05"
         }
     ];
@@ -412,6 +487,15 @@ function FreeContentSection() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    // Close video modal on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') setActiveVideo(null);
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     const settings = {
         centerMode: freeSlidesToShow > 1,
         dots: true,
@@ -419,9 +503,9 @@ function FreeContentSection() {
         speed: 500,
         slidesToShow: freeSlidesToShow,
         slidesToScroll: 1,
-        autoplay: true,
+        autoplay: !activeVideo,
         autoplaySpeed: 3000,
-        focusOnSelect: true,
+        focusOnSelect: false,
         arrows: freeSlidesToShow > 1,
         centerPadding: "0px",
     };
@@ -443,30 +527,31 @@ function FreeContentSection() {
                         {freeContents.map((content, idx) => (
                             <div key={idx} className="px-1 md:px-6 py-4">
                                 <div
-                                    className="bg-black rounded-2xl overflow-hidden h-full flex flex-col shadow-lg border border-slate-800"
+                                    onClick={() => setActiveVideo(content)}
+                                    className="bg-black rounded-2xl overflow-hidden h-full flex flex-col shadow-lg border border-slate-800 cursor-pointer group transition-all duration-300 hover:scale-[1.02] hover:border-orange-500/50"
                                 >
                                     {/* Thumbnail */}
                                     <div className="relative aspect-video w-full bg-slate-900 flex items-center justify-center overflow-hidden">
                                         <img
                                             src={content.thumbnail}
                                             alt={content.title}
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                             loading="lazy"
                                         />
                                         {/* Play Overlay */}
-                                        <div className="absolute inset-0 bg-transparent flex items-center justify-center">
-                                            <div className="w-16 h-16 bg-white/30 rounded-full flex items-center justify-center text-white border border-white/50 shadow-lg">
-                                                <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
-                                                    <path d="M8 5v14l11-7z" />
-                                                </svg>
+                                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                            <div className="w-16 h-16 bg-orange-600/90 text-white shadow-xl shadow-orange-600/40 rounded-full flex items-center justify-center border-2 border-white/80 group-hover:scale-110 transition-transform duration-300">
+                                                <PlayIcon className="w-8 h-8 ml-0.5 fill-current" />
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Content */}
                                     <div className="p-8 flex flex-col flex-grow">
-                                        <div className="text-xs text-orange-400 mb-4 font-black uppercase tracking-widest">
-                                            {new Date(content.published_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                        <div className="text-xs text-orange-400 mb-4 font-black uppercase tracking-widest flex items-center gap-2">
+                                            <span>{new Date(content.published_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                                            <span>•</span>
+                                            <span className="text-emerald-400 font-bold">Watch Video</span>
                                         </div>
                                         <h3 className="text-white font-black text-xl leading-tight mb-4 group-hover:text-orange-500 transition-colors line-clamp-2">
                                             {content.title}
@@ -482,16 +567,78 @@ function FreeContentSection() {
                 </div>
 
                 {/* View All Button */}
-                <div className="mt-12 flex justify-center w-full">
+                <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-4">
                     <motion.button
+                        onClick={() => navigate('/courses/all-india')}
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
-                        className="w-full max-w-4xl py-4 bg-gradient-to-r from-orange-400 to-red-500 text-white font-bold text-sm uppercase tracking-wider rounded-xl shadow-lg transition-all duration-300"
+                        className="w-full max-w-xl py-4 bg-gradient-to-r from-orange-400 to-red-500 text-white font-bold text-sm uppercase tracking-wider rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
                     >
-                        View All
+                        <span>View All Online Programs & Free Content</span>
+                        <ArrowUpRightIcon className="w-5 h-5" />
                     </motion.button>
+                    <a
+                        href="https://www.youtube.com/@PathfinderInstitute"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-black text-white font-bold text-sm uppercase tracking-wider rounded-xl border border-slate-700 shadow-md transition-all duration-300 flex items-center justify-center gap-2"
+                    >
+                        <span>Watch on YouTube</span>
+                        <ArrowUpRightIcon className="w-4 h-4" />
+                    </a>
                 </div>
             </div>
+
+            {/* Video Modal Player */}
+            <AnimatePresence>
+                {activeVideo && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setActiveVideo(null)}
+                        className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.92, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.92, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden max-w-4xl w-full shadow-2xl relative"
+                        >
+                            <div className="flex items-center justify-between p-4 sm:p-5 bg-slate-800/90 border-b border-slate-700">
+                                <h3 className="text-white font-black text-sm sm:text-base line-clamp-1">{activeVideo.title}</h3>
+                                <button
+                                    onClick={() => setActiveVideo(null)}
+                                    className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-700/60 transition-colors cursor-pointer"
+                                >
+                                    <XMarkIcon className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <div className="relative aspect-video w-full bg-black">
+                                <iframe
+                                    src={`https://www.youtube-nocookie.com/embed/${activeVideo.youtubeId}?autoplay=1&rel=0`}
+                                    title={activeVideo.title}
+                                    className="w-full h-full border-0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            </div>
+                            <div className="p-5 bg-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">{activeVideo.description}</p>
+                                <a
+                                    href={`https://www.youtube.com/watch?v=${activeVideo.youtubeId}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-orange-400 hover:text-orange-300 text-xs font-bold whitespace-nowrap flex items-center gap-1"
+                                >
+                                    Open in YouTube →
+                                </a>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </section>
     );
 }
