@@ -140,6 +140,7 @@ const StudentSidebar = () => {
                                         onClick={() => {
                                             logout();
                                             setIsMenuOpen(false);
+                                            navigate('/');
                                         }}
                                         className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition"
                                     >
@@ -199,7 +200,10 @@ const StudentSidebar = () => {
                 {/* Bottom Logout */}
                 <div className="mt-8 pt-4 border-t border-slate-100">
                     <button
-                        onClick={logout}
+                        onClick={() => {
+                            logout();
+                            navigate('/');
+                        }}
                         className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 text-xs font-bold transition-all uppercase tracking-wider"
                     >
                         <ArrowRightOnRectangleIcon className="h-4 w-4" />

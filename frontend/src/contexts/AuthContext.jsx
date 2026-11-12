@@ -186,6 +186,13 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (response.ok) {
+        // Clear any old guest/prior cache before writing new user credentials
+        try {
+          localStorage.removeItem("pathfinder_my_courses");
+          localStorage.removeItem("pathfinder_purchases");
+          localStorage.removeItem("pathfinder_sc_orders");
+        } catch (e) {}
+
         setUser(data.user);
         setToken(data.token);
         setUserType("student");
@@ -225,21 +232,25 @@ export const AuthProvider = ({ children }) => {
     setUserType(null);
     setRedirectAfterRegister(null);
 
-    // Clear all storage
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userData");
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_user");
-    localStorage.removeItem("userType");
+    // Clear all storage on logout
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      console.warn("Storage clear error on logout:", e);
+    }
   };
 
   const adminLogout = () => {
     setAdmin(null);
     setToken(null);
     setUserType(null);
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_user");
-    localStorage.removeItem("userType");
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      console.warn("Storage clear error on admin logout:", e);
+    }
     window.location.href = "/business/admin/login";
   };
 

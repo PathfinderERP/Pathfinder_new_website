@@ -58,7 +58,7 @@ const PATHFINDER_CENTRES = [
 export const PublicReferralLanding = () => {
   const { referralId = "SB004", programSlug } = useParams();
   const navigate = useNavigate();
-  const { setAuthenticatedUser } = useAuth();
+  const { user, setAuthenticatedUser } = useAuth();
 
   const [availablePrograms, setAvailablePrograms] = useState(PROGRAMS);
 
@@ -293,11 +293,11 @@ export const PublicReferralLanding = () => {
         }
       };
 
-      const existingCourses = JSON.parse(localStorage.getItem("pathfinder_my_courses") || "[]");
+      const userCourseKey = user?.id ? `pathfinder_my_courses_${user.id}` : 'pathfinder_pending_purchase';
+      const existingCourses = JSON.parse(localStorage.getItem(userCourseKey) || "[]");
       if (!existingCourses.some(c => c.payment_info?.payment_id === merchantTxnNo)) {
         existingCourses.unshift(purchaseIntent);
-        localStorage.setItem("pathfinder_my_courses", JSON.stringify(existingCourses));
-        localStorage.setItem("pathfinder_purchases", JSON.stringify(existingCourses));
+        localStorage.setItem(userCourseKey, JSON.stringify(existingCourses));
       }
 
       // 5. Initiate ICICI Payment Gateway

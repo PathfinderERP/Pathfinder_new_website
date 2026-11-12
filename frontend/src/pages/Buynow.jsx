@@ -395,11 +395,11 @@ const Buynow = () => {
             date: new Date().toISOString()
           }
         };
-        const localCourses = JSON.parse(localStorage.getItem('pathfinder_my_courses') || '[]');
+        const userCourseKey = user?.id ? `pathfinder_my_courses_${user.id}` : 'pathfinder_pending_purchase';
+        const localCourses = JSON.parse(localStorage.getItem(userCourseKey) || '[]');
         if (!localCourses.some(c => c.payment_info?.payment_id === merchantTxnNo)) {
           localCourses.unshift(purchaseRecord);
-          localStorage.setItem('pathfinder_my_courses', JSON.stringify(localCourses));
-          localStorage.setItem('pathfinder_purchases', JSON.stringify(localCourses));
+          localStorage.setItem(userCourseKey, JSON.stringify(localCourses));
         }
       } catch (e) {
         console.warn("Local storage purchase save warning:", e);

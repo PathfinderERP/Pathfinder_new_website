@@ -49,11 +49,18 @@ const MyCourses = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
+                // Purge legacy unscoped global keys so fresh or switched accounts never see ghost batches
+                try {
+                    localStorage.removeItem('pathfinder_my_courses');
+                    localStorage.removeItem('pathfinder_purchases');
+                } catch (e) {}
+
                 const response = await coursesAPI.getMyCourses();
                 let fetchedCourses = response.data || [];
 
-                // Check local storage for any recently completed purchases
-                const localCoursesRaw = localStorage.getItem('pathfinder_my_courses') || localStorage.getItem('pathfinder_purchases');
+                // Check user-scoped local storage for any recently completed purchases
+                const userCourseKey = user?.id ? `pathfinder_my_courses_${user.id}` : null;
+                const localCoursesRaw = userCourseKey ? localStorage.getItem(userCourseKey) : null;
                 const localCourses = localCoursesRaw ? JSON.parse(localCoursesRaw) : [];
 
                 const combined = [...fetchedCourses];
@@ -63,7 +70,7 @@ const MyCourses = () => {
                     }
                 });
 
-                // If query status is SUCCESS, persist enrollment in local storage
+                // If query status is SUCCESS, persist enrollment in user-scoped local storage
                 const queryParams = new URLSearchParams(location.search);
                 const txnNo = queryParams.get("txnNo") || queryParams.get("merchantTxnNo") || queryParams.get("txnID");
                 const status = queryParams.get("status") || queryParams.get("responseCode");
@@ -83,12 +90,13 @@ const MyCourses = () => {
                     };
                     combined.unshift(newEnrolledCourse);
                     
-                    // Persist to local storage for Dashboard and PaymentInfo pages
-                    const existingLocal = JSON.parse(localStorage.getItem('pathfinder_my_courses') || '[]');
-                    if (!existingLocal.some(c => c.payment_info?.payment_id === txnNo || c.id === newEnrolledCourse.id)) {
-                        existingLocal.unshift(newEnrolledCourse);
-                        localStorage.setItem('pathfinder_my_courses', JSON.stringify(existingLocal));
-                        localStorage.setItem('pathfinder_purchases', JSON.stringify(existingLocal));
+                    // Persist to user-scoped local storage for Dashboard and PaymentInfo pages
+                    if (userCourseKey) {
+                        const existingLocal = JSON.parse(localStorage.getItem(userCourseKey) || '[]');
+                        if (!existingLocal.some(c => c.payment_info?.payment_id === txnNo || c.id === newEnrolledCourse.id)) {
+                            existingLocal.unshift(newEnrolledCourse);
+                            localStorage.setItem(userCourseKey, JSON.stringify(existingLocal));
+                        }
                     }
                 }
 
@@ -102,7 +110,7 @@ const MyCourses = () => {
         };
 
         fetchCourses();
-    }, [location.search]);
+    }, [location.search, user]);
 
     const handlePrintInvoice = () => {
         window.print();

@@ -40,6 +40,12 @@ const Dashboard = () => {
 
     const fetchData = async () => {
       try {
+        // Purge legacy unscoped global keys so fresh or switched accounts never see ghost batches
+        try {
+          localStorage.removeItem('pathfinder_my_courses');
+          localStorage.removeItem('pathfinder_purchases');
+        } catch (e) {}
+
         const [coursesRes, ordersRes, itemsRes] = await Promise.all([
           coursesAPI.getMyCourses(),
           studentCornerAPI.getMyOrders(),
@@ -47,7 +53,8 @@ const Dashboard = () => {
         ]);
         
         let fetchedCourses = coursesRes.data || [];
-        const localCoursesRaw = localStorage.getItem('pathfinder_my_courses') || localStorage.getItem('pathfinder_purchases');
+        const userCourseKey = user?.id ? `pathfinder_my_courses_${user.id}` : null;
+        const localCoursesRaw = userCourseKey ? localStorage.getItem(userCourseKey) : null;
         const localCourses = localCoursesRaw ? JSON.parse(localCoursesRaw) : [];
         const combinedCourses = [...fetchedCourses];
         localCourses.forEach(lc => {
@@ -56,7 +63,7 @@ const Dashboard = () => {
           }
         });
 
-        // Check for payment redirect params and persist
+        // Check for payment redirect params and persist to user-scoped storage
         const queryParams = new URLSearchParams(window.location.search);
         const txnNo = queryParams.get("txnNo") || queryParams.get("merchantTxnNo") || queryParams.get("txnID");
         const status = queryParams.get("status") || queryParams.get("responseCode");
@@ -75,18 +82,20 @@ const Dashboard = () => {
             }
           };
           combinedCourses.unshift(newCourse);
-          const existingLocal = JSON.parse(localStorage.getItem('pathfinder_my_courses') || '[]');
-          if (!existingLocal.some(c => c.payment_info?.payment_id === txnNo || c.id === newCourse.id)) {
-            existingLocal.unshift(newCourse);
-            localStorage.setItem('pathfinder_my_courses', JSON.stringify(existingLocal));
-            localStorage.setItem('pathfinder_purchases', JSON.stringify(existingLocal));
+          if (userCourseKey) {
+            const existingLocal = JSON.parse(localStorage.getItem(userCourseKey) || '[]');
+            if (!existingLocal.some(c => c.payment_info?.payment_id === txnNo || c.id === newCourse.id)) {
+              existingLocal.unshift(newCourse);
+              localStorage.setItem(userCourseKey, JSON.stringify(existingLocal));
+            }
           }
         }
 
         setMyCourses(combinedCourses);
 
         let fetchedOrders = ordersRes.data || [];
-        const localOrdersRaw = localStorage.getItem('pathfinder_sc_orders');
+        const userOrderKey = user?.id ? `pathfinder_sc_orders_${user.id}` : null;
+        const localOrdersRaw = userOrderKey ? localStorage.getItem(userOrderKey) : null;
         const localOrders = localOrdersRaw ? JSON.parse(localOrdersRaw) : [];
         const combinedOrders = [...fetchedOrders];
         localOrders.forEach(lo => {

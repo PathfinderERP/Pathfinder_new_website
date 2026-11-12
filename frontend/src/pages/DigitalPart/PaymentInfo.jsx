@@ -2,22 +2,31 @@ import React, { useEffect, useState } from "react";
 import StudentSidebar from "../../components/DigitalPart/StudentSidebar";
 import { CreditCardIcon } from "@heroicons/react/24/outline";
 import { coursesAPI, studentCornerAPI } from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
 
 const PaymentInfo = () => {
+    const { user } = useAuth();
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchPayments = async () => {
             try {
+                // Purge legacy unscoped keys so old sessions don't leak into new users
+                try {
+                    localStorage.removeItem('pathfinder_my_courses');
+                    localStorage.removeItem('pathfinder_purchases');
+                } catch (e) {}
+
                 const [courseRes, scRes] = await Promise.all([
                     coursesAPI.getMyCourses(),
                     studentCornerAPI.getMyOrders()
                 ]);
 
-                // 1. Process Course Payments from API & localStorage
+                // 1. Process Course Payments from API & user-scoped localStorage
                 let rawCourses = courseRes.data || [];
-                const localCoursesRaw = localStorage.getItem('pathfinder_my_courses') || localStorage.getItem('pathfinder_purchases');
+                const userCourseKey = user?.id ? `pathfinder_my_courses_${user.id}` : null;
+                const localCoursesRaw = userCourseKey ? localStorage.getItem(userCourseKey) : null;
                 const localCourses = localCoursesRaw ? JSON.parse(localCoursesRaw) : [];
                 
                 localCourses.forEach(lc => {
@@ -62,7 +71,7 @@ const PaymentInfo = () => {
         };
 
         fetchPayments();
-    }, []);
+    }, [user]);
 
     const formatDate = (dateString) => {
         if (!dateString) return "N/A";
