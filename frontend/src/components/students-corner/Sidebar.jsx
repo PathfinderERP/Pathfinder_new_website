@@ -65,8 +65,6 @@ const Sidebar = ({
                             <SidebarPriceFilter
                                 priceFilter={priceFilter}
                                 onPriceChange={onPriceChange}
-                                freeDelivery={freeDelivery}
-                                onDeliveryChange={onDeliveryChange}
                             />
                             <SidebarAcademicFilters
                                 activeCategory={activeCategory}
@@ -97,12 +95,10 @@ const Sidebar = ({
                             onToggle={onToggle}
                         />
 
-                        {/* 2. Price & Delivery Filters */}
+                        {/* 2. Price Filters */}
                         <SidebarPriceFilter
                             priceFilter={priceFilter}
                             onPriceChange={onPriceChange}
-                            freeDelivery={freeDelivery}
-                            onDeliveryChange={onDeliveryChange}
                         />
 
                         {/* 3. Academic Filters (Board & Class) */}

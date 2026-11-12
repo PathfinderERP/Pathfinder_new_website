@@ -107,38 +107,6 @@ const SidebarPriceFilter = ({ priceFilter, onPriceChange, freeDelivery, onDelive
             >
                 Apply Range
             </button>
-
-            {/* SC-01: Visual Free Delivery Sliding Toggle Switch */}
-            {onDeliveryChange && (
-                <div className="pt-3 mt-3 border-t border-slate-200/70">
-                    <button
-                        type="button"
-                        onClick={() => onDeliveryChange(!freeDelivery)}
-                        className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-white border border-slate-200/80 hover:border-slate-300 transition-all group"
-                    >
-                        <div className="flex items-center gap-2">
-                            <span className="text-base">🚚</span>
-                            <div className="text-left">
-                                <span className="text-xs font-black text-slate-800 block leading-none">Free Delivery</span>
-                                <span className="text-[9px] font-bold text-slate-400">Zero shipping fees</span>
-                            </div>
-                        </div>
-
-                        {/* Interactive sliding switch */}
-                        <div
-                            className={`w-11 h-6 flex items-center rounded-full p-0.5 transition-colors duration-300 ease-in-out cursor-pointer ${
-                                freeDelivery ? 'bg-emerald-500' : 'bg-slate-200'
-                            }`}
-                        >
-                            <div
-                                className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
-                                    freeDelivery ? 'translate-x-5' : 'translate-x-0'
-                                }`}
-                            />
-                        </div>
-                    </button>
-                </div>
-            )}
         </div>
     );
 };

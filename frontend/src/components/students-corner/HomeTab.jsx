@@ -121,8 +121,8 @@ const HomeTab = ({
             <div className="mb-14 px-6">
                 <div className="rounded-3xl overflow-hidden shadow-xl shadow-orange-100/50">
                     <img
-                        src={getImageUrl("/images/student corner/student corner home page  2nd banner.webp")}
-                        alt="Pathfinder Promotion"
+                        src={getImageUrl("/images/student corner/pathfinder-key-to-success-books.webp")}
+                        alt="Pathfinder Key to Success Books"
                         className="w-full h-auto block"
                     />
                 </div>

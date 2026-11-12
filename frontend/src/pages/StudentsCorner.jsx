@@ -25,7 +25,6 @@ export default function StudentsCorner() {
 
     const [activeCategory, setActiveCategory] = useState('All');
     const [priceFilter, setPriceFilter] = useState(null);
-    const [freeDelivery, setFreeDelivery] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedBoard, setSelectedBoard] = useState('');
     const [selectedClass, setSelectedClass] = useState('');
@@ -57,14 +56,12 @@ export default function StudentsCorner() {
 
     const hasActiveFilters = Boolean(
         priceFilter !== null ||
-        freeDelivery ||
         selectedBoard ||
         selectedClass
     );
 
     const handleResetAllFilters = useCallback(() => {
         setPriceFilter(null);
-        setFreeDelivery(false);
         setSelectedBoard('');
         setSelectedClass('');
     }, []);
@@ -84,9 +81,6 @@ export default function StudentsCorner() {
         }
         if (activeCategory !== 'All') {
             result = result.filter(item => item.category === activeCategory);
-        }
-        if (freeDelivery) {
-            result = result.filter(item => Boolean(item.free_delivery === true || item.free_delivery === 'true'));
         }
         if (priceFilter) {
             const min = priceFilter.min !== undefined && priceFilter.min !== '' && !isNaN(priceFilter.min)
@@ -144,7 +138,7 @@ export default function StudentsCorner() {
             });
         }
         return result;
-    }, [allItems, searchQuery, activeCategory, freeDelivery, priceFilter, selectedBoard, selectedClass]);
+    }, [allItems, searchQuery, activeCategory, priceFilter, selectedBoard, selectedClass]);
 
     const handleCategoryChange = useCallback((cat) => {
         setActiveCategory(cat);
@@ -193,7 +187,7 @@ export default function StudentsCorner() {
                         {[...Array(8)].map((_, i) => (
                             <span key={i} className="mx-8 whitespace-nowrap">
                                 <span className="bg-white/20 px-2 py-0.5 rounded-full mr-2">NEW</span>
-                                <span>GET UP TO 20% DISCOUNT ON ALL ACADEMIC BOOKS & STUDY MATERIALS | FREE EXPRESS DELIVERY ON ALL ORDERS</span>
+                                <span>GET UP TO 20% DISCOUNT ON ALL ACADEMIC BOOKS & STUDY MATERIALS | EXCLUSIVE EDITIONS AVAILABLE</span>
                             </span>
                         ))}
                     </div>
@@ -298,8 +292,6 @@ export default function StudentsCorner() {
                             onCategoryChange={handleCategoryChange}
                             priceFilter={priceFilter}
                             onPriceChange={setPriceFilter}
-                            freeDelivery={freeDelivery}
-                            onDeliveryChange={setFreeDelivery}
                             isOpen={isSidebarOpen}
                             onToggle={handleSidebarToggle}
                             selectedBoard={selectedBoard}
@@ -432,15 +424,6 @@ export default function StudentsCorner() {
                                     {hasActiveFilters && (
                                         <div className="flex items-center gap-2 flex-wrap mb-6">
                                             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Active:</span>
-                                            {freeDelivery && (
-                                                <button
-                                                    onClick={() => setFreeDelivery(false)}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
-                                                >
-                                                    <span>🚚 Free Delivery</span>
-                                                    <span className="text-emerald-500 font-black">×</span>
-                                                </button>
-                                            )}
                                             {priceFilter && (
                                                 <button
                                                     onClick={() => setPriceFilter(null)}
