@@ -9,6 +9,7 @@ import {
     EnvelopeIcon
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
+import { getDirectMapLink } from "../../utils/mapUtils";
 
 const CentreCard = ({ centre, onExplore, isSelected = false, onSelectMap }) => {
     const navigate = useNavigate();
@@ -22,42 +23,7 @@ const CentreCard = ({ centre, onExplore, isSelected = false, onSelectMap }) => {
         }
     };
 
-    const getMapLink = (locationVal, mapUrlVal) => {
-        let val = locationVal || mapUrlVal || "";
-        if (!val) return "";
-        
-        // Extract src from iframe if present
-        if (val.includes("<iframe") || val.includes("iframe")) {
-            const match = val.match(/src="([^"]+)"/);
-            if (match && match[1]) {
-                val = match[1];
-            }
-        }
-
-        // If it is a Google Maps embed URL, convert it to a standard clickable link
-        if (val.includes("/maps/embed") || val.includes("google.com/maps/embed")) {
-            // 1. Try to extract lat/lng from pb parameter protobuf: !2d[lng]!3d[lat]
-            const latMatch = val.match(/!3d(-?\d+\.\d+)/);
-            const lngMatch = val.match(/!2d(-?\d+\.\d+)/);
-            if (latMatch && lngMatch) {
-                return `https://www.google.com/maps?q=${latMatch[1]},${lngMatch[1]}`;
-            }
-
-            // 2. Try to extract standard query parameter q
-            try {
-                const urlObj = new URL(val);
-                const q = urlObj.searchParams.get("q");
-                if (q) {
-                    return `https://www.google.com/maps?q=${encodeURIComponent(q)}`;
-                }
-            } catch (e) {
-                // Ignore parse errors and keep moving
-            }
-        }
-
-        return val;
-    };
-    const mapLink = getMapLink(centre.location, centre.map_url);
+    const mapLink = getDirectMapLink(centre);
 
     return (
         <div className={`group relative bg-white rounded-3xl border p-4 transition-all duration-500 overflow-hidden ${

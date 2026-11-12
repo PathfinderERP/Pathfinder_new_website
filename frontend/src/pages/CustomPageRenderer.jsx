@@ -14,6 +14,7 @@ import "slick-carousel/slick/slick-theme.css";
 import ContactFormCard from "../components/common/ContactFormCard";
 import CourseDetailModal from "../components/CourseDetailModal";
 import { getImageUrl } from "../utils/imageUtils";
+import { getDirectMapLink } from "../utils/mapUtils";
 
 // Simple mapping for dynamic icons used in Legacy & Features sections
 const IconComponent = ({ name, className = "w-6 h-6" }) => {
@@ -646,44 +647,7 @@ export default function CustomPageRenderer({ slug: propSlug }) {
             else scrollToContact();
           };
 
-          // Robust map link extractor helper (handles direct links and converts embed iframe URLs to clickable search links)
-          const getMapLink = (locationVal, mapUrlVal) => {
-            let val = locationVal || mapUrlVal || "";
-            if (!val) return "";
-            
-            // Extract src from iframe if present
-            if (val.includes("<iframe") || val.includes("iframe")) {
-              const match = val.match(/src="([^"]+)"/);
-              if (match && match[1]) {
-                val = match[1];
-              }
-            }
-
-            // If it is a Google Maps embed URL, convert it to a standard clickable link
-            if (val.includes("/maps/embed") || val.includes("google.com/maps/embed")) {
-              // 1. Try to extract lat/lng from pb parameter protobuf: !2d[lng]!3d[lat]
-              const latMatch = val.match(/!3d(-?\d+\.\d+)/);
-              const lngMatch = val.match(/!2d(-?\d+\.\d+)/);
-              if (latMatch && lngMatch) {
-                return `https://www.google.com/maps?q=${latMatch[1]},${lngMatch[1]}`;
-              }
-
-              // 2. Try to extract standard query parameter q
-              try {
-                const urlObj = new URL(val);
-                const q = urlObj.searchParams.get("q");
-                if (q) {
-                  return `https://www.google.com/maps?q=${encodeURIComponent(q)}`;
-                }
-              } catch (e) {
-                // Ignore parse errors and keep moving
-              }
-            }
-
-            return val;
-          };
-          
-          const mapLink = getMapLink(center.location, center.map_url);
+          const mapLink = getDirectMapLink(center);
 
           return (
             <div key={index} className="group relative bg-white rounded-3xl border border-slate-100 p-5 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 hover:-translate-y-2 overflow-hidden flex flex-col justify-between min-h-[340px] w-full">

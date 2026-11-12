@@ -11,6 +11,7 @@ import {
 import { AnimatePresence } from "framer-motion";
 import { centresAPI } from "../services/api";
 import { centerdata } from "../data/data";
+import { getDirectMapLink } from "../utils/mapUtils";
 import ReCAPTCHA from "react-google-recaptcha";
 
 // Helper function to normalize strings for comparison
@@ -346,8 +347,7 @@ const ContactUs = () => {
 
                 // If location fails, fallback to opening current centre's map as a friendly gesture
                 if (displayedCentre) {
-                    const url = displayedCentre.map_url || displayedCentre.google_map_url || displayedCentre.mapEmbed || displayedCentre.map || displayedCentre.location;
-                    if (url) window.open(url, '_blank');
+                    window.open(getDirectMapLink(displayedCentre), '_blank');
                 } else {
                     let msg = "Unable to retrieve your location.";
                     if (error.code === 1) msg = "Location permission denied.";
@@ -370,8 +370,8 @@ const ContactUs = () => {
         if (coords && userLoc) {
             const googleMapsDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLoc.lat},${userLoc.lng}&destination=${coords.lat},${coords.lng}&travelmode=driving`;
             window.open(googleMapsDirUrl, '_blank');
-        } else if (targetUrl) {
-            window.open(targetUrl, '_blank');
+        } else {
+            window.open(getDirectMapLink(displayedCentre), '_blank');
         }
     };
 
