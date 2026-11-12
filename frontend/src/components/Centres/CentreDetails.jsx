@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { getImageUrl } from "../../utils/imageUtils";
+import { getMapEmbedUrl, getDirectMapLink } from "../../utils/mapUtils";
 
 const CentreDetails = ({ centre }) => {
     const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=400&auto=format&fit=crop";
@@ -243,34 +244,26 @@ const CentreDetails = ({ centre }) => {
                         {/* Map Integration */}
                         <div className="bg-white rounded-[40px] p-4 shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
                             <div className="aspect-[4/5] rounded-[30px] overflow-hidden bg-slate-100">
-                                {centre.location ? (
-                                    <iframe
-                                        src={centre.location.includes('iframe') ? centre.location.match(/src="([^"]+)"/)?.[1] : centre.location}
-                                        width="100%"
-                                        height="100%"
-                                        style={{ border: 0 }}
-                                        allowFullScreen
-                                        loading="lazy"
-                                        title="Centre Location"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold p-12 text-center">
-                                        Map visualizer currently being updated.
-                                    </div>
-                                )}
+                                <iframe
+                                    src={getMapEmbedUrl(centre)}
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen
+                                    loading="lazy"
+                                    title={centre?.centre ? `Map: ${centre.centre}` : "Centre Location"}
+                                />
                             </div>
-                            {mapLink && (
-                                <div className="p-4 text-center">
-                                    <a
-                                        href={mapLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs font-black text-orange-600 uppercase tracking-widest flex items-center justify-center gap-2"
-                                    >
-                                        Open in Google Maps <MapIcon className="w-4 h-4" />
-                                    </a>
-                                </div>
-                            )}
+                            <div className="p-4 text-center">
+                                <a
+                                    href={getDirectMapLink(centre)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs font-black text-orange-600 hover:text-orange-700 uppercase tracking-widest flex items-center justify-center gap-2 transition-colors"
+                                >
+                                    Open in Google Maps <MapIcon className="w-4 h-4" />
+                                </a>
+                            </div>
                         </div>
                     </div>
 

@@ -11,6 +11,7 @@ import { centresAPI } from "../../services/api";
 import CentreCard from "./CentreCard";
 import { useCachedData } from "../../hooks/useCachedData";
 import { useCallback } from "react";
+import { getMapEmbedUrl, getDirectMapLink } from "../../utils/mapUtils";
 
 const CentreShowcase = () => {
     const { data: centres, loading, error } = useCachedData("centres", () => centresAPI.getAll(), {
@@ -137,21 +138,48 @@ const CentreShowcase = () => {
                 <div className="flex flex-col lg:flex-row gap-6 items-start relative">
                     {/* Centes Grid / List */}
                     <div className="w-full lg:w-[65%] order-2 lg:order-1">
+                        <div className="flex items-center justify-between mb-4 px-1">
+                            <p className="text-sm font-bold text-slate-500">
+                                Hover or click any centre card to view on map:
+                            </p>
+                            <span className="text-xs font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-200">
+                                {filteredCentres.length} Centres Found
+                            </span>
+                        </div>
                         <div className="grid sm:grid-cols-2 gap-6 relative">
                             <AnimatePresence mode="popLayout">
-                                {filteredCentres.map((centre, idx) => (
-                                    <motion.div
-                                        key={centre.id}
-                                        layout
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.9 }}
-                                        transition={{ duration: 0.4, delay: idx * 0.05 }}
-                                        onMouseEnter={() => handleCentreHover(centre)}
-                                    >
-                                        <CentreCard centre={centre} />
-                                    </motion.div>
-                                ))}
+                                {filteredCentres.map((centre, idx) => {
+                                    const isSelected = activeCentre?.id === centre.id;
+                                    return (
+                                        <motion.div
+                                            key={centre.id}
+                                            layout
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            transition={{ duration: 0.4, delay: idx * 0.05 }}
+                                            onMouseEnter={() => handleCentreHover(centre)}
+                                            onClick={() => handleCentreHover(centre)}
+                                            className={`rounded-3xl cursor-pointer transition-all duration-300 relative ${
+                                                isSelected
+                                                    ? "ring-4 ring-orange-500 shadow-2xl shadow-orange-500/20 scale-[1.02]"
+                                                    : "hover:shadow-xl hover:scale-[1.01]"
+                                            }`}
+                                        >
+                                            {isSelected && (
+                                                <div className="absolute -top-3 right-6 z-20 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow-lg flex items-center gap-1.5 animate-pulse">
+                                                    <span className="w-2 h-2 rounded-full bg-white" />
+                                                    <span>Active on Map</span>
+                                                </div>
+                                            )}
+                                            <CentreCard
+                                                centre={centre}
+                                                isSelected={isSelected}
+                                                onSelectMap={() => handleCentreHover(centre)}
+                                            />
+                                        </motion.div>
+                                    );
+                                })}
                             </AnimatePresence>
                         </div>
 
@@ -172,47 +200,42 @@ const CentreShowcase = () => {
                             layoutId="map-container"
                             className="bg-slate-900 rounded-[32px] overflow-hidden border-[6px] border-slate-100 shadow-xl relative group"
                         >
-                            <div className="absolute inset-0 bg-orange-500/5 pointer-events-none z-10" />
-
                             <div className="aspect-square w-full relative">
-                                {activeCentre?.location ? (
-                                    <iframe
-                                        key={activeCentre.id}
-                                        src={activeCentre.location.includes('iframe') ? activeCentre.location.match(/src="([^"]+)"/)?.[1] : activeCentre.location}
-                                        width="100%"
-                                        height="100%"
-                                        style={{ border: 0, filter: 'grayscale(0.2) contrast(1.1)' }}
-                                        allowFullScreen
-                                        loading="lazy"
-                                        title="Centre Location"
-                                        className="group-hover:grayscale-0 transition-all duration-700"
-                                    />
-                                ) : (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-slate-800">
-                                        <MapPinIcon className="w-20 h-20 text-slate-600 mb-6 animate-bounce" />
-                                        <h3 className="text-2xl font-black text-white mb-2">Location Ready</h3>
-                                        <p className="text-slate-400 font-medium">Select a centre card to visualize its position on the global map.</p>
-                                    </div>
-                                )}
+                                <iframe
+                                    key={activeCentre?.id || 'centre-map'}
+                                    src={getMapEmbedUrl(activeCentre)}
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen
+                                    loading="lazy"
+                                    title={activeCentre ? `Map: ${activeCentre.centre}` : "Centre Location"}
+                                    className="w-full h-full"
+                                />
 
                                 {/* Overlay Details */}
-                                <div className="absolute bottom-6 left-6 right-6">
-                                    <div className="bg-white/90 backdrop-blur-xl p-5 rounded-3xl border border-white/20 shadow-2xl transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
-                                                <MapPinIcon className="w-6 h-6 text-white" />
+                                <div className="absolute bottom-4 left-4 right-4 z-20">
+                                    <div className="bg-white/95 backdrop-blur-xl p-4 rounded-2xl border border-white/40 shadow-2xl transition-all duration-300">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center shadow-md shadow-orange-500/25 shrink-0">
+                                                <MapPinIcon className="w-5 h-5 text-white" />
                                             </div>
-                                            <div className="flex-1">
-                                                <h4 className="font-black text-slate-900 leading-none mb-1">{activeCentre?.centre}</h4>
-                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{activeCentre?.district}, {activeCentre?.state}</p>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-1.5 mb-0.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                    <span className="text-[10px] font-black uppercase tracking-wider text-orange-600">Showing On Map</span>
+                                                </div>
+                                                <h4 className="font-black text-slate-900 text-sm truncate">{activeCentre?.centre || "Select a Centre"}</h4>
+                                                <p className="text-[11px] font-medium text-slate-500 truncate">{activeCentre?.district}, {activeCentre?.state}</p>
                                             </div>
                                             <a
-                                                href={activeCentre?.location}
+                                                href={getDirectMapLink(activeCentre)}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="p-3 bg-slate-100 rounded-xl hover:bg-orange-100 hover:text-orange-600 transition-colors"
+                                                className="p-2.5 bg-orange-50 hover:bg-orange-500 hover:text-white text-orange-600 rounded-xl transition-all shrink-0 shadow-sm"
+                                                title="Open in Google Maps"
                                             >
-                                                <ChevronRightIcon className="w-5 h-5" />
+                                                <ChevronRightIcon className="w-4 h-4" />
                                             </a>
                                         </div>
                                     </div>
