@@ -101,28 +101,36 @@ const AlumniPage = () => {
 
     const stories = [
         {
-            name: "Dr. Arjun Mehta",
-            achievement: "IIT Bombay, CSE | AIR 45",
-            current: "Senior Architect, Google Mountain View",
-            year: "2018 Batch",
+            name: "Rupayan Pal",
+            achievement: "NEET Top Ranker | AIR 20",
+            current: "MBBS Scholar, Premier Medical College",
+            year: "Pathfinder Medical Batch",
             image: getImageUrl("/images/homepagecarousal_images/rupayan pal.webp"),
-            quote: "Pathfinder was more than just a coaching center; it was a launchpad for my dreams. The analytical mindset I built here stays with me in every project at Google.",
+            quote: "Pathfinder was more than just a coaching center; it was a launchpad for my medical career. The rigorous testing and mentoring built my confidence to secure AIR 20 in NEET.",
         },
         {
-            name: "Sneha Reddy",
-            achievement: "AIIMS New Delhi | AIR 12",
-            current: "Chief Resident, AIIMS Cardiology",
-            year: "2019 Batch",
+            name: "Pranami Halder",
+            achievement: "CBSE & Medical Ranker | 99.2%",
+            current: "Medical Scholar & Academic Star",
+            year: "Pathfinder Integrated Batch",
             image: getImageUrl("/images/homepagecarousal_images/Pranami halder.webp"),
-            quote: "The personalized attention and the 'never-give-up' attitude instilled by Pathfinder mentors were crucial during my preparation. Proud to be a Pathfinder alumna.",
+            quote: "The personalized attention and conceptual clarity instilled by Pathfinder faculty were crucial during my preparation. Proud to be part of the Pathfinder legacy.",
         },
         {
-            name: "Rahul Sharma",
-            achievement: "Senior Scientist, ISRO",
-            current: "Mission Specialist, Gaganyaan Program",
-            year: "2012 Batch",
+            name: "Devdutta Majhi",
+            achievement: "JEE Advanced Top Ranker | IITian",
+            current: "Engineering Scholar, Premier IIT",
+            year: "Pathfinder Engineering Batch",
             image: getImageUrl("/images/homepagecarousal_images/devdutta majhi.webp"),
-            quote: "Success in space science requires precision and foundation—both of which were forged during my JEE years at Pathfinder. The legacy continues.",
+            quote: "Success in competitive exams requires precision and strong fundamentals—both of which were forged during my JEE preparation at Pathfinder.",
+        },
+        {
+            name: "Chandrachur Sen",
+            achievement: "Madhyamik State Rank 1",
+            current: "Senior Secondary Scholar",
+            year: "Pathfinder Foundation Batch",
+            image: getImageUrl("/images/homepagecarousal_images/Chandrachur Sen.webp"),
+            quote: "Pathfinder's structured curriculum and continuous mock evaluations helped me achieve State Rank 1. The teachers are always there to guide you.",
         },
     ];
 
@@ -332,65 +340,6 @@ const AlumniPage = () => {
                         className="w-full h-auto block"
                     />
                 </motion.div>
-            </section>
-            {/* Join Alumni Group Section */}
-            <section
-                className="w-full md:w-[150%] relative md:left-1/2 md:-translate-x-1/2 overflow-hidden p-0 md:p-10"
-                style={{
-                    background: 'linear-gradient(to bottom, #ffffff 50%, #000000 50%)'
-                }}
-            >
-                <div className="w-full md:w-[120%] relative md:-left-[10%]">
-                    <FadeInImage
-                        src={getImageUrl("/images/alumni/papper.webp")}
-                        alt="Join our Alumni Group"
-                        className="w-full h-[350px] md:h-[450px] object-cover md:object-fill rounded-none md:rounded-none shadow-none md:shadow-none"
-                    />
-
-                    {/* Content Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center z-10 w-full h-full">
-                        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-0 scale-[0.75] sm:scale-[0.85] md:scale-100">
-                            {/* QR Code Block */}
-                            <div className="bg-white p-4 rounded-3xl shadow-2xl relative">
-                                <img
-                                    src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://chat.whatsapp.com/pathfinder-alumni"
-                                    alt="QR Code"
-                                    className="w-32 h-32 md:w-52 md:h-52 mix-blend-multiply"
-                                />
-                                <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-2 border-4 border-white">
-                                    <img
-                                        src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-                                        alt="WhatsApp"
-                                        className="w-6 h-6"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Text Block */}
-                            <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                                <div className="flex items-center gap-3 mb-2 md:ml-8">
-                                    <span className="text-3xl md:text-4xl font-black text-black tracking-tighter">SCAN</span>
-                                    <span className="text-2xl md:text-4xl font-bold text-white">to</span>
-                                    <span className="text-3xl md:text-4xl font-black text-black tracking-tighter">JOIN</span>
-                                    {/* Desktop WhatsApp Link Icon */}
-                                    <div className="hidden md:block bg-white rounded-full p-1 shadow-md">
-                                        <img
-                                            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-                                            alt="WhatsApp"
-                                            className="w-8 h-8 md:w-12 md:h-12"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="text-3xl md:text-4xl font-black text-white tracking-tighter leading-none mb-4 md:mb-6 md:ml-8 drop-shadow-md">
-                                    our Alumni Group!
-                                </div>
-                                <div className="bg-black text-white px-6 py-2 text-base md:text-lg font-bold tracking-wide transform -rotate-1 shadow-lg">
-                                    For regular updates, events & re-unions!
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </section>
         </div>
     );

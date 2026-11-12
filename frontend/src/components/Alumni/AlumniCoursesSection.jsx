@@ -104,12 +104,20 @@ export default function AlumniCoursesSection() {
                     if (boardsGroup[i]) combined.push(boardsGroup[i]);
                 }
 
-                // Final unique filter
-                const seen = new Set();
+                // Final unique filter: ensure each course and batch is displayed only once
+                const seenKeys = new Set();
+                const seenIds = new Set();
                 const finalFiltered = combined.filter(c => {
                     const id = c.id || c._id;
-                    if (seen.has(id)) return false;
-                    seen.add(id);
+                    const normName = (c.name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+                    const normClass = (c.class_level || '').trim().toLowerCase();
+                    const batchKey = `${normName}|${normClass}`;
+
+                    if (seenKeys.has(batchKey) || (id && seenIds.has(id))) {
+                        return false;
+                    }
+                    seenKeys.add(batchKey);
+                    if (id) seenIds.add(id);
                     return true;
                 });
 

@@ -3,7 +3,7 @@ import { getImageUrl } from "../utils/imageUtils";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
-import { ChevronLeftIcon, ChevronRightIcon, ArrowUpRightIcon, CurrencyDollarIcon, BookOpenIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon, ArrowUpRightIcon, CurrencyDollarIcon, BookOpenIcon, UserGroupIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { MapPinIcon } from "@heroicons/react/24/solid";
 import { jobAPI } from "../services/jobAPI";
 import { useCachedData } from "../hooks/useCachedData";
@@ -43,11 +43,76 @@ const Career = () => {
   });
 
   const [teamSlidesToShow, setTeamSlidesToShow] = useState(3);
+  const [showAllTeamModal, setShowAllTeamModal] = useState(false);
   const loading = jobsLoading;
 
+  // Real Pathfinder faculty & academic leaders (CR-02)
+  const teamMembers = useMemo(() => [
+    {
+      name: "Abhishek Sir",
+      role: "Senior Faculty, Physics",
+      subject: "Physics",
+      dept: "JEE & NEET Academic Council",
+      image: getImageUrl("/images/about us page/teachers_image/Abhishek Sir.webp"),
+    },
+    {
+      name: "Biswajit Sir",
+      role: "Senior Faculty, Mathematics",
+      subject: "Mathematics",
+      dept: "JEE Advanced Specialist",
+      image: getImageUrl("/images/about us page/teachers_image/Biswajit Sir.webp"),
+    },
+    {
+      name: "Dipanjan Sir",
+      role: "Senior Faculty, Chemistry",
+      subject: "Chemistry",
+      dept: "Medical & Engineering Mentor",
+      image: getImageUrl("/images/about us page/teachers_image/Dipanjan Sir.webp"),
+    },
+    {
+      name: "Jitendra Sir",
+      role: "Senior Faculty, Biology",
+      subject: "Botany & Zoology",
+      dept: "NEET Specialist",
+      image: getImageUrl("/images/about us page/teachers_image/Jitendra Sir.webp"),
+    },
+    {
+      name: "Sourabh Sir",
+      role: "Senior Faculty, Applied Sciences",
+      subject: "Science & Engineering",
+      dept: "Olympiad & Foundation Lead",
+      image: getImageUrl("/images/about us page/teachers_image/Sourabh Sir.webp"),
+    },
+    {
+      name: "Subhojit Sir",
+      role: "Senior Faculty, Physical Sciences",
+      subject: "Advanced Sciences",
+      dept: "Curriculum & Research Lead",
+      image: getImageUrl("/images/about us page/teachers_image/subhojit Sir.webp"),
+    },
+    {
+      name: "Academic Mentors",
+      role: "Student Success & Counseling",
+      subject: "Student Operations",
+      dept: "Career Guidance",
+      image: getImageUrl("/images/carrer/employee1.webp"),
+    },
+  ], []);
+
+  // Format centre/location correctly to prevent "Centre centre" glitch (CR-04)
+  const formatLocation = useCallback((loc, centre) => {
+    const raw = (centre || loc || "Kolkata").trim();
+    if (/centre|center/i.test(raw)) {
+      return raw;
+    }
+    return `${raw} Centre`;
+  }, []);
+
+  // Standard and dynamic career navigation filters (CR-03)
   const dynamicDepartments = useMemo(() => {
-    const uniqueDepts = [...new Set(jobs.map(job => job.department || job.company).filter(Boolean))];
-    return ["View all", ...uniqueDepts];
+    const baseDepts = ["View all", "Telecaller", "Faculty", "Academic", "Counselor", "Operations"];
+    const fromJobs = (Array.isArray(jobs) ? jobs : []).map(job => job.department).filter(Boolean);
+    return [...new Set([...baseDepts, ...fromJobs])];
   }, [jobs]);
 
   const filteredJobs = useMemo(() => {
@@ -69,14 +134,41 @@ const Career = () => {
         (job) =>
           (job.location || "").toLowerCase().includes(loc) ||
           (job.district || "").toLowerCase().includes(loc) ||
-          (job.state || "").toLowerCase().includes(loc)
+          (job.state || "").toLowerCase().includes(loc) ||
+          (job.centre || "").toLowerCase().includes(loc)
       );
     }
 
     if (filters.department && filters.department !== "View all") {
-      filtered = filtered.filter(
-        (job) => (job.department || job.company)?.toLowerCase() === filters.department.toLowerCase()
-      );
+      const dept = filters.department.toLowerCase();
+      filtered = filtered.filter((job) => {
+        const jobDept = (job.department || "").toLowerCase();
+        const jobTitle = (job.title || "").toLowerCase();
+        const jobDesc = (job.description || "").toLowerCase();
+        const jobCompany = (job.company || "").toLowerCase();
+
+        if (dept === "telecaller") {
+          return jobDept.includes("telecaller") || jobDept.includes("caller") ||
+                 jobTitle.includes("telecaller") || jobTitle.includes("caller") ||
+                 jobDesc.includes("telecaller") || jobDesc.includes("tele-caller");
+        }
+        if (dept === "faculty") {
+          return jobDept.includes("faculty") || jobDept.includes("teacher") ||
+                 jobTitle.includes("faculty") || jobTitle.includes("teacher") ||
+                 jobTitle.includes("physics") || jobTitle.includes("chemistry") ||
+                 jobTitle.includes("math") || jobTitle.includes("biology");
+        }
+        if (dept === "counselor") {
+          return jobDept.includes("counsel") || jobTitle.includes("counsel") || jobDesc.includes("counsel");
+        }
+        if (dept === "academic") {
+          return jobDept.includes("academic") || jobTitle.includes("academic") || jobDesc.includes("academic");
+        }
+        if (dept === "operations") {
+          return jobDept.includes("operat") || jobTitle.includes("operat") || jobDesc.includes("operat");
+        }
+        return jobDept === dept || jobTitle.includes(dept) || jobCompany === dept;
+      });
     }
 
     if (filters.search) {
@@ -84,7 +176,8 @@ const Career = () => {
       filtered = filtered.filter(
         (job) =>
           job.title.toLowerCase().includes(query) ||
-          job.description?.toLowerCase().includes(query)
+          job.description?.toLowerCase().includes(query) ||
+          job.department?.toLowerCase().includes(query)
       );
     }
 
@@ -194,9 +287,18 @@ const Career = () => {
             </div>
 
             <div className="flex-shrink-0 relative z-10 md:-mt-12 group">
-              <div className="w-fit px-8 py-3 md:px-10 md:py-4 rounded-full border-2 border-white text-slate-900 font-bold text-lg shadow-sm cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-xl hover:-translate-y-1 active:scale-95 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('open-positions');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="w-fit px-8 py-3 md:px-10 md:py-4 rounded-full border-2 border-white text-slate-900 font-bold text-lg shadow-sm cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-xl hover:-translate-y-1 active:scale-95 text-center bg-white/10 backdrop-blur-sm"
+              >
                 We're hiring!
-              </div>
+              </button>
             </div>
           </div>
 
@@ -206,8 +308,6 @@ const Career = () => {
 
         <section className="bg-white pb-8 sm:pb-12 md:pb-16">
           <div className="px-4 sm:px-6 lg:px-8 pt-16">
-            {/* Meet the Team Section */}
-            {/* Meet the Team Section */}
             {/* Meet the Team Section */}
             <div className="bg-white px-4 md:px-8 pb-10">
               <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 lg:gap-12 mb-8 lg:mb-16">
@@ -240,24 +340,41 @@ const Career = () => {
                       nextArrow={<NextArrow />}
                       prevArrow={<PrevArrow />}
                     >
-                      {[1, 2, 3, 4, 5].map((idx) => (
-                        <div key={idx} className="px-2 md:px-10">
-                          <div className="aspect-square max-w-[240px] mx-auto bg-slate-900 rounded-full overflow-hidden border-[10px] border-white/20 shadow-2xl transition-all duration-500 hover:scale-105 group">
-                            <img
-                              src={getImageUrl("/images/carrer/employee1.webp")}
-                              alt="Team Member"
-                              className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
-                            />
+                      {teamMembers.map((member, idx) => (
+                        <div key={idx} className="px-2 md:px-6">
+                          <div className="flex flex-col items-center text-center group">
+                            <div className="aspect-square w-40 sm:w-48 md:w-52 mx-auto bg-slate-900 rounded-full overflow-hidden border-[6px] md:border-[8px] border-white/30 shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:border-white">
+                              <img
+                                src={member.image}
+                                alt={member.name}
+                                className="w-full h-full object-cover object-top transition-all duration-700"
+                              />
+                            </div>
+                            <div className="mt-4">
+                              <h3 className="text-white font-black text-lg md:text-xl tracking-tight leading-tight">
+                                {member.name}
+                              </h3>
+                              <p className="text-white/90 text-xs md:text-sm font-bold mt-0.5">
+                                {member.role}
+                              </p>
+                              <span className="inline-block mt-2 px-3 py-0.5 bg-black/40 text-orange-200 text-[10px] font-bold uppercase tracking-wider rounded-full border border-white/10">
+                                {member.dept}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       ))}
                     </Slider>
                   </div>
 
-                  {/* View All Button - Wider Pill */}
-                  <div className="mt-20 flex justify-center">
-                    <button className="w-full max-w-xl md:max-w-2xl bg-white text-slate-900 py-4 rounded-full font-black uppercase tracking-[0.3em] text-xs hover:bg-slate-900 hover:text-white transition-all duration-500 shadow-2xl active:scale-[0.98]">
-                      View All
+                  {/* View All Button - Opens full team modal */}
+                  <div className="mt-12 md:mt-16 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowAllTeamModal(true)}
+                      className="w-full max-w-xl md:max-w-2xl bg-white text-slate-900 py-3.5 md:py-4 rounded-full font-black uppercase tracking-[0.25em] text-xs hover:bg-slate-900 hover:text-white transition-all duration-300 shadow-2xl active:scale-[0.98] border border-white/40"
+                    >
+                      View All Faculty & Team Members ({teamMembers.length})
                     </button>
                   </div>
                 </div>
@@ -285,7 +402,7 @@ const Career = () => {
             </div>
 
             {/* Jobs Listing Section */}
-            <div className="max-w-7xl mx-auto px-4 mb-4">
+            <div id="open-positions" className="max-w-7xl mx-auto px-4 mb-4 scroll-mt-24">
               <div className="bg-[#F8FAFC] rounded-[32px] md:rounded-[48px] p-6 md:p-20 shadow-sm border border-slate-100">
                 <div className="text-center mb-10 md:mb-20">
                   <h2 className="text-3xl md:text-[60px] font-bold text-slate-900 tracking-tighter">
@@ -320,7 +437,7 @@ const Career = () => {
                         <div className="flex items-center">
                           <MapPinIcon className="w-5 h-5 md:w-6 md:h-6 mr-2 md:mr-3 text-[#FF6332]" />
                           <span className="text-slate-900 text-sm md:text-lg font-bold capitalize">
-                            {job.centre || job.location} centre
+                            {formatLocation(job.location, job.centre)}
                           </span>
                         </div>
                       </Link>
@@ -406,6 +523,73 @@ const Career = () => {
             </div>
           </div>
         </section>
+
+        {/* View All Faculty & Team Members Modal (CR-02 & CR-03) */}
+        {showAllTeamModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <div className="bg-white rounded-[32px] max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
+              {/* Modal Header */}
+              <div className="px-6 py-5 bg-gradient-to-r from-[#FF6332] to-[#FF9D66] text-white flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl md:text-2xl font-black tracking-tight">
+                    Our Faculty & Mentorship Team
+                  </h3>
+                  <p className="text-xs text-white/90 font-medium">
+                    The inspiring educators and academic architects behind Pathfinder's success
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAllTeamModal(false)}
+                  className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors"
+                  aria-label="Close modal"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {teamMembers.map((member, idx) => (
+                    <div
+                      key={idx}
+                      className="p-5 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-orange-300 hover:shadow-lg transition-all text-center flex flex-col items-center"
+                    >
+                      <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-orange-200 shadow-md mb-3 bg-slate-900">
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-full h-full object-cover object-top"
+                        />
+                      </div>
+                      <h4 className="text-base font-black text-slate-900 leading-tight">
+                        {member.name}
+                      </h4>
+                      <p className="text-xs font-bold text-orange-600 mt-1">
+                        {member.role}
+                      </p>
+                      <span className="mt-2 text-[10px] font-semibold text-slate-500 bg-white px-2.5 py-1 rounded-full border border-slate-200">
+                        {member.dept}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowAllTeamModal(false)}
+                  className="px-6 py-2 rounded-full bg-slate-900 text-white font-bold text-xs uppercase tracking-wider hover:bg-[#FF6332] transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
