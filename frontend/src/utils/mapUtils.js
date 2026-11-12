@@ -149,11 +149,29 @@ export const getDirectMapLink = (centreOrUrl, fallbackUrl) => {
         return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(buildFallbackQuery())}`;
     }
 
-    // 3. If it is a normal URL (e.g. goo.gl, maps.app.goo.gl, google.com/maps/place/...), return it
-    if (raw.startsWith("http://") || raw.startsWith("https://")) {
-        return raw;
+    // 3. If it contains a normal URL (e.g. goo.gl, maps.app.goo.gl, google.com/maps/place/...), return it
+    const urlMatch = raw.match(/https?:\/\/[^\s"'<>]+/);
+    if (urlMatch) {
+        return urlMatch[0];
     }
 
     // 4. Default fallback search
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(buildFallbackQuery())}`;
 };
+
+/**
+ * Cleans location text by removing raw URLs, iframes, and excessive punctuation,
+ * returning a clean readable name (e.g., "Kolkata, West Bengal")
+ */
+export const getCleanLocationText = (loc, fallback = "Kolkata, West Bengal") => {
+    if (!loc || typeof loc !== "string") return fallback;
+    let clean = loc
+        .replace(/https?:\/\/[^\s"'<>]+/g, "")
+        .replace(/<iframe[^>]*>.*?<\/iframe>/gi, "")
+        .replace(/src="[^"]*"/g, "")
+        .replace(/<[^>]+>/g, "")
+        .trim();
+    clean = clean.replace(/^[,\s\-•|]+|[,\s\-•|]+$/g, "").trim();
+    return clean || fallback;
+};
+

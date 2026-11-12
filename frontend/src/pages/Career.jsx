@@ -7,6 +7,7 @@ import { ChevronLeftIcon, ChevronRightIcon, ArrowUpRightIcon, CurrencyDollarIcon
 import { MapPinIcon } from "@heroicons/react/24/solid";
 import { jobAPI } from "../services/jobAPI";
 import { useCachedData } from "../hooks/useCachedData";
+import { getCleanLocationText } from "../utils/mapUtils";
 
 const NextArrow = ({ onClick }) => (
   <button
@@ -99,13 +100,14 @@ const Career = () => {
     },
   ], []);
 
-  // Format centre/location correctly to prevent "Centre centre" glitch (CR-04)
+  // Format centre/location correctly to prevent "Centre centre" glitch and strip raw URLs (CR-04)
   const formatLocation = useCallback((loc, centre) => {
     const raw = (centre || loc || "Kolkata").trim();
-    if (/centre|center/i.test(raw)) {
-      return raw;
+    const clean = getCleanLocationText(raw, "Kolkata");
+    if (/centre|center/i.test(clean)) {
+      return clean;
     }
-    return `${raw} Centre`;
+    return `${clean} Centre`;
   }, []);
 
   // Standard and dynamic career navigation filters (CR-03)

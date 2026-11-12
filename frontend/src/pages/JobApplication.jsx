@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { jobAPI } from "../services/jobAPI";
+import { getCleanLocationText, getDirectMapLink } from "../utils/mapUtils";
 
 const JobApplication = () => {
   const { id } = useParams();
@@ -365,8 +366,27 @@ const JobApplication = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Apply for {job.title}
           </h1>
-          <p className="text-xl text-gray-600">
-            {job.company} • {job.location}
+          <p className="text-xl text-gray-600 flex items-center gap-2 flex-wrap">
+            <span>{job.company || "Pathfinder Educational Centre LLP"}</span>
+            <span>•</span>
+            {(() => {
+              const cleanText = getCleanLocationText(job.location || job.centre || job.district, "Kolkata, West Bengal");
+              const hasUrl = (job.location || "").match(/https?:\/\/[^\s"'<>]+/);
+              const mapLink = hasUrl ? getDirectMapLink(hasUrl[0]) : null;
+              return mapLink ? (
+                <a
+                  href={mapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#FF6332] hover:text-[#FF4500] hover:underline font-semibold"
+                  title="Open location in Google Maps"
+                >
+                  {cleanText} ↗
+                </a>
+              ) : (
+                <span>{cleanText}</span>
+              );
+            })()}
           </p>
         </div>
       </div>

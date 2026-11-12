@@ -10,8 +10,10 @@ import {
   BuildingOffice2Icon,
   ArrowLeftIcon,
   CheckCircleIcon,
+  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { jobAPI } from "../services/jobAPI";
+import { getDirectMapLink, getCleanLocationText } from "../utils/mapUtils";
 
 // Helper component to render text with auto-linkified URLs and email addresses (CR-04)
 const AutoLinkText = ({ text }) => {
@@ -98,16 +100,58 @@ const JobDetail = () => {
     return job?.company?.trim() || "Pathfinder Educational Centre LLP";
   }, [job]);
 
-  // Clean location formatting to prevent duplicate text (CR-04)
-  const cleanLocation = useMemo(() => {
-    if (!job) return "Kolkata, West Bengal";
-    const loc = job.location || job.centre || "";
+  // Clean location formatting and clickable Google Maps link
+  const { cleanLocationText, mapLink } = useMemo(() => {
+    if (!job) return { cleanLocationText: "Kolkata, West Bengal", mapLink: null };
+
+    const rawLoc = job.location || "";
+    const rawCentre = job.centre || "";
+    const rawAddress = job.address || "";
+    const rawMapUrl = job.map_url || job.google_map_url || "";
     const district = job.district || "";
     const state = job.state || "";
 
-    const parts = [loc, district, state].filter(Boolean);
-    const uniqueParts = [...new Set(parts.map(p => p.trim()))];
-    return uniqueParts.join(", ") || "Kolkata, West Bengal";
+    // 1. Detect if any field has a map URL or iframe
+    const combined = `${rawLoc} ${rawAddress} ${rawMapUrl} ${rawCentre}`;
+    let extractedUrl = "";
+    const urlMatch = combined.match(/https?:\/\/[^\s"'<>]+/);
+    if (urlMatch) {
+      extractedUrl = urlMatch[0];
+    } else if (combined.includes("<iframe") || combined.includes("iframe")) {
+      const srcMatch = combined.match(/src="([^"]+)"/);
+      if (srcMatch && srcMatch[1]) {
+        extractedUrl = srcMatch[1];
+      }
+    }
+
+    // 2. Strip raw URLs and HTML from readable text parts
+    const cleanLoc = getCleanLocationText(rawLoc, "");
+    const cleanCentre = getCleanLocationText(rawCentre, "");
+    const cleanDistrict = getCleanLocationText(district, "");
+    const cleanState = getCleanLocationText(state, "");
+
+    const parts = [cleanCentre, cleanLoc, cleanDistrict, cleanState].filter(Boolean);
+    const uniqueParts = [...new Set(parts.map(p => p.trim()).filter(Boolean))];
+    let displayText = uniqueParts.join(", ");
+    displayText = displayText.replace(/^[,\s\-•|]+|[,\s\-•|]+$/g, "").trim();
+
+    if (!displayText) {
+      displayText = "Kolkata, West Bengal";
+    }
+
+    // 3. Resolve direct clickable Google Maps link (converts embed links to clickable web links)
+    let resolvedMapLink = null;
+    if (extractedUrl) {
+      resolvedMapLink = getDirectMapLink(extractedUrl);
+    } else if (rawLoc || rawCentre || rawAddress) {
+      const query = ["Pathfinder Institute", displayText].filter(Boolean).join(" ");
+      resolvedMapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+    }
+
+    return {
+      cleanLocationText: displayText,
+      mapLink: resolvedMapLink
+    };
   }, [job]);
 
   // Dynamic updated application date / active rolling deadline (CR-07)
@@ -205,10 +249,24 @@ const JobDetail = () => {
                   <ClockIcon className="w-3.5 h-3.5" />
                   {formatExperience(job.experience_level)}
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-white/20 text-white backdrop-blur-sm">
-                  <MapPinIcon className="w-3.5 h-3.5 text-orange-200" />
-                  {cleanLocation}
-                </span>
+                {mapLink ? (
+                  <a
+                    href={mapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-white/20 hover:bg-white text-white hover:text-slate-950 backdrop-blur-sm transition-all shadow-sm group cursor-pointer max-w-full"
+                    title="Open location in Google Maps"
+                  >
+                    <MapPinIcon className="w-3.5 h-3.5 text-orange-200 group-hover:text-[#FF6332] shrink-0" />
+                    <span className="truncate">{cleanLocationText}</span>
+                    <ArrowTopRightOnSquareIcon className="w-3 h-3 opacity-70 group-hover:opacity-100 shrink-0" />
+                  </a>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-white/20 text-white backdrop-blur-sm max-w-full">
+                    <MapPinIcon className="w-3.5 h-3.5 text-orange-200 shrink-0" />
+                    <span className="truncate">{cleanLocationText}</span>
+                  </span>
+                )}
                 {job.is_featured && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black bg-amber-400 text-slate-950 uppercase">
                     ⭐ Featured Role
@@ -302,9 +360,22 @@ const JobDetail = () => {
                   <span className="font-black text-slate-900">{formatExperience(job.experience_level)}</span>
                 </div>
 
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-500 font-bold">Location:</span>
-                  <span className="font-black text-slate-900 text-right max-w-[180px]">{cleanLocation}</span>
+                <div className="flex items-center justify-between py-1 gap-2">
+                  <span className="text-slate-500 font-bold shrink-0">Location:</span>
+                  {mapLink ? (
+                    <a
+                      href={mapLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-black text-[#FF6332] hover:text-[#FF4500] hover:underline text-right max-w-[200px] truncate inline-flex items-center justify-end gap-1"
+                      title="Open in Google Maps"
+                    >
+                      <span className="truncate">{cleanLocationText}</span>
+                      <ArrowTopRightOnSquareIcon className="w-3 h-3 shrink-0" />
+                    </a>
+                  ) : (
+                    <span className="font-black text-slate-900 text-right max-w-[180px] truncate">{cleanLocationText}</span>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between py-1">
@@ -348,13 +419,26 @@ const JobDetail = () => {
 
                 <div>
                   <span className="text-slate-400 font-bold uppercase text-[10px] block">Location</span>
-                  <p className="font-black text-slate-800 mt-0.5">{cleanLocation}</p>
+                  {mapLink ? (
+                    <a
+                      href={mapLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-black text-[#FF6332] hover:text-[#FF4500] hover:underline mt-0.5 inline-flex items-center gap-1 max-w-full"
+                      title="Open in Google Maps"
+                    >
+                      <span className="truncate">{cleanLocationText}</span>
+                      <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5 shrink-0" />
+                    </a>
+                  ) : (
+                    <p className="font-black text-slate-800 mt-0.5">{cleanLocationText}</p>
+                  )}
                 </div>
 
                 {job.address && (
                   <div>
                     <span className="text-slate-400 font-bold uppercase text-[10px] block">Centre Address</span>
-                    <p className="font-medium text-slate-700 mt-0.5 leading-relaxed">{job.address}</p>
+                    <p className="font-medium text-slate-700 mt-0.5 leading-relaxed break-words">{getCleanLocationText(job.address, job.address)}</p>
                   </div>
                 )}
 
