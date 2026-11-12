@@ -661,6 +661,14 @@ export const landingAPI = {
     return api.post("/api/landing/register/", registrationData);
   },
 
+  sendOTP: (data) => {
+    return api.post("/api/landing/send-otp/", data);
+  },
+
+  verifyOTP: (data) => {
+    return api.post("/api/landing/verify-otp/", data);
+  },
+
   list: () => {
     return api.get("/api/landing/list/");
   }

@@ -35,6 +35,7 @@ This document provides a detailed breakdown of all problems reported across ever
 | **Franchise** | **FR-02** | Show Details displays "Under Process" | Dead dummy button | **SOLVED (Document Details Modal)**| [`1b69326`](https://github.com/PathfinderERP/Pathfinder_new_website/commit/1b69326) |
 | **Franchise** | **FR-03** | 2-column cards hover collision | Map jumped accidentally on hover | **SOLVED (Click-to-Select)** | [`1b69326`](https://github.com/PathfinderERP/Pathfinder_new_website/commit/1b69326) |
 | **Invoice/Pay** | **PAY-01** | Generic payment receipt / no auto email | Unstyled receipt | **SOLVED (Official Tax Invoice)**| [`faca504`](https://github.com/PathfinderERP/Pathfinder_new_website/commit/faca504) |
+| **Registration**| **OTP-01** | Email OTP verification on registration | No email verification before lead | **SOLVED (OTP Flow + Resend + Spam Notice)**| Newly Implemented |
 
 ---
 

@@ -536,3 +536,193 @@ def send_invoice_email_async(recipient_email, student_name, txn_no, amount, cour
     thread.daemon = True
     thread.start()
     return thread
+
+def generate_otp_email_html(student_name, otp_code):
+    """
+    Generates a premium, responsive HTML email template for Pathfinder registration OTP verification.
+    """
+    clean_name = student_name or "Student"
+    spaced_otp = " ".join(list(str(otp_code)))
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verification Code - Pathfinder Educational Centre</title>
+  <style>
+    body {{
+      margin: 0;
+      padding: 0;
+      background-color: #F8FAFC;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1E293B;
+      -webkit-font-smoothing: antialiased;
+    }}
+    .email-container {{
+      max-width: 580px;
+      margin: 30px auto;
+      background: #FFFFFF;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      border: 1px solid #E2E8F0;
+    }}
+    .header {{
+      background: linear-gradient(135deg, #FF9F00 0%, #EA580C 100%);
+      padding: 32px 24px;
+      text-align: center;
+      color: #FFFFFF;
+    }}
+    .otp-box {{
+      background: #FFFBEB;
+      border: 2px dashed #F59E0B;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin: 28px 0;
+    }}
+    .otp-code {{
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 38px;
+      font-weight: 800;
+      color: #B45309;
+      letter-spacing: 10px;
+      margin: 8px 0;
+    }}
+    .notice-box {{
+      background: #F1F5F9;
+      border-left: 4px solid #64748B;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 24px 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #334155;
+    }}
+    .footer {{
+      background-color: #F8FAFC;
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid #E2E8F0;
+      font-size: 12px;
+      color: #64748B;
+      line-height: 1.6;
+    }}
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">PATHFINDER</h1>
+      <p style="margin: 6px 0 0 0; font-size: 13px; opacity: 0.95; font-weight: 500;">Where Aspiration Meets Success</p>
+    </div>
+
+    <div style="padding: 36px 32px; background: #FFFFFF;">
+      <h2 style="margin: 0 0 14px 0; font-size: 20px; font-weight: 700; color: #0F172A;">
+        Hello, {clean_name} 👋
+      </h2>
+      <p style="margin: 0 0 16px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+        Thank you for starting your registration with <strong>Pathfinder Educational Centre</strong>. Please use the following One-Time Password (OTP) to verify your email address:
+      </p>
+
+      <div class="otp-box">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #92400E; letter-spacing: 1.5px; margin-bottom: 6px;">
+          Your 6-Digit Verification Code
+        </div>
+        <div class="otp-code">
+          {spaced_otp}
+        </div>
+        <div style="font-size: 12px; color: #B45309; font-weight: 500; margin-top: 8px;">
+          ⏰ Valid for 10 minutes only. Please do not share this code.
+        </div>
+      </div>
+
+      <div class="notice-box">
+        📬 <strong>Delivery Notice:</strong> If you ever don't see our emails in your Primary inbox, please make sure to check your <strong>Junk</strong> or <strong>Spam</strong> folder and mark as <em>"Not Spam"</em>.
+      </div>
+
+      <p style="margin: 20px 0 0 0; font-size: 14px; color: #64748B; line-height: 1.6;">
+        If you did not request this verification code, please ignore this email or contact our support team.
+      </p>
+    </div>
+
+    <div class="footer">
+      <p style="margin: 0 0 6px 0; font-weight: 600; color: #475569;">Pathfinder Educational Centre LLP</p>
+      <p style="margin: 0 0 12px 0;">Student Helpline: <strong style="color: #0F172A;">9147178886</strong> | Email: <a href="mailto:support@pathfinder.edu.in" style="color: #EA580C; text-decoration: none;">support@pathfinder.edu.in</a></p>
+      <p style="margin: 0; font-size: 11px; color: #94A3B8;">Head Office: 96K, Shyama Prasad Mukherjee Road, Hazra, Kolkata - 700026</p>
+    </div>
+  </div>
+</body>
+</html>"""
+
+def send_otp_email(recipient_email, otp_code, student_name=None):
+    """
+    Sends the 6-digit registration OTP email to the student with responsive HTML and plain text fallback.
+    """
+    if not recipient_email or "@" not in recipient_email:
+        logger.warning(f"Cannot send OTP email: Invalid recipient '{recipient_email}'")
+        return False
+
+    clean_name = student_name or "Student"
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'Pathfinder <support@pathfinder.edu.in>')
+    if "noreply@pathfinder.com" in from_email:
+        from_email = "Pathfinder Support <support@pathfinder.edu.in>"
+
+    subject = f"{otp_code} is your Pathfinder Registration Verification Code"
+
+    text_content = f"""Dear {clean_name},
+
+Thank you for registering with Pathfinder Educational Centre.
+
+Your One-Time Password (OTP) for email verification is:
+{otp_code}
+
+This code is valid for 10 minutes. Please do not share this OTP with anyone.
+
+Note: If you do not see this email in your inbox, please check your Junk and Spam folder.
+
+Student Helpline: 9147178886
+Email: support@pathfinder.edu.in
+Website: https://pathfinder.edu.in
+"""
+
+    html_content = generate_otp_email_html(student_name=clean_name, otp_code=otp_code)
+
+    try:
+        from django.core.mail import get_connection
+        connection = get_connection(
+            host=settings.EMAIL_HOST,
+            port=settings.EMAIL_PORT,
+            username=settings.EMAIL_HOST_USER,
+            password=settings.EMAIL_HOST_PASSWORD,
+            use_tls=settings.EMAIL_USE_TLS,
+            use_ssl=settings.EMAIL_USE_SSL,
+            timeout=getattr(settings, 'EMAIL_TIMEOUT', 30)
+        )
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=text_content,
+            from_email=from_email,
+            to=[recipient_email],
+            connection=connection
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+        logger.info(f"Successfully sent OTP email to {recipient_email}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send OTP email to {recipient_email}: {e}")
+        return False
+
+def send_otp_email_async(recipient_email, otp_code, student_name=None):
+    """
+    Sends the OTP email in a background thread to prevent blocking HTTP requests.
+    """
+    thread = threading.Thread(
+        target=send_otp_email,
+        args=(recipient_email, otp_code, student_name)
+    )
+    thread.daemon = True
+    thread.start()
+    return thread

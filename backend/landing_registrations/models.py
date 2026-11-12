@@ -32,6 +32,7 @@ class LandingPageRegistration(Document):
     is_paid = fields.BooleanField(default=False)
     amount_paid = fields.FloatField(default=0.0)
     txn_ref = fields.StringField(max_length=100, required=False, null=True)
+    is_email_verified = fields.BooleanField(default=False)
     
     meta = {
         'collection': 'landing_page_registrations',
@@ -60,4 +61,26 @@ class LandingPageRegistration(Document):
 
     def __str__(self):
         return f"{self.name} - {self.course_type} ({self.page_source})"
+
+
+class EmailOTP(Document):
+    """
+    Stores email verification OTP codes with 10-minute expiry and rate-limiting attempt counter.
+    """
+    email = fields.EmailField(required=True)
+    otp_code = fields.StringField(required=True, max_length=6)
+    created_at = fields.DateTimeField(default=datetime.datetime.utcnow)
+    expires_at = fields.DateTimeField(required=True)
+    is_verified = fields.BooleanField(default=False)
+    attempts = fields.IntField(default=0)
+    
+    meta = {
+        'collection': 'email_otps',
+        'ordering': ['-created_at'],
+        'indexes': ['email', 'otp_code', 'expires_at']
+    }
+
+    def __str__(self):
+        return f"OTP for {self.email} ({self.otp_code})"
+
 

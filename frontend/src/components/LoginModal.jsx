@@ -1,12 +1,18 @@
 // src/components/LoginModal.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   XMarkIcon,
   ExclamationTriangleIcon,
+  EnvelopeIcon,
+  KeyIcon,
+  ArrowPathIcon,
+  ArrowLeftIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { landingAPI } from "../services/api";
 
 const LoginModal = ({ isOpen, onClose, onSuccess, initialTab = "login" }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -31,6 +37,13 @@ const LoginModal = ({ isOpen, onClose, onSuccess, initialTab = "login" }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [apiSuccess, setApiSuccess] = useState("");
+
+  // OTP Verification State for Register Tab
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [resendCountdown, setResendCountdown] = useState(60);
+  const [isResending, setIsResending] = useState(false);
   
   const { login, register } = useAuth();
   const navigate = useNavigate();
@@ -40,7 +53,23 @@ const LoginModal = ({ isOpen, onClose, onSuccess, initialTab = "login" }) => {
     setActiveTab(tab);
     setErrors({});
     setApiError("");
+    setApiSuccess("");
+    setIsVerifyingOtp(false);
+    setOtpCode("");
   };
+
+  // Countdown timer for OTP resend
+  useEffect(() => {
+    let interval = null;
+    if (isVerifyingOtp && resendCountdown > 0) {
+      interval = setInterval(() => {
+        setResendCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isVerifyingOtp, resendCountdown]);
 
   const handleLoginInputChange = (e) => {
     const { name, value } = e.target;
@@ -101,6 +130,30 @@ const LoginModal = ({ isOpen, onClose, onSuccess, initialTab = "login" }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleResendOtp = async () => {
+    if (resendCountdown > 0 || isResending) return;
+    setIsResending(true);
+    setApiError("");
+    setApiSuccess("");
+    try {
+      const otpRes = await landingAPI.sendOTP({
+        email: registerData.email.trim(),
+        name: registerData.fullName.trim(),
+      });
+      if (otpRes.data.success) {
+        setResendCountdown(60);
+        setOtpCode("");
+        setApiSuccess("New verification code sent! Check your inbox & spam folder.");
+      } else {
+        setApiError(otpRes.data.message || "Failed to resend verification code.");
+      }
+    } catch (err) {
+      setApiError(err.response?.data?.message || "Failed to resend verification code.");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -128,40 +181,88 @@ const LoginModal = ({ isOpen, onClose, onSuccess, initialTab = "login" }) => {
         setIsSubmitting(false);
       }
     } else {
-      if (!validateRegisterForm()) return;
-      setIsSubmitting(true);
-      setApiError("");
-      try {
-        const result = await register({
-          fullName: registerData.fullName.trim(),
-          email: registerData.email.trim(),
-          phone: registerData.phone.trim(),
-          student_class: registerData.student_class,
-          area: registerData.area.trim(),
-          school: registerData.school.trim(),
-          password: registerData.password,
-        });
-
-        if (result.success) {
-          setRegisterData({
-            fullName: "",
-            email: "",
-            phone: "",
-            student_class: "",
-            area: "",
-            school: "",
-            password: "",
+      // REGISTER TAB
+      if (!isVerifyingOtp) {
+        // Step 1: Validate form and send OTP
+        if (!validateRegisterForm()) return;
+        setIsSubmitting(true);
+        setApiError("");
+        setApiSuccess("");
+        try {
+          const otpRes = await landingAPI.sendOTP({
+            email: registerData.email.trim(),
+            name: registerData.fullName.trim(),
           });
+          if (otpRes.data.success) {
+            setIsVerifyingOtp(true);
+            setResendCountdown(60);
+            setOtpCode("");
+            setApiSuccess("Verification code sent to your email!");
+          } else {
+            setApiError(otpRes.data.message || "Failed to send verification code.");
+          }
+        } catch (err) {
+          setApiError(err.response?.data?.message || "Could not send verification code. Please check your email.");
+        } finally {
           setIsSubmitting(false);
-          onClose();
-          if (onSuccess) onSuccess();
-        } else {
-          setApiError(result.error || "Registration failed. Please try again.");
         }
-      } catch (error) {
-        setApiError("Network error during registration. Please try again.");
-      } finally {
-        setIsSubmitting(false);
+      } else {
+        // Step 2: Verify OTP and complete registration
+        const cleanOtp = otpCode.trim();
+        if (cleanOtp.length !== 6) {
+          setApiError("Please enter the complete 6-digit verification code.");
+          return;
+        }
+
+        setIsSubmitting(true);
+        setApiError("");
+        try {
+          // 1. Verify OTP
+          const verifyRes = await landingAPI.verifyOTP({
+            email: registerData.email.trim(),
+            otp: cleanOtp,
+          });
+
+          if (!verifyRes.data.success) {
+            setApiError(verifyRes.data.message || "Invalid verification code.");
+            setIsSubmitting(false);
+            return;
+          }
+
+          // 2. Complete student account registration
+          const result = await register({
+            fullName: registerData.fullName.trim(),
+            email: registerData.email.trim(),
+            phone: registerData.phone.trim(),
+            student_class: registerData.student_class,
+            area: registerData.area.trim(),
+            school: registerData.school.trim(),
+            password: registerData.password,
+            otp: cleanOtp,
+          });
+
+          if (result.success) {
+            setRegisterData({
+              fullName: "",
+              email: "",
+              phone: "",
+              student_class: "",
+              area: "",
+              school: "",
+              password: "",
+            });
+            setIsVerifyingOtp(false);
+            setIsSubmitting(false);
+            onClose();
+            if (onSuccess) onSuccess();
+          } else {
+            setApiError(result.error || "Registration failed. Please try again.");
+          }
+        } catch (error) {
+          setApiError(error.response?.data?.message || "Registration failed. Please try again.");
+        } finally {
+          setIsSubmitting(false);
+        }
       }
     }
   };
@@ -179,6 +280,9 @@ const LoginModal = ({ isOpen, onClose, onSuccess, initialTab = "login" }) => {
     });
     setErrors({});
     setApiError("");
+    setApiSuccess("");
+    setIsVerifyingOtp(false);
+    setOtpCode("");
     onClose();
   };
 
@@ -266,6 +370,14 @@ const LoginModal = ({ isOpen, onClose, onSuccess, initialTab = "login" }) => {
                   </div>
                 )}
 
+                {/* API Success Message */}
+                {apiSuccess && (
+                  <div className="mb-5 p-3 bg-green-50 border border-green-200 rounded-xl flex items-start gap-2.5">
+                    <InformationCircleIcon className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-green-800 font-semibold text-xs leading-snug">{apiSuccess}</p>
+                  </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {activeTab === "login" ? (
                     /* LOGIN FORM FIELDS */
@@ -308,6 +420,83 @@ const LoginModal = ({ isOpen, onClose, onSuccess, initialTab = "login" }) => {
                         )}
                       </div>
                     </>
+                  ) : isVerifyingOtp ? (
+                    /* OTP VERIFICATION VIEW */
+                    <div className="space-y-4 py-1">
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-orange-500/20">
+                          <KeyIcon className="w-6 h-6 text-white" />
+                        </div>
+                        <h3 className="text-lg font-extrabold text-gray-900 mb-1">Verify Your Email</h3>
+                        <p className="text-gray-500 text-xs">
+                          Enter the 6-digit verification code sent to your email
+                        </p>
+                      </div>
+
+                      {/* Email Badge with Change Email Button */}
+                      <div className="flex items-center justify-between p-3 bg-orange-50/70 border border-orange-200/60 rounded-xl">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <EnvelopeIcon className="w-4 h-4 text-orange-600 shrink-0" />
+                          <span className="text-xs font-bold text-gray-800 truncate">{registerData.email}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsVerifyingOtp(false);
+                            setApiError("");
+                            setApiSuccess("");
+                          }}
+                          className="text-xs font-bold text-orange-600 hover:text-orange-700 underline flex items-center gap-1 shrink-0 ml-2"
+                        >
+                          <ArrowLeftIcon className="w-3 h-3" />
+                          Change
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="block text-gray-700 font-bold text-xs uppercase tracking-wider mb-2 text-center">
+                          Enter 6-Digit Code
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={6}
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                          placeholder="• • • • • •"
+                          autoFocus
+                          className="w-full text-center text-2xl font-black tracking-[10px] px-4 py-3 rounded-xl border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 font-mono transition-all"
+                        />
+                      </div>
+
+                      {/* Resend Timer & Action */}
+                      <div className="flex items-center justify-between text-xs px-1 text-gray-500">
+                        <span>Didn't receive email?</span>
+                        {resendCountdown > 0 ? (
+                          <span className="text-gray-500">
+                            Resend in <strong className="text-orange-600 font-mono">{resendCountdown}s</strong>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={isResending}
+                            onClick={handleResendOtp}
+                            className="text-orange-600 hover:text-orange-700 font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+                          >
+                            <ArrowPathIcon className={`w-3.5 h-3.5 ${isResending ? 'animate-spin' : ''}`} />
+                            {isResending ? "Sending..." : "Resend Code"}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* SPAM / JUNK FOLDER PROMINENT CALLOUT */}
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2 text-left">
+                        <InformationCircleIcon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <p className="text-[11.5px] text-amber-900 leading-snug">
+                          <strong>Check Junk & Spam Folder:</strong> If you don't see the email in your inbox, please check your spam or junk folder.
+                        </p>
+                      </div>
+                    </div>
                   ) : (
                     /* REGISTER FORM FIELDS */
                     <>
@@ -460,12 +649,12 @@ const LoginModal = ({ isOpen, onClose, onSuccess, initialTab = "login" }) => {
                   <div className="pt-2">
                     <button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || (activeTab === "register" && isVerifyingOtp && otpCode.trim().length !== 6)}
                       className="w-full py-3.5 rounded-xl font-extrabold text-sm uppercase tracking-wider bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting
-                        ? (activeTab === "login" ? "Signing In..." : "Creating Profile...")
-                        : (activeTab === "login" ? "Sign In" : "Register & Sign In")
+                        ? (activeTab === "login" ? "Signing In..." : isVerifyingOtp ? "Verifying..." : "Sending Code...")
+                        : (activeTab === "login" ? "Sign In" : isVerifyingOtp ? "Verify & Create Account" : "Proceed to Email Verification")
                       }
                     </button>
                   </div>

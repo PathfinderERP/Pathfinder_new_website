@@ -8,6 +8,6 @@ class LandingPageRegistrationSerializer(mongo_serializers.DocumentSerializer):
         fields = [
             'id', 'name', 'phone', 'email', 'student_class', 
             'board', 'course_type', 'centre', 'city', 'last_exam_percentage', 'page_source', 
-            'referral_id', 'created_at', 'is_contacted', 'is_paid', 'amount_paid', 'txn_ref'
+            'referral_id', 'created_at', 'is_contacted', 'is_paid', 'amount_paid', 'txn_ref', 'is_email_verified'
         ]
         read_only_fields = ['id', 'created_at']

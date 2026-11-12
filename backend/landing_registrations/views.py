@@ -1,12 +1,138 @@
 import threading
+import datetime
+import random
+import re
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import LandingPageRegistration
+from .models import LandingPageRegistration, EmailOTP
 from .serializers import LandingPageRegistrationSerializer
+from contact_backend.email_service import send_otp_email_async
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def send_otp_view(request):
+    """
+    Generate and send a 6-digit OTP to the student's email for registration verification.
+    Enforces a 60-second cooldown period between requests.
+    """
+    email = (request.data.get('email') or '').strip().lower()
+    name = (request.data.get('name') or '').strip()
+
+    if not email:
+        return Response({
+            'success': False,
+            'message': 'Please provide a valid email address.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    email_regex = r'^[^@\s]+@[^@\s]+\.[^@\s]+$'
+    if not re.match(email_regex, email):
+        return Response({
+            'success': False,
+            'message': 'Please enter a valid email address (e.g., student@gmail.com).'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    now = datetime.datetime.utcnow()
+
+    # Rate limiting: 60-second cooldown check
+    existing_active = EmailOTP.objects(email=email).order_by('-created_at').first()
+    if existing_active:
+        time_elapsed = (now - existing_active.created_at).total_seconds()
+        if time_elapsed < 60:
+            remaining_seconds = int(60 - time_elapsed)
+            return Response({
+                'success': False,
+                'cooldown': True,
+                'remaining_seconds': remaining_seconds,
+                'message': f'Please wait {remaining_seconds} seconds before requesting a new verification code.'
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+    # Generate 6-digit numeric OTP
+    otp_code = f"{random.randint(100000, 999999)}"
+    expires_at = now + datetime.timedelta(minutes=10)
+
+    # Save to database
+    otp_record = EmailOTP(
+        email=email,
+        otp_code=otp_code,
+        created_at=now,
+        expires_at=expires_at,
+        is_verified=False,
+        attempts=0
+    )
+    otp_record.save()
+
+    # Dispatch email asynchronously using Pathfinder SMTP server
+    send_otp_email_async(
+        recipient_email=email,
+        otp_code=otp_code,
+        student_name=name
+    )
+
+    return Response({
+        'success': True,
+        'message': f'A 6-digit verification code has been sent to {email}. Please check your Inbox and Spam/Junk folder.',
+        'cooldown_seconds': 60
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_otp_view(request):
+    """
+    Verify the 6-digit OTP entered by the user.
+    """
+    email = (request.data.get('email') or '').strip().lower()
+    otp = (request.data.get('otp') or '').strip()
+
+    if not email or not otp:
+        return Response({
+            'success': False,
+            'message': 'Please provide both email address and verification code.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    now = datetime.datetime.utcnow()
+    otp_record = EmailOTP.objects(email=email).order_by('-created_at').first()
+
+    if not otp_record:
+        return Response({
+            'success': False,
+            'message': 'No verification code found for this email. Please request a new code.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if now > otp_record.expires_at:
+        return Response({
+            'success': False,
+            'message': 'Verification code has expired. Please request a new code.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if otp_record.attempts >= 5:
+        return Response({
+            'success': False,
+            'message': 'Too many failed verification attempts. Please request a new code.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if otp_record.otp_code != otp:
+        otp_record.attempts += 1
+        otp_record.save()
+        remaining = max(0, 5 - otp_record.attempts)
+        return Response({
+            'success': False,
+            'message': f'Invalid verification code. {remaining} attempts remaining.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Mark as successfully verified
+    otp_record.is_verified = True
+    otp_record.save()
+
+    return Response({
+        'success': True,
+        'message': 'Email verified successfully!'
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -16,10 +142,33 @@ def create_registration(request):
     Handle landing page registration form submission.
     Sends confirmation email to student and notification to official email.
     """
+    # Check email verification status
+    email = (request.data.get('email') or '').strip().lower()
+    otp = (request.data.get('otp') or '').strip()
+    is_verified = False
+
+    if email:
+        verified_record = EmailOTP.objects(email=email, is_verified=True).order_by('-created_at').first()
+        if verified_record:
+            # Valid if verified in the last 30 minutes
+            if (datetime.datetime.utcnow() - verified_record.created_at).total_seconds() < 1800:
+                is_verified = True
+        
+        # Or verify direct otp match if provided
+        if not is_verified and otp:
+            otp_match = EmailOTP.objects(email=email, otp_code=otp).order_by('-created_at').first()
+            if otp_match and datetime.datetime.utcnow() <= otp_match.expires_at:
+                otp_match.is_verified = True
+                otp_match.save()
+                is_verified = True
+
     serializer = LandingPageRegistrationSerializer(data=request.data)
     
     if serializer.is_valid():
         registration = serializer.save()
+        if is_verified:
+            registration.is_email_verified = True
+            registration.save()
         
         # Send emails in background to avoid long wait times
         
