@@ -2042,10 +2042,21 @@ function CoursesSection({ selectedState, selectedDistrict, selectedLocation, sel
                   discountLabel = Math.round(offer);
                 }
 
+                const now = new Date();
                 const startDateValue = c.start_date || c.starting_date;
-                const formattedDate = startDateValue
-                  ? new Date(startDateValue).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                  : "Coming Soon";
+                let formattedDate = "Admissions Open";
+                if (startDateValue) {
+                  const parsedDate = new Date(startDateValue);
+                  if (!isNaN(parsedDate.getTime()) && parsedDate >= now) {
+                    formattedDate = parsedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                  } else {
+                    const nextBatch = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                    formattedDate = nextBatch.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                  }
+                } else {
+                  const nextBatch = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                  formattedDate = nextBatch.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                }
 
                 return (
                   <div
@@ -2471,12 +2482,39 @@ function ResultsSection({ selectedCentre }) {
                 }
               }
 
+              const rawRank = topper.rank ? String(topper.rank).trim() : "";
+              let displayRank = "Top Ranker";
+              let cornerBadge = "";
+              if (rawRank) {
+                if (/^air/i.test(rawRank)) {
+                  displayRank = rawRank.toUpperCase();
+                  cornerBadge = rawRank.toUpperCase();
+                } else if (/^rank/i.test(rawRank)) {
+                  displayRank = rawRank;
+                  cornerBadge = rawRank.replace(/rank\s*/i, 'Rank ');
+                } else if (/^\d+$/.test(rawRank)) {
+                  displayRank = `AIR ${rawRank}`;
+                  cornerBadge = `AIR ${rawRank}`;
+                } else {
+                  displayRank = rawRank;
+                  cornerBadge = rawRank;
+                }
+              } else if (topper.percentages) {
+                displayRank = `${topper.percentages}% Top Score`;
+                cornerBadge = `${topper.percentages}%`;
+              } else {
+                displayRank = "Merit Achiever";
+                cornerBadge = "Top Score";
+              }
+
               topperList.push({
                 name: topper.name || "Unknown",
                 score: topper.percentages || topper.score || 0,
                 exam: topper.exam || "N/A",
                 category: category,
-                rank: topper.rank ? `Rank ${topper.rank}` : "N/A",
+                rank: displayRank,
+                rawRank: rawRank,
+                cornerBadge: cornerBadge,
                 photo: getTopperImageUrl(topper) || getImageUrl("images/placeholder.webp"),
                 quote: topper.topper_msg || "No message available",
                 centre: centre.centre || "Unknown",
@@ -2488,6 +2526,15 @@ function ResultsSection({ selectedCentre }) {
             });
           }
         });
+
+        // Sort toppers hierarchically by numeric rank or percentage
+        topperList.sort((a, b) => {
+          const numA = parseInt((a.rawRank || '').replace(/\D/g, '')) || 9999;
+          const numB = parseInt((b.rawRank || '').replace(/\D/g, '')) || 9999;
+          if (numA !== numB && numA < 9999 && numB < 9999) return numA - numB;
+          return (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0);
+        });
+
         return topperList;
       }
     }
@@ -2675,8 +2722,8 @@ function ResultsSection({ selectedCentre }) {
                               alt={student.name}
                               className="w-full h-full object-contain"
                             />
-                            <div className="absolute top-3 right-3 bg-gradient-to-br from-orange-500 to-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border border-white/20">
-                              #{index + 1}
+                            <div className="absolute top-3 right-3 bg-gradient-to-br from-orange-500 to-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-wide">
+                              {student.cornerBadge || student.rank || `#${index + 1}`}
                             </div>
                           </div>
 
@@ -2780,8 +2827,8 @@ function ResultsSection({ selectedCentre }) {
                       alt={student.name}
                       className="w-full h-full object-contain"
                     />
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg border border-white/20">
-                      #{index + 1}
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg border border-white/20 uppercase tracking-wide">
+                      {student.cornerBadge || student.rank || `#${index + 1}`}
                     </div>
                   </div>
 

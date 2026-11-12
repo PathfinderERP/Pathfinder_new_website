@@ -1,5 +1,6 @@
 import { getImageUrl } from "../../utils/imageUtils";
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   AcademicCapIcon,
@@ -9,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 const AboutUs = () => {
+  const navigate = useNavigate();
   const [currentTimelineIndex, setCurrentTimelineIndex] = useState(0);
   const timelineRef = useRef(null);
 
@@ -101,6 +103,22 @@ const AboutUs = () => {
                   DECODING <span className="text-[#FF7F3E]">SUCCESS</span><br />
                   SINCE 1993
                 </h1>
+
+                <motion.button
+                  onClick={() => navigate('/applynow')}
+                  whileHover={{
+                    scale: 1.04,
+                    boxShadow: "0 25px 50px -12px rgba(255, 127, 62, 0.5)",
+                    background: "linear-gradient(to right, #FFA366, #FF5F00)"
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                  className="mt-8 inline-flex items-center gap-3 bg-gradient-to-r from-[#FFB380] to-[#FF5F00] text-white px-8 lg:px-12 py-3.5 lg:py-4 rounded-2xl text-lg lg:text-xl font-black shadow-[0_20px_40px_-5px_rgba(255, 95, 0, 0.3)] transition-all duration-300 uppercase tracking-tight group cursor-pointer"
+                >
+                  <span>START NOW</span>
+                  <svg className="w-5 h-5 transform group-hover:translate-x-1.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </motion.button>
               </motion.div>
             </div>
 

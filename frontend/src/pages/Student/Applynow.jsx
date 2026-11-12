@@ -17,22 +17,30 @@ import {
 } from "@heroicons/react/24/outline";
 
 const formatStartDate = (dateStr) => {
-  if (!dateStr) return "Coming Soon";
-  if (typeof dateStr === "string") {
-    // If it's already a clean non-ISO string like "23 Apr 2026", "Coming Soon", "Flexible"
-    if (!dateStr.includes("T") && !/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
-      return dateStr;
+  const now = new Date();
+  if (dateStr) {
+    if (typeof dateStr === "string") {
+      // If it's a future or flexible string, keep it, but avoid past hardcoded year labels
+      if (!dateStr.includes("T") && !/^\d{4}-\d{2}-\d{2}/.test(dateStr) && !dateStr.includes("2024") && !dateStr.includes("2025")) {
+        return dateStr;
+      }
+    }
+    const parsed = new Date(dateStr);
+    if (!isNaN(parsed.getTime()) && parsed >= now) {
+      return parsed.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
     }
   }
-  const parsed = new Date(dateStr);
-  if (!isNaN(parsed.getTime())) {
-    return parsed.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric"
-    });
-  }
-  return dateStr;
+  // If date is missing or outdated in the past, roll forward to upcoming intake
+  const nextBatch = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return nextBatch.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
 };
 
 const parsePriceNumber = (val) => {
@@ -178,7 +186,43 @@ function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnC
       coursesAPI.getAll()
         .then(res => {
           const list = Array.isArray(res) ? res : (res?.data || []);
-          setCoursesList(list);
+
+          // Deduplicate courses by name and class_level to remove duplicate entries across centres
+          const uniqueCoursesMap = new Map();
+          list.forEach(c => {
+            if (!c || !c.name) return;
+            const key = `${(c.name || '').trim().toLowerCase()}___${(c.class_level || '').trim().toLowerCase()}`;
+            if (!uniqueCoursesMap.has(key)) {
+              const initialCentres = Array.isArray(c.centres) && c.centres.length > 0
+                ? [...c.centres]
+                : (c.centre ? [c.centre] : (c.location ? [c.location] : ["All Centres"]));
+              uniqueCoursesMap.set(key, {
+                ...c,
+                centres: initialCentres
+              });
+            } else {
+              const existing = uniqueCoursesMap.get(key);
+              const combinedCentres = new Set([
+                ...(existing.centres || []),
+                ...(Array.isArray(c.centres) ? c.centres : []),
+                c.centre,
+                c.location
+              ].filter(Boolean));
+              existing.centres = Array.from(combinedCentres);
+
+              // Prefer record with valid thumbnail image
+              if (!existing.thumbnail_url && c.thumbnail_url) {
+                existing.thumbnail_url = c.thumbnail_url;
+              }
+              // Prefer record with plans or higher discount
+              if ((!existing.plans || existing.plans.length === 0) && c.plans && c.plans.length > 0) {
+                existing.plans = c.plans;
+              }
+            }
+          });
+
+          const deduplicatedList = Array.from(uniqueCoursesMap.values());
+          setCoursesList(deduplicatedList.length > 0 ? deduplicatedList : list);
         })
         .catch(err => {
           console.error("Error fetching courses:", err);
@@ -623,7 +667,28 @@ function ApplyNowForm({ course: propCourse, isOpen: propIsOpen, onClose: propOnC
     });
 
     return (
-      <div className="min-h-screen bg-[#FDFBF7] py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#FDFBF7] py-12 px-4 sm:px-6 lg:px-8 overflow-y-auto scroll-smooth">
+        <style>{`
+          html, body {
+            overflow-y: auto !important;
+            scrollbar-width: thin;
+            scrollbar-color: #f97316 #f1f5f9;
+          }
+          ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+          }
+          ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+          }
+          ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+          }
+          ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+          }
+        `}</style>
         <div className="max-w-7xl mx-auto">
           {/* Hero Banner */}
           <div className="text-center mb-12">
