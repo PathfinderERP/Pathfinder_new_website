@@ -32,7 +32,7 @@ const CentreShowcase = () => {
         }
     }, [centres, activeCentre]);
 
-    const handleCentreHover = useCallback((centre) => {
+    const handleCentreClick = useCallback((centre) => {
         setActiveCentre(centre);
     }, []);
 
@@ -140,7 +140,7 @@ const CentreShowcase = () => {
                     <div className="w-full lg:w-[65%] order-2 lg:order-1">
                         <div className="flex items-center justify-between mb-4 px-1">
                             <p className="text-sm font-bold text-slate-500">
-                                Hover or click any centre card to view on map:
+                                Click any centre card to view on map:
                             </p>
                             <span className="text-xs font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-200">
                                 {filteredCentres.length} Centres Found
@@ -158,8 +158,7 @@ const CentreShowcase = () => {
                                             animate={{ opacity: 1, scale: 1 }}
                                             exit={{ opacity: 0, scale: 0.9 }}
                                             transition={{ duration: 0.4, delay: idx * 0.05 }}
-                                            onMouseEnter={() => handleCentreHover(centre)}
-                                            onClick={() => handleCentreHover(centre)}
+                                            onClick={() => handleCentreClick(centre)}
                                             className={`rounded-3xl cursor-pointer transition-all duration-300 relative ${
                                                 isSelected
                                                     ? "ring-4 ring-orange-500 shadow-2xl shadow-orange-500/20 scale-[1.02]"
@@ -175,7 +174,7 @@ const CentreShowcase = () => {
                                             <CentreCard
                                                 centre={centre}
                                                 isSelected={isSelected}
-                                                onSelectMap={() => handleCentreHover(centre)}
+                                                onSelectMap={() => handleCentreClick(centre)}
                                             />
                                         </motion.div>
                                     );
