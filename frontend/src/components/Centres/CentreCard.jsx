@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 
-const CentreCard = ({ centre, onExplore }) => {
+const CentreCard = ({ centre, onExplore, isSelected = false, onSelectMap }) => {
     const navigate = useNavigate();
     if (!centre) return null;
 
@@ -60,7 +60,11 @@ const CentreCard = ({ centre, onExplore }) => {
     const mapLink = getMapLink(centre.location, centre.map_url);
 
     return (
-        <div className="group relative bg-white rounded-3xl border border-slate-100 p-4 hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+        <div className={`group relative bg-white rounded-3xl border p-4 transition-all duration-500 overflow-hidden ${
+            isSelected
+                ? "border-orange-400 shadow-xl shadow-orange-500/15"
+                : "border-slate-100 hover:shadow-2xl hover:shadow-orange-500/10 hover:-translate-y-2"
+        }`}>
             {/* Background Decor */}
             <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-orange-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-3xl" />
 
@@ -156,7 +160,23 @@ const CentreCard = ({ centre, onExplore }) => {
                         <ArrowRightIcon className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                     </button>
 
-                    {mapLink ? (
+                    {onSelectMap ? (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onSelectMap(centre);
+                            }}
+                            className={`w-11 h-11 rounded-2xl border flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                                isSelected
+                                    ? "bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/30"
+                                    : "bg-slate-50 border-slate-100 text-slate-400 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-500"
+                            }`}
+                            title={isSelected ? "Currently Viewing on Map" : "View Location on Map"}
+                        >
+                            <MapIcon className="w-5 h-5 transition-colors" />
+                        </button>
+                    ) : mapLink ? (
                         <a
                             href={mapLink}
                             target="_blank"
